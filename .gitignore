@@ -127,11 +127,6 @@ ServerData/*
 .vscode/settings.json
 .vscode/unitycv.code-workspace
 
-AGENTS.md
-.agents/AGENTS.md
-.agents/*
-.agent/*
-/.codex/
 
 # SteamPipe ContentBuilder local user/session cache
 /tools/steamworks_sdk/tools/ContentBuilder/builder/userdata/
@@ -152,14 +147,4 @@ AGENTS.md
 
 # SteamPipe ContentBuilder build logs and generated output
 /tools/steamworks_sdk/tools/ContentBuilder/output/
-Docs/MapEditor/animation-timing-and-sprite.md
-Docs/MapEditor/bg-container-tool.md
-Docs/MapEditor/editor-preview-and-save-guard.md
-Docs/MapEditor/field-prefab-save-and-backup.md
-Docs/MapEditor/map-object-anchor.md
-Docs/MapEditor/map-shaders-and-materials.md
-Docs/MapEditor/placement-band-and-pivot.md
-Docs/MapEditor/post-fx-zone-and-volume-animation.md
-Docs/MapEditor/README.md
-Docs/MapEditor/scene-picking-protection.md
-Docs/MapEditor/variant-and-group-system.md
+

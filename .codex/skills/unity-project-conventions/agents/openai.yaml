@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unity 프로젝트 규칙"
+  short_description: "이 프로젝트의 Unity 및 C# 규칙 적용"
+  default_prompt: "$unity-project-conventions를 사용하여 프로젝트 규칙과 직렬화 호환성을 보존하면서 이 Unity 변경을 분석하거나 구현해줘."
