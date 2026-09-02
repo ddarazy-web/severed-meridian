@@ -1,0 +1,4 @@
+interface:
+  display_name: "Story Continuity"
+  short_description: "설정·시간선·인과·인물·복선의 연속성 검수"
+  default_prompt: "Use $story-continuity to audit my story bible and manuscript for contradictions."

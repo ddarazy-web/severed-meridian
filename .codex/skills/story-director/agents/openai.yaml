@@ -1,0 +1,4 @@
+interface:
+  display_name: "Story Director"
+  short_description: "컨셉을 소설 제작 단계와 전문 작업으로 안내"
+  default_prompt: "Use $story-director to expand my concept into a practical novel-writing path."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Story World"
+  short_description: "서사에 작용하는 세계 규칙·세력·장소 설계"
+  default_prompt: "Use $story-world to design the world rules and locations that drive my novel."

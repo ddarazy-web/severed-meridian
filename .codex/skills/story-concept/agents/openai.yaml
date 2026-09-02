@@ -1,0 +1,4 @@
+interface:
+  display_name: "Story Concept"
+  short_description: "소설의 핵심 전제와 독자에게 약속할 재미 구체화"
+  default_prompt: "Use $story-concept to turn my novel idea into a clear creative concept."

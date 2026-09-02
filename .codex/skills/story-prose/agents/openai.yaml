@@ -1,0 +1,4 @@
+interface:
+  display_name: "Story Prose"
+  short_description: "시점·문체·대사·리듬을 살린 실제 소설 집필"
+  default_prompt: "Use $story-prose to write this planned scene as polished novel prose."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Story Episode"
+  short_description: "장·회차·장면의 목적과 변화가 있는 구조 설계"
+  default_prompt: "Use $story-episode to turn my plot into a practical chapter and scene plan."

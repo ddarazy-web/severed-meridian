@@ -1,0 +1,4 @@
+interface:
+  display_name: "Story Plot"
+  short_description: "선택과 결과로 이어지는 소설 플롯·복선 설계"
+  default_prompt: "Use $story-plot to build a causal plot with strong turns and payoff."

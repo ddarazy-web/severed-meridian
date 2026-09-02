@@ -1,0 +1,4 @@
+interface:
+  display_name: "Story Character"
+  short_description: "욕망·관계·성장선으로 행동하는 소설 인물 설계"
+  default_prompt: "Use $story-character to develop a character who can drive meaningful scenes."
