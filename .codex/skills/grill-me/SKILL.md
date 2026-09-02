@@ -14,6 +14,10 @@ Interview the user relentlessly about the plan until both sides share the same m
 - Do not end the work turn merely because one question was answered. Continue until the ending criteria are met or execution has to yield.
 - When `request_user_input` is unavailable, ask one direct text question and wait for the next user turn.
 - Include the recommended answer or default position before the question, with a brief reason.
+- Treat the user's follow-up question or challenge as a request to examine the reasoning, not as implicit agreement with or rejection of the current recommendation.
+- Reassess the issue independently when challenged. Do not automatically reverse or soften a recommendation merely because the user questions it, and do not automatically defend it merely because it was recommended earlier.
+- When the original recommendation still appears best after reassessment, say so and support it with concrete reasoning. When the challenge exposes a genuine flaw or changed constraint, revise the recommendation explicitly and explain what changed.
+- Compare meaningful alternatives and their material tradeoffs in a balanced, proportionate way when that comparison improves the decision. Do not manufacture a counterargument, force artificial symmetry, or favor one side without evidence.
 - Do not conclude after one or two questions unless the user explicitly says to stop, asks for a final summary, or the plan is genuinely fully resolved.
 - If the user gives a vague, contradictory, hand-wavy, or overly broad answer, ask a sharper follow-up instead of moving on.
 - If the user answers with a new branch or hidden assumption, follow that branch until it is resolved before returning to the previous branch.
