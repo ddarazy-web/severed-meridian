@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1600" viewBox="0 0 2400 1600">
+<defs>
+  <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#f2e6c9"/><stop offset="0.55" stop-color="#eadbbd"/><stop offset="1" stop-color="#d8c7a5"/>
+  </linearGradient>
+  <filter id="paperNoise" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="23" result="noise"/>
+    <feColorMatrix in="noise" type="saturate" values="0" result="gray"/>
+    <feComponentTransfer in="gray" result="faint"><feFuncA type="table" tableValues="0 0.055"/></feComponentTransfer>
+    <feBlend in="SourceGraphic" in2="faint" mode="multiply"/>
+  </filter>
+  <filter id="inkBleed" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="t"/>
+    <feDisplacementMap in="SourceGraphic" in2="t" scale="2.3" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <clipPath id="mingClip"><polygon points="153.0,400.0 219.0,350.0 362.0,285.0 516.0,290.0 681.0,335.0 840.5,330.0 1011.0,310.0 1176.0,320.0 1297.0,290.0 1429.0,305.0 1517.0,335.0 1594.0,320.0 1737.0,260.0 1797.5,305.0 1770.0,380.0 1671.0,410.0 1566.5,415.0 1533.5,465.0 1616.0,495.0 1649.0,535.0 1621.5,580.0 1550.0,620.0 1522.5,680.0 1561.0,770.0 1610.5,850.0 1566.5,950.0 1528.0,1020.0 1484.0,1105.0 1407.0,1160.0 1335.5,1215.0 1242.0,1245.0 1137.5,1255.0 1055.0,1310.0 950.5,1320.0 868.0,1290.0 780.0,1290.0 686.5,1250.0 598.5,1245.0 516.0,1270.0 439.0,1290.0 362.0,1230.0 301.5,1155.0 296.0,1035.0 351.0,965.0 406.0,900.0 439.0,820.0 450.0,740.0 400.5,670.0 356.5,610.0 362.0,550.0 301.5,510.0 241.0,470.0"/></clipPath>
+</defs>
+<style><![CDATA[
+  text { font-family: "Noto Serif CJK KR", "Malgun Gothic", "Batang", serif; fill: #211f1b; }
+  .title { font-size: 50px; font-weight: 800; letter-spacing: 3px; }
+  .subtitle { font-size: 22px; fill: #5a554a; letter-spacing: 1px; }
+  .map-outline { fill: #e8dbbd; stroke: #3a3730; stroke-width: 5; stroke-linejoin: round; }
+  .coast-wash { fill: none; stroke: #4e7180; stroke-opacity: .2; stroke-width: 21; }
+  .province-border { fill: none; stroke: #7d7565; stroke-width: 2.2; stroke-dasharray: 8 8; opacity: .82; }
+  .region-label { font-size: 27px; font-weight: 800; letter-spacing: 3px; fill: #3a3730; opacity: .48; paint-order: stroke; stroke: #f2e6c9; stroke-width: 6px; }
+  .frontier-label { font-size: 19px; font-weight: 700; fill: #5a554a; letter-spacing: 2px; }
+  .river { fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:.74; }
+  .water { stroke:#4e7180; stroke-width:8; }
+  .yellow-river { stroke:#b28435; stroke-width:9; }
+  .minor-river { stroke-width:5; opacity:.55; }
+  .river-label { font-size:18px; font-weight:700; fill:#4e7180; paint-order:stroke; stroke:#f2e6c9; stroke-width:5px; }
+  .river-label.yellow { fill:#b28435; }
+  .canal { fill:none; stroke:#4e7180; stroke-width:4; stroke-dasharray:7 7; opacity:.72; }
+  .wall { fill:none; stroke:#5a554a; stroke-width:4; stroke-dasharray:2 9; stroke-linecap:square; }
+  .wall-label { font-size:17px; fill:#5a554a; letter-spacing:2px; paint-order:stroke; stroke:#f2e6c9; stroke-width:4px; }
+  .range path { fill:none; stroke:#3e6243; stroke-linecap:round; stroke-linejoin:round; }
+  .range-wash { stroke:#bcc38b!important; stroke-width:28; opacity:.23; }
+  .range-spine { stroke-width:5; opacity:.82; }
+  .range > path:not(.range-wash):not(.range-spine) { stroke-width:3.5; opacity:.82; }
+  .range-label { font-size:16px; font-weight:800; fill:#263f32; letter-spacing:2px; paint-order:stroke; stroke:#f2e6c9; stroke-width:5px; }
+  .mountain path { fill:none; stroke:#263f32; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  .mountain .ridge-highlight { stroke:#65805a; stroke-width:3.2; }
+  .mountain .wash { fill:#8e9c68; opacity:.22; stroke:none; }
+  .mountain.small path { stroke-width:4; }
+  .mountain-label { font-size:14px; font-weight:700; fill:#263f32; paint-order:stroke; stroke:#f2e6c9; stroke-width:5px; }
+  .mountain-label.major { font-size:17px; font-weight:900; }
+  .city text { font-size:15px; font-weight:700; paint-order:stroke; stroke:#f2e6c9; stroke-width:5px; }
+  .city circle, .city rect, .city path { vector-effect:non-scaling-stroke; }
+  .capital rect { fill:#a33b2b; stroke:#211f1b; stroke-width:2; }
+  .capital circle { fill:none; stroke:#a33b2b; stroke-width:3; }
+  .capital text { font-size:20px; font-weight:900; fill:#a33b2b; }
+  .seat path { fill:#b28435; stroke:#211f1b; stroke-width:2; }
+  .seat circle { fill:#f2e6c9; stroke:none; }
+  .seat text { font-size:17px; font-weight:900; fill:#4a3028; }
+  .major-city circle { fill:#3a3730; stroke:#f2e6c9; stroke-width:2; }
+  .medium-city circle { fill:#f2e6c9; stroke:#3a3730; stroke-width:3; }
+  .small-city rect { fill:#7d7565; stroke:none; }
+  .legend-title { font-size:27px; font-weight:900; letter-spacing:2px; }
+  .legend-text { font-size:18px; fill:#3a3730; }
+  .legend-note { font-size:16px; fill:#5a554a; }
+  .note-title { font-size:20px; font-weight:900; fill:#4a3028; }
+  .frame { fill:none; stroke:#714635; stroke-width:3; }
+  .thin-frame { fill:none; stroke:#776b59; stroke-width:1.5; }
+]]></style>
+
+<rect width="2400" height="1600" fill="url(#paper)" filter="url(#paperNoise)"/>
+<rect x="28" y="28" width="2344" height="1544" rx="8" class="frame"/>
+<rect x="43" y="43" width="2314" height="1514" rx="6" class="thin-frame"/>
+
+<g transform="translate(82,76)">
+  <text class="title" x="0" y="0">명 중기 중국 개략도</text>
+  <text class="subtitle" x="4" y="38">약 1530년경 · 양경십삼성 · 스토리 동선 및 세계관 참고용</text>
+</g>
+
+<g id="map">
+  <polyline points="153.0,400.0 219.0,350.0 362.0,285.0 516.0,290.0 681.0,335.0 840.5,330.0 1011.0,310.0 1176.0,320.0 1297.0,290.0 1429.0,305.0 1517.0,335.0 1594.0,320.0 1737.0,260.0 1797.5,305.0 1770.0,380.0 1671.0,410.0 1566.5,415.0 1533.5,465.0 1616.0,495.0 1649.0,535.0 1621.5,580.0 1550.0,620.0 1522.5,680.0 1561.0,770.0 1610.5,850.0 1566.5,950.0 1528.0,1020.0 1484.0,1105.0 1407.0,1160.0 1335.5,1215.0 1242.0,1245.0 1137.5,1255.0 1055.0,1310.0 950.5,1320.0 868.0,1290.0 780.0,1290.0 686.5,1250.0 598.5,1245.0 516.0,1270.0 439.0,1290.0 362.0,1230.0 301.5,1155.0 296.0,1035.0 351.0,965.0 406.0,900.0 439.0,820.0 450.0,740.0 400.5,670.0 356.5,610.0 362.0,550.0 301.5,510.0 241.0,470.0" class="coast-wash"/>
+  <polygon points="153.0,400.0 219.0,350.0 362.0,285.0 516.0,290.0 681.0,335.0 840.5,330.0 1011.0,310.0 1176.0,320.0 1297.0,290.0 1429.0,305.0 1517.0,335.0 1594.0,320.0 1737.0,260.0 1797.5,305.0 1770.0,380.0 1671.0,410.0 1566.5,415.0 1533.5,465.0 1616.0,495.0 1649.0,535.0 1621.5,580.0 1550.0,620.0 1522.5,680.0 1561.0,770.0 1610.5,850.0 1566.5,950.0 1528.0,1020.0 1484.0,1105.0 1407.0,1160.0 1335.5,1215.0 1242.0,1245.0 1137.5,1255.0 1055.0,1310.0 950.5,1320.0 868.0,1290.0 780.0,1290.0 686.5,1250.0 598.5,1245.0 516.0,1270.0 439.0,1290.0 362.0,1230.0 301.5,1155.0 296.0,1035.0 351.0,965.0 406.0,900.0 439.0,820.0 450.0,740.0 400.5,670.0 356.5,610.0 362.0,550.0 301.5,510.0 241.0,470.0" class="map-outline"/>
+  <g clip-path="url(#mingClip)">
+    <path d="M80 240 C620 360 810 130 1320 280 S2110 340 2190 170" fill="none" stroke="#b4a17f" stroke-width="45" opacity=".08"/>
+    <path d="M150 1120 C620 940 900 1170 1350 990 S1920 980 2050 840" fill="none" stroke="#8e9c68" stroke-width="55" opacity=".06"/>
+    <path d="M 1275.0 330.0 L 1231.0 400.0 L 1242.0 480.0 L 1275.0 560.0" class="province-border"/>
+<path d="M 1440.0 330.0 L 1407.0 385.0 L 1451.0 465.0 L 1396.0 530.0 L 1286.0 570.0" class="province-border"/>
+<path d="M 983.5 345.0 L 1011.0 435.0 L 1000.0 525.0 L 967.0 615.0" class="province-border"/>
+<path d="M 780.0 370.0 L 769.0 475.0 L 840.5 555.0 L 912.0 635.0 L 835.0 725.0" class="province-border"/>
+<path d="M 967.0 615.0 L 1055.0 595.0 L 1176.0 620.0 L 1286.0 570.0 L 1319.0 680.0" class="province-border"/>
+<path d="M 1319.0 680.0 L 1385.0 670.0 L 1462.0 720.0 L 1550.0 740.0" class="province-border"/>
+<path d="M 1330.0 750.0 L 1286.0 830.0 L 1330.0 910.0 L 1396.0 960.0" class="province-border"/>
+<path d="M 1396.0 960.0 L 1440.0 1010.0 L 1418.0 1115.0" class="province-border"/>
+<path d="M 1154.0 795.0 L 1209.0 880.0 L 1198.0 985.0 L 1121.0 1115.0" class="province-border"/>
+<path d="M 890.0 770.0 L 1000.0 810.0 L 1154.0 795.0 L 1121.0 970.0 L 1044.0 1100.0" class="province-border"/>
+<path d="M 675.5 720.0 L 752.5 810.0 L 873.5 830.0 L 890.0 970.0 L 824.0 1060.0" class="province-border"/>
+<path d="M 450.0 780.0 L 576.5 790.0 L 675.5 720.0 L 752.5 810.0 L 670.0 950.0 L 560.0 1020.0 L 450.0 990.0" class="province-border"/>
+<path d="M 560.0 1020.0 L 670.0 950.0 L 824.0 1060.0 L 791.0 1145.0 L 670.0 1220.0" class="province-border"/>
+<path d="M 824.0 1060.0 L 945.0 1100.0 L 1044.0 1100.0 L 1055.0 1270.0" class="province-border"/>
+<path d="M 1121.0 1115.0 L 1264.0 1125.0 L 1335.5 1215.0" class="province-border"/>
+    <text x="1280.4999999999998" y="434.9999999999999" text-anchor="middle" class="region-label" transform="rotate(-8 1280.4999999999998 434.9999999999999)">북직례 北直隸</text>
+<text x="1396.0000000000002" y="755.0000000000001" text-anchor="middle" class="region-label" transform="rotate(-4 1396.0000000000002 755.0000000000001)">남직례 南直隸</text>
+<text x="1423.5000000000002" y="545" text-anchor="middle" class="region-label" transform="rotate(0 1423.5000000000002 545)">산동 山東</text>
+<text x="1066" y="489.99999999999994" text-anchor="middle" class="region-label" transform="rotate(-5 1066 489.99999999999994)">산서 山西</text>
+<text x="1142.9999999999995" y="670" text-anchor="middle" class="region-label" transform="rotate(0 1142.9999999999995 670)">하남 河南</text>
+<text x="846.0000000000001" y="584.9999999999999" text-anchor="middle" class="region-label" transform="rotate(-7 846.0000000000001 584.9999999999999)">섬서 陝西</text>
+<text x="1495" y="920" text-anchor="middle" class="region-label" transform="rotate(-18 1495 920)">절강 浙江</text>
+<text x="1252.9999999999998" y="1010" text-anchor="middle" class="region-label" transform="rotate(-2 1252.9999999999998 1010)">강서 江西</text>
+<text x="1055" y="955" text-anchor="middle" class="region-label" transform="rotate(-3 1055 955)">호광 湖廣</text>
+<text x="615" y="900.0000000000001" text-anchor="middle" class="region-label" transform="rotate(-5 615 900.0000000000001)">사천 四川</text>
+<text x="1390.4999999999998" y="1090" text-anchor="middle" class="region-label" transform="rotate(-13 1390.4999999999998 1090)">복건 福建</text>
+<text x="1110" y="1235" text-anchor="middle" class="region-label" transform="rotate(-2 1110 1235)">광동 廣東</text>
+<text x="857.0000000000003" y="1140" text-anchor="middle" class="region-label" transform="rotate(-4 857.0000000000003 1140)">광서 廣西</text>
+<text x="482.99999999999966" y="1140" text-anchor="middle" class="region-label" transform="rotate(-7 482.99999999999966 1140)">운남 雲南</text>
+<text x="736.0000000000001" y="1020" text-anchor="middle" class="region-label" transform="rotate(-4 736.0000000000001 1020)">귀주 貴州</text>
+<text x="1632.5" y="345" text-anchor="middle" class="region-label" transform="rotate(-8 1632.5 345)">요동도사 遼東都司</text>
+    <path d="M 598.5 565.0 L 714.0 530.0 L 741.5 440.0 L 879.0 385.0 L 967.0 410.0 L 956.0 500.0 L 1044.0 590.0 L 1148.5 625.0 L 1231.0 610.0 L 1330.0 560.0 L 1440.0 515.0" class="river yellow-river"/>
+<path d="M 362.0 770.0 L 488.5 800.0 L 615.0 840.0 L 752.5 890.0 L 868.0 880.0 L 961.5 850.0 L 1077.0 855.0 L 1181.5 840.0 L 1275.0 885.0 L 1357.5 840.0 L 1429.0 775.0 L 1539.0 810.0" class="river water"/>
+<path d="M 1027.5 720.0 L 1137.5 725.0 L 1247.5 720.0 L 1346.5 710.0 L 1440.0 700.0" class="river water minor-river"/>
+<path d="M 736.0 1160.0 L 835.0 1180.0 L 945.0 1200.0 L 1060.5 1210.0 L 1121.0 1220.0" class="river water minor-river"/>
+    <path d="M 1503.3 856.5 L 1529.1 804.5 L 1463.1 750.5 L 1441.1 690.0 L 1341.0 630.0 L 1302.5 570.0 L 1258.5 528.0 L 1297.0 375.0" class="canal"/>
+    <g class="range"><path class="range-wash" d="M 725.0 365.0 L 835.0 350.0 L 945.0 370.0 L 1044.0 380.0"/><path class="range-spine" d="M 725.0 365.0 L 835.0 350.0 L 945.0 370.0 L 1044.0 380.0"/><path d="M823.78,356.6000000000001 Q831.04,340.76000000000005 835,336.14000000000004 Q841.6,345.38000000000005 848.2,356.6000000000001" /><path d="M932.42,377.4 Q940.56,359.64 945,354.46 Q952.4,364.82 959.8,377.4" /></g><text x="878.9999999999999" y="330.0000000000001" text-anchor="middle" class="range-label" transform="rotate(0 878.9999999999999 330.0000000000001)">음산산맥</text>
+<g class="range"><path class="range-wash" d="M 1088.0 390.0 L 1121.0 445.0 L 1137.5 500.0 L 1143.0 560.0 L 1121.0 610.0"/><path class="range-spine" d="M 1088.0 390.0 L 1121.0 445.0 L 1137.5 500.0 L 1143.0 560.0 L 1121.0 610.0"/><path d="M1109.78,451.6 Q1117.04,435.76 1121,431.14 Q1127.6,440.38 1134.2,451.6" /><path d="M1124.92,507.40000000000003 Q1133.06,489.64000000000004 1137.5,484.46000000000004 Q1144.9,494.82000000000005 1152.3,507.40000000000003" /><path d="M1133.1399999999996,565.7999999999998 Q1139.5199999999995,551.8799999999999 1142.9999999999995,547.8199999999999 Q1148.7999999999995,555.9399999999999 1154.5999999999995,565.7999999999998" /></g><text x="1159.5000000000002" y="505.0000000000001" text-anchor="middle" class="range-label" transform="rotate(78 1159.5000000000002 505.0000000000001)">태행산맥</text>
+<g class="range"><path class="range-wash" d="M 1302.5 340.0 L 1357.5 350.0 L 1418.0 360.0 L 1467.5 370.0"/><path class="range-spine" d="M 1302.5 340.0 L 1357.5 350.0 L 1418.0 360.0 L 1467.5 370.0"/><path d="M1346.28,356.6000000000001 Q1353.54,340.76000000000005 1357.5,336.14000000000004 Q1364.1,345.38000000000005 1370.7,356.6000000000001" /><path d="M1405.4199999999998,367.39999999999986 Q1413.5599999999997,349.6399999999999 1417.9999999999998,344.45999999999987 Q1425.3999999999999,354.8199999999999 1432.7999999999997,367.39999999999986" /></g><text x="1385" y="330.0000000000001" text-anchor="middle" class="range-label" transform="rotate(0 1385 330.0000000000001)">연산</text>
+<g class="range"><path class="range-wash" d="M 670.0 680.0 L 791.0 685.0 L 901.0 685.0 L 1011.0 700.0"/><path class="range-spine" d="M 670.0 680.0 L 791.0 685.0 L 901.0 685.0 L 1011.0 700.0"/><path d="M779.7800000000001,691.5999999999999 Q787.0400000000001,675.7599999999999 791.0000000000001,671.1399999999999 Q797.6000000000001,680.3799999999999 804.2000000000002,691.5999999999999" /><path d="M888.4200000000001,692.3999999999999 Q896.5600000000001,674.6399999999999 901.0000000000001,669.4599999999999 Q908.4000000000001,679.8199999999999 915.8000000000001,692.3999999999999" /></g><text x="846.0000000000001" y="659.9999999999999" text-anchor="middle" class="range-label" transform="rotate(0 846.0000000000001 659.9999999999999)">진령산맥</text>
+<g class="range"><path class="range-wash" d="M 725.0 770.0 L 835.0 770.0 L 928.5 790.0 L 1000.0 810.0"/><path class="range-spine" d="M 725.0 770.0 L 835.0 770.0 L 928.5 790.0 L 1000.0 810.0"/><path d="M823.78,776.6 Q831.04,760.76 835,756.14 Q841.6,765.38 848.2,776.6" /><path d="M915.9200000000001,797.3999999999999 Q924.0600000000001,779.6399999999999 928.5000000000001,774.4599999999999 Q935.9000000000001,784.8199999999999 943.3000000000001,797.3999999999999" /></g><text x="862.5" y="755.0000000000001" text-anchor="middle" class="range-label" transform="rotate(-7 862.5 755.0000000000001)">대파산맥</text>
+<g class="range"><path class="range-wash" d="M 400.5 760.0 L 428.0 845.0 L 422.5 940.0 L 378.5 1015.0 L 356.5 1100.0"/><path class="range-spine" d="M 400.5 760.0 L 428.0 845.0 L 422.5 940.0 L 378.5 1015.0 L 356.5 1100.0"/><path d="M416.77999999999963,851.6 Q424.0399999999997,835.76 427.99999999999966,831.14 Q434.5999999999997,840.38 441.19999999999965,851.6" /><path d="M409.92,947.3999999999999 Q418.06,929.6399999999999 422.5,924.4599999999999 Q429.9,934.8199999999999 437.3,947.3999999999999" /><path d="M368.64000000000016,1020.7999999999998 Q375.02000000000015,1006.8799999999999 378.50000000000017,1002.8199999999999 Q384.3000000000002,1010.9399999999999 390.1000000000002,1020.7999999999998" /></g><text x="367.5" y="930" text-anchor="middle" class="range-label" transform="rotate(84 367.5 930)">횡단산맥</text>
+<g class="range"><path class="range-wash" d="M 1330.0 920.0 L 1352.0 975.0 L 1374.0 1030.0 L 1396.0 1085.0"/><path class="range-spine" d="M 1330.0 920.0 L 1352.0 975.0 L 1374.0 1030.0 L 1396.0 1085.0"/><path d="M1340.7800000000002,981.6000000000001 Q1348.0400000000002,965.7600000000001 1352.0000000000002,961.1400000000001 Q1358.6000000000001,970.3800000000001 1365.2000000000003,981.6000000000001" /><path d="M1361.4199999999998,1037.4 Q1369.5599999999997,1019.64 1373.9999999999998,1014.46 Q1381.3999999999999,1024.82 1388.7999999999997,1037.4" /></g><text x="1335.4999999999998" y="1014.9999999999999" text-anchor="middle" class="range-label" transform="rotate(73 1335.4999999999998 1014.9999999999999)">무이산맥</text>
+<g class="range"><path class="range-wash" d="M 851.5 1120.0 L 950.5 1120.0 L 1055.0 1125.0 L 1165.0 1135.0"/><path class="range-spine" d="M 851.5 1120.0 L 950.5 1120.0 L 1055.0 1125.0 L 1165.0 1135.0"/><path d="M939.2799999999996,1126.6 Q946.5399999999996,1110.76 950.4999999999997,1106.14 Q957.0999999999997,1115.38 963.6999999999997,1126.6" /><path d="M1042.42,1132.4 Q1050.56,1114.64 1055,1109.46 Q1062.4,1119.82 1069.8,1132.4" /></g><text x="1011.0000000000001" y="1095" text-anchor="middle" class="range-label" transform="rotate(0 1011.0000000000001 1095)">남령산맥</text>
+    
+    <g class="mountain large" transform="translate(1335.4999999999998,557.5) scale(1.15)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1335.4999999999998" y="598.6" text-anchor="middle" class="mountain-label major">태산</text>
+
+    <g class="mountain large" transform="translate(950.4999999999997,645) scale(1.15)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="950.4999999999997" y="688.1" text-anchor="middle" class="mountain-label major">화산</text>
+
+    <g class="mountain large" transform="translate(1107.25,646.0000000000002) scale(1.15)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1107.25" y="689.1000000000003" text-anchor="middle" class="mountain-label major">숭산</text>
+
+    <g class="mountain large" transform="translate(1142.9999999999995,420) scale(1.15)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1142.9999999999995" y="462.1" text-anchor="middle" class="mountain-label major">오대산</text>
+
+    <g class="mountain large" transform="translate(579.2499999999997,892.5) scale(1.15)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="579.2499999999997" y="934.6" text-anchor="middle" class="mountain-label major">아미산</text>
+
+    <g class="mountain large" transform="translate(1000,750.0000000000001) scale(1.15)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1000" y="793.1000000000001" text-anchor="middle" class="mountain-label major">무당산</text>
+
+    <g class="mountain large" transform="translate(1393.2500000000002,862.5000000000001) scale(1.15)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1393.2500000000002" y="904.6000000000001" text-anchor="middle" class="mountain-label major">황산</text>
+
+    <g class="mountain large" transform="translate(1272.2500000000002,892.5) scale(1.15)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1272.2500000000002" y="935.6" text-anchor="middle" class="mountain-label major">여산</text>
+
+    <g class="mountain large" transform="translate(1090.7500000000005,1007.5) scale(1.15)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1090.7500000000005" y="1049.6" text-anchor="middle" class="mountain-label major">형산</text>
+
+    <g class="mountain medium" transform="translate(590.2499999999998,822.5) scale(0.86)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="590.2499999999998" y="853.74" text-anchor="middle" class="mountain-label">청성산</text>
+
+    <g class="mountain medium" transform="translate(867.9999999999997,675) scale(0.86)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="867.9999999999997" y="706.24" text-anchor="middle" class="mountain-label">종남산</text>
+
+    <g class="mountain medium" transform="translate(994.5000000000003,814.9999999999999) scale(0.86)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="994.5000000000003" y="846.2399999999999" text-anchor="middle" class="mountain-label">무산</text>
+
+    <g class="mountain medium" transform="translate(1552.7499999999998,912.5000000000001) scale(0.86)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1552.7499999999998" y="943.7400000000001" text-anchor="middle" class="mountain-label">천태산</text>
+
+    <g class="mountain medium" transform="translate(1547.2500000000002,947.5) scale(0.86)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1547.2500000000002" y="978.74" text-anchor="middle" class="mountain-label">안탕산</text>
+
+    <g class="mountain medium" transform="translate(1162.2500000000002,1207.5) scale(0.86)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1162.2500000000002" y="1238.74" text-anchor="middle" class="mountain-label">나부산</text>
+
+    <g class="mountain medium" transform="translate(755.2499999999999,592.5000000000001) scale(0.86)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="755.2499999999999" y="623.7400000000001" text-anchor="middle" class="mountain-label">공동산</text>
+
+    <g class="mountain medium" transform="translate(397.74999999999983,1082.5) scale(0.86)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="397.74999999999983" y="1113.74" text-anchor="middle" class="mountain-label">점창산</text>
+
+    <g class="mountain small" transform="translate(1280.4999999999998,380.0000000000001) scale(0.62)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1280.4999999999998" y="402.0800000000001" text-anchor="middle" class="mountain-label">반산</text>
+
+    <g class="mountain small" transform="translate(1327.2500000000002,962.5000000000001) scale(0.62)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1327.2500000000002" y="984.5800000000002" text-anchor="middle" class="mountain-label">용호산</text>
+
+    <g class="mountain small" transform="translate(1390.4999999999998,1120) scale(0.62)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="1390.4999999999998" y="1142.08" text-anchor="middle" class="mountain-label">청원산</text>
+
+    <g class="mountain small" transform="translate(812.9999999999997,1125) scale(0.62)">
+      <path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17" />
+      <path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3" />
+      <path class="wash" d="M-34,19 C-11,13 25,11 57,19 C34,28 -8,28 -34,19 Z" />
+    </g>
+    <text x="812.9999999999997" y="1147.08" text-anchor="middle" class="mountain-label">도양산</text>
+  </g>
+
+  <path d="M 301.5 381.5 L 505.0 380.0 L 725.0 395.0 L 945.0 405.0 L 1126.5 365.0 L 1297.0 350.0 L 1482.9 370.0" class="wall"/>
+  <text x="912.0000000000003" y="331.4999999999999" text-anchor="middle" class="wall-label" >명 북방 변경 · 만리장성</text>
+  <text x="1390.4999999999998" y="620" text-anchor="middle" class="river-label" transform="rotate(72 1390.4999999999998 620)">대운하</text>
+  <text x="1000" y="520" text-anchor="middle" class="river-label yellow" >황하</text>
+<text x="846.0000000000001" y="910" text-anchor="middle" class="river-label " >장강</text>
+<text x="1220" y="745" text-anchor="middle" class="river-label " >회수</text>
+<text x="917.5" y="1220" text-anchor="middle" class="river-label " >서강</text>
+
+  <g class="city capital"><rect x="1288.0000000000002" y="366.00000000000006" width="18" height="18" rx="2"/><circle cx="1297.0000000000002" cy="375.00000000000006" r="14"/><text x="1315.0000000000002" y="361.00000000000006" text-anchor="start">북경 · 순천부</text></g>
+<g class="city capital"><rect x="1419.9999999999998" y="757.9999999999999" width="18" height="18" rx="2"/><circle cx="1428.9999999999998" cy="766.9999999999999" r="14"/><text x="1446.9999999999998" y="790.9999999999999" text-anchor="start">남경 · 응천부</text></g>
+<g class="city seat"><path d="M1330,525.4999999999999 L1341,536.4999999999999 L1330,547.4999999999999 L1319,536.4999999999999 Z"/><circle cx="1330" cy="536.4999999999999" r="3"/><text x="1342" y="524.4999999999999" text-anchor="start">제남부</text></g>
+<g class="city seat"><path d="M1085.25,465.5000000000001 L1096.25,476.5000000000001 L1085.25,487.5000000000001 L1074.25,476.5000000000001 Z"/><circle cx="1085.25" cy="476.5000000000001" r="3"/><text x="1097.25" y="464.5000000000001" text-anchor="start">태원부</text></g>
+<g class="city seat"><path d="M1182.0500000000002,619.0000000000001 L1193.0500000000002,630.0000000000001 L1182.0500000000002,641.0000000000001 L1171.0500000000002,630.0000000000001 Z"/><circle cx="1182.0500000000002" cy="630.0000000000001" r="3"/><text x="1194.0500000000002" y="618.0000000000001" text-anchor="start">개봉부</text></g>
+<g class="city seat"><path d="M886.6999999999998,641.9999999999998 L897.6999999999998,652.9999999999998 L886.6999999999998,663.9999999999998 L875.6999999999998,652.9999999999998 Z"/><circle cx="886.6999999999998" cy="652.9999999999998" r="3"/><text x="898.6999999999998" y="640.9999999999998" text-anchor="start">서안부</text></g>
+<g class="city seat"><path d="M618.8499999999997,825.4999999999999 L629.8499999999997,836.4999999999999 L618.8499999999997,847.4999999999999 L607.8499999999997,836.4999999999999 Z"/><circle cx="618.8499999999997" cy="836.4999999999999" r="3"/><text x="630.8499999999997" y="824.4999999999999" text-anchor="start">성도부</text></g>
+<g class="city seat"><path d="M1181.4999999999998,831.5 L1192.4999999999998,842.5 L1181.4999999999998,853.5 L1170.4999999999998,842.5 Z"/><circle cx="1181.4999999999998" cy="842.5" r="3"/><text x="1193.4999999999998" y="830.5" text-anchor="start">무창부</text></g>
+<g class="city seat"><path d="M1266.7499999999998,925 L1277.7499999999998,936 L1266.7499999999998,947 L1255.7499999999998,936 Z"/><circle cx="1266.7499999999998" cy="936" r="3"/><text x="1278.7499999999998" y="924" text-anchor="start">남창부</text></g>
+<g class="city seat"><path d="M1503.2500000000002,845.5 L1514.2500000000002,856.5 L1503.2500000000002,867.5 L1492.2500000000002,856.5 Z"/><circle cx="1503.2500000000002" cy="856.5" r="3"/><text x="1515.2500000000002" y="878.5" text-anchor="start">항주부</text></g>
+<g class="city seat"><path d="M1456.4999999999998,1055 L1467.4999999999998,1066 L1456.4999999999998,1077 L1445.4999999999998,1066 Z"/><circle cx="1456.4999999999998" cy="1066" r="3"/><text x="1468.4999999999998" y="1054" text-anchor="start">복주부</text></g>
+<g class="city seat"><path d="M1124.3000000000002,1202.5 L1135.3000000000002,1213.5 L1124.3000000000002,1224.5 L1113.3000000000002,1213.5 Z"/><circle cx="1124.3000000000002" cy="1213.5" r="3"/><text x="1136.3000000000002" y="1235.5" text-anchor="start">광주부</text></g>
+<g class="city seat"><path d="M960.9500000000004,1095.5 L971.9500000000004,1106.5 L960.9500000000004,1117.5 L949.9500000000004,1106.5 Z"/><circle cx="960.9500000000004" cy="1106.5" r="3"/><text x="972.9500000000004" y="1094.5" text-anchor="start">계림부</text></g>
+<g class="city seat"><path d="M544.0499999999997,1107 L555.0499999999997,1118 L544.0499999999997,1129 L533.0499999999997,1118 Z"/><circle cx="544.0499999999997" cy="1118" r="3"/><text x="556.0499999999997" y="1106" text-anchor="start">운남부</text></g>
+<g class="city seat"><path d="M759.6499999999997,1026.5 L770.6499999999997,1037.5 L759.6499999999997,1048.5 L748.6499999999997,1037.5 Z"/><circle cx="759.6499999999997" cy="1037.5" r="3"/><text x="771.6499999999997" y="1059.5" text-anchor="start">귀주선위사</text></g>
+<g class="city major-city"><circle cx="1529.1000000000004" cy="804.5000000000001" r="7"/><text x="1541.1000000000004" y="794.5000000000001" text-anchor="start">소주부</text></g>
+<g class="city major-city"><circle cx="1463.1000000000001" cy="750.5" r="7"/><text x="1475.1000000000001" y="740.5" text-anchor="start">양주부</text></g>
+<g class="city major-city"><circle cx="1126.5" cy="366.0000000000001" r="7"/><text x="1138.5" y="356.0000000000001" text-anchor="start">대동부</text></g>
+<g class="city major-city"><circle cx="1079.75" cy="639.0000000000001" r="7"/><text x="1067.75" y="659.0000000000001" text-anchor="end">낙양</text></g>
+<g class="city major-city"><circle cx="755.2499999999999" cy="892.0000000000001" r="7"/><text x="767.2499999999999" y="914.0000000000001" text-anchor="start">중경부</text></g>
+<g class="city major-city"><circle cx="1106.6999999999998" cy="958.5" r="7"/><text x="1118.6999999999998" y="978.5" text-anchor="start">장사부</text></g>
+<g class="city major-city"><circle cx="1062.7" cy="768" r="7"/><text x="1050.7" y="758" text-anchor="end">양양부</text></g>
+<g class="city major-city"><circle cx="1421.8500000000001" cy="1126" r="7"/><text x="1433.8500000000001" y="1144" text-anchor="start">천주부</text></g>
+<g class="city medium-city"><circle cx="1245.85" cy="426.5000000000001" r="5"/><text x="1257.85" y="416.5000000000001" text-anchor="start">보정부</text></g>
+<g class="city medium-city"><circle cx="1196.8999999999999" cy="462.50000000000006" r="5"/><text x="1208.8999999999999" y="480.50000000000006" text-anchor="start">진정부</text></g>
+<g class="city medium-city"><circle cx="1411.4000000000003" cy="536" r="5"/><text x="1423.4000000000003" y="554" text-anchor="start">청주부</text></g>
+<g class="city medium-city"><circle cx="1258.5000000000002" cy="527.9999999999998" r="5"/><text x="1246.5000000000002" y="517.9999999999998" text-anchor="end">임청주</text></g>
+<g class="city medium-city"><circle cx="1441.0999999999997" cy="689.9999999999999" r="5"/><text x="1453.0999999999997" y="679.9999999999999" text-anchor="start">회안부</text></g>
+<g class="city medium-city"><circle cx="1403.1499999999999" cy="884" r="5"/><text x="1391.1499999999999" y="904" text-anchor="end">휘주부</text></g>
+<g class="city medium-city"><circle cx="1580.2499999999998" cy="876.5" r="5"/><text x="1592.2499999999998" y="866.5" text-anchor="start">영파부</text></g>
+<g class="city medium-city"><circle cx="1533.5000000000002" cy="970" r="5"/><text x="1545.5000000000002" y="988" text-anchor="start">온주부</text></g>
+<g class="city medium-city"><circle cx="1275" cy="885" r="5"/><text x="1263" y="875" text-anchor="end">구강부</text></g>
+<g class="city medium-city"><circle cx="1068.1999999999998" cy="853.5000000000001" r="5"/><text x="1056.1999999999998" y="873.5000000000001" text-anchor="end">형주부</text></g>
+<g class="city medium-city"><circle cx="781.0999999999998" cy="716.5" r="5"/><text x="793.0999999999998" y="706.5" text-anchor="start">한중부</text></g>
+<g class="city medium-city"><circle cx="606.2000000000002" cy="566.9999999999999" r="5"/><text x="618.2000000000002" y="556.9999999999999" text-anchor="start">난주</text></g>
+<g class="city medium-city"><circle cx="409.8499999999998" cy="1090" r="5"/><text x="421.8499999999998" y="1080" text-anchor="start">대리부</text></g>
+<g class="city medium-city"><circle cx="913.1000000000001" cy="1153.5" r="5"/><text x="925.1000000000001" y="1173.5" text-anchor="start">유주부</text></g>
+<g class="city medium-city"><circle cx="852.5999999999997" cy="1229" r="5"/><text x="864.5999999999997" y="1249" text-anchor="start">남녕부</text></g>
+<g class="city medium-city"><circle cx="1365.7500000000002" cy="1144" r="5"/><text x="1353.7500000000002" y="1162" text-anchor="end">장주부</text></g>
+<g class="city small-city"><rect x="1479.4" y="366.5" width="7" height="7"/><text x="1494.9" y="362" text-anchor="start">산해관</text></g>
+<g class="city small-city"><rect x="297.45000000000033" y="377.99999999999983" width="7" height="7"/><text x="312.95000000000033" y="373.49999999999983" text-anchor="start">가욕관</text></g>
+<g class="city small-city"><rect x="1336.4000000000003" y="903" width="7" height="7"/><text x="1351.9000000000003" y="922.5" text-anchor="start">경덕진</text></g>
+<g class="city small-city"><rect x="1113.6499999999996" y="898" width="7" height="7"/><text x="1129.1499999999996" y="893.5" text-anchor="start">악양</text></g>
+<g class="city small-city"><rect x="1305.6000000000004" y="1183.5" width="7" height="7"/><text x="1321.1000000000004" y="1203" text-anchor="start">조주부</text></g>
+<g class="city small-city"><rect x="345.8500000000001" y="1110.5" width="7" height="7"/><text x="361.3500000000001" y="1130" text-anchor="start">영창부</text></g>
+
+  <ellipse cx="958.75" cy="1410" rx="55" ry="31" transform="rotate(-18 958.75 1410)" fill="#e8dbbd" stroke="#3a3730" stroke-width="4"/>
+  <text x="958.75" y="1418.5" text-anchor="middle" class="frontier-label" >해남도</text>
+  <text x="1709.5000000000002" y="905" text-anchor="middle" class="frontier-label" >동해</text>
+  <text x="1220" y="1335" text-anchor="middle" class="frontier-label" >남해</text>
+  <text x="835" y="245" text-anchor="middle" class="frontier-label" >몽골 제부</text>
+  <text x="1720.4999999999998" y="220" text-anchor="middle" class="frontier-label" >여진 제부</text>
+  <text x="252.0000000000003" y="734.9999999999999" text-anchor="middle" class="frontier-label" >토번계 제부</text>
+</g>
+
+<g id="legend" transform="translate(1945,190)">
+  <rect x="0" y="0" width="375" height="1170" rx="12" fill="#f2e6c9" fill-opacity=".82" stroke="#776b59" stroke-width="2"/>
+  <text x="28" y="48" class="legend-title">범례</text>
+  <path d="M25 67 H350" stroke="#b4a17f" stroke-width="2"/>
+
+  <text x="28" y="110" class="note-title">도시</text>
+  <g class="city capital"><rect x="32" y="134" width="18" height="18" rx="2"/><circle cx="41" cy="143" r="14"/><text x="72" y="150">양경 · 수도</text></g>
+  <g class="city seat"><path d="M41 177 L52 188 L41 199 L30 188 Z"/><circle cx="41" cy="188" r="3"/><text x="72" y="195">성도 · 행정 중심</text></g>
+  <g class="city major-city"><circle cx="41" cy="235" r="7"/><text x="72" y="242">대도시</text></g>
+  <g class="city medium-city"><circle cx="41" cy="280" r="5"/><text x="72" y="287">중소도시</text></g>
+  <g class="city small-city"><rect x="37.5" y="319.5" width="7" height="7"/><text x="72" y="329">소도시 · 관문</text></g>
+
+  <text x="28" y="382" class="note-title">산세</text>
+  <g transform="translate(44,424) scale(1.05)" class="mountain large"><path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17"/><path class="ridge-highlight" d="M-25,12 C-16,1 -12,-15 -2,-27 C3,-17 4,-9 11,-3"/></g><text x="125" y="430" class="legend-text">큰산 · 대표 명산</text>
+  <g transform="translate(44,486) scale(.78)" class="mountain medium"><path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17"/></g><text x="125" y="492" class="legend-text">중간산</text>
+  <g transform="translate(44,540) scale(.52)" class="mountain small"><path d="M-32,17 C-21,2 -16,-22 -2,-35 C3,-25 8,-14 13,-7 C19,-16 24,-22 30,-27 C37,-11 45,5 55,17"/></g><text x="125" y="546" class="legend-text">작은산</text>
+  <g class="range"><path class="range-wash" d="M28 598 C85 570 115 620 165 588"/><path class="range-spine" d="M28 598 C85 570 115 620 165 588"/></g><text x="195" y="600" class="legend-text">산맥</text>
+
+  <text x="28" y="662" class="note-title">물길과 경계</text>
+  <path d="M30 700 H115" class="river water"/><text x="135" y="707" class="legend-text">장강 · 주요 수계</text>
+  <path d="M30 746 H115" class="river yellow-river"/><text x="135" y="753" class="legend-text">황하</text>
+  <path d="M30 792 H115" class="canal"/><text x="135" y="799" class="legend-text">대운하</text>
+  <path d="M30 838 H115" class="wall"/><text x="135" y="845" class="legend-text">장성 · 북방 변경</text>
+  <path d="M30 884 H115" class="province-border"/><text x="135" y="891" class="legend-text">행정 경계(근사)</text>
+
+  <text x="28" y="950" class="note-title">읽는 법</text>
+  <text x="28" y="986" class="legend-note">• 양경십삼성의 큰 틀을 우선합니다.</text>
+  <text x="28" y="1016" class="legend-note">• 도시 좌표·경계·산줄기는 스토리</text>
+  <text x="44" y="1042" class="legend-note">동선용으로 단순화한 근사입니다.</text>
+  <text x="28" y="1072" class="legend-note">• 귀주의 행정 중심은 당시 명칭인</text>
+  <text x="44" y="1098" class="legend-note">‘귀주선위사’로 표기했습니다.</text>
+  <text x="28" y="1128" class="legend-note">• 현대 국경·현대 성명을 적용하지</text>
+  <text x="44" y="1154" class="legend-note">않은 세계관 참고용 개략도입니다.</text>
+</g>
+
+<g transform="translate(83,1488)">
+  <text class="legend-note" x="0" y="0">기준: 가정 연간 전반(16세기 전반) · 명대 지도 전통의 산·성곽 기호를 현대적 범례로 재구성</text>
+  <text class="legend-note" x="0" y="27">제작 상태: 프로젝트 콘셉트 참고용 / Unity 빌드 제외 / SVG 원본 우선</text>
+</g>
+
+<g transform="translate(2260,1450)">
+  <circle cx="0" cy="0" r="43" fill="none" stroke="#5a554a" stroke-width="2"/>
+  <path d="M0 -39 L9 -7 L0 -14 L-9 -7 Z" fill="#a33b2b" stroke="#211f1b" stroke-width="1.5"/>
+  <path d="M0 39 L8 8 L0 14 L-8 8 Z" fill="#f2e6c9" stroke="#211f1b" stroke-width="1.5"/>
+  <text x="0" y="-50" text-anchor="middle" class="legend-text">북</text>
+</g>
+</svg>
