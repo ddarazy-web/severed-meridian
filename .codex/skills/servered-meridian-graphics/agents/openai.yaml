@@ -1,0 +1,4 @@
+interface:
+  display_name: "Servered Meridian Graphics"
+  short_description: "게임 전용 그래픽 리소스와 UI 시각 규칙 적용"
+  default_prompt: "Servered Meridian의 그래픽 리소스를 기존 아트 방향과 제작 규칙에 맞춰 설계하거나 검토해 주세요."
