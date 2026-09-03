@@ -1,4 +1,6 @@
 interface:
   display_name: "Servered Meridian Graphics"
-  short_description: "°ÔÀÓ Àü¿ë ±×·¡ÇÈ ¸®¼Ò½º¿Í UI ½Ã°¢ ±ÔÄ¢ Àû¿ë"
-  default_prompt: "Servered MeridianÀÇ ±×·¡ÇÈ ¸®¼Ò½º¸¦ ±âÁ¸ ¾ÆÆ® ¹æÇâ°ú Á¦ÀÛ ±ÔÄ¢¿¡ ¸ÂÃç ¼³°èÇÏ°Å³ª °ËÅäÇØ ÁÖ¼¼¿ä."
+  short_description: "ëª… ì¤‘ê¸° ë™ì–‘ ì±„ìƒ‰í™”í’ ê²Œì„ ê·¸ë˜í”½ ì œì‘ ê·œì¹™"
+  default_prompt: "Use $servered-meridian-graphics to design or review a cohesive game graphic asset for Servered Meridian."
+policy:
+  allow_implicit_invocation: true

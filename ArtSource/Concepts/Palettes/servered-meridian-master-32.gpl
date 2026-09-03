@@ -1,0 +1,36 @@
+GIMP Palette
+Name: Servered Meridian Master 32
+Columns: 8
+# Final baseline palette for Servered Meridian pixel assets
+242 230 201 Paper_Light
+216 199 165 Paper_Mid
+180 161 127 Paper_Shade
+119 107  89 Paper_Deep
+ 33  31  27 Ink_Core
+ 58  55  48 Ink_Deep
+ 90  85  74 Ink_Mid
+125 117 101 Ink_Light
+164 154 132 Ink_Wash
+240 201 161 Skin_Light
+216 155 115 Skin_Mid
+173 110  86 Skin_Shade
+117  70  59 Skin_Deep
+ 74  48  40 Wood_Ink
+113  70  53 Wood_Deep
+154 104  70 Wood_Mid
+185 138  91 Wood_Light
+210 173 120 Ochre_Light
+ 38  63  50 Foliage_Ink
+ 62  98  67 Foliage_Deep
+101 128  90 Bamboo_Green
+142 156 104 Foliage_Mid
+188 195 139 Foliage_Light
+ 53  65  74 Iron_InkBlue
+ 89 102 106 Iron_Mid
+137 145 139 Iron_Light
+194 196 182 Silver_Light
+163  59  43 Vermilion
+178 132  53 Ochre_Gold
+ 78 113 128 Blue_Gray
+ 77 128 112 Jade
+139  90  71 Seal_BrownRed
