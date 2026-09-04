@@ -1,0 +1,34 @@
+{
+  "id": "chr_protagonist_male_stage_01_walk_candidate_02",
+  "status": "PRODUCTION_CANDIDATE_REVIEW_REQUIRED",
+  "cellSize": [
+    256,
+    256
+  ],
+  "sheetSize": [
+    1536,
+    1024
+  ],
+  "directions": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "framesPerDirection": 6,
+  "fps": 8,
+  "rowOrder": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "pivotNormalized": [
+    0.5,
+    0.105469
+  ],
+  "filterMode": "Bilinear",
+  "alpha": "RGBA",
+  "buildIncluded": false,
+  "reference": "ArtSource/Concepts/Characters/chr_protagonist_male_stage_01_walk_down_concept_01.png"
+}

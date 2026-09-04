@@ -1,0 +1,71 @@
+{
+  "id": "chr_protagonist_male_stage_01",
+  "status": "PRODUCTION_REVIEW",
+  "source": "chr_protagonist_male_stage_01.aseprite",
+  "conceptReference": "../../Concepts/Characters/chr_protagonist_herbalist_concept_01.png",
+  "logicalBodySize": {
+    "width": 64,
+    "height": 96
+  },
+  "frameCell": {
+    "width": 128,
+    "height": 128
+  },
+  "pivotPixelsFromTopLeft": {
+    "x": 64,
+    "y": 116
+  },
+  "pixelsPerUnit": 64,
+  "directionRowOrder": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "layersBottomToTop": [
+    "shadow",
+    "equipment_back",
+    "body",
+    "clothes",
+    "head_hair",
+    "equipment_front"
+  ],
+  "animations": {
+    "idle": {
+      "sheet": "../../../Assets/Art/Production/Characters/chr_protagonist_male_stage_01_idle.png",
+      "columns": 2,
+      "rows": 4,
+      "framesPerDirection": 2,
+      "fps": 4,
+      "loop": true,
+      "tags": [
+        "idle_down",
+        "idle_left",
+        "idle_right",
+        "idle_up"
+      ]
+    },
+    "walk": {
+      "sheet": "../../../Assets/Art/Production/Characters/chr_protagonist_male_stage_01_walk.png",
+      "columns": 6,
+      "rows": 4,
+      "framesPerDirection": 6,
+      "fps": 8,
+      "loop": true,
+      "tags": [
+        "walk_down",
+        "walk_left",
+        "walk_right",
+        "walk_up"
+      ]
+    }
+  },
+  "unityImport": {
+    "textureType": "Sprite",
+    "spriteMode": "Multiple",
+    "filterMode": "Point",
+    "compression": "None",
+    "mipmaps": false,
+    "alphaIsTransparency": true
+  }
+}

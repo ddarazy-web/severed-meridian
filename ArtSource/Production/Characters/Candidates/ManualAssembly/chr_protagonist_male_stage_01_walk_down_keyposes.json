@@ -1,0 +1,27 @@
+{
+  "status": "MANUAL_ASSEMBLY_KEYPOSES",
+  "frameSize": [
+    256,
+    256
+  ],
+  "fpsSuggestion": 8,
+  "pivotNormalized": [
+    0.5,
+    0.105469
+  ],
+  "kneePatches": false,
+  "suggestedOrder": [
+    "01_left_contact",
+    "02_left_recoil",
+    "03_right_passing",
+    "04_right_contact",
+    "05_right_recoil",
+    "06_left_passing"
+  ],
+  "editableOrder": true,
+  "notes": [
+    "Frames are intentionally separate for manual ordering in Aseprite.",
+    "Opposite-foot variants mirror only the lower body; waist equipment is not mirrored.",
+    "Treat the GIF as a suggested order, not an approved final animation."
+  ]
+}
