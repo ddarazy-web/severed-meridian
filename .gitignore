@@ -148,3 +148,6 @@ ServerData/*
 # SteamPipe ContentBuilder build logs and generated output
 /tools/steamworks_sdk/tools/ContentBuilder/output/
 
+# Codex remote attachments
+/.codex-remote-attachments/
+
