@@ -55,6 +55,7 @@ namespace Levels.Editor
             // 재개는 이전에 실제 실행 중이었던 연쇄에만 적용한다.
             if (visible && !value)
             {
+                StopBot();
                 resumeCascade = cascadeRunning;
                 StopCascadeRun(); OnLostFocus();
                 searchSchedule?.Pause(); searchWatch?.Stop();
@@ -87,7 +88,7 @@ namespace Levels.Editor
         {
             // 직렬화 복원 중에는 Unity UI를 만들 수 없으므로 창의 CreateGUI에서 생성한다.
             rootVisualElement ??= new VisualElement();
-            ClearQuery(); ClearExecution();
+            ClearBot(); ClearQuery(); ClearExecution();
             VisualElement root = rootVisualElement; root.Clear(); root.RemoveFromClassList("manual-play"); root.AddToClassList("match-editor"); root.AddToClassList("initial-state");
             root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Scripts/Features/LevelEditor/Editor/Styles/LevelEditor.uss"));
             root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Scripts/Features/PlayTesting/Editor/Styles/LevelInitialState.uss"));
@@ -119,6 +120,7 @@ namespace Levels.Editor
             overview = new Label { name = "initial-overview" }; inspector.Add(overview);
             AttachQueryResults(inspector);
             CreateManualUI();
+            CreateBotUI();
             Invalidate(manualMode ? "레벨을 지정하고 검사·구성을 누르세요. 창 재생성 후에는 다시 시작해야 합니다." : "레벨과 시드를 지정하고 초기 후보를 구성하세요.");
             inputSchedule?.Pause();
             inputSchedule = root.schedule.Execute(CheckInput).Every(250);
@@ -127,6 +129,7 @@ namespace Levels.Editor
 
         private void Invalidate(string message)
         {
+            ClearBot();
             resumeCascade = false;
             ClearQuery();
             ClearExecution();

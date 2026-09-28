@@ -124,6 +124,10 @@ namespace Levels.Editor
             window.Owner.position = new Rect(10, 10, 680, 480); yield return null; Capture("manual-narrow.png");
             Check(root.Q<Button>("manual-return").worldBound.xMax <= window.Owner.position.width, "680폭 복귀 버튼 접근");
             Check(root.Q<ScrollView>("initial-board-scroll").worldBound.height >= 100 && root.Q<Button>("item-Shuffle").worldBound.yMax < 480, "680×480 보드·아이템 접근 공간");
+            // 탭별 최소 창 크기에서는 보드 전체가 보여 스크롤이 필요 없을 수 있다.
+            // 검증 소유 뷰의 높이만 제한하여 실제 넘침을 만든 뒤, 탭 왕복의 위치 보존을 검사한다.
+            root.Q<ScrollView>("initial-board-scroll").style.maxHeight = 200;
+            yield return null;
             root.Q<ScrollView>("initial-board-scroll").scrollOffset = new Vector2(0, 60); yield return null; Capture("manual-scrolled.png");
             Vector2 scrollBefore = root.Q<ScrollView>("initial-board-scroll").scrollOffset;
             Click(editor.rootVisualElement, "workspace-tab-0"); yield return null;
@@ -133,11 +137,13 @@ namespace Levels.Editor
             typeof(LevelEditorWindow).GetMethod("SelectCell", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(editor, new object[] { new BoardCoordinate(3, 3) });
             object selectedBefore = typeof(LevelEditorWindow).GetField("selected", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(editor);
             Click(editor.rootVisualElement, "workspace-tab-1"); yield return null;
-            Check(scrollBefore.y > 0 && (root.Q<ScrollView>("initial-board-scroll").scrollOffset - scrollBefore).sqrMagnitude < 1, "플레이 탭 복귀 시 보드 스크롤 보존");
+            Check(scrollBefore.y > 0 && (root.Q<ScrollView>("initial-board-scroll").scrollOffset - scrollBefore).sqrMagnitude < 1,
+                $"플레이 탭 복귀 시 보드 스크롤 보존 (전 {scrollBefore}, 후 {root.Q<ScrollView>("initial-board-scroll").scrollOffset}, 창 {window.Owner.position.size})");
             Click(editor.rootVisualElement, "workspace-tab-0"); yield return null;
             Check((editScroll.scrollOffset - editScrollBefore).sqrMagnitude < 1 && Equals(selectedBefore, typeof(LevelEditorWindow).GetField("selected", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(editor)),
                 "편집 탭 복귀 시 스크롤·선택 칸 보존");
             Click(editor.rootVisualElement, "workspace-tab-1"); yield return null;
+            root.Q<ScrollView>("initial-board-scroll").style.maxHeight = StyleKeyword.Null;
             Check(JsonUtility.ToJson(level) == json && EditorUtility.IsDirty(level) && File.ReadAllText(AssetDatabase.GetAssetPath(level)) == disk, "시험 후 원본 JSON·미저장 dirty·디스크 보존");
             Click(root, "manual-restart");
             for (int i = 0; window.IsSearching && i < 500; i++) yield return null;

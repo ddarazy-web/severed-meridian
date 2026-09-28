@@ -80,6 +80,7 @@ namespace Levels.Editor
         private void UpdateManualControls()
         {
             if (!manualMode || manualStart == null) return;
+            if (botSession != null) { UpdateBotControls(); return; }
             manualStart.SetEnabled(execution == null && !IsSearching && level != null);
             manualStart.text = CurrentState == null ? "검사·구성" : "시작";
             LevelRuntimeState shown = execution?.State ?? CurrentState;

@@ -94,7 +94,11 @@ Docs/Handover/
 
 ## Planning 규칙
 
-복잡한 작업은 deep-planning Skill을 사용한다.
+복잡한 작업의 기획·설계와 요구사항 확인에는 [grill-me Skill](skills/grill-me/SKILL.md)을 사용한다.
+
+코드에서 확인할 수 있는 내용은 먼저 조사하고, 미확정된 핵심 사항은 한 번에 하나씩 질문한다. 이미 합의된 내용은 반복해서 묻지 않는다.
+
+deep-planning Skill은 사용하지 않는다. 삭제 예정인 해당 스킬에 의존하는 작업 절차를 추가하지 않는다.
 
 Planning 단계에서는 사용자의 승인 없이 구현하지 않는다.
 

@@ -45,3 +45,8 @@
 .manual-play #initial-grid { align-self: center; }
 .manual-play #initial-diagnostics { max-height: 65px; }
 .manual-play .initial-toolbar { flex-wrap: wrap; }
+#bot-trial { flex-shrink: 0; margin-top: 4px; }
+#bot-buttons { flex-direction: row; flex-wrap: wrap; flex-shrink: 0; }
+#bot-buttons .unity-button { min-width: 70px; }
+#bot-guide, #bot-progress, #bot-reason { white-space: normal; flex-shrink: 0; margin: 3px; }
+#bot-reason { color: #aebed0; }
