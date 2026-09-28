@@ -111,6 +111,9 @@ namespace Levels.Editor
             duplicatePanel.style.flexShrink = 0;
             editorRoot.Add(duplicatePanel);
             state = new Label { name = "asset-state" };
+            // UI Toolkit의 예약 작업은 화면이 연결된 동안만 실행되므로 창 재생성·종료 시
+            // 별도 이벤트 해제 없이 외부 저장과 Undo 상태를 주기적으로 확인할 수 있다.
+            state.schedule.Execute(UpdateSaveState).Every(200);
             editorRoot.Add(state);
 
             VisualElement workspace = new VisualElement { name = "workspace" };
@@ -120,7 +123,7 @@ namespace Levels.Editor
             editorRoot.Add(workspace);
             ScrollView toolScroll = new ScrollView();
             toolScroll.name = "tool-scroll";
-            toolScroll.style.width = 192;
+            toolScroll.style.width = 224;
             toolScroll.style.flexShrink = 0;
             tools = toolScroll.contentContainer;
             tools.AddToClassList("side-content");
@@ -181,7 +184,7 @@ namespace Levels.Editor
             boardScroll.Add(grid);
 
             ScrollView inspectorScroll = new ScrollView { name = "inspector-scroll" };
-            inspectorScroll.style.width = 256;
+            inspectorScroll.style.width = 300;
             inspectorScroll.style.flexShrink = 0;
             properties = inspectorScroll.contentContainer;
             properties.AddToClassList("side-content");
@@ -292,8 +295,7 @@ namespace Levels.Editor
             flowOverlay.Display(level, board.Brush == LevelBrush.Flow ? flowTool : FlowTool.None);
             connectionGraph.Display(level, selected, board.Brush == LevelBrush.Select || (board.Brush == LevelBrush.Flow && flowTool == FlowTool.Select));
             flowOverlay.DisplayMerge(selected, board.Brush == LevelBrush.Select || (board.Brush == LevelBrush.Flow && flowTool == FlowTool.Select));
-            state.text = level == null ? "레벨을 선택하거나 새로 만드세요." :
-                AssetDatabase.GetAssetPath(level) + (EditorUtility.IsDirty(level) ? "  • 저장 안 됨" : "  • 저장됨");
+            UpdateSaveState();
             editorRoot.Q<ToolbarButton>("save-level").SetEnabled(level != null);
             editorRoot.Q<ToolbarButton>("validate-level").SetEnabled(level != null);
             InvalidateResults();
@@ -455,12 +457,46 @@ namespace Levels.Editor
             Refresh();
         }
 
+        /// <summary>레벨 편집 탭의 저장 키를 처리한다. 다른 탭과 다른 단축키는 그대로 전달한다.</summary>
+        /// <param name="evt">이 창 안에서 발생한 키 입력.</param>
+        private void HandleSaveShortcut(KeyDownEvent evt)
+        {
+            if (workspaceTab != 0 || evt.keyCode != KeyCode.S || !evt.actionKey || evt.altKey || evt.shiftKey) return;
+            // Unity의 일반 저장 명령까지 전파하여 다른 에셋을 함께 저장하지 않도록 소비한다.
+            evt.StopImmediatePropagation();
+            Save();
+        }
+
+        /// <summary>저장 버튼과 단축키가 공통으로 사용한다. 확정한 입력을 현재 레벨 파일에 저장한다.</summary>
         private void Save()
         {
-            board.CancelStroke();
+            board?.CancelStroke();
             if (level == null) return;
-            AssetDatabase.SaveAssetIfDirty(level);
-            state.text = AssetDatabase.GetAssetPath(level) + "  • 저장됨";
+            // 지연 입력 필드는 포커스를 잃어야 값이 반영된다. 단축키로 저장할 때도
+            // 이 순서를 지켜야 화면에 입력한 숫자 대신 이전 값이 저장되지 않는다.
+            (rootVisualElement.focusController?.focusedElement as VisualElement)?.Blur();
+            LevelDefinition target = level;
+            // 키 이벤트 처리 중에는 포커스 해제 이벤트가 대기열로 들어간다. 다음 UI 갱신에서
+            // 저장해야 지연 입력의 ChangeEvent와 직렬화 바인딩 반영이 먼저 끝난다.
+            rootVisualElement.schedule.Execute(() =>
+            {
+                if (target == null) return;
+                if (level == target) data?.ApplyModifiedProperties();
+                AssetDatabase.SaveAssetIfDirty(target);
+                UpdateSaveState();
+            });
+        }
+
+        /// <summary>Unity 에셋의 실제 dirty 상태를 제목과 저장 안내에 표시한다.</summary>
+        private void UpdateSaveState()
+        {
+            bool dirty = level != null && EditorUtility.IsDirty(level);
+            string title = dirty ? "Match *" : "Match";
+            if (titleContent.text != title) titleContent = new GUIContent(title);
+            if (state == null) return;
+            string message = level == null ? "레벨을 선택하거나 새로 만드세요." :
+                AssetDatabase.GetAssetPath(level) + (dirty ? "  ● 저장 안 됨" : "  • 저장됨");
+            if (state.text != message) state.text = message;
         }
 
         private void Validate()

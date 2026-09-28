@@ -48,6 +48,7 @@ namespace Levels.Editor
                 int index = parent.IndexOf(title);
                 if (title.ClassListContains("unity-base-field__label") || title.ClassListContains("unity-toggle__text"))
                 {
+                    parent.AddToClassList("manual-help-field");
                     parent.Insert(index + 1, help);
                     return;
                 }
@@ -83,7 +84,7 @@ namespace Levels.Editor
                 ("flow-heading", "중력·이동 경로·발전기 연결을 편집합니다.", "flow.html#gravity"),
                 ("rename-level", "데이터 파일 이름을 바꿉니다. 현재 수정한 레벨 내용도 함께 저장합니다.", "files.html#rename"),
                 ("workspace-level", "편집과 테스트에 공통으로 사용할 레벨 파일을 고릅니다.", "files.html#open-save"),
-                ("save-level", "현재 레벨 파일의 변경 내용을 저장합니다.", "files.html#open-save"),
+                ("save-level", "현재 레벨 파일의 변경 내용을 저장합니다. 레벨 편집 탭에서 Ctrl+S (Mac: Cmd+S)로도 저장합니다. 제목의 *는 저장하지 않은 변경이 있다는 뜻입니다.", "files.html#open-save"),
                 ("validate-level", "배치와 연결, 공급, 미션의 데이터 오류를 찾습니다. 클리어 가능성은 판정하지 않습니다.", "play.html#check"),
                 ("tool-tab-0", "블록·장애물·덮개·바닥을 배치합니다.", "board.html#tools"),
                 ("tool-tab-1", "중력·경로·통로·장치 연결 도구를 표시합니다.", "flow.html#gravity"),
