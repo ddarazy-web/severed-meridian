@@ -44,6 +44,7 @@ namespace Levels.Editor
             botReason = new Label("점수는 선택 이유이며 실제 미래 결과나 난이도가 아닙니다.") { name = "bot-reason" };
             botFoldout.Add(botProgress); botFoldout.Add(botReason);
             rootVisualElement.Insert(5, botFoldout);
+            CreateBatchUI();
             UpdateBotControls();
         }
 
@@ -55,12 +56,12 @@ namespace Levels.Editor
         private void PrepareBot(bool repeat)
         {
             CheckInput();
-            if (level == null || !visible || botSession?.NeedsAdvance == true) return;
+            if (level == null || !visible || botSession?.NeedsAdvance == true || batchSession?.CanContinue == true) return;
             string fingerprint = LevelStateBuilder.Fingerprint(level);
             if (repeat && (!botReplaySeed.HasValue || botReplayFingerprint != fingerprint)) return;
             int next = botReplaySeed ?? seed;
             if (!repeat) do { next = BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0); } while (next == seed);
-            Invalidate("수동 시험 종료 · 새 봇 시험 준비");
+            ClearBatch(); Invalidate("수동 시험 종료 · 새 봇 시험 준비");
             seed = next; seedField.SetValueWithoutNotify(seed);
             botReplaySeed = seed; botReplayFingerprint = inputFingerprint = fingerprint;
             botRepeating = repeat;
@@ -124,7 +125,7 @@ namespace Levels.Editor
         private void UpdateBotControls()
         {
             if (botFoldout == null) return;
-            bool active = botSession != null;
+            bool active = botSession != null || batchSession != null;
             // 부모를 잠그므로 기존 수동 갱신 코드가 자식 버튼을 켜도 입력이 다시 열리지 않는다.
             rootVisualElement.Q("manual-toolbar")?.SetEnabled(!active);
             rootVisualElement.Q("manual-input")?.SetEnabled(!active);
@@ -138,14 +139,19 @@ namespace Levels.Editor
                 VisualElement element = rootVisualElement.Q(name);
                 if (element != null) element.style.display = active ? DisplayStyle.None : DisplayStyle.Flex;
             }
+            rootVisualElement.Q("initial-toolbar")?.SetEnabled(batchSession == null);
+            rootVisualElement.Q("bot-buttons")?.SetEnabled(batchSession?.CanContinue != true);
+            botProgress.style.display = batchSession == null ? DisplayStyle.Flex : DisplayStyle.None;
+            botReason.style.display = batchSession == null ? DisplayStyle.Flex : DisplayStyle.None;
             botNew.SetEnabled(level != null && botSession?.NeedsAdvance != true);
             botStrategy.SetEnabled(botSession?.NeedsAdvance != true);
             botRepeat.SetEnabled(level != null && botReplaySeed.HasValue && botSession?.NeedsAdvance != true);
-            bool sameStrategy = active && botSession.Strategy == (botStrategy.value == "계획" ? BotStrategyKind.Planning : BotStrategyKind.Basic);
+            bool sameStrategy = botSession != null && botSession.Strategy == (botStrategy.value == "계획" ? BotStrategyKind.Planning : BotStrategyKind.Basic);
             bool ready = sameStrategy && (botSession.Status == BotSessionStatus.Ready || botSession.Status == BotSessionStatus.Stopped && botSession.State != null);
             botStep.SetEnabled(ready); botRun.SetEnabled(ready);
-            botStop.SetEnabled(active && botSession.NeedsAdvance && botSession.Status != BotSessionStatus.Stopping);
-            if (!active) return;
+            botStop.SetEnabled(botSession != null && botSession.NeedsAdvance && botSession.Status != BotSessionStatus.Stopping);
+            UpdateBatchControls();
+            if (botSession == null) return;
             string phase = botSession.Status switch {
                 BotSessionStatus.Preparing => "준비 중", BotSessionStatus.Ready => "입력 대기", BotSessionStatus.Running => "실행 중",
                 BotSessionStatus.Stopping => "중지 대기", BotSessionStatus.Stopped => "사용자 중지", BotSessionStatus.Won => "성공",

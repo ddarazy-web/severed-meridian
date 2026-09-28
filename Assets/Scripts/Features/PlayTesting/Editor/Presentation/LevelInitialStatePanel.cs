@@ -45,6 +45,7 @@ namespace Levels.Editor
             if (level == target) return;
             level = target;
             rootVisualElement.Q<ObjectField>("initial-level")?.SetValueWithoutNotify(target);
+            if (batchSession != null) { UpdateBatchControls(); return; }
             Invalidate("레벨이 바뀌었습니다. 다시 구성하세요.");
         }
 
@@ -55,6 +56,7 @@ namespace Levels.Editor
             // 재개는 이전에 실제 실행 중이었던 연쇄에만 적용한다.
             if (visible && !value)
             {
+                PauseBatch();
                 StopBot();
                 resumeCascade = cascadeRunning;
                 StopCascadeRun(); OnLostFocus();
@@ -80,6 +82,7 @@ namespace Levels.Editor
 
         internal void PrepareManual()
         {
+            if (batchSession != null) return;
             CheckInput();
             if (CurrentState == null && !IsSearching && level != null) Build();
         }
@@ -88,7 +91,7 @@ namespace Levels.Editor
         {
             // 직렬화 복원 중에는 Unity UI를 만들 수 없으므로 창의 CreateGUI에서 생성한다.
             rootVisualElement ??= new VisualElement();
-            ClearBot(); ClearQuery(); ClearExecution();
+            ClearBatch(); ClearBot(); ClearQuery(); ClearExecution();
             VisualElement root = rootVisualElement; root.Clear(); root.RemoveFromClassList("manual-play"); root.AddToClassList("match-editor"); root.AddToClassList("initial-state");
             root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Scripts/Features/LevelEditor/Editor/Styles/LevelEditor.uss"));
             root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Scripts/Features/PlayTesting/Editor/Styles/LevelInitialState.uss"));
@@ -144,12 +147,15 @@ namespace Levels.Editor
 
         private void CheckInput()
         {
+            if (batchSession != null) { UpdateBatchControls(); return; }
             if (inputFingerprint != null && inputFingerprint != LevelStateBuilder.Fingerprint(level))
                 Invalidate("원본 내용이 바뀌었습니다. 이전 후보를 지웠습니다. 다시 구성하세요.");
         }
 
         private void Build()
         {
+            if (batchSession?.CanContinue == true) return;
+            ClearBatch();
             Invalidate("구성 중…");
             inputFingerprint = LevelStateBuilder.Fingerprint(level);
             if (startingMode)

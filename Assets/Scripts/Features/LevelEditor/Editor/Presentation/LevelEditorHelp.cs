@@ -114,6 +114,7 @@ namespace Levels.Editor
                 ("tool-Select", "배치를 멈추고 칸이나 장애물을 선택해 설정을 봅니다.", "board.html#select"),
                 ("manual-start", "현재 레벨로 직접 플레이를 시작합니다.", "play.html#manual"),
                 ("bot-trial", "공개 정보만 읽는 기본/계획 봇을 시험합니다. 계획은 가정 보드의 두 수를 비교합니다. 같은 조건 재시험으로 전략을 바꿔 확인할 수 있습니다.", "play.html#bot"),
+                ("batch-count", "기본·계획 봇을 각각 지정한 횟수만큼 시험합니다. 100이면 총 200판입니다. 탭 이동은 일시정지하며 기록은 프로젝트 로컬에 남습니다.", "play.html#batch"),
                 ("manual-restart", "같은 시작값으로 다시 플레이합니다.", "play.html#restart"),
                 ("manual-new-seed", "다른 무작위 시작값으로 다시 플레이합니다.", "play.html#restart"),
                 ("initial-seed", "같은 레벨과 시작값을 사용하면 무작위 결과를 재현할 수 있습니다.", "play.html#diagnostic")
