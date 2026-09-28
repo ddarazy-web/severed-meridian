@@ -31,10 +31,15 @@ namespace Levels
         public RabbitColor Color => color;
         public int RequiredCharge => requiredCharge;
 
-        internal ObstaclePlacementDefinition(string id, BoardCoordinate coordinate, ObstacleKind kind, int durability)
+        /// <summary>에셋을 만들지 않고 본체 값을 구성한다. 기존 공급 호출은 색·충전의 기본값을 유지한다.</summary>
+        /// <param name="id">이 판 내부에서 연결을 구별할 ID.</param><param name="coordinate">본체 기준 칸.</param>
+        /// <param name="kind">장애물 종류.</param><param name="durability">현재 내구도.</param>
+        /// <param name="color">색 자물쇠의 공개 색.</param><param name="requiredCharge">발전기의 공개 충전 목표.</param>
+        internal ObstaclePlacementDefinition(string id, BoardCoordinate coordinate, ObstacleKind kind, int durability,
+            RabbitColor color = default, int requiredCharge = 0)
         {
             this.id = id; this.coordinate = coordinate; this.kind = kind; this.durability = durability;
-            color = default; requiredCharge = 0;
+            this.color = color; this.requiredCharge = requiredCharge;
         }
     }
 }

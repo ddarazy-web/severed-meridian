@@ -23,6 +23,13 @@ namespace AutoPlay
             Reason = $"공개 미션 기여 {mission} → 파워 가치 {power} → 확인 범위 {clear}칸" +
                 (string.IsNullOrEmpty(uncertainty) ? "" : " / " + uncertainty);
         }
+
+        /// <param name="immediate">같은 첫 행동의 기본 평가.</param><param name="planReason">가정 탐색의 선택 근거와 한계.</param>
+        internal BotChoice(BotChoice immediate, string planReason)
+        {
+            Action = immediate.Action; MissionValue = immediate.MissionValue; PowerValue = immediate.PowerValue;
+            ClearValue = immediate.ClearValue; Reason = planReason + " / 첫 수 기본 평가: " + immediate.Reason;
+        }
     }
 
     /// <summary>공개 관찰만 평가하는 한 수 전략. 게임 실행기·난수·원본 데이터에 접근하지 않는다.</summary>

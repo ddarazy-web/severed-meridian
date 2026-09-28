@@ -59,6 +59,9 @@ namespace Simulation
         public ReadOnlyCollection<BoardCoordinate> Vertices { get; }
         internal RuntimeConnection(LevelConnectionDefinition connection)
         { GeneratorId = connection.GeneratorId; TargetId = connection.TargetId; Vertices = Array.AsReadOnly(connection.Vertices.ToArray()); }
+        // 공개 연결의 양 끝만 복원할 때 경로 장식은 실행 규칙에 관여하지 않는다.
+        internal RuntimeConnection(string generatorId, string targetId)
+        { GeneratorId = generatorId; TargetId = targetId; Vertices = Array.AsReadOnly(Array.Empty<BoardCoordinate>()); }
     }
 
     public sealed class RuntimeSource
@@ -76,6 +79,8 @@ namespace Simulation
             Items = Array.AsReadOnly(source.Items.ToArray());
         }
         internal RuntimeSource Copy() => (RuntimeSource)MemberwiseClone();
+        internal RuntimeSource(BoardCoordinate coordinate)
+        { Coordinate = coordinate; Mode = SupplyMode.Random; Exhaustion = SupplyExhaustion.Random; Items = Array.AsReadOnly(Array.Empty<SupplyItem>()); }
     }
 
     public sealed class RuntimeFlow
@@ -92,6 +97,13 @@ namespace Simulation
             Merges = Array.AsReadOnly(flow.Merges.Select(merge => new RuntimeMerge(merge)).ToArray());
             Walls = Array.AsReadOnly(flow.Walls.ToArray()); Portals = Array.AsReadOnly(flow.Portals.ToArray());
             Arrivals = Array.AsReadOnly(flow.Arrivals.ToArray());
+        }
+        // 제작 전용 경로/합류 설정 없이 공개된 지형만 새 배열로 구성한다.
+        internal RuntimeFlow(IEnumerable<BoardEdge> walls, IEnumerable<FlowPortal> portals, IEnumerable<BoardCoordinate> arrivals)
+        {
+            Gravity = Array.AsReadOnly(Array.Empty<GravityCell>()); Paths = Array.AsReadOnly(Array.Empty<FlowPathCell>());
+            Merges = Array.AsReadOnly(Array.Empty<RuntimeMerge>());
+            Walls = Array.AsReadOnly(walls.ToArray()); Portals = Array.AsReadOnly(portals.ToArray()); Arrivals = Array.AsReadOnly(arrivals.ToArray());
         }
     }
 
@@ -116,6 +128,8 @@ namespace Simulation
             ScrapTarget = source.ScrapTarget; ScrapLimit = source.ScrapLimit; ScrapDurability = source.ScrapDurability;
             RecoveryTarget = source.RecoveryTarget; ScrapGenerated = source.ScrapGenerated;
         }
+        internal RuntimeSupply(IEnumerable<BoardCoordinate> randomSources)
+        { Sources = Array.AsReadOnly(randomSources.Select(at => new RuntimeSource(at)).ToArray()); ScrapDurability = 1; }
     }
 
     public sealed class LevelRuntimeState
@@ -170,6 +184,31 @@ namespace Simulation
             Missions = Array.AsReadOnly(source.Missions.Select(mission => mission.Copy()).ToArray());
             Connections = source.Connections; Flow = source.Flow; Supply = new RuntimeSupply(source.Supply); Random = source.Random.Copy();
             recoveries.AddRange(source.recoveries);
+        }
+
+        /// <summary>
+        /// 원본 에셋이나 실행 상태를 받지 않는 값 기반 현재 상태 구성 경로다.
+        /// 초기 배치를 다시 채우지 않으며 빈칸·현재 내구도·남은 미션을 그대로 보존한다.
+        /// 전달한 변경 가능 값도 복사하므로 호출자의 작업 배열과 판이 상태를 공유하지 않는다.
+        /// </summary>
+        /// <param name="rows">행 수.</param><param name="columns">열 수.</param><param name="moves">남은 이동.</param>
+        /// <param name="cells">현재 점유 값.</param><param name="bodies">현재 본체 값.</param><param name="missions">현재 목표.</param>
+        /// <param name="flow">값으로 구성한 흐름.</param><param name="supply">값으로 구성한 공급.</param>
+        /// <param name="connections">값으로 구성한 연결.</param><param name="seed">이 새 상태만의 난수 시드.</param>
+        internal LevelRuntimeState(int rows, int columns, int moves, IEnumerable<RuntimeCell> cells,
+            IEnumerable<RuntimeObstacle> bodies, IEnumerable<RuntimeMission> missions, RuntimeFlow flow,
+            RuntimeSupply supply, IEnumerable<RuntimeConnection> connections, int seed)
+        {
+            SchemaVersion = LevelDefinition.CurrentSchemaVersion; LevelNumber = 1;
+            Rows = rows; Columns = columns; InitialMoves = MovesRemaining = moves;
+            DefinitionFingerprint = "value-snapshot";
+            Colors = Array.AsReadOnly((RabbitColor[])Enum.GetValues(typeof(RabbitColor)));
+            InitialBlocks = Array.AsReadOnly(Array.Empty<InitialBlockDefinition>());
+            Cells = Array.AsReadOnly(cells.Select(cell => cell.Copy()).ToArray());
+            obstacleBodies = bodies.Select(body => body.Copy()).ToList(); Obstacles = obstacleBodies.AsReadOnly();
+            Missions = Array.AsReadOnly(missions.Select(mission => mission.Copy()).ToArray());
+            Flow = flow; Supply = new RuntimeSupply(supply);
+            Connections = Array.AsReadOnly(connections.ToArray()); Random = new SimulationRandom(seed);
         }
 
         // 제거된 본체도 남겨 같은 턴의 피해 기록과 새 공급 본체가 충돌하지 않게 한다.

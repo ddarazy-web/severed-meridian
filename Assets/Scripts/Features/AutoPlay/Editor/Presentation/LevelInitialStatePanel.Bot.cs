@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoPlay;
 using Simulation;
@@ -13,21 +14,31 @@ namespace Levels.Editor
         private BotPlaySession botSession;
         private Foldout botFoldout;
         private Label botProgress, botReason;
-        private Button botNew, botStep, botRun, botStop;
+        private Button botNew, botStep, botRun, botStop, botRepeat;
+        private PopupField<string> botStrategy;
+        private int? botReplaySeed;
+        private string botReplayFingerprint;
+        private bool botRepeating;
         private double nextBotTick;
 
         /// <summary>수동 플레이 탭에만 봇 시험 영역을 붙인다. 별도 창이나 통계 화면은 만들지 않는다.</summary>
         private void CreateBotUI()
         {
             if (!manualMode) return;
-            botFoldout = new Foldout { name = "bot-trial", text = "기본 봇 시험", value = false };
+            botFoldout = new Foldout { name = "bot-trial", text = "봇 시험", value = false };
             botFoldout.Add(new Label("새 봇 시험은 수동 시험을 끝내고 별도 사본으로 시작합니다. 아이템·부스터는 사용하지 않습니다.") { name = "bot-guide" });
+            botStrategy = new PopupField<string>("전략", new List<string> { "기본", "계획" }, 0) { name = "bot-strategy",
+                tooltip = "기본은 당장의 공개 기여, 계획은 가정 보드의 두 수를 비교합니다. 변경 뒤 새 시험 또는 같은 조건으로 다시를 누르세요." };
+            botStrategy.RegisterValueChangedCallback(_ => UpdateBotControls()); botFoldout.Add(botStrategy);
             VisualElement buttons = new VisualElement { name = "bot-buttons" }; botFoldout.Add(buttons);
             botNew = new Button(StartBot) { name = "bot-new", text = "새 봇 시험", tooltip = "현재 편집 내용으로 새 사본과 새 시드를 만듭니다. 원본 파일은 바뀌지 않습니다." };
             botStep = new Button(() => RunBot(false)) { name = "bot-step", text = "한 수 진행", tooltip = "한 행동을 선택하고 낙하·연쇄가 끝날 때까지 진행합니다." };
             botRun = new Button(() => RunBot(true)) { name = "bot-run", text = "한 판 실행", tooltip = "공개 정보로 행동을 선택하며 성공·패배·오류까지 진행합니다." };
             botStop = new Button(StopBot) { name = "bot-stop", text = "중지", tooltip = "현재 행동의 낙하·연쇄를 마치고 멈춥니다." };
             buttons.Add(botNew); buttons.Add(botStep); buttons.Add(botRun); buttons.Add(botStop);
+            botRepeat = new Button(() => PrepareBot(true)) { name = "bot-repeat", text = "같은 조건으로 다시",
+                tooltip = "같은 시작 레벨·시드로 선택한 전략을 새로 시험합니다. 원본 수정이나 창 재로드 후에는 사용할 수 없습니다." };
+            buttons.Add(botRepeat);
             buttons.Add(new Button(() => Build()) { name = "bot-manual", text = "수동 시험 새로", tooltip = "봇 시험을 끝내고 새 수동 시험을 준비합니다." });
             botProgress = new Label("새 봇 시험을 눌러 준비하세요.") { name = "bot-progress" };
             botReason = new Label("점수는 선택 이유이며 실제 미래 결과나 난이도가 아닙니다.") { name = "bot-reason" };
@@ -38,14 +49,22 @@ namespace Levels.Editor
 
         /// <summary>명시적인 새 시험에서만 수동 실행을 정리하고 봇 전용 사본을 만든다.</summary>
         private void StartBot()
+            => PrepareBot(false);
+
+        /// <param name="repeat">직전 시작 조건의 시드를 재사용할지 여부. 원본 변경 시 재사용하지 않는다.</param>
+        private void PrepareBot(bool repeat)
         {
+            CheckInput();
             if (level == null || !visible || botSession?.NeedsAdvance == true) return;
+            string fingerprint = LevelStateBuilder.Fingerprint(level);
+            if (repeat && (!botReplaySeed.HasValue || botReplayFingerprint != fingerprint)) return;
+            int next = botReplaySeed ?? seed;
+            if (!repeat) do { next = BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0); } while (next == seed);
             Invalidate("수동 시험 종료 · 새 봇 시험 준비");
-            int next;
-            do { next = BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0); } while (next == seed);
             seed = next; seedField.SetValueWithoutNotify(seed);
-            inputFingerprint = LevelStateBuilder.Fingerprint(level);
-            botSession = new BotPlaySession(level, seed);
+            botReplaySeed = seed; botReplayFingerprint = inputFingerprint = fingerprint;
+            botRepeating = repeat;
+            botSession = new BotPlaySession(level, seed, botStrategy.value == "계획" ? BotStrategyKind.Planning : BotStrategyKind.Basic);
             manualDiagnostics.SetValueWithoutNotify(false);
             botFoldout.SetValueWithoutNotify(true);
             EditorApplication.update -= BotTick;
@@ -77,12 +96,13 @@ namespace Levels.Editor
         private void BotTick()
         {
             if (EditorApplication.timeSinceStartup < nextBotTick) return;
-            nextBotTick = EditorApplication.timeSinceStartup + 0.05;
+            nextBotTick = EditorApplication.timeSinceStartup + (botSession?.IsPlanning == true ? 0.005 : 0.05);
             CheckInput();
             if (botSession == null) { EditorApplication.update -= BotTick; return; }
             botSession.Advance();
+            bool changed = !ReferenceEquals(CurrentState, botSession.State);
             CurrentState = botSession.State;
-            if (CurrentState != null) DisplayState(CurrentState);
+            if (changed && CurrentState != null) DisplayState(CurrentState);
             UpdateBotControls();
             if (!botSession.NeedsAdvance) EditorApplication.update -= BotTick;
             Owner?.Repaint();
@@ -93,6 +113,8 @@ namespace Levels.Editor
         {
             EditorApplication.update -= BotTick;
             botSession?.Dispose(); botSession = null;
+            botReplaySeed = null; botReplayFingerprint = null;
+            botRepeating = false;
             if (botProgress != null) botProgress.text = "새 봇 시험을 눌러 준비하세요.";
             if (botReason != null) botReason.text = "점수는 선택 이유이며 실제 미래 결과나 난이도가 아닙니다.";
             UpdateBotControls();
@@ -117,7 +139,10 @@ namespace Levels.Editor
                 if (element != null) element.style.display = active ? DisplayStyle.None : DisplayStyle.Flex;
             }
             botNew.SetEnabled(level != null && botSession?.NeedsAdvance != true);
-            bool ready = active && (botSession.Status == BotSessionStatus.Ready || botSession.Status == BotSessionStatus.Stopped && botSession.State != null);
+            botStrategy.SetEnabled(botSession?.NeedsAdvance != true);
+            botRepeat.SetEnabled(level != null && botReplaySeed.HasValue && botSession?.NeedsAdvance != true);
+            bool sameStrategy = active && botSession.Strategy == (botStrategy.value == "계획" ? BotStrategyKind.Planning : BotStrategyKind.Basic);
+            bool ready = sameStrategy && (botSession.Status == BotSessionStatus.Ready || botSession.Status == BotSessionStatus.Stopped && botSession.State != null);
             botStep.SetEnabled(ready); botRun.SetEnabled(ready);
             botStop.SetEnabled(active && botSession.NeedsAdvance && botSession.Status != BotSessionStatus.Stopping);
             if (!active) return;
@@ -126,7 +151,8 @@ namespace Levels.Editor
                 BotSessionStatus.Stopping => "중지 대기", BotSessionStatus.Stopped => "사용자 중지", BotSessionStatus.Won => "성공",
                 BotSessionStatus.MovesExhausted => "이동 수 소진", BotSessionStatus.Blocked => "진행 불가",
                 BotSessionStatus.Error => "실행 오류", _ => "시험 종료" };
-            botProgress.text = $"{phase} · 완료한 행동 {botSession.Records.Count}회 · 시드 {seed}\n{botSession.Message}";
+            botProgress.text = $"현재 판: {(botSession.Strategy == BotStrategyKind.Planning ? "계획" : "기본")} · {(botRepeating ? "직전과 같은 시작 조건" : "새 시작 조건")} · {phase} · 완료한 행동 {botSession.Records.Count}회 · 시드 {seed}\n{botSession.Message}" +
+                (sameStrategy ? "" : "\n선택한 전략으로 새 시험 또는 같은 조건 재시험을 시작하세요.");
             BotChoice choice = botSession.LastChoice;
             botReason.text = choice == null ? "아직 선택한 행동이 없습니다. 봇은 화면에 공개된 값만 읽습니다." :
                 $"최근 선택: {choice.Action.First}" + (choice.Action.Second.HasValue ? $" ↔ {choice.Action.Second}" : " 제자리 발동") + "\n" + choice.Reason;

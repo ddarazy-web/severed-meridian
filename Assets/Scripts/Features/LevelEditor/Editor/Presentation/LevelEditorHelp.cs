@@ -113,7 +113,7 @@ namespace Levels.Editor
                 ("erase-layer", "현재 편집 층의 내용만 지웁니다. 다른 층은 그대로 둡니다.", "board.html#tools"),
                 ("tool-Select", "배치를 멈추고 칸이나 장애물을 선택해 설정을 봅니다.", "board.html#select"),
                 ("manual-start", "현재 레벨로 직접 플레이를 시작합니다.", "play.html#manual"),
-                ("bot-trial", "공개 정보만 읽는 기본 봇으로 한 수 또는 한 판을 시험합니다. 원본은 보존하며 아이템과 부스터는 쓰지 않습니다.", "play.html#bot"),
+                ("bot-trial", "공개 정보만 읽는 기본/계획 봇을 시험합니다. 계획은 가정 보드의 두 수를 비교합니다. 같은 조건 재시험으로 전략을 바꿔 확인할 수 있습니다.", "play.html#bot"),
                 ("manual-restart", "같은 시작값으로 다시 플레이합니다.", "play.html#restart"),
                 ("manual-new-seed", "다른 무작위 시작값으로 다시 플레이합니다.", "play.html#restart"),
                 ("initial-seed", "같은 레벨과 시작값을 사용하면 무작위 결과를 재현할 수 있습니다.", "play.html#diagnostic")

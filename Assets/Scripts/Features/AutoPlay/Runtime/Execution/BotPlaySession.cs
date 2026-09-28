@@ -7,6 +7,7 @@ using Simulation;
 namespace AutoPlay
 {
     public enum BotSessionStatus { Preparing, Ready, Running, Stopping, Stopped, Won, MovesExhausted, Blocked, Error, Disposed }
+    public enum BotStrategyKind { Basic, Planning }
 
     /// <summary>실행 경계 전용 진단 기록. 전략 입력에는 기록이나 실제 난수 정보를 전달하지 않는다.</summary>
     public sealed class BotTurnRecord
@@ -30,7 +31,8 @@ namespace AutoPlay
     /// </summary>
     public sealed class BotPlaySession : IDisposable
     {
-        public const string Version = "bot-session-v2";
+        public const string Version = "bot-session-v3";
+        private PlanningSearch planning;
         private StartingBoardSearch search;
         private BoardActionExecutor executor;
         private BotObservation observation;
@@ -49,6 +51,9 @@ namespace AutoPlay
         public string DefinitionFingerprint { get; }
         public ReadOnlyCollection<BotTurnRecord> Records { get; }
         public BotChoice LastChoice { get; private set; }
+        public BotStrategyKind Strategy { get; }
+        public string StrategyVersion => Strategy == BotStrategyKind.Planning ? PlanningSearch.Version : BasicBotStrategy.Version;
+        public bool IsPlanning => planning != null;
         // 화면과 검증용 상태다. 이 속성을 포함한 세션 자체를 전략 인자로 넘기지 않는다.
         // 실행기를 공개하지 않으므로 수동 화면이 같은 판에 Swap/아이템을 호출할 수 없다.
         public LevelRuntimeState State => executor?.State;
@@ -57,8 +62,13 @@ namespace AutoPlay
 
         /// <summary>원본의 값 복사본으로 시작 조건 검색을 구성한다. 긴 검색은 Advance에서 나누어 실행한다.</summary>
         /// <param name="definition">저장 여부와 무관한 현재 레벨.</param><param name="seed">실행 전용 시드.</param>
-        public BotPlaySession(LevelDefinition definition, int seed)
+        public BotPlaySession(LevelDefinition definition, int seed) : this(definition, seed, BotStrategyKind.Basic) { }
+
+        /// <param name="definition">현재 레벨.</param><param name="seed">실행 전용 시드.</param><param name="strategy">이 판에서 유지할 전략.</param>
+        public BotPlaySession(LevelDefinition definition, int seed, BotStrategyKind strategy)
         {
+            if (strategy != BotStrategyKind.Basic && strategy != BotStrategyKind.Planning) throw new ArgumentOutOfRangeException(nameof(strategy));
+            Strategy = strategy;
             Seed = seed; Records = records.AsReadOnly();
             // 기존 StartingBoardSearch/LevelStateBuilder가 정의 구조체·목록을 복사한다.
             // Unity Object를 새로 만들거나 원본에 값을 쓰지 않는다.
@@ -91,13 +101,19 @@ namespace AutoPlay
         /// <param name="expected">전략이 읽은 관찰 객체.</param><param name="action">그 관찰의 후보.</param>
         /// <returns>실제 행동 수락 여부. 거절은 이동 수·난수를 변경하지 않는다.</returns>
         public bool TrySubmit(BotObservation expected, BotAction action)
+            => Submit(expected, action, null);
+
+        /// <summary>실제 제출 경계는 두 전략과 외부 요청이 공유한다. 탐색 중 외부 제출도 차단한다.</summary>
+        /// <param name="expected">관찰 토큰.</param><param name="action">공개 후보.</param><param name="chosen">완료한 전략 선택. 외부 요청은 기본 평가.</param>
+        /// <returns>공통 실행기의 수락 여부.</returns>
+        private bool Submit(BotObservation expected, BotAction action, BotChoice chosen)
         {
-            if (executor == null || executor.Phase != BoardActionPhase.Ready || executor.Outcome != null ||
+            if (planning != null || executor == null || executor.Phase != BoardActionPhase.Ready || executor.Outcome != null ||
                 (Status != BotSessionStatus.Ready && Status != BotSessionStatus.Running) ||
                 expected == null || !ReferenceEquals(expected, observation) || action == null || !expected.Actions.Contains(action))
             { LastRejection = "현재 관찰의 유효 후보가 아니거나 입력할 수 없는 시점입니다."; return false; }
 
-            BotChoice choice = BasicBotStrategy.Evaluate(expected, action);
+            BotChoice choice = chosen ?? BasicBotStrategy.Evaluate(expected, action);
             int beforeMoves = State.MovesRemaining, beforeRandom = State.Random.DrawCount;
             BoardActionResult result = action.Kind == BotActionKind.Activate ? executor.Activate(action.First) :
                 executor.Swap(action.First, action.Second.Value);
@@ -146,14 +162,23 @@ namespace AutoPlay
                 if (!runRequested) { ReachBoundary(); return; }
                 BotObservation current = Observe();
                 if (current == null) { Fail("공통 실행기가 입력 가능 상태로 돌아오지 않았습니다."); return; }
-                BotChoice choice = BasicBotStrategy.Choose(current);
+                BotChoice choice;
+                if (Strategy == BotStrategyKind.Planning)
+                {
+                    planning ??= new PlanningSearch(current);
+                    planning.Advance(); Message = planning.Message;
+                    if (!planning.IsDone) return;
+                    choice = planning.Result;
+                    planning.Dispose(); planning = null;
+                }
+                else choice = BasicBotStrategy.Choose(current);
                 if (choice == null)
                 {
                     // 재배치·막힘 판정은 실행기의 안정 경계 책임이다. 봇은 여기서
                     // 임의로 섞거나 패배를 선언하지 않고 불일치를 기록한다.
                     Fail("입력 가능한 판에 공개 행동 후보가 없습니다."); return;
                 }
-                TrySubmit(current, choice.Action);
+                Submit(current, choice.Action, choice);
             }
             catch (Exception error) { Fail(error.GetType().Name + ": " + error.Message); }
         }
@@ -162,6 +187,7 @@ namespace AutoPlay
         public void RequestStop()
         {
             if (Status >= BotSessionStatus.Won) return;
+            planning?.Dispose(); planning = null;
             runRequested = false; stopRequested = true; observation = null;
             if (executor?.HasPendingCascade == true)
             { Status = BotSessionStatus.Stopping; Message = "현재 행동의 낙하·연쇄 완료 후 중지"; }
@@ -193,11 +219,12 @@ namespace AutoPlay
 
         /// <param name="message">실행 오류 원인. 정상 패배와 구분해 표시한다.</param>
         private void Fail(string message)
-        { Status = BotSessionStatus.Error; Message = message; observation = null; runRequested = false; }
+        { planning?.Dispose(); planning = null; Status = BotSessionStatus.Error; Message = message; observation = null; runRequested = false; }
 
         /// <summary>원본 변경·창 종료·재로드 시 실행기와 과거 관찰을 폐기한다. 원본은 건드리지 않는다.</summary>
         public void Dispose()
         {
+            planning?.Dispose(); planning = null;
             search = null; executor = null; observation = null; pendingChoice = null;
             runRequested = false; Status = BotSessionStatus.Disposed; Message = "시험 폐기";
         }
