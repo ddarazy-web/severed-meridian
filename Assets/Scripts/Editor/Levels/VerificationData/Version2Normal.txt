@@ -1,0 +1,126 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33dcef7ce60494c4a99675e089ea2641, type: 3}
+  m_Name: Board
+  m_EditorClassIdentifier: Assembly-CSharp::Levels.LevelDefinition
+  schemaVersion: 2
+  levelNumber: 53001
+  moveCount: 20
+  colors: 0000000001000000020000000300000004000000
+  board:
+    rows: 10
+    columns: 10
+    cells:
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+  initialBlocks: []
+  obstacles: []
+  covers: []
+  dust: []
