@@ -14,7 +14,14 @@ namespace Levels.Editor
         private static IEnumerator sequence;
         private static double nextTick;
         private static string originalClipboard;
+        private static bool powerSupplyOnly;
         private sealed class FocusWindow : EditorWindow { }
+
+        public static void StartPowerSupply()
+        {
+            powerSupplyOnly = true;
+            Start();
+        }
 
         public static void Start()
         {
@@ -77,6 +84,33 @@ namespace Levels.Editor
             Cell(0, 0); yield return null;
             Check(window.rootVisualElement.Q<PopupField<string>>("source-mode") != null, "보드 생성구 선택 속성");
             Mode("고정 목록"); yield return null;
+            Button addPower = window.rootVisualElement.Q<Button>("add-power-supply-item");
+            using (NavigationSubmitEvent evt = NavigationSubmitEvent.GetPooled())
+            { evt.target = addPower; addPower.SendEvent(evt); }
+            yield return null;
+            Check(level.Supply.Sources[0].Items.Count == 1 && level.Supply.Sources[0].Items[0].Kind == SupplyKind.RandomPower, "파워블록 추가 버튼 기본 랜덤");
+            foreach (SupplyKind power in new[] { SupplyKind.Rocket, SupplyKind.Bomb, SupplyKind.Drone, SupplyKind.RandomPower })
+            {
+                window.rootVisualElement.Q<PopupField<string>>("supply-item-kind").value = LevelSupplyRules.Name(power); yield return null;
+                Check(level.Supply.Sources[0].Items[0].Kind == power, "파워 공급 선택 " + power);
+            }
+            if (powerSupplyOnly)
+            {
+                window.rootVisualElement.Q<IntegerField>("supply-item-count").value = 7; yield return null;
+                Check(level.Supply.Sources[0].Items[0].Count == 7, "랜덤 파워 수량 UI 저장");
+                // OS 클립보드 사용 여부와 분리하여 실제 복사 데이터의 새 종류 직렬화를 검증한다.
+                string powerCopy = LevelSupplyEditing.Copy(level, 0);
+                Check(LevelSupplyEditing.Paste(level, new[] { 0 }, powerCopy, true) == null &&
+                    level.Supply.Sources[0].Items.Count == 2 && level.Supply.Sources[0].Items[1].Kind == SupplyKind.RandomPower &&
+                    level.Supply.Sources[0].Items[1].Count == 7, "랜덤 파워 복사 데이터/뒤에 추가");
+                yield return null;
+                Undo.PerformUndo(); yield return null;
+                Check(level.Supply.Sources[0].Items.Count == 1, "랜덤 파워 붙여넣기 Undo");
+                Undo.PerformRedo(); yield return null;
+                Check(level.Supply.Sources[0].Items.Count == 2, "랜덤 파워 붙여넣기 Redo");
+                yield break;
+            }
+            LevelContextMenuVerification.Action(window, "공급 항목/선택 항목 삭제").Execute(); yield return null;
             LevelContextMenuVerification.Action(window, "공급 항목/추가").Execute(); yield return null;
             Check(level.Supply.Sources[0].Items.Count == 1, "UI 공급 항목 추가");
             window.rootVisualElement.Q<PopupField<string>>("supply-item-kind").value = "청소로켓"; yield return null;
@@ -197,8 +231,18 @@ namespace Levels.Editor
             Click("inspector-tab-1"); yield return null;
             Capture("mission-wide.png");
             window.position = new Rect(10, 10, 680, 480); yield return null; yield return null;
-            Check(window.rootVisualElement.Q<ScrollView>("board-scroll").horizontalScroller.highValue > 0, "좁은 창 보드 스크롤 유지");
+            // 통합 창의 현재 계약은 최소 크기 자동 확대다. 내부 스크롤의 존재가 아니라
+            // 확대 후 보드 접근과 좁은 컨테이너에서의 전체 영역 접근을 각각 확인한다.
+            Check(window.position.width >= window.minSize.x && window.position.height >= window.minSize.y &&
+                window.rootVisualElement.Q<ScrollView>("board-scroll").contentViewport.worldBound.width >= 400,
+                "작은 독립 창의 최소 크기·공급 보드 영역 확보");
+            ScrollView workspace = window.rootVisualElement.Q<ScrollView>("workspace-viewport");
+            workspace.style.width = 600; workspace.style.height = 400; workspace.style.flexGrow = 0;
+            yield return null; yield return null;
+            Check(workspace.horizontalScroller.highValue > 0 && workspace.verticalScroller.highValue > 0,
+                "좁은 컨테이너에서 공급 편집 양방향 스크롤");
             Capture("supply-narrow.png");
+            workspace.style.width = StyleKeyword.Null; workspace.style.height = StyleKeyword.Null; workspace.style.flexGrow = 1;
             window.position = new Rect(10, 10, 1000, 780); yield return null;
             Click("tool-tab-2"); yield return null;
             Click("source-list-0-1"); yield return null;

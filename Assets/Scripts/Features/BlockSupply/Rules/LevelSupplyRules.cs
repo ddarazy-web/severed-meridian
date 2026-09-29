@@ -17,6 +17,7 @@ namespace Levels
             SupplyKind.RandomNormal => "무작위 달토끼", SupplyKind.FixedNormal => "고정 달토끼",
             SupplyKind.Rocket => "청소로켓", SupplyKind.Bomb => "달폭탄", SupplyKind.Drone => "수거드론",
             SupplyKind.Magnet => "무지개 자석", SupplyKind.Scrap => "고철 뭉치", SupplyKind.Recovery => "회수 부품",
+            SupplyKind.RandomPower => "랜덤 파워블록",
             _ => "잘못된 공급 종류"
         };
 

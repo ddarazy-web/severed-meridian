@@ -145,6 +145,29 @@ namespace Levels.Editor
         }
         private static void SupplyChecks()
         {
+            BoardCoordinate[] randomColumn = Enumerable.Range(0, 10).Select(i => C(i, 0)).ToArray();
+            LevelDefinition powers = Make(randomColumn);
+            Source(powers, C(0, 0), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.RandomPower, 10));
+            HashSet<RuntimeContent> kinds = new HashSet<RuntimeContent>();
+            HashSet<RocketDirection> directions = new HashSet<RocketDirection>();
+            for (int seed = 0; seed < 8; seed++)
+            {
+                LevelRuntimeState input = Build(powers, seed); Empty(input, randomColumn);
+                string before = Snapshot(input);
+                SettlementResult supplied = SettlementResolution.Resolve(input);
+                RuntimeCell[] cells = randomColumn.Select(supplied.State.CellAt).ToArray();
+                Check(supplied.IsApplied && cells.All(c => c.Content == RuntimeContent.Rocket || c.Content == RuntimeContent.Bomb || c.Content == RuntimeContent.Drone), "랜덤 파워 3종만 공급 " + seed);
+                Check(cells.All(c => c.Color == null && (c.Content == RuntimeContent.Rocket ? c.RocketDirection.HasValue : !c.RocketDirection.HasValue)), "랜덤 파워 색 없음/로켓만 방향 " + seed);
+                Check(supplied.State.Supply.Sources[0].ItemIndex == 1 && supplied.State.Supply.Sources[0].ItemConsumed == 0 &&
+                    supplied.State.Supply.Sources[0].Items[0].Kind == SupplyKind.RandomPower, "랜덤 파워 수량 소진/목록 유지 " + seed);
+                Check(Snapshot(input) == before && Snapshot(SettlementResolution.Resolve(input).State) == Snapshot(supplied.State), "랜덤 파워 원본 보존/같은 시드 재현 " + seed);
+                SettlementResult blockedPower = SettlementResolution.Resolve(supplied.State);
+                Check(blockedPower.RandomBefore == blockedPower.RandomAfter && blockedPower.Records.Count == 0, "랜덤 파워 소진 후 추가 생성 없음 " + seed);
+                foreach (RuntimeCell cell in cells)
+                { kinds.Add(cell.Content); if (cell.RocketDirection.HasValue) directions.Add(cell.RocketDirection.Value); }
+            }
+            Check(kinds.Count == 3 && directions.Count == 2, "랜덤 파워 모든 종류/양방향 등장");
+            UnityEngine.Object.DestroyImmediate(powers);
             BoardCoordinate[] column = Enumerable.Range(0, 10).Select(i => C(i, 3)).ToArray(); LevelDefinition level = Make(column);
             Source(level, C(0, 3), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal, 2, RabbitColor.Type3),
                 new SupplyItem(SupplyKind.Rocket, direction: RocketDirection.Vertical), new SupplyItem(SupplyKind.Bomb), new SupplyItem(SupplyKind.Drone), new SupplyItem(SupplyKind.Magnet));

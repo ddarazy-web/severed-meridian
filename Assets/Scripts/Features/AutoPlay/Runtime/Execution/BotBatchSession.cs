@@ -50,7 +50,8 @@ namespace AutoPlay
                     startedUtc = DateTime.UtcNow.ToString("O"), seeds = (int[])seeds.Clone(), status = BotBatchStatus.Running,
                     message = "반복 시험 준비", basicVersion = BasicBotStrategy.Version, planningVersion = PlanningSearch.Version,
                     observationVersion = BotObservationBuilder.Version, assumptionVersion = PlanningBranch.Version,
-                    sessionVersion = BotPlaySession.Version, engineVersion = BoardActionExecutor.Version };
+                    sessionVersion = BotPlaySession.Version, engineVersion = BoardActionExecutor.Version,
+                    startingVersion = StartingBoardSearch.AlgorithmVersion };
                 Save(null);
             }
             catch { UnityEngine.Object.DestroyImmediate(definition); definition = null; throw; }

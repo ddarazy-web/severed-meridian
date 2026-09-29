@@ -183,7 +183,7 @@ namespace Levels.Editor
                 for (int column = 0; column < display.Columns; column++)
                 {
                     RuntimeCell cell = display.CellAt(new BoardCoordinate(row, column));
-                    Button button = new Button { name = $"initial-cell-{row}-{column}", text = CellText(cell), tooltip = cell.Coordinate.ToString() };
+                    Button button = new Button { name = $"initial-cell-{row}-{column}", text = CellText(cell, display), tooltip = cell.Coordinate.ToString() };
                     button.AddToClassList("initial-cell");
                     if (!cell.IsActive) button.AddToClassList("inactive");
                     if (cell.Color.HasValue && cell.Cover != CoverKind.Mold) button.AddToClassList("rabbit-" + (int)cell.Color.Value);
@@ -209,7 +209,9 @@ namespace Levels.Editor
             UpdateExecutionControls();
         }
 
-        private string CellText(RuntimeCell cell)
+        /// <param name="cell">표시할 칸.</param><param name="state">이 칸이 속한 실행 또는 재생 사본.</param>
+        /// <returns>플레이와 사례 재생이 공유하는 블록·장애물·바닥 표시.</returns>
+        internal static string CellText(RuntimeCell cell, LevelRuntimeState state)
         {
             if (!cell.IsActive) return "×";
             if (cell.Cover == CoverKind.Mold) return "곰팡이" + (cell.DustDurability > 0 ? "*" + cell.DustDurability : "");
@@ -218,20 +220,20 @@ namespace Levels.Editor
                 RuntimeContent.Normal => "토" + ((int)cell.Color.Value + 1),
                 RuntimeContent.Rocket => cell.RocketDirection == Levels.RocketDirection.Horizontal ? "로↔" : "로↕",
                 RuntimeContent.Bomb => "폭탄", RuntimeContent.Drone => "드론", RuntimeContent.Magnet => "자석",
-                RuntimeContent.Recovery => "회수", RuntimeContent.Obstacle => (execution?.State ?? CurrentState).Obstacles[cell.ObstacleIndex.Value].Definition.Kind switch
+                RuntimeContent.Recovery => "회수", RuntimeContent.Obstacle => state.Obstacles[cell.ObstacleIndex.Value].Definition.Kind switch
                 { ObstacleKind.Crate => "상자", ObstacleKind.Scrap => "고철", ObstacleKind.Safe => "금고", ObstacleKind.ColorLock => "잠금", ObstacleKind.Appliance => "가전", _ => "발전" },
                 _ => "·"
             };
             if (cell.Content == RuntimeContent.Obstacle)
             {
-                RuntimeObstacle body = (execution?.State ?? CurrentState).Obstacles[cell.ObstacleIndex.Value];
+                RuntimeObstacle body = state.Obstacles[cell.ObstacleIndex.Value];
                 text += body.Definition.Kind == ObstacleKind.Generator ? " " + body.Charge + "/" + body.Definition.RequiredCharge : body.Durability.ToString();
                 if (body.Definition.Kind == ObstacleKind.Appliance) text += "\n#" + cell.ObstacleIndex;
                 if (body.Definition.Kind == ObstacleKind.ColorLock) text += "\n토" + ((int)body.Definition.Color + 1);
             }
             if (cell.Cover.HasValue) text = (cell.Cover == CoverKind.Web ? "줄" : "곰") + cell.CoverDurability + "\n" + text;
             if (cell.DustDurability > 0) text += "*" + cell.DustDurability;
-            if ((execution?.State ?? CurrentState).Flow.Arrivals.Contains(cell.Coordinate)) text += "\n▽도착";
+            if (state.Flow.Arrivals.Contains(cell.Coordinate)) text += "\n▽도착";
             return text;
         }
 
@@ -244,7 +246,7 @@ namespace Levels.Editor
             LevelRuntimeState display = execution?.State ?? CurrentState;
             selectedButton?.RemoveFromClassList("selected"); selectedButton = button; button.AddToClassList("selected");
             StringBuilder text = new StringBuilder(); text.AppendLine(cell.Coordinate.ToString());
-            text.AppendLine(cell.IsActive ? CellText(cell).Replace("\n", " / ") : "비활성 칸");
+            text.AppendLine(cell.IsActive ? CellText(cell, display).Replace("\n", " / ") : "비활성 칸");
             if (cell.ObstacleIndex.HasValue)
             {
                 RuntimeObstacle obstacle = display.Obstacles[cell.ObstacleIndex.Value];

@@ -7,7 +7,8 @@ namespace Levels
 {
     public enum SupplyMode { Random, Fixed, MaintainScrap, MaintainRecovery }
     public enum SupplyExhaustion { Stop, Random }
-    public enum SupplyKind { RandomNormal, FixedNormal, Rocket, Bomb, Drone, Magnet, Scrap, Recovery }
+    // 기존 에셋의 숫자 값을 유지하기 위해 새로운 공급 종류는 끝에 추가한다.
+    public enum SupplyKind { RandomNormal, FixedNormal, Rocket, Bomb, Drone, Magnet, Scrap, Recovery, RandomPower }
 
     [Serializable]
     public struct SupplyItem

@@ -12,7 +12,7 @@ using UnityEngine.UIElements;
 namespace Levels.Editor
 {
     /// <summary>별도 검증 실행용. 이 검사에서 소유한 임시 에셋만 생성·삭제하고 종료한다.</summary>
-    public static class LevelShapeVerification
+    public static partial class LevelShapeVerification
     {
         private const string Evidence = "Logs/LevelShapeCatalogVerification";
         private static readonly List<string> Results = new List<string>();
@@ -118,6 +118,26 @@ namespace Levels.Editor
             var choices = window.rootVisualElement.Q<PopupField<string>>("shape-choice"); choices.value = firstName;
             yield return null;
             Check(window.rootVisualElement.Q("shape-candidates").Query<Label>().ToList().Any(l => l.text.Contains("나무상자")), "장애물 이력 화면 표시");
+            string guid = AssetDatabase.AssetPathToGUID(registeredPaths[0]);
+            string shapeBefore = JsonUtility.ToJson(first), sourceBefore = JsonUtility.ToJson(source);
+            foreach (string invalid in new[] { "", "../invalid", second.name })
+            {
+                window.rootVisualElement.Q<TextField>("shape-rename-name").value = invalid;
+                Click("rename-shape"); yield return null;
+                Check(AssetDatabase.GUIDToAssetPath(guid) == registeredPaths[0] && JsonUtility.ToJson(first) == shapeBefore, "등록 맵 잘못된 이름/중복 거절 " + invalid);
+            }
+            string renamed = "Renamed_" + Guid.NewGuid().ToString("N");
+            window.rootVisualElement.Q<TextField>("shape-rename-name").value = renamed;
+            Click("rename-shape"); yield return null;
+            registeredPaths[0] = AssetDatabase.GUIDToAssetPath(guid);
+            firstName = renamed;
+            Check(first.name == renamed && registeredPaths[0].EndsWith("/" + renamed + ".asset"), "등록 맵 이름 변경/GUID 보존");
+            Check(window.rootVisualElement.Q<PopupField<string>>("shape-choice").value == renamed &&
+                window.rootVisualElement.Q<TextField>("shape-rename-name").value == renamed, "이름 변경 후 목록 선택/입력 동기화");
+            Check(first.Cells.SequenceEqual(second.Cells) == false && first.ObstacleHistory.Count == 3 && JsonUtility.ToJson(source) == sourceBefore,
+                "등록 이름 변경 후 모양·장애물 기록·원본 레벨 보존");
+            Resources.UnloadAsset(first); first = AssetDatabase.LoadAssetAtPath<LevelShapePreset>(registeredPaths[0]);
+            Check(first.name == renamed && first.Cells[99] == saved && first.ObstacleHistory.Count == 3, "변경된 이름 디스크 재로딩");
             Capture("catalog.png");
             original = JsonUtility.ToJson(source);
             Click("close-shape-recommendations");

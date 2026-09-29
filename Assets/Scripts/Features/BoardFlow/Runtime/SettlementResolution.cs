@@ -197,6 +197,17 @@ namespace Simulation
                 if (!fixedItem && source.Mode == SupplyMode.Fixed && source.Exhaustion == SupplyExhaustion.Stop) continue;
                 SupplyItem item = fixedItem ? source.Items[source.ItemIndex] : new SupplyItem(SupplyKind.RandomNormal);
                 int beforeIndex = source.ItemIndex, beforeConsumed = source.ItemConsumed;
+                // 목록에는 랜덤 항목을 그대로 남기고, 실제 공급하는 한 개마다 종류를 뽑는다.
+                // 공통 상태의 난수를 사용하므로 게임·봇·같은 시드 재실행 결과가 일치한다.
+                // 자석은 기존 개별 공급만 지원하며 랜덤 후보에는 포함하지 않는다.
+                if (item.Kind == SupplyKind.RandomPower)
+                {
+                    SupplyKind chosen = work.Random.Next(3) switch
+                    { 0 => SupplyKind.Rocket, 1 => SupplyKind.Bomb, _ => SupplyKind.Drone };
+                    RocketDirection direction = chosen == SupplyKind.Rocket
+                        ? (RocketDirection)work.Random.Next(2) : RocketDirection.Horizontal;
+                    item = new SupplyItem(chosen, item.Count, direction: direction);
+                }
                 cell.Content = item.Kind switch
                 {
                     SupplyKind.Rocket => RuntimeContent.Rocket, SupplyKind.Bomb => RuntimeContent.Bomb,

@@ -208,6 +208,11 @@ namespace Levels.Editor
             itemActions.Add(SupplyButton("복제", "duplicate-supply-item", () => ChangeItem(0)));
             itemActions.Add(SupplyButton("삭제", "delete-supply-item", () => ChangeItem(1)));
             selectedProperties.Add(itemActions);
+            selectedProperties.Add(SupplyButton("+ 파워블록", "add-power-supply-item", () =>
+            {
+                List<SupplyItem> updated = original.ToList(); updated.Add(new SupplyItem(SupplyKind.RandomPower));
+                selectedSupplyItem = updated.Count - 1; return LevelSupplyEditing.SetItems(level, sourceIndex, updated);
+            }));
             VisualElement order = new VisualElement(); order.style.flexDirection = FlexDirection.Row;
             order.Add(SupplyButton("↑ 나중에", "supply-item-later", () => ChangeItem(2)));
             order.Add(SupplyButton("↓ 먼저", "supply-item-earlier", () => ChangeItem(3)));
@@ -242,6 +247,9 @@ namespace Levels.Editor
             PopupField<string> kind = new PopupField<string>("종류", kinds, raw) { name = "supply-item-kind" };
             kind.RegisterValueChangedCallback(evt => Apply(new SupplyItem((SupplyKind)kinds.IndexOf(evt.newValue), item.Count,
                 level.Colors?.FirstOrDefault() ?? RabbitColor.Type1, item.Direction, Math.Max(1, item.Durability)))); parent.Add(kind);
+            kind.tooltip = "파워블록은 랜덤 파워블록·청소로켓·달폭탄·수거드론을 선택할 수 있습니다. 기존 무지개 자석 공급도 유지합니다.";
+            if (item.Kind == SupplyKind.RandomPower)
+                parent.Add(new HelpBox("한 개를 공급할 때마다 로켓·폭탄·드론 중 같은 확률로 선택합니다. 로켓 방향도 무작위입니다.", HelpBoxMessageType.Info));
             IntegerField count = new IntegerField("수량") { value = item.Count, isDelayed = true, name = "supply-item-count" };
             count.RegisterValueChangedCallback(evt => Apply(new SupplyItem(item.Kind, evt.newValue, item.Color, item.Direction, item.Durability))); parent.Add(count);
             if (item.Kind == SupplyKind.Scrap)

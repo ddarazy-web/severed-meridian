@@ -10,11 +10,22 @@ namespace Levels.Editor
     public sealed partial class LevelEditorWindow
     {
         private VisualElement recommendationPanel;
+        private Action refreshShapeUsage;
+
+        /// <summary>저장·프로젝트 변경·포커스 복귀 때 열린 목록의 사용 현황만 갱신한다.</summary>
+        private void RefreshShapeUsage()
+        {
+            if (recommendationPanel?.style.display == DisplayStyle.Flex) refreshShapeUsage?.Invoke();
+        }
+
+        private void OnProjectChange() => RefreshShapeUsage();
+        private void OnFocus() => RefreshShapeUsage();
 
         /// <summary>등록된 모양 목록을 표시한다. 선택과 미리보기만으로는 레벨을 변경하지 않는다.</summary>
         internal void ShowShapeRecommendations()
         {
             board?.CancelStroke(); data?.ApplyModifiedProperties();
+            refreshShapeUsage = null;
             recommendationPanel.Clear(); recommendationPanel.style.display = DisplayStyle.Flex;
             Label heading = new Label("맵 모양 목록 · 등록하고 다시 사용하기");
             LevelEditorHelp.Link(heading, "저장한 레벨의 모양과 사용 장애물 기록을 등록합니다. 목록에서 고른 모양으로 새 레벨을 만듭니다.", "recommendations.html#choose");
@@ -41,6 +52,7 @@ namespace Levels.Editor
             recommendationPanel.Add(register);
             // 목록을 열 때만 읽는다. 임의 모양 생성이나 사용 횟수에 따른 자동 정렬은 하지 않는다.
             var registered = LevelShapeRecommendations.LoadAll();
+            System.Collections.Generic.Dictionary<LevelShapePreset, System.Collections.Generic.List<LevelShapeUsage.Entry>> usage = null;
             if (registered.Count == 0)
             {
                 recommendationPanel.Add(new Label("등록한 모양이 없습니다. 마음에 드는 레벨을 저장하고 위 버튼으로 등록하세요.") { name = "shape-empty" });
@@ -54,6 +66,42 @@ namespace Levels.Editor
             PopupField<string> choices = new PopupField<string>("등록 모양", registered.Select(item => item.name).ToList(), 0) { name = "shape-choice" };
             choices.tooltip = "직접 등록한 모양을 이름순으로 표시합니다. 원하는 모양을 반복해서 사용할 수 있습니다.";
             choices.style.flexGrow = 1; options.Add(choices);
+            VisualElement renameRow = new VisualElement(); renameRow.style.flexDirection = FlexDirection.Row;
+            TextField shapeName = new TextField("등록 맵 이름") { name = "shape-rename-name", value = registered[0].name };
+            shapeName.style.flexGrow = 1; shapeName.style.minWidth = 0;
+            shapeName.tooltip = "선택한 등록 모양의 이름입니다. 원본 레벨 이름과 장애물 사용 기록은 바뀌지 않습니다.";
+            renameRow.Add(shapeName);
+            renameRow.Add(new Button(() =>
+            {
+                LevelShapePreset target = registered[choices.index];
+                string error = LevelShapeRecommendations.Rename(target, shapeName.value);
+                if (error != null) { status.text = error; return; }
+                // 이름순 정렬을 갱신한 뒤 객체 위치로 다시 선택한다. 이름이 같아도 대상을 혼동하지 않는다.
+                ShowShapeRecommendations();
+                recommendationPanel.Q<PopupField<string>>("shape-choice").index = LevelShapeRecommendations.LoadAll().IndexOf(target);
+                recommendationPanel.Q<Label>("shape-status").text = "이름을 변경했습니다: " + target.name;
+            }) { text = "이름 변경", name = "rename-shape", tooltip = "선택한 등록 맵의 파일 이름을 변경합니다." });
+            recommendationPanel.Add(renameRow);
+            VisualElement deletePrompt = new VisualElement { name = "shape-delete-prompt" };
+            deletePrompt.style.display = DisplayStyle.None;
+            Label deleteMessage = new Label(); deleteMessage.style.whiteSpace = WhiteSpace.Normal; deletePrompt.Add(deleteMessage);
+            LevelShapePreset pendingDelete = null;
+            Button delete = new Button(() =>
+            {
+                pendingDelete = registered[choices.index];
+                deleteMessage.text = $"‘{pendingDelete.name}’ 등록 맵을 삭제할까요? 등록 파일을 휴지통으로 옮깁니다. 레벨 파일은 삭제하지 않습니다.";
+                deletePrompt.style.display = DisplayStyle.Flex;
+            }) { text = "미사용 맵 삭제", name = "delete-shape", tooltip = "저장된 레벨에서 사용하지 않는 등록 맵만 삭제할 수 있습니다." };
+            renameRow.Add(delete);
+            VisualElement deleteActions = new VisualElement(); deleteActions.style.flexDirection = FlexDirection.Row;
+            deleteActions.Add(new Button(() =>
+            {
+                string error = LevelShapeUsage.DeleteUnused(pendingDelete);
+                if (error != null) { refreshShapeUsage?.Invoke(); status.text = error; return; }
+                ShowShapeRecommendations(); recommendationPanel.Q<Label>("shape-status").text = "등록 맵을 휴지통으로 옮겼습니다. 레벨 파일은 유지됩니다.";
+            }) { text = "삭제", name = "confirm-delete-shape" });
+            deleteActions.Add(new Button(() => { pendingDelete = null; deletePrompt.style.display = DisplayStyle.None; }) { text = "취소", name = "cancel-delete-shape" });
+            deletePrompt.Add(deleteActions); recommendationPanel.Add(deletePrompt);
             ScrollView detail = new ScrollView { name = "shape-detail" }; detail.style.maxHeight = 265; detail.style.flexShrink = 1; recommendationPanel.Add(detail);
             TextField filename = new TextField("새 파일 이름") { name = "shape-file-name", value = Path.GetFileNameWithoutExtension(AssetDatabase.GenerateUniqueAssetPath(LevelAssetOperations.DefaultFolder + "/Level.asset")) };
             recommendationPanel.Add(filename);
@@ -82,15 +130,37 @@ namespace Levels.Editor
                 { status.text = "만들기를 완료하지 못했습니다. " + exception.Message; }
             }) { text = "이 모양으로 새 레벨 만들기", name = "create-shape-level", tooltip = "현재 레벨을 덮어쓰지 않습니다. 활성 칸과 기본 생성구만 설정한 새 파일을 만듭니다." });
             recommendationPanel.Add(actions); recommendationPanel.Add(status);
-            choices.RegisterValueChangedCallback(_ => ShowDetail());
-            ShowDetail();
+            choices.RegisterValueChangedCallback(_ => { pendingDelete = null; deletePrompt.style.display = DisplayStyle.None; ShowDetail(); });
+            refreshShapeUsage = () =>
+            {
+                try { usage = LevelShapeUsage.Read(registered); }
+                catch (Exception error) when (error is IOException || error is UnauthorizedAccessException || error is UnityException)
+                { usage = null; status.text = "사용 현황을 읽지 못했습니다. " + error.Message; }
+                ShowDetail();
+            };
+            refreshShapeUsage();
 
             // 선택된 모양의 100칸 미리보기와 설명은 일치해야 하므로 같은 결과 객체에서 함께 그린다.
             void ShowDetail()
             {
                 detail.Clear();
                 var shape = registered[choices.index];
-                if (shape == null || !shape.IsValid) { detail.Add(new Label("등록 항목이 변경되었습니다. 목록을 다시 여세요.")); return; }
+                if (shape == null || !shape.IsValid) { delete.SetEnabled(false); detail.Add(new Label("등록 항목이 변경되었습니다. 목록을 다시 여세요.")); return; }
+                shapeName.SetValueWithoutNotify(shape.name);
+                bool known = usage != null && usage.ContainsKey(shape);
+                delete.SetEnabled(known && usage[shape].Count == 0);
+                Label count = new Label(known ? $"사용 레벨 {usage[shape].Count}개 · 마지막 저장 기준" : "사용 현황을 확인할 수 없습니다.") { name = "shape-usage-count" };
+                count.style.whiteSpace = WhiteSpace.Normal; detail.Add(count);
+                Foldout usedLevels = new Foldout { text = "사용 레벨과 장애물", name = "shape-used-levels", value = false };
+                usedLevels.tooltip = "활성 칸 위치가 같은 저장된 레벨을 셉니다. 반복 저장은 중복 집계하지 않고 미저장 변경은 포함하지 않습니다.";
+                if (known)
+                    foreach (LevelShapeUsage.Entry entry in usage[shape])
+                    {
+                        Label item = new Label($"레벨 {entry.Number} · {Path.GetFileNameWithoutExtension(entry.Path)}\n" +
+                            (entry.Obstacles.Count == 0 ? "사용 장애물 없음" : string.Join(" / ", entry.Obstacles))) { tooltip = entry.Path };
+                        item.style.whiteSpace = WhiteSpace.Normal; usedLevels.Add(item);
+                    }
+                detail.Add(usedLevels);
                 Label description = new Label($"등록 당시 레벨: {shape.SourceName} · 레벨 {shape.SourceLevelNumber}\n사용 칸 {shape.Cells.Count(active => active)}개 · 장애물 기록은 참고용입니다.");
                 description.style.whiteSpace = WhiteSpace.Normal; detail.Add(description);
                 VisualElement preview = new VisualElement { name = "shape-preview", tooltip = "색 칸은 사용할 칸, 어두운 칸은 비활성 칸입니다. 생성 후 칸을 더 편집할 수 있습니다." };

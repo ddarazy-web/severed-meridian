@@ -50,7 +50,7 @@ namespace Levels.Editor
 
         private void OnDisable()
         {
-            playPanel?.Dispose(); diagnosticPanel?.Dispose();
+            playPanel?.Dispose(); diagnosticPanel?.Dispose(); analysisPanel?.Dispose();
             board?.CancelStroke();
             Undo.undoRedoPerformed -= ExternalChange;
             Undo.postprocessModifications -= OnModifications;
@@ -216,6 +216,7 @@ namespace Levels.Editor
             if (levelNamePanel != null) levelNamePanel.style.display = DisplayStyle.None;
             workspaceLevel?.SetValueWithoutNotify(target);
             playPanel?.SetLevel(target); diagnosticPanel?.SetLevel(target);
+            analysisPanel?.SourceChanged();
             selected = null;
             selectedSources.Clear();
             selectedPlacements.Clear();
@@ -484,6 +485,7 @@ namespace Levels.Editor
                 if (level == target) data?.ApplyModifiedProperties();
                 AssetDatabase.SaveAssetIfDirty(target);
                 UpdateSaveState();
+                RefreshShapeUsage();
             });
         }
 

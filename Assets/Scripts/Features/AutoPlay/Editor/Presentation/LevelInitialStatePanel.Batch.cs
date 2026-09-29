@@ -19,6 +19,7 @@ namespace Levels.Editor
         private ProgressBar batchProgress;
         private string batchError;
         private double nextBatchDisplay;
+        internal bool IsAnalysisBlocked => batchSession?.NeedsAdvance == true || botSession?.NeedsAdvance == true;
 
         /// <summary>한 판 시험 아래에 최소한의 반복 실행 조작을 붙이고 직전 기록만 복원한다.</summary>
         private void CreateBatchUI()
@@ -66,7 +67,12 @@ namespace Levels.Editor
                 }
                 ClearBatch(); Invalidate("반복 시험 준비");
                 int[] seeds = repeat ? conditions.seeds : BotBatchSession.NewSeeds(batchCount.value, conditions?.seeds);
-                batchSession = new BotBatchSession(repeat ? saved : level, seeds, batchStore.Save);
+                // 실행 도중 선택 레벨이 바뀌어도 최초 원본의 식별 정보를 유지한다.
+                string sourceGuid = repeat ? conditions.sourceGuid : AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(level));
+                string sourceName = repeat ? conditions.sourceName : level.name;
+                batchSession = new BotBatchSession(repeat ? saved : level, seeds, (record, game) => {
+                    record.sourceGuid = sourceGuid; record.sourceName = sourceName; batchStore.Save(record, game);
+                });
                 previousBatch = batchSession.Record; inputFingerprint = previousBatch.fingerprint;
                 batchCount.SetValueWithoutNotify(seeds.Length);
                 batchError = repeat && !BotBatchStore.SameVersions(conditions) ? "규칙 버전이 바뀌었습니다. 시작 조건은 같지만 이전 결과의 완전 재현은 아닙니다." : null;

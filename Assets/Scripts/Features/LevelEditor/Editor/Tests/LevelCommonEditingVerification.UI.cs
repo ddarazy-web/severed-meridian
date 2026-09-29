@@ -115,8 +115,18 @@ namespace Levels.Editor
             Check(window.rootVisualElement.Q<LevelBoardView>().PlacementSelection.Count == 0, "2×2 다른 점유 칸으로 동일 본체 해제");
             Cell(4, 0); yield return null; Cell(4, 1, true); yield return null;
             window.position = new Rect(10, 10, 680, 480); yield return null; yield return null;
-            Check(window.rootVisualElement.Q<ScrollView>("board-scroll").horizontalScroller.highValue > 0, "좁은 창 보드 스크롤");
+            // 현재 작업창은 작은 독립 창을 최소 크기로 확대한다. 예전의 보드 내부 스크롤
+            // 기대 대신 실제 칸 영역 확보를 검사하고, 도킹처럼 좁은 컨테이너는 별도로 확인한다.
+            Check(window.position.width >= window.minSize.x && window.position.height >= window.minSize.y &&
+                window.rootVisualElement.Q<ScrollView>("board-scroll").contentViewport.worldBound.width >= 400,
+                "작은 독립 창의 최소 크기·보드 영역 확보");
+            ScrollView workspace = window.rootVisualElement.Q<ScrollView>("workspace-viewport");
+            workspace.style.width = 600; workspace.style.height = 400; workspace.style.flexGrow = 0;
+            yield return null; yield return null;
+            Check(workspace.horizontalScroller.highValue > 0 && workspace.verticalScroller.highValue > 0,
+                "좁은 컨테이너에서 작업 영역 양방향 스크롤");
             Capture("common-narrow.png");
+            workspace.style.width = StyleKeyword.Null; workspace.style.height = StyleKeyword.Null; workspace.style.flexGrow = 1;
             window.position = new Rect(10, 10, 1000, 780); yield return null;
             window.rootVisualElement.Q<PopupField<string>>("placement-layer").index = (int)PlacementLayer.Cover; yield return null;
             Check(window.rootVisualElement.Q<LevelBoardView>().PlacementSelection.Count == 0, "층 변경 시 선택 정리");

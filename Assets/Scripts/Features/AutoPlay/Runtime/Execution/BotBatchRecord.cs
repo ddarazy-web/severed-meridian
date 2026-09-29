@@ -13,6 +13,10 @@ namespace AutoPlay
     {
         public int formatVersion = 1;
         public string id, definitionJson, fingerprint, startedUtc, endedUtc, message;
+        // Editor가 제공하는 이력 연결 정보다. 구기록은 비어 있어도 읽을 수 있으며,
+        // 실행·재생 근거는 항상 definitionJson/fingerprint다. 봇에는 전달하지 않는다.
+        public string sourceGuid, sourceName;
+        public string startingVersion;
         public string basicVersion, planningVersion, observationVersion, assumptionVersion, sessionVersion, engineVersion;
         public int[] seeds;
         public BotBatchStatus status;

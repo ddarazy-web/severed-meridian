@@ -20,7 +20,6 @@ MonoBehaviour:
     rows: 10
     columns: 10
     cells:
-    - isActive: 0
     - isActive: 1
     - isActive: 1
     - isActive: 1
@@ -29,7 +28,6 @@ MonoBehaviour:
     - isActive: 1
     - isActive: 1
     - isActive: 1
-    - isActive: 0
     - isActive: 1
     - isActive: 1
     - isActive: 1
@@ -110,7 +108,6 @@ MonoBehaviour:
     - isActive: 1
     - isActive: 1
     - isActive: 1
-    - isActive: 0
     - isActive: 1
     - isActive: 1
     - isActive: 1
@@ -119,7 +116,10 @@ MonoBehaviour:
     - isActive: 1
     - isActive: 1
     - isActive: 1
-    - isActive: 0
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
   initialBlocks:
   - coordinate:
       row: 0
@@ -697,6 +697,30 @@ MonoBehaviour:
     kind: 0
     fixedColor: 0
     rocketDirection: 0
+  - coordinate:
+      row: 0
+      column: 0
+    kind: 0
+    fixedColor: 0
+    rocketDirection: 0
+  - coordinate:
+      row: 0
+      column: 9
+    kind: 0
+    fixedColor: 0
+    rocketDirection: 0
+  - coordinate:
+      row: 9
+      column: 9
+    kind: 0
+    fixedColor: 0
+    rocketDirection: 0
+  - coordinate:
+      row: 9
+      column: 0
+    kind: 0
+    fixedColor: 0
+    rocketDirection: 0
   obstacles: []
   covers: []
   dust: []
@@ -755,6 +779,18 @@ MonoBehaviour:
     - coordinate:
         row: 0
         column: 8
+      mode: 0
+      exhaustion: 0
+      items: []
+    - coordinate:
+        row: 0
+        column: 0
+      mode: 0
+      exhaustion: 0
+      items: []
+    - coordinate:
+        row: 0
+        column: 9
       mode: 0
       exhaustion: 0
       items: []
