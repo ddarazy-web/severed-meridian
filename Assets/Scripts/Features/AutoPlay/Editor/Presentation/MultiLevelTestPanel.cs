@@ -66,7 +66,7 @@ namespace Levels.Editor
             VisualElement controls = new VisualElement(); controls.style.flexDirection = FlexDirection.Row; Root.Add(controls);
             start = new Button(Start) { text = "선택 레벨 시험 시작", name = "multi-start" };
             pause = new Button(() => { session.SetPaused(!session.Paused); Refresh(); }) { text = "일시정지", name = "multi-pause" };
-            stop = new Button(() => { session.Stop(); Refresh(); }) { text = "중지", name = "multi-stop" };
+            stop = new Button(() => { session.Stop(); ReadSelected(); RefreshHistory(); Refresh(); }) { text = "중지", name = "multi-stop" };
             controls.Add(start); controls.Add(pause); controls.Add(stop);
             progress = new Label { name = "multi-progress" }; progress.style.whiteSpace = WhiteSpace.Normal; Root.Add(progress);
             VisualElement captions = new VisualElement(); captions.style.flexDirection = FlexDirection.Row; Root.Add(captions);
@@ -90,6 +90,7 @@ namespace Levels.Editor
             }) { text = "결과 폴더" });
             ScrollView details = new ScrollView(); details.style.flexGrow = 1; details.style.minHeight = 140; Root.Add(details);
             detail = new Label("오른쪽에서 레벨 결과를 선택하세요.") { name = "multi-detail" }; detail.style.whiteSpace = WhiteSpace.Normal; details.Add(detail);
+            CreateErrorDetails(details);
             try { record = this.store.Load(); } catch (Exception error) { detail.text = error.Message; }
             results.itemsSource = record?.entries; CreateHistory();
             ArrangeWorkspace(guide, executionTitle, options, controls, resultTools, details);
@@ -114,6 +115,7 @@ namespace Levels.Editor
                 session?.Dispose();
                 session = new MultiLevelTestSession(choices.selectedIndices.OrderBy(i => i).Select(i => levels[i]), (MultiLevelTestMode)mode.index, samples.value, store);
                 record = session.Record; results.ClearSelection(); results.itemsSource = record.entries; results.Rebuild();
+                ResetErrorDetails(); ShowCurrentHistory();
                 repeatReader = null; balanceReader = null; selectedFolder = null; detail.text = "진행 결과를 선택하면 해당 레벨의 결과만 확인합니다.";
             }
             catch (Exception error) { detail.text = "시작 불가: " + error.Message; }
@@ -131,8 +133,17 @@ namespace Levels.Editor
             if (!visible) return;
             Stopwatch budget = Stopwatch.StartNew();
             AdvanceHistory(budget);
+            bool wasRunning = CanContinue;
             if (CanContinue && !session.Paused)
                 do { session.Advance(); } while (CanContinue && !session.Paused && budget.Elapsed.TotalMilliseconds < 8);
+            if (wasRunning && !CanContinue)
+            {
+                RefreshHistory();
+                // 오류 종료 직후에도 별도로 결과를 다시 선택할 필요 없이 원문을 보여준다.
+                int failed = record.entries.FindIndex(e => e.status == MultiLevelTestStatus.Error);
+                if (results.selectedIndex < 0 && failed >= 0) results.SetSelection(failed);
+                else ReadSelected();
+            }
             // 결과는 저장된 원시 판까지 검사한 뒤 표시한다. 실행 중인 묶음의 파일을 동시에 읽지 않는다.
             if (repeatReader != null && !repeatReader.IsDone || balanceReader != null && !balanceReader.IsDone)
             {
@@ -140,6 +151,11 @@ namespace Levels.Editor
                 while ((repeatReader != null && !repeatReader.IsDone || balanceReader != null && !balanceReader.IsDone) && budget.Elapsed.TotalMilliseconds < 8);
                 // 내용과 조작 가능 상태를 함께 갱신한다. 완료 화면에서 버튼만 늦게 켜지는 간격을 없앤다.
                 if (repeatReader?.IsDone == true || balanceReader?.IsDone == true) { ShowResult(); Refresh(); }
+            }
+            if (errorTrialReader != null && !errorTrialReader.IsDone)
+            {
+                do { errorTrialReader.Advance(); } while (!errorTrialReader.IsDone && budget.Elapsed.TotalMilliseconds < 8);
+                if (errorTrialReader.IsDone) RefreshErrorDetails();
             }
             if (EditorApplication.timeSinceStartup < nextDisplay) return;
             nextDisplay = EditorApplication.timeSinceStartup + .25; Refresh();
@@ -167,9 +183,11 @@ namespace Levels.Editor
         private void ReadSelected()
         {
             repeatReader = null; balanceReader = null; selectedFolder = null;
+            ResetErrorDetails();
             if (record == null || results.selectedIndex < 0) return;
             int index = results.selectedIndex; MultiLevelTestEntry entry = record.entries[index];
             detail.text = entry.name + " · " + StatusName(entry.status) + "\n" + entry.message;
+            RefreshErrorDetails();
             if (CanContinue && index == session.Index) { detail.text += "\n실행 중인 레벨은 중지 또는 완료 후 확인하세요."; Refresh(); return; }
             if (string.IsNullOrEmpty(entry.resultId)) { Refresh(); return; }
             try
@@ -177,15 +195,18 @@ namespace Levels.Editor
                 selectedFolder = Path.Combine(store.LevelRoot(record, index), entry.resultId);
                 if (record.mode == MultiLevelTestMode.Balance) balanceReader = new BotMoveBalanceStore(store.LevelRoot(record, index)).OpenReader();
                 else repeatReader = new BotAnalysisReader(selectedFolder);
+                OpenErrorTrial();
                 detail.text += "\n원시 기록 확인 중 · 확인이 끝난 뒤 추천 표시";
                 if (repeatReader?.IsDone == true || balanceReader?.IsDone == true) ShowResult();
             }
-            catch (Exception error) { detail.text += "\n조회 실패: " + error.Message; }
+            catch (Exception error) { detail.text += "\n조회 실패: " + error.Message; errorReadFailure = error.ToString(); }
+            RefreshErrorDetails();
             Refresh();
         }
         /// <summary>기존 공통 평가·추천 규칙만 사용한다. 표본 부족이나 버전 차이를 임의 등급으로 바꾸지 않는다.</summary>
         private void ShowResult()
         {
+            RefreshErrorDetails();
             string error = repeatReader?.Error ?? balanceReader?.Error;
             if (error != null) { detail.text = "기록 확인 실패 · 추천 없음\n" + error; return; }
             string heading = record.entries[results.selectedIndex].name + "\n";

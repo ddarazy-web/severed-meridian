@@ -278,6 +278,7 @@ namespace Levels.Editor
                 bool active = hasCell && definition.IsActive;
                 int index = LevelBoardEditing.FindBlock(level, coordinate);
                 bool colored = false;
+                Texture2D rabbitTexture = null;
                 string text = active ? "·" : "×";
                 Color background = active ? new Color32(66, 72, 84, 255) : new Color32(35, 38, 45, 255);
                 if (index == -2) text = "!";
@@ -290,6 +291,7 @@ namespace Levels.Editor
                         text = ((int)block.FixedColor.Value + 1).ToString();
                         background = Swatches[(int)block.FixedColor.Value];
                         colored = true;
+                        rabbitTexture = RabbitBlockArtwork.Get(block.FixedColor.Value);
                     }
                     else text = block.Kind switch
                     {
@@ -338,6 +340,23 @@ namespace Levels.Editor
                     (Brush == LevelBrush.SourceSelect && SourceSelection.Contains(coordinate));
                 Color border = preview ? previewError != null ? new Color32(255, 78, 78, 255) : new Color32(255, 225, 90, 255) :
                     isSelected ? UnityEngine.Color.white : errors.Contains(coordinate) || index == -2 || conflict ? new Color32(255, 78, 78, 255) : new Color32(24, 27, 32, 255);
+                // 본체 그림은 정상적인 일반 블록에만 표시한다. 곰팡이·장애물·회수 부품이나
+                // 잘못된 중복 배치에 토끼가 비치지 않도록 표시 가능 여부를 매번 새로 계산한다.
+                bool showRabbit = rabbitTexture != null && active && obstacleIndex == -1 && !conflict &&
+                    !LevelSupplyRules.HasRecovery(level, coordinate) &&
+                    (coverIndex == -1 || (coverIndex >= 0 && level.Covers[coverIndex].Kind == CoverKind.Web));
+                cell.style.backgroundImage = showRabbit ? new StyleBackground(rabbitTexture) : new StyleBackground(StyleKeyword.None);
+                cell.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                cell.style.unityTextAlign = showRabbit ? TextAnchor.UpperLeft : TextAnchor.MiddleCenter;
+                cell.style.unityTextOutlineWidth = showRabbit ? 1 : 0;
+                cell.style.unityTextOutlineColor = (Color)new Color32(24, 27, 32, 255);
+                if (showRabbit)
+                {
+                    background = new Color32(66, 72, 84, 255);
+                    colored = false;
+                    // 토끼의 번호 대신 이미지를 쓰되 거미줄 내구도와 오류 표시는 남긴다.
+                    text = coverIndex >= 0 ? "줄" + level.Covers[coverIndex].Durability : "";
+                }
                 cell.text = text + (errors.Contains(coordinate) && index != -2 ? "!" : "");
                 Label supplyMark = supplyMarks.Q<Label>("supply-mark-" + i);
                 if (supplyMark == null)

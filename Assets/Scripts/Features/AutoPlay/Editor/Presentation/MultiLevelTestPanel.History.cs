@@ -19,11 +19,23 @@ namespace Levels.Editor
         {
             historyScan?.Dispose(); historyScan = null; session?.Dispose(); session = null;
             results.ClearSelection(); record = null; repeatReader = null; balanceReader = null; selectedFolder = null;
+            ResetErrorDetails();
             results.itemsSource = null; results.Rebuild(); pastRuns.Clear();
             historyChoice.choices = new List<string> { "저장된 시험 없음" }; historyChoice.SetValueWithoutNotify(historyChoice.choices[0]);
             detail.text = "저장된 결과 없음"; Refresh();
         }
         internal void ReloadHistory() => RefreshHistory();
+
+        /// <summary>새 실행 중에도 위의 시험 이름과 아래 결과가 같은 기록을 가리키도록 즉시 맞춘다.</summary>
+        private void ShowCurrentHistory()
+        {
+            historyScan?.Dispose(); historyScan = null; pastRuns.Clear();
+            MultiLevelHistoryEntry current = new MultiLevelHistoryEntry { Id = record.id, Record = record };
+            pastRuns.Add(current);
+            historyChoice.choices = new List<string> { HistoryLabel(current) };
+            historyChoice.SetValueWithoutNotify(historyChoice.choices[0]);
+            historyNotice.text = "현재 실행 중인 시험 · 종료 후 지난 시험 목록을 갱신합니다.";
+        }
 
         /// <summary>기존 결과 영역을 공유하고 실행 목록만 드롭다운으로 추가한다.</summary>
         private void CreateHistory()
@@ -102,6 +114,7 @@ namespace Levels.Editor
             if (CanContinue || otherBusy() || index < 0 || index >= pastRuns.Count) return;
             session?.Dispose(); session = null;
             results.ClearSelection(); repeatReader = null; balanceReader = null; selectedFolder = null; record = null;
+            ResetErrorDetails();
             try { record = store.Load(pastRuns[index].Id); detail.text = "레벨 결과를 선택하세요."; }
             catch (Exception error) { detail.text = "기록 확인 실패 · 추천 없음\n" + error.Message; }
             results.itemsSource = record?.entries; results.Rebuild(); Refresh();

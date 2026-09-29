@@ -139,6 +139,32 @@ namespace Levels.Editor
                 Refresh();
             });
             tools.Add(menu);
+            if (name == "menu-normal")
+            {
+                // 기존 드롭다운은 유지하고 같은 선택 경로를 사용하는 그림 버튼만 보조로 둔다.
+                // 레벨에서 허용한 색만 노출하며 클릭은 위의 기존 브러시 선택 처리를 거친다.
+                VisualElement rabbits = new VisualElement { name = "normal-rabbit-palette" };
+                rabbits.style.flexDirection = FlexDirection.Row;
+                rabbits.style.flexWrap = Wrap.Wrap;
+                foreach (ToolOption option in options.Where(value => value.Brush == LevelBrush.Fixed))
+                {
+                    Texture2D texture = RabbitBlockArtwork.Get(option.Color);
+                    Button rabbit = new Button(() => menu.value = option.Label)
+                        { name = "normal-rabbit-" + (int)option.Color, tooltip = option.Label + " 달토끼 배치", text = texture == null ? ((int)option.Color + 1).ToString() : "" };
+                    rabbit.style.width = rabbit.style.height = 34;
+                    rabbit.style.flexShrink = 0;
+                    rabbit.style.backgroundImage = texture;
+                    rabbit.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                    if (board.Brush == LevelBrush.Fixed && board.Color == option.Color)
+                    {
+                        rabbit.style.borderLeftColor = rabbit.style.borderRightColor = Color.white;
+                        rabbit.style.borderTopColor = rabbit.style.borderBottomColor = Color.white;
+                    }
+                    rabbit.SetEnabled(editable);
+                    rabbits.Add(rabbit);
+                }
+                tools.Add(rabbits);
+            }
         }
 
         private void BuildUsedPlacements()

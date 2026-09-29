@@ -57,8 +57,13 @@ namespace Simulation
     // 입력을 직접 변경하지 않는다. 완료한 작업 사본만 실행기가 반영한다.
     public static class SettlementResolution
     {
-        public const string Version = "settlement-recovery-v8";
-        public static SettlementResult Resolve(LevelRuntimeState original, TurnEffectContext turnEffects = null)
+        public const string Version = "settlement-last-pang-supply-v9";
+        private static readonly RabbitColor[] LastPangColors = (RabbitColor[])Enum.GetValues(typeof(RabbitColor));
+        /// <param name="original">정착 전 상태. 원본은 변경하지 않는다.</param>
+        /// <param name="turnEffects">현재 턴의 보호·피격 기록.</param>
+        /// <param name="lastPang">성공 후에는 예약·유지 공급 대신 일반 토끼 전체 5종을 공급한다.</param>
+        /// <returns>완료한 정착 사본과 이동·공급 기록.</returns>
+        public static SettlementResult Resolve(LevelRuntimeState original, TurnEffectContext turnEffects = null, bool lastPang = false)
         {
             SettlementResult Reject(SettlementReason reason, string message) => new SettlementResult(reason, message, original);
             if (original.Obstacles.Any(o => !ObstacleDamageRules.Supports(o.Definition.Kind)))
@@ -123,7 +128,7 @@ namespace Simulation
                     continue;
                 }
                 int beforeSupply = records.Count;
-                Supply(work, context, batch, records);
+                Supply(work, context, batch, records, lastPang);
                 if (records.Count == beforeSupply)
                     return new SettlementResult(SettlementReason.Applied, "정착 완료 · 자동 매칭 대기", original, work, context, records);
             }
@@ -161,8 +166,24 @@ namespace Simulation
             return selected;
         }
 
-        private static void Supply(LevelRuntimeState work, TurnEffectContext context, int batch, List<SettlementRecord> records)
+        private static void Supply(LevelRuntimeState work, TurnEffectContext context, int batch, List<SettlementRecord> records, bool lastPang)
         {
+            if (lastPang)
+            {
+                // 성공 후의 공급만 바꾼다. 레벨 색상, 예약 목록·커서, 고철/회수 생성 수량은 보존한다.
+                // 소진 후 정지하는 생성구도 라스트팡 동안에는 5종 일반 블록으로 빈칸을 채운다.
+                foreach (RuntimeSource source in work.Supply.Sources.OrderBy(s => s.Coordinate.Row).ThenBy(s => s.Coordinate.Column))
+                {
+                    RuntimeCell cell = work.CellAt(source.Coordinate);
+                    if (!cell.IsActive || cell.Content != RuntimeContent.Empty) continue;
+                    cell.Content = RuntimeContent.Normal; cell.Color = LastPangColors[work.Random.Next(LastPangColors.Length)];
+                    cell.RocketDirection = null; cell.ObstacleIndex = null;
+                    context.RecordArrival(source.Coordinate, source.Coordinate, batch, true);
+                    records.Add(new SettlementRecord(batch, MovementKind.Supply, source.Coordinate, cell, false,
+                        source.ItemIndex, source.ItemConsumed, source.ItemIndex, source.ItemConsumed));
+                }
+                return;
+            }
             List<RuntimeSource> available = work.Supply.Sources.Where(s => s.Mode == SupplyMode.MaintainScrap &&
                 work.CellAt(s.Coordinate).IsActive && work.CellAt(s.Coordinate).Content == RuntimeContent.Empty)
                 .OrderBy(s => s.Coordinate.Row).ThenBy(s => s.Coordinate.Column).ToList();

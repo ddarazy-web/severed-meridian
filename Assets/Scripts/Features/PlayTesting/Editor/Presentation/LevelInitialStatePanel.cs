@@ -195,6 +195,20 @@ namespace Levels.Editor
                     if (cell.ObstacleIndex.HasValue && display.Obstacles[cell.ObstacleIndex.Value].Definition.Kind == ObstacleKind.ColorLock)
                         button.AddToClassList("rabbit-" + (int)display.Obstacles[cell.ObstacleIndex.Value].Definition.Color);
                     if (cell.Cover.HasValue) button.AddToClassList("covered");
+                    // 초기 후보·수동 플레이·사례 재생은 이 표시 경로를 공유한다.
+                    // 곰팡이 내부 색을 그림으로 노출하지 않고, 파워/장애물의 문자 표시는 유지한다.
+                    Texture2D rabbitTexture = cell.IsActive && cell.Content == RuntimeContent.Normal &&
+                        cell.Color.HasValue && cell.Cover != CoverKind.Mold ? RabbitBlockArtwork.Get(cell.Color.Value) : null;
+                    if (rabbitTexture != null)
+                    {
+                        button.style.backgroundImage = rabbitTexture;
+                        button.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                        button.AddToClassList("rabbit-artwork");
+                        // CellText는 상세 정보·검증에서도 쓰므로 변경하지 않는다. 화면 본문에서만
+                        // 일반 블록 이름을 생략하고 거미줄/먼지/도착 정보는 그대로 남긴다.
+                        button.text = button.text.Replace("토" + ((int)cell.Color.Value + 1), "").Trim();
+                        button.tooltip += " / 토" + ((int)cell.Color.Value + 1);
+                    }
                     button.clicked += () => ShowCell(cell, button); line.Add(button);
                 }
             }
@@ -204,7 +218,7 @@ namespace Levels.Editor
                 .Where(r => r.Event == GeneratorEvent.Charged).Select(r => r.GeneratorIndex).Distinct().ToArray();
             grid.Add(new LevelGeneratorOverlay(display, pulsing));
             displayedGeneratorContext = generatorContext; displayedGeneratorRecords = generatorContext?.Generators.Count ?? 0;
-            details.text = "칸을 선택해 본체·덮개·바닥·연결을 확인하세요.\n일반 블록은 숫자로도 색 종류를 구분합니다.";
+            details.text = "칸을 선택해 본체·덮개·바닥·연결을 확인하세요.\n일반 블록은 달토끼 그림으로 표시하며 상세 정보에서 종류 번호를 확인할 수 있습니다.";
             overview.text = $"남은 이동 {display.MovesRemaining}\n본체 {display.Cells.Count(cell => cell.Content == RuntimeContent.Obstacle)} · 회수 부품 {display.Cells.Count(cell => cell.Content == RuntimeContent.Recovery)}\n" +
                 $"미션 {display.Missions.Count}\n" + string.Join("\n", display.Missions.Select(mission => mission.Definition.Kind == MissionKind.Mold ? "남은 곰팡이 " + mission.Remaining : $"{LevelMissionRules.Name(mission.Definition.Kind)}{(mission.Definition.Kind == MissionKind.Color ? " / 토" + ((int)mission.Definition.Color + 1) : "")}: {mission.Progress}/{mission.Target}")) +
                 $"\n\n공급 {display.Supply.Sources.Count}곳\n고철 현재 {display.LiveScrapCount} / 유지 {display.Supply.ScrapTarget}\n추가 생성 {display.Supply.ScrapGenerated} / 한도 {display.Supply.ScrapLimit} · 남음 {display.Supply.ScrapRemaining}\n공급 내구도 {display.Supply.ScrapDurability}\n회수 유지 {display.Supply.RecoveryTarget}\n\n" +

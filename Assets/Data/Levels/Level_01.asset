@@ -448,32 +448,32 @@ MonoBehaviour:
   - coordinate:
       row: 2
       column: 2
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 2
     rocketDirection: 0
   - coordinate:
       row: 2
       column: 3
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 1
     rocketDirection: 0
   - coordinate:
       row: 2
       column: 4
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 3
     rocketDirection: 0
   - coordinate:
       row: 2
       column: 5
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 1
     rocketDirection: 0
   - coordinate:
       row: 2
       column: 6
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 2
     rocketDirection: 0
   - coordinate:
       row: 2
@@ -502,62 +502,62 @@ MonoBehaviour:
   - coordinate:
       row: 3
       column: 6
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 3
     rocketDirection: 0
   - coordinate:
       row: 3
       column: 5
-    kind: 0
+    kind: 1
     fixedColor: 0
     rocketDirection: 0
   - coordinate:
       row: 3
       column: 4
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 2
     rocketDirection: 0
   - coordinate:
       row: 3
       column: 3
-    kind: 0
+    kind: 1
     fixedColor: 0
     rocketDirection: 0
   - coordinate:
       row: 3
       column: 2
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 3
     rocketDirection: 0
   - coordinate:
       row: 4
       column: 2
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 1
     rocketDirection: 0
   - coordinate:
       row: 4
       column: 3
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 2
     rocketDirection: 0
   - coordinate:
       row: 4
       column: 4
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 1
     rocketDirection: 0
   - coordinate:
       row: 4
       column: 5
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 2
     rocketDirection: 0
   - coordinate:
       row: 4
       column: 6
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 1
     rocketDirection: 0
   - coordinate:
       row: 4
@@ -574,32 +574,32 @@ MonoBehaviour:
   - coordinate:
       row: 5
       column: 2
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 3
     rocketDirection: 0
   - coordinate:
       row: 5
       column: 3
-    kind: 0
+    kind: 1
     fixedColor: 0
     rocketDirection: 0
   - coordinate:
       row: 5
       column: 4
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 2
     rocketDirection: 0
   - coordinate:
       row: 5
       column: 5
-    kind: 0
+    kind: 1
     fixedColor: 0
     rocketDirection: 0
   - coordinate:
       row: 5
       column: 6
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 3
     rocketDirection: 0
   - coordinate:
       row: 5
@@ -616,32 +616,32 @@ MonoBehaviour:
   - coordinate:
       row: 6
       column: 2
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 2
     rocketDirection: 0
   - coordinate:
       row: 6
       column: 3
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 1
     rocketDirection: 0
   - coordinate:
       row: 6
       column: 4
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 3
     rocketDirection: 0
   - coordinate:
       row: 6
       column: 5
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 1
     rocketDirection: 0
   - coordinate:
       row: 6
       column: 6
-    kind: 0
-    fixedColor: 0
+    kind: 1
+    fixedColor: 2
     rocketDirection: 0
   - coordinate:
       row: 6
@@ -802,4 +802,4 @@ MonoBehaviour:
   missions:
   - kind: 0
     color: 0
-    count: 10
+    count: 20

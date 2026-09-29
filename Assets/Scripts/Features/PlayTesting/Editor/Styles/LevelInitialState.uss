@@ -17,6 +17,13 @@
 .initial-state .initial-cell.rabbit-2 { background-color: #586338; }
 .initial-state .initial-cell.rabbit-3 { background-color: #715937; }
 .initial-state .initial-cell.rabbit-4 { background-color: #624c79; }
+.initial-state .initial-cell.rabbit-artwork {
+    background-color: #424854;
+    -unity-text-align: upper-left;
+    color: #ffffff;
+    -unity-text-outline-color: #181b20;
+    -unity-text-outline-width: 1px;
+}
 .initial-state .initial-cell.covered { border-color: #bcb6cb; }
 .initial-state .initial-cell.selected { border-width: 2px; border-color: #89daca; }
 #initial-inspector { width: 225px; min-width: 225px; margin-left: 8px; padding: 9px; background-color: #2a313e; border-radius: 5px; }

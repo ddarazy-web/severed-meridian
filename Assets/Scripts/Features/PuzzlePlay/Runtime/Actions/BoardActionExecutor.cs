@@ -59,7 +59,7 @@ namespace Simulation
     // 사용자 행동과 단계별 연쇄를 소유한다. 조회와 Editor 표시에는 상태 변경을 맡기지 않는다.
     public sealed partial class BoardActionExecutor
     {
-        public const string Version = "board-action-items-v13";
+        public const string Version = "board-action-last-pang-supply-v14";
         public LevelRuntimeState State { get; private set; }
         public BoardActionPhase Phase { get; private set; }
         public int Turn { get; private set; }
@@ -94,7 +94,7 @@ namespace Simulation
         {
             if (Phase != BoardActionPhase.WaitingForFall)
                 return new SettlementResult(SettlementReason.WrongPhase, "낙하 대기에서만 정착을 실행할 수 있습니다.", State);
-            SettlementResult result = SettlementResolution.Resolve(State, TurnEffects);
+            SettlementResult result = SettlementResolution.Resolve(State, TurnEffects, IsLastPang);
             if (!result.IsApplied) { AbortExecution(result.Message); return result; }
             State = result.State; TurnEffects = result.TurnEffects; LastSettlement = result;
             Phase = BoardActionPhase.WaitingForAutomaticMatch;
