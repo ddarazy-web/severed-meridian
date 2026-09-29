@@ -40,7 +40,7 @@ namespace Levels.Editor
                 $"기본만 성공 {pairs.LeftOnlyWon} · 계획만 성공 {pairs.RightOnlyWon} · 제외 {pairs.Excluded}쌍\n" +
                 $"최초 이동 수 {reader.InitialMoves} · 대표 전략 성공 표본 {representative.Remaining.Count}판 · 남은 이동 수 중앙값 " +
                 (representative.Remaining.Median.HasValue ? representative.Remaining.Median.Value.ToString("F1") : "기록 없음"), null));
-            evidence.Add(Text("등급 구간: 80% 이상 매우 쉬움 / 60% 이상 쉬움 / 40% 이상 보통 / 20% 이상 어려움 / 0% 초과 매우 어려움. 반올림 전 값을 사용합니다.", null));
+            evidence.Add(Text("등급 구간: 60% 이상 쉬움 / 40% 이상 보통 / 20% 이상 어려움 / 0% 초과 매우 어려움. 반올림 전 값을 사용합니다.", null));
             evidence.Add(Text("계획 요구: 정상 쌍 100개 이상, 계획 우세 20%p 이상, 서로 다른 결과 20쌍 이상. 이동 여유 부족: 성공 20판 이상, 남은 이동 중앙값이 최초의 10% 이하.", null));
             foreach (string note in result.Notes) evidence.Add(Text(note, null));
             if (parent == statistics)

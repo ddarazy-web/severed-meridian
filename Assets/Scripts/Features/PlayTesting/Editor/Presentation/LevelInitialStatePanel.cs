@@ -45,12 +45,14 @@ namespace Levels.Editor
             if (level == target) return;
             level = target;
             rootVisualElement.Q<ObjectField>("initial-level")?.SetValueWithoutNotify(target);
+            if (balancePanel?.CanContinue == true) { UpdateBotControls(); return; }
             if (batchSession != null) { UpdateBatchControls(); return; }
             Invalidate("레벨이 바뀌었습니다. 다시 구성하세요.");
         }
 
         internal void SetVisible(bool value)
         {
+            balancePanel?.SetVisible(value);
             // 탭을 숨겨도 실행 객체는 유지한다. 숨겨진 상태에서 연쇄나 시작 보드 탐색이 진행되면
             // 사용자가 보지 못한 동안 결과가 바뀌므로 예약 작업과 측정 시간을 함께 멈춘다.
             // 재개는 이전에 실제 실행 중이었던 연쇄에만 적용한다.
@@ -82,6 +84,7 @@ namespace Levels.Editor
 
         internal void PrepareManual()
         {
+            if (balancePanel?.CanContinue == true) return;
             if (batchSession != null) return;
             CheckInput();
             if (CurrentState == null && !IsSearching && level != null) Build();
@@ -91,6 +94,7 @@ namespace Levels.Editor
         {
             // 직렬화 복원 중에는 Unity UI를 만들 수 없으므로 창의 CreateGUI에서 생성한다.
             rootVisualElement ??= new VisualElement();
+            balancePanel?.Dispose(); balancePanel = null;
             ClearBatch(); ClearBot(); ClearQuery(); ClearExecution();
             VisualElement root = rootVisualElement; root.Clear(); root.RemoveFromClassList("manual-play"); root.AddToClassList("match-editor"); root.AddToClassList("initial-state");
             root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Scripts/Features/LevelEditor/Editor/Styles/LevelEditor.uss"));
@@ -147,6 +151,7 @@ namespace Levels.Editor
 
         private void CheckInput()
         {
+            if (balancePanel?.CanContinue == true) return;
             if (batchSession != null) { UpdateBatchControls(); return; }
             if (inputFingerprint != null && inputFingerprint != LevelStateBuilder.Fingerprint(level))
                 Invalidate("원본 내용이 바뀌었습니다. 이전 후보를 지웠습니다. 다시 구성하세요.");

@@ -52,14 +52,16 @@ namespace Levels.Editor
             Directory.CreateDirectory(Evidence); Results.Clear(); Exception failure = null;
             try
             {
+                Check(Enum.GetValues(typeof(BotDifficultyGrade)).Length == 4, "공통 난이도는 네 단계만 제공");
+                Check(BotMoveRecommendations.Grade(BotDifficultyGrade.Easy) == 0 && BotMoveRecommendations.Grade(BotDifficultyGrade.Normal) == 1 && BotMoveRecommendations.Grade(BotDifficultyGrade.Hard) == 2 && BotMoveRecommendations.Grade(BotDifficultyGrade.VeryHard) == 3, "이동 횟수 추천과 공통 네 등급 일치");
                 foreach (var sample in new[] {
                     (wins: 1, grade: BotDifficultyGrade.VeryHard), (wins: 1999, grade: BotDifficultyGrade.VeryHard),
                     (wins: 2000, grade: BotDifficultyGrade.Hard), (wins: 2001, grade: BotDifficultyGrade.Hard),
                     (wins: 3999, grade: BotDifficultyGrade.Hard), (wins: 4000, grade: BotDifficultyGrade.Normal),
                     (wins: 4001, grade: BotDifficultyGrade.Normal), (wins: 5999, grade: BotDifficultyGrade.Normal),
                     (wins: 6000, grade: BotDifficultyGrade.Easy), (wins: 6001, grade: BotDifficultyGrade.Easy),
-                    (wins: 7999, grade: BotDifficultyGrade.Easy), (wins: 8000, grade: BotDifficultyGrade.VeryEasy),
-                    (wins: 8001, grade: BotDifficultyGrade.VeryEasy), (wins: 10000, grade: BotDifficultyGrade.VeryEasy) })
+                    (wins: 7999, grade: BotDifficultyGrade.Easy), (wins: 8000, grade: BotDifficultyGrade.Easy),
+                    (wins: 8001, grade: BotDifficultyGrade.Easy), (wins: 10000, grade: BotDifficultyGrade.Easy) })
                 {
                     var input = Synthetic(sample.wins, sample.wins, 10000);
                     BotDifficultyResult result = BotDifficultyRules.Evaluate(input.record, input.basic, input.planning, input.pairs, 10);
@@ -99,7 +101,7 @@ namespace Levels.Editor
                 Check(issues.Grade == null && issues.HoldReasons.Count == 2 && issues.Tags.Count == 0, "입력/버전 문제를 모두 표시하고 등급·태그 보류");
                 string before = JsonUtility.ToJson(reverse.record);
                 BotDifficultyResult again = BotDifficultyRules.Evaluate(reverse.record, reverse.basic, reverse.planning, reverse.pairs, 10);
-                Check(again.Grade == BotDifficultyGrade.VeryEasy && JsonUtility.ToJson(reverse.record) == before, "같은 기록·기준의 재계산과 입력 불변");
+                Check(again.Grade == BotDifficultyGrade.Easy && JsonUtility.ToJson(reverse.record) == before, "같은 기록·기준의 재계산과 입력 불변");
             }
             catch (Exception error) { failure = error; Results.Add("FAIL " + error); UnityEngine.Debug.LogException(error); }
             File.WriteAllLines(Evidence + "/core-results.txt", Results);

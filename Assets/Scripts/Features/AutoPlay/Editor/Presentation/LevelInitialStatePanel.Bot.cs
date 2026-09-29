@@ -12,6 +12,7 @@ namespace Levels.Editor
     public sealed partial class LevelInitialStatePanel
     {
         private BotPlaySession botSession;
+        private BotMoveBalancePanel balancePanel;
         private Foldout botFoldout;
         private Label botProgress, botReason;
         private Button botNew, botStep, botRun, botStop, botRepeat;
@@ -45,6 +46,13 @@ namespace Levels.Editor
             botFoldout.Add(botProgress); botFoldout.Add(botReason);
             rootVisualElement.Insert(5, botFoldout);
             CreateBatchUI();
+            balancePanel = new BotMoveBalancePanel(() => level,
+                () => batchSession?.CanContinue == true || botSession?.NeedsAdvance == true,
+                () => { ClearBatch(); Invalidate("이동 횟수별 밸런스 시험 준비"); botFoldout.SetValueWithoutNotify(false); },
+                UpdateBotControls);
+            rootVisualElement.Insert(rootVisualElement.IndexOf(botFoldout) + 1, balancePanel.Root);
+            balancePanel.Root.RegisterValueChangedCallback(evt => { if (evt.newValue) botFoldout.SetValueWithoutNotify(false); });
+            botFoldout.RegisterValueChangedCallback(evt => { if (evt.newValue) balancePanel.Root.SetValueWithoutNotify(false); });
             UpdateBotControls();
         }
 
@@ -125,7 +133,8 @@ namespace Levels.Editor
         private void UpdateBotControls()
         {
             if (botFoldout == null) return;
-            bool active = botSession != null || batchSession != null;
+            bool balancing = balancePanel?.CanContinue == true;
+            bool active = botSession != null || batchSession != null || balancing;
             // 부모를 잠그므로 기존 수동 갱신 코드가 자식 버튼을 켜도 입력이 다시 열리지 않는다.
             rootVisualElement.Q("manual-toolbar")?.SetEnabled(!active);
             rootVisualElement.Q("manual-input")?.SetEnabled(!active);
@@ -139,12 +148,14 @@ namespace Levels.Editor
                 VisualElement element = rootVisualElement.Q(name);
                 if (element != null) element.style.display = active ? DisplayStyle.None : DisplayStyle.Flex;
             }
-            rootVisualElement.Q("initial-toolbar")?.SetEnabled(batchSession == null);
-            rootVisualElement.Q("bot-buttons")?.SetEnabled(batchSession?.CanContinue != true);
+            rootVisualElement.Q("initial-toolbar")?.SetEnabled(batchSession == null && !balancing);
+            rootVisualElement.Q("bot-buttons")?.SetEnabled(batchSession?.CanContinue != true && !balancing);
+            rootVisualElement.Q("batch-buttons")?.SetEnabled(!balancing);
+            balancePanel?.RefreshEnabled();
             botProgress.style.display = batchSession == null ? DisplayStyle.Flex : DisplayStyle.None;
             botReason.style.display = batchSession == null ? DisplayStyle.Flex : DisplayStyle.None;
             botNew.SetEnabled(level != null && botSession?.NeedsAdvance != true);
-            botStrategy.SetEnabled(botSession?.NeedsAdvance != true);
+            botStrategy.SetEnabled(botSession?.NeedsAdvance != true && !balancing);
             botRepeat.SetEnabled(level != null && botReplaySeed.HasValue && botSession?.NeedsAdvance != true);
             bool sameStrategy = botSession != null && botSession.Strategy == (botStrategy.value == "계획" ? BotStrategyKind.Planning : BotStrategyKind.Basic);
             bool ready = sameStrategy && (botSession.Status == BotSessionStatus.Ready || botSession.Status == BotSessionStatus.Stopped && botSession.State != null);

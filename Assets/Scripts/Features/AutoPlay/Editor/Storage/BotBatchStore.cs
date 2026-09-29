@@ -107,7 +107,7 @@ namespace Levels.Editor
 
         /// <summary>같은 폴더의 임시 파일을 교체한다. 실패 시 이전 확정 파일을 삭제하지 않는다.</summary>
         /// <param name="path">확정할 파일.</param><param name="contents">UTF-8로 기록할 값.</param>
-        private static void WriteAtomic(string path, string contents)
+        internal static void WriteAtomic(string path, string contents)
         {
             string temporary = path + ".tmp";
             File.WriteAllText(temporary, contents);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AutoPlay
 {
-    public enum BotDifficultyGrade { VeryEasy, Easy, Normal, Hard, VeryHard }
+    public enum BotDifficultyGrade { Easy = 1, Normal = 2, Hard = 3, VeryHard = 4 }
 
     /// <summary>추천의 관측 근거와 보류 이유. 저장 기록이나 실행 상태를 소유하지 않는 읽기 전용 결과다.</summary>
     public sealed class BotDifficultyResult
@@ -15,7 +15,7 @@ namespace AutoPlay
         public IReadOnlyList<string> Tags { get; }
         public IReadOnlyList<string> Notes { get; }
         public string Title => Grade switch {
-            BotDifficultyGrade.VeryEasy => "매우 쉬움", BotDifficultyGrade.Easy => "쉬움",
+            BotDifficultyGrade.Easy => "쉬움",
             BotDifficultyGrade.Normal => "보통", BotDifficultyGrade.Hard => "어려움",
             BotDifficultyGrade.VeryHard => "매우 어려움", _ => "난이도 판단 보류" };
 
@@ -34,7 +34,7 @@ namespace AutoPlay
     /// </summary>
     public static class BotDifficultyRules
     {
-        public const string Version = "bot-difficulty-v1";
+        public const string Version = "bot-difficulty-v2";
         public const int MinimumNormalPerStrategy = 100;
         public const int MinimumMoveSamples = 20;
         public const int MinimumDiscordantPairs = 20;
@@ -48,7 +48,7 @@ namespace AutoPlay
         /// <param name="initialMoves">저장된 레벨 정의의 최초 이동 수. 라스트팡 표시 수가 아니다.</param>
         /// <param name="recordIssue">읽기·정합성 검사에서 발견한 문제. 없으면 null.</param>
         /// <param name="versionIssue">현재 평가가 지원하지 않는 실행 조건의 설명. 없으면 null.</param>
-        /// <returns>5단계 추천 또는 모든 보류 이유와 관측 근거.</returns>
+        /// <returns>4단계 추천 또는 모든 보류 이유와 관측 근거.</returns>
         public static BotDifficultyResult Evaluate(BotBatchRecord record, BotStrategyStatistics basic,
             BotStrategyStatistics planning, BotPairedStatistics pairs, int initialMoves,
             string recordIssue = null, string versionIssue = null)
@@ -80,8 +80,8 @@ namespace AutoPlay
             BotDifficultyGrade? grade = null;
             if (hold.Count == 0)
             {
-                // 표시용 반올림은 이 계산 뒤에 한다. 79.99%를 80% 구간으로 올리지 않는다.
-                grade = rate >= 80 ? BotDifficultyGrade.VeryEasy : rate >= 60 ? BotDifficultyGrade.Easy :
+                // 표시용 반올림은 이 계산 뒤에 한다. 59.99%를 60% 구간으로 올리지 않는다.
+                grade = rate >= 60 ? BotDifficultyGrade.Easy :
                     rate >= 40 ? BotDifficultyGrade.Normal : rate >= 20 ? BotDifficultyGrade.Hard : BotDifficultyGrade.VeryHard;
                 double difference = 100d * (pairs.RightOnlyWon - pairs.LeftOnlyWon) / pairs.Included;
                 if (pairs.Included >= MinimumNormalPerStrategy && pairs.RightOnlyWon + pairs.LeftOnlyWon >= MinimumDiscordantPairs &&

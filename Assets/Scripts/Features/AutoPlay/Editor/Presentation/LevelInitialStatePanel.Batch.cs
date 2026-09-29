@@ -19,7 +19,7 @@ namespace Levels.Editor
         private ProgressBar batchProgress;
         private string batchError;
         private double nextBatchDisplay;
-        internal bool IsAnalysisBlocked => batchSession?.NeedsAdvance == true || botSession?.NeedsAdvance == true;
+        internal bool IsAnalysisBlocked => batchSession?.NeedsAdvance == true || botSession?.NeedsAdvance == true || balancePanel?.Session?.NeedsAdvance == true;
 
         /// <summary>한 판 시험 아래에 최소한의 반복 실행 조작을 붙이고 직전 기록만 복원한다.</summary>
         private void CreateBatchUI()
