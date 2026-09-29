@@ -41,8 +41,9 @@ namespace Levels.Editor
         }
 
         /// <summary>직전 묶음의 값만 복원한다. 진행 중 게임 객체나 과거 전략 코드는 복원하지 않는다.</summary>
+        /// <param name="persistRecovery">복구한 요약을 다시 쓸지 여부. 화면 조회는 false로 원본 파일을 보존한다.</param>
         /// <returns>기록이 없으면 null. 손상된 기록은 예외로 구분하여 UI에 알린다.</returns>
-        internal BotBatchRecord LoadLatest()
+        internal BotBatchRecord LoadLatest(bool persistRecovery = true)
         {
             string pointer = Path.Combine(root, "latest.txt");
             if (!File.Exists(pointer)) return null;
@@ -95,7 +96,7 @@ namespace Levels.Editor
             }
             else if (record.status == BotBatchStatus.Completed) throw new InvalidDataException("전체 완료 표시와 판 수가 맞지 않습니다.");
             // 되살아난 객체는 없다. 중단된 묶음에서 새로운 판을 실행하는 경로도 제공하지 않는다.
-            WriteAtomic(Path.Combine(directory, "batch.json"), JsonUtility.ToJson(record, true));
+            if (persistRecovery) WriteAtomic(Path.Combine(directory, "batch.json"), JsonUtility.ToJson(record, true));
             return record;
         }
 

@@ -34,6 +34,17 @@ namespace Levels.Editor
         private double nextDisplay;
         internal BotAnalysisReader Analysis => analysis;
         internal BotRecordReplay ReplaySession => replay;
+        internal bool IsExporting => export != null;
+
+        /// <summary>파일 삭제 전에 읽기와 재생을 해제하고 이전 비교·추천이 남지 않게 한다.</summary>
+        internal void ClearStoredResults()
+        {
+            scan?.Dispose(); scan = null; CloseReplay(); analysis = reference = null; selectedGame = null;
+            entries.Clear(); filtered.Clear(); history.ClearSelection(); cases.ClearSelection(); history.Rebuild(); cases.Rebuild();
+            statistics.Clear(); replayGrid.Clear(); identity.text = caseInfo.text = "";
+            comparisonInfo.text = "비교 기준을 먼저 지정하세요."; notice.text = "기록 목록을 다시 확인하세요."; UpdateControls();
+        }
+        internal void ReloadHistory() => RefreshHistory();
 
         /// <param name="currentLevel">현재 편집 원본을 읽는 접근자.</param><param name="trialAdvancing">다른 패널의 실행 중 여부.</param>
         internal LevelAnalysisPanel(Func<LevelDefinition> currentLevel, Func<bool> trialAdvancing)
@@ -41,10 +52,13 @@ namespace Levels.Editor
             this.currentLevel = currentLevel; this.trialAdvancing = trialAdvancing;
             Root.AddToClassList("initial-state"); Root.style.flexGrow = 1;
             Root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Scripts/Features/PlayTesting/Editor/Styles/LevelInitialState.uss"));
+            Root.AddToClassList("trial-workspace");
+            Root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Scripts/Features/AutoPlay/Editor/Styles/TrialWorkspace.uss"));
             Label title = Text("시험 결과 · 이력", "analysis-heading");
             LevelEditorHelp.Link(title, "저장한 판 기록의 통계·예상 난이도와 판단 근거를 확인하고 실제 행동을 재생합니다.", "analysis.html#summary");
             Root.Add(title);
             VisualElement toolbar = new VisualElement(); toolbar.style.flexDirection = FlexDirection.Row; toolbar.style.flexWrap = Wrap.Wrap; Root.Add(toolbar);
+            toolbar.AddToClassList("trial-analysis-tools");
             AddButton(toolbar, "이력 새로고침", "analysis-refresh", RefreshHistory, "프로젝트에 남아 있는 시험 요약을 다시 읽습니다.");
             AddButton(toolbar, "보관 폴더 열기", "analysis-open", () => {
                 string folder = EditorUtility.OpenFolderPanel("보관한 시험 폴더 선택", "", "");
@@ -137,6 +151,8 @@ namespace Levels.Editor
 
         private void RefreshHistory()
         {
+            // 삭제 도중 탭을 다시 열어도 SetVisible이 파일 열거를 재시작하지 않게 한다.
+            if (!Root.enabledSelf) return;
             scan?.Dispose(); scan = BotAnalysisCatalog.Scan().GetEnumerator(); entries.Clear(); history.ClearSelection(); history.Rebuild();
             notice.text = "이력 목록을 읽는 중입니다.";
         }

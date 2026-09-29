@@ -6,6 +6,11 @@ using UnityEngine;
 
 namespace Levels.Editor
 {
+    internal sealed class MultiLevelHistoryEntry
+    {
+        internal string Id, Error;
+        internal MultiLevelTestRecord Record;
+    }
     internal enum MultiLevelTestMode { Repeat, Balance }
     internal enum MultiLevelTestStatus { Waiting, Running, Paused, Completed, Error, Stopped, Interrupted }
 
@@ -42,10 +47,20 @@ namespace Levels.Editor
         internal MultiLevelTestRecord Load()
         {
             string pointer = Path.Combine(Root, "latest.txt");
+            TestRecordPaths.Check(Root, pointer);
             if (!File.Exists(pointer)) return null;
             string id = File.ReadAllText(pointer).Trim();
+            return Load(id);
+        }
+
+        /// <param name="id">목록에서 선택한 실행 ID. 최근 실행 포인터는 바꾸지 않는다.</param>
+        /// <returns>저장된 실행 사본. 종료된 프로세스의 작업은 중단 상태로 읽는다.</returns>
+        internal MultiLevelTestRecord Load(string id)
+        {
             if (!Guid.TryParseExact(id, "N", out _)) throw new InvalidDataException("일괄 시험 ID 오류");
-            MultiLevelTestRecord record = JsonUtility.FromJson<MultiLevelTestRecord>(File.ReadAllText(Path.Combine(Root, id, "queue.json")));
+            string path = Path.Combine(Root, id, "queue.json");
+            TestRecordPaths.Check(Root, path);
+            MultiLevelTestRecord record = JsonUtility.FromJson<MultiLevelTestRecord>(File.ReadAllText(path));
             if (record == null || record.version != 1 || record.id != id || record.entries == null ||
                 !Enum.IsDefined(typeof(MultiLevelTestMode), record.mode) || record.samples < 1 || record.samples > 10000 ||
                 record.entries.Any(e => e == null || !Enum.IsDefined(typeof(MultiLevelTestStatus), e.status) ||
@@ -55,6 +70,22 @@ namespace Levels.Editor
                 if (entry.status == MultiLevelTestStatus.Running || entry.status == MultiLevelTestStatus.Paused || entry.status == MultiLevelTestStatus.Waiting)
                 { entry.status = MultiLevelTestStatus.Interrupted; entry.message = "창 종료로 중단 · 새 시험으로 다시 시작하세요."; }
             return record;
+        }
+
+        /// <returns>원시 판을 열지 않고 실행 요약만 하나씩 읽는 목록. 손상 항목도 별도로 표시한다.</returns>
+        internal IEnumerable<MultiLevelHistoryEntry> Scan()
+        {
+            TestRecordPaths.Check(Root, Root);
+            if (!Directory.Exists(Root)) yield break;
+            foreach (string directory in Directory.EnumerateDirectories(Root))
+            {
+                string id = Path.GetFileName(directory);
+                if (!Guid.TryParseExact(id, "N", out _)) continue;
+                MultiLevelHistoryEntry entry = new MultiLevelHistoryEntry { Id = id };
+                try { entry.Record = Load(id); }
+                catch (Exception error) { entry.Error = error.Message; }
+                yield return entry;
+            }
         }
         /// <param name="record">조회할 실행.</param><param name="index">레벨 목록 순번.</param>
         /// <returns>사용자가 수정한 이름 대신 ID와 순번으로 정하는 원시 기록 폴더.</returns>

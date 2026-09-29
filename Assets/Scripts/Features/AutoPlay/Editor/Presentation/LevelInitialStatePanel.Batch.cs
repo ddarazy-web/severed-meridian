@@ -24,11 +24,20 @@ namespace Levels.Editor
         internal bool HasPendingTest => batchSession?.CanContinue == true || balancePanel?.CanContinue == true ||
             botSession?.NeedsAdvance == true || botSession?.Status == BotSessionStatus.Ready;
 
+        /// <summary>종료된 시험의 화면 캐시만 비운다. 삭제한 조건으로 재시험하는 버튼도 해제한다.</summary>
+        internal void ClearStoredResults()
+        {
+            batchSession?.Dispose(); batchSession = null; previousBatch = null; batchError = null;
+            EditorApplication.update -= BatchTick;
+            balancePanel?.ClearStoredResults();
+            if (batchNew != null) UpdateBatchControls();
+        }
+
         /// <summary>한 판 시험 아래에 최소한의 반복 실행 조작을 붙이고 직전 기록만 복원한다.</summary>
         private void CreateBatchUI()
         {
             batchStore ??= new BotBatchStore();
-            try { previousBatch = batchStore.LoadLatest(); batchError = null; }
+            try { previousBatch = batchStore.LoadLatest(false); batchError = null; }
             catch (Exception error) { previousBatch = null; batchError = "이전 시험을 읽을 수 없습니다: " + error.Message; }
             VisualElement area = new VisualElement { name = "batch-trial" };
             botFoldout.Add(area);

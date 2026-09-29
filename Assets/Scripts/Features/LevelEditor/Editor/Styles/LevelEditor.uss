@@ -3,6 +3,22 @@
     color: #e0e5ef;
     padding: 8px;
 }
+#workspace-menubar {
+    height: 28px;
+    flex-shrink: 0;
+    background-color: #1a2029;
+    border-bottom-width: 1px;
+    border-bottom-color: #3a485b;
+    padding-left: 4px;
+}
+#workspace-menubar .unity-toolbar-menu {
+    min-width: 58px;
+    color: #d9e6f2;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+#workspace-menubar .unity-toolbar-menu:hover { background-color: #35475c; }
+#workspace-page-name { flex-grow: 1; -unity-text-align: middle-right; color: #87b7c2; margin-right: 10px; font-size: 11px; }
 .editor-title {
     flex-grow: 1;
     color: #89daca;

@@ -168,7 +168,8 @@ namespace Levels.Editor
             yield return null;
             Check(!EditorUtility.IsDirty(level) && File.ReadAllText(AssetDatabase.GetAssetPath(level)).Contains("moveCount: 7"), "Ctrl+S 후 디스크와 화면 값 일치");
             string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(level));
-            Click("rename-level"); yield return null;
+            window.rootVisualElement.Q<UnityEditor.UIElements.ToolbarMenu>("workspace-menu-level").menu.MenuItems()
+                .OfType<DropdownMenuAction>().First(item => item.name == "이름 변경…").Execute(); yield return null;
             string displayName = new[] { "기본 수집 통합 검수", "통로와 파워 공급 통합 검수", "발전기와 상자 통합 검수" }[scenario];
             window.rootVisualElement.Q("level-name-panel").Q<TextField>().value = displayName;
             Click("confirm-level-name"); yield return null;

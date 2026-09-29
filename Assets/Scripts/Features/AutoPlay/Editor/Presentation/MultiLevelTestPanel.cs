@@ -5,13 +5,14 @@ using System.IO;
 using System.Linq;
 using AutoPlay;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Levels.Editor
 {
     /// <summary>레벨 다중 선택, 순차 실행 제어, 선택한 레벨의 검증된 결과를 표시한다.</summary>
-    internal sealed class MultiLevelTestPanel : IDisposable
+    internal sealed partial class MultiLevelTestPanel : IDisposable
     {
         internal VisualElement Root { get; } = new VisualElement { name = "multi-level-panel" };
         internal bool CanContinue => session?.CanContinue == true;
@@ -43,11 +44,16 @@ namespace Levels.Editor
             Label guide = new Label("저장된 레벨을 Ctrl/Shift로 여러 개 선택하세요. 시작할 때 내용을 복사하며, 한 레벨씩 시험합니다.");
             guide.style.whiteSpace = WhiteSpace.Normal; Root.Add(guide);
             LevelEditorHelp.Link(guide, "반복 시험은 현재 이동 횟수의 난이도, 추천 시험은 네 난이도별 이동 횟수를 확인합니다.", "difficulty.html#multi-level");
+            Label executionTitle = new Label("새 시험 실행") { name = "multi-execution-title" };
+            executionTitle.style.unityFontStyleAndWeight = FontStyle.Bold; executionTitle.style.marginTop = 8; Root.Add(executionTitle);
             selectionTools = new VisualElement(); selectionTools.style.flexDirection = FlexDirection.Row; selectionTools.style.flexWrap = Wrap.Wrap; Root.Add(selectionTools);
-            selectionTools.Add(new Button(RefreshLevels) { text = "레벨 목록 새로고침", name = "multi-refresh-levels" });
-            selectionTools.Add(new Button(() => choices.SetSelection(Enumerable.Range(0, levels.Count))) { text = "전체 선택", name = "multi-select-all" });
-            selectionTools.Add(new Button(() => choices.ClearSelection()) { text = "선택 해제" });
-            selectionTools.Add(new Button(() => choices.SetSelection(Enumerable.Range(0, levels.Count).Where(i => Selection.objects.Contains(levels[i])))) { text = "Project 선택 가져오기" });
+            ToolbarMenu selectionMenu = new ToolbarMenu { text = "선택 도구", name = "multi-selection-menu" };
+            selectionMenu.menu.AppendAction("전체 선택", _ => choices.SetSelection(Enumerable.Range(0, levels.Count)));
+            selectionMenu.menu.AppendAction("선택 해제", _ => choices.ClearSelection());
+            selectionMenu.menu.AppendAction("Project 선택 가져오기", _ => choices.SetSelection(Enumerable.Range(0, levels.Count).Where(i => Selection.objects.Contains(levels[i]))));
+            selectionMenu.menu.AppendSeparator();
+            selectionMenu.menu.AppendAction("레벨 목록 새로고침", _ => RefreshLevels());
+            selectionTools.Add(selectionMenu);
             VisualElement options = new VisualElement(); options.style.flexDirection = FlexDirection.Row; Root.Add(options);
             mode = new PopupField<string>("시험 방식", new List<string> { "현재 횟수 반복 시험", "난이도별 이동 횟수 추천" }, 0) { name = "multi-mode" };
             samples = new IntegerField("전략별 판 수") { value = 100, name = "multi-samples", tooltip = "반복 시험에만 적용합니다. 난이도 판단에는 전략별 정상 100판 이상이 필요합니다." };
@@ -77,7 +83,7 @@ namespace Levels.Editor
                 } };
             results.style.flexGrow = 1; lists.Add(results); results.selectionChanged += _ => ReadSelected();
             VisualElement resultTools = new VisualElement(); resultTools.style.flexDirection = FlexDirection.Row; Root.Add(resultTools);
-            read = new Button(ReadSelected) { text = "선택 결과 확인", name = "multi-read" }; resultTools.Add(read);
+            read = new Button(ReadSelected) { text = "결과 다시 읽기", name = "multi-read" }; resultTools.Add(read);
             open = new Button(() => openRepeat(selectedFolder)) { text = "판별 통계·사례 열기", name = "multi-open-repeat" }; resultTools.Add(open);
             resultTools.Add(new Button(() => {
                 if (record != null) EditorUtility.RevealInFinder(Path.GetFullPath(Path.Combine(this.store.Root, record.id)));
@@ -85,7 +91,9 @@ namespace Levels.Editor
             ScrollView details = new ScrollView(); details.style.flexGrow = 1; details.style.minHeight = 140; Root.Add(details);
             detail = new Label("오른쪽에서 레벨 결과를 선택하세요.") { name = "multi-detail" }; detail.style.whiteSpace = WhiteSpace.Normal; details.Add(detail);
             try { record = this.store.Load(); } catch (Exception error) { detail.text = error.Message; }
-            results.itemsSource = record?.entries; RefreshLevels();
+            results.itemsSource = record?.entries; CreateHistory();
+            ArrangeWorkspace(guide, executionTitle, options, controls, resultTools, details);
+            RefreshLevels();
             EditorApplication.update += Tick;
         }
 
@@ -122,6 +130,7 @@ namespace Levels.Editor
         {
             if (!visible) return;
             Stopwatch budget = Stopwatch.StartNew();
+            AdvanceHistory(budget);
             if (CanContinue && !session.Paused)
                 do { session.Advance(); } while (CanContinue && !session.Paused && budget.Elapsed.TotalMilliseconds < 8);
             // 결과는 저장된 원시 판까지 검사한 뒤 표시한다. 실행 중인 묶음의 파일을 동시에 읽지 않는다.
@@ -139,6 +148,8 @@ namespace Levels.Editor
         {
             if (choices == null || start == null || progress == null) return;
             bool busy = CanContinue;
+            historyChoice?.SetEnabled(!busy && !otherBusy() && historyScan == null);
+            historyRefresh?.SetEnabled(!busy && !otherBusy() && historyScan == null);
             int selectedCount = choices.selectedIndices.Count();
             estimate.text = $"선택 {selectedCount}개 · 예정 {(long)selectedCount * (mode.index == 1 ? 20000 : Math.Max(0L, samples.value) * 2):N0}판" +
                 (mode.index == 1 ? " · 레벨당 1~100회, 두 전략 각 100판" : " · 현재 이동 횟수로 두 전략 시험");
@@ -210,6 +221,6 @@ namespace Levels.Editor
         private static string StatusName(MultiLevelTestStatus status) => status switch {
             MultiLevelTestStatus.Waiting => "대기", MultiLevelTestStatus.Running => "진행", MultiLevelTestStatus.Paused => "일시정지",
             MultiLevelTestStatus.Completed => "완료", MultiLevelTestStatus.Error => "오류", MultiLevelTestStatus.Stopped => "중지", _ => "중단" };
-        public void Dispose() { EditorApplication.update -= Tick; session?.Dispose(); session = null; }
+        public void Dispose() { EditorApplication.update -= Tick; historyScan?.Dispose(); historyScan = null; session?.Dispose(); session = null; }
     }
 }

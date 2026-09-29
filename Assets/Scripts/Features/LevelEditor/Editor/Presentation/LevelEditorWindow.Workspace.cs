@@ -12,6 +12,7 @@ namespace Levels.Editor
         [SerializeField] private LevelInitialStatePanel diagnosticPanel;
         private LevelAnalysisPanel analysisPanel;
         private MultiLevelTestPanel multiPanel;
+        private TestRecordManagement recordManagement;
         private VisualElement editorRoot;
         private ObjectField workspaceLevel;
         private Button[] workspaceTabs;
@@ -39,6 +40,7 @@ namespace Levels.Editor
         {
             // Unity의 코드 재컴파일 뒤에도 이 메서드가 다시 호출된다. 이전 패널의 예약 작업과
             // 바인딩을 먼저 해제한다. 직렬화된 레벨·탭 선택은 유지하지만 UI 객체는 재사용하지 않는다.
+            recordManagement?.Dispose(); recordManagement = null;
             playPanel?.Dispose(); diagnosticPanel?.Dispose(); analysisPanel?.Dispose(); multiPanel?.Dispose();
             board?.CancelStroke(); properties?.Unbind(); data?.Dispose(); data = null;
             titleContent = new GUIContent("Match");
@@ -62,6 +64,7 @@ namespace Levels.Editor
             viewport.RegisterCallback<GeometryChangedEvent>(_ => FitWorkspaceViewport());
             viewport.Add(workspaceContent);
             rootVisualElement.Add(viewport);
+            workspaceContent.Add(CreateWorkspaceMenu());
             Toolbar header = new Toolbar { name = "workspace-header" };
             header.Add(new Label("MATCH"));
             workspaceLevel = new ObjectField("레벨") { name = "workspace-level", objectType = typeof(LevelDefinition), allowSceneObjects = false, value = level };
@@ -72,8 +75,6 @@ namespace Levels.Editor
             levelInput.style.minWidth = 0; levelInput.style.flexShrink = 1;
             workspaceLevel.RegisterValueChangedCallback(evt => SetLevel(evt.newValue as LevelDefinition));
             header.Add(workspaceLevel);
-            header.Add(new ToolbarButton(() => ShowLevelNamePanel(false)) { text = "이름 변경", name = "rename-level" });
-            header.Add(new ToolbarButton(OpenManual) { text = "사용 설명서", name = "open-level-manual" });
             workspaceContent.Add(header);
             VisualElement tabs = new VisualElement { name = "workspace-tabs" };
             string[] labels = { "레벨 편집", "플레이 테스트", "초기 보드·진단", "결과·이력", "여러 레벨 시험" };
@@ -82,11 +83,11 @@ namespace Levels.Editor
             {
                 int tab = i;
                 workspaceTabs[i] = new Button(() => SelectWorkspaceTab(tab)) { text = labels[i], name = "workspace-tab-" + i };
-                tabs.Add(workspaceTabs[i]);
+                // 진단은 시험 메뉴에서 여는 보조 화면이다. 저장된 탭 번호와 기존 호출부는 유지한다.
+                if (i != 2) tabs.Add(workspaceTabs[i]);
             }
+            tabs.Insert(2, workspaceTabs[4]);
             workspaceContent.Add(tabs);
-            Button recommend = new Button(ShowShapeRecommendations) { text = "맵 모양 목록", name = "show-shape-recommendations", tooltip = "저장한 레벨의 모양을 등록하거나, 등록 목록에서 골라 새 레벨로 만듭니다." };
-            tabs.Add(recommend);
             recommendationPanel = new VisualElement { name = "shape-recommendations" };
             recommendationPanel.style.maxHeight = 380;
             recommendationPanel.style.flexShrink = 0;
@@ -104,11 +105,18 @@ namespace Levels.Editor
             playPanel.rootVisualElement.AddToClassList("workspace-panel");
             diagnosticPanel.rootVisualElement.AddToClassList("workspace-panel");
             workspaceContent.Add(playPanel.rootVisualElement); workspaceContent.Add(diagnosticPanel.rootVisualElement);
-            analysisPanel = new LevelAnalysisPanel(() => level, () => playPanel.IsAnalysisBlocked || diagnosticPanel.IsAnalysisBlocked || multiPanel?.CanContinue == true);
+            analysisPanel = new LevelAnalysisPanel(() => level, () => recordManagement?.IsBusy == true || playPanel.IsAnalysisBlocked || diagnosticPanel.IsAnalysisBlocked || multiPanel?.CanContinue == true);
             analysisPanel.Root.AddToClassList("workspace-panel"); workspaceContent.Add(analysisPanel.Root);
-            multiPanel = new MultiLevelTestPanel(() => playPanel.HasPendingTest || diagnosticPanel.HasPendingTest,
+            multiPanel = new MultiLevelTestPanel(() => recordManagement?.IsBusy == true || analysisPanel.IsExporting || playPanel.HasPendingTest || diagnosticPanel.HasPendingTest,
                 folder => { SelectWorkspaceTab(3); analysisPanel.OpenRecord(folder); });
             multiPanel.Root.AddToClassList("workspace-panel"); workspaceContent.Add(multiPanel.Root);
+            recordManagement = new TestRecordManagement(
+                () => playPanel.HasPendingTest || diagnosticPanel.HasPendingTest || multiPanel.CanContinue || analysisPanel.IsExporting,
+                () => { analysisPanel.ClearStoredResults(); multiPanel.ClearStoredResults(); playPanel.ClearStoredResults(); diagnosticPanel.ClearStoredResults(); },
+                () => { analysisPanel.ReloadHistory(); multiPanel.ReloadHistory(); },
+                locked => { playPanel.rootVisualElement.SetEnabled(!locked && !multiPanel.CanContinue); diagnosticPanel.rootVisualElement.SetEnabled(!locked && !multiPanel.CanContinue);
+                    analysisPanel.Root.SetEnabled(!locked); multiPanel.Root.SetEnabled(!locked); });
+            recordManagement.AddTo(analysisPanel.Root); recordManagement.AddTo(multiPanel.Root);
             CreateEditorGUI();
             SelectWorkspaceTab(workspaceTab);
             LevelEditorHelp.Apply(rootVisualElement);
@@ -121,6 +129,7 @@ namespace Levels.Editor
             if (workspaceTabs == null) return;
             board?.CancelStroke(); data?.ApplyModifiedProperties();
             workspaceTab = Mathf.Clamp(tab, 0, 4);
+            if (workspacePageName != null) workspacePageName.text = new[] { "레벨 편집", "플레이 테스트", "초기 보드·진단", "결과·이력", "여러 레벨 시험" }[workspaceTab];
             // 편집: 좌우 도구와 보드, 플레이: 보드와 조작 버튼, 진단: 보드와 상세 정보가 기준이다.
             // 사용자가 넓혀 둔 창은 줄이지 않고, 전환한 탭에 부족한 축만 늘린다.
             Vector2 required = workspaceTab switch
@@ -131,6 +140,7 @@ namespace Levels.Editor
                 4 => new Vector2(1000, 760),
                 _ => new Vector2(800, 900)
             };
+            required.y += 28; // 상단 명령 메뉴가 추가되어도 각 작업 화면의 기존 유효 높이를 보존한다.
             minSize = required;
             workspaceContent.style.minWidth = required.x;
             workspaceContent.style.minHeight = required.y;
@@ -153,8 +163,8 @@ namespace Levels.Editor
             analysisPanel.SetVisible(workspaceTab == 3);
             multiPanel.SetVisible(workspaceTab == 4);
             // 일괄 시험이 일시정지 중이어도 실행 객체는 유지된다. 다른 보드 시험의 중복 시작을 막는다.
-            playPanel.rootVisualElement.SetEnabled(!multiPanel.CanContinue);
-            diagnosticPanel.rootVisualElement.SetEnabled(!multiPanel.CanContinue);
+            playPanel.rootVisualElement.SetEnabled(recordManagement?.IsBusy != true && !multiPanel.CanContinue);
+            diagnosticPanel.rootVisualElement.SetEnabled(recordManagement?.IsBusy != true && !multiPanel.CanContinue);
             for (int i = 0; i < workspaceTabs.Length; i++) workspaceTabs[i].EnableInClassList("workspace-tab-active", i == workspaceTab);
         }
 

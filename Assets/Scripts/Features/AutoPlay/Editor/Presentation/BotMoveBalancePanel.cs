@@ -150,5 +150,11 @@ namespace Levels.Editor
             EditorApplication.update -= ReadTick; loading = null;
             EditorApplication.update -= Tick; Session?.Dispose(); Session = null;
         }
+
+        /// <summary>삭제 대상의 저장 사본과 진행 표시를 해제한다. 기존 저장 형식은 바꾸지 않는다.</summary>
+        internal void ClearStoredResults()
+        {
+            Dispose(); previous = null; errorMessage = null; Refresh();
+        }
     }
 }

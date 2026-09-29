@@ -50,6 +50,7 @@ namespace Levels.Editor
 
         private void OnDisable()
         {
+            recordManagement?.Dispose(); recordManagement = null;
             playPanel?.Dispose(); diagnosticPanel?.Dispose(); analysisPanel?.Dispose(); multiPanel?.Dispose();
             board?.CancelStroke();
             Undo.undoRedoPerformed -= ExternalChange;
