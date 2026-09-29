@@ -45,7 +45,17 @@ namespace Levels.Editor
             using NavigationSubmitEvent evt = NavigationSubmitEvent.GetPooled(); evt.target = button; button.SendEvent(evt);
         }
 
-        private static IEnumerator Run()
+        /// <summary>합성 범위·보관 검사만 실행한다. 실제 게임을 추가하지 않는 개발용 진입점이다.</summary>
+        public static void RangesOnly()
+        {
+            try { CheckRanges(); }
+            catch (Exception error) { Results.Add("FAIL " + error); }
+            File.WriteAllLines("Logs/Stage31Workflow/range-results.txt", Results);
+            EditorApplication.Exit(Results.Any(line => line.StartsWith("FAIL ")) ? 1 : 0);
+        }
+
+        /// <summary>합성 입력은 범위 계산에만 사용하고 실제 저장 결과로 수락하지 않는지 확인한다.</summary>
+        private static void CheckRanges()
         {
             Check(BotMoveRecommendations.Grade(BotDifficultyGrade.Easy) == 0 &&
                 BotMoveRecommendations.Grade(BotDifficultyGrade.Normal) == 1 && BotMoveRecommendations.Grade(BotDifficultyGrade.Hard) == 2 &&
@@ -59,18 +69,26 @@ namespace Levels.Editor
                 new BotMoveTrial { moves = 33, grade = 0, normalPerStrategy = 99 } };
             Check(BotMoveRecommendations.Ranges(synthetic, 0) == "28회, 30~32회", "합성 표본: 빈칸·다른 등급·미완료를 범위로 연결하지 않음");
             Check(BotMoveRecommendations.Ranges(synthetic, 3) == "", "없는 난이도 수치를 만들지 않음");
-            // 전체 범위의 종료 표시와 저장 형식은 합성 값으로 검사한다. 아래 실제 판 수에 합산하지 않는다.
+            // 합성 값은 범위 계산만 검증한다. 원시 판 없는 합성 요약을 실측 저장 결과로 수락하면 안 된다.
             BotMoveBalanceStore syntheticStore = new BotMoveBalanceStore(Evidence + "/synthetic-" + Guid.NewGuid().ToString("N"));
             BotMoveBalanceRecord full = new BotMoveBalanceRecord { id = Guid.NewGuid().ToString("N"), seeds = Enumerable.Range(1, 100).ToArray(),
                 status = BotBatchStatus.Completed, trials = Enumerable.Range(1, 100).Select(n => new BotMoveTrial {
                     moves = n, normalPerStrategy = 100, grade = n <= 25 ? 3 : n <= 50 ? 2 : n <= 75 ? 1 : 0 }).ToList() };
             syntheticStore.Save(full);
-            Check(syntheticStore.Load().trials.Count == 100 && BotMoveRecommendations.Ranges(full.trials, 0) == "76~100회" &&
-                BotMoveRecommendations.Ranges(full.trials, 3) == "1~25회", "합성 100구간 완료 저장과 양 끝 범위");
+            Check(BotMoveRecommendations.Ranges(full.trials, 0) == "76~100회" &&
+                BotMoveRecommendations.Ranges(full.trials, 3) == "1~25회", "합성 100구간의 양 끝 범위 계산");
+            bool missingRawRejected = false;
+            try { syntheticStore.Load(); } catch (InvalidDataException) { missingRawRejected = true; }
+            Check(missingRawRejected, "실측 원시 기록 없는 합성 전체 요약은 정상 기록으로 수락하지 않음");
             full.trials.RemoveAt(99); syntheticStore.Save(full);
             bool rejected = false;
             try { syntheticStore.Load(); } catch (InvalidDataException) { rejected = true; }
             Check(rejected, "합성 99구간을 전체 완료로 저장한 손상 기록 거부");
+        }
+
+        private static IEnumerator Run()
+        {
+            CheckRanges();
             level = (LevelDefinition)typeof(SettlementVerification).GetMethod("Make", BindingFlags.NonPublic | BindingFlags.Static)
                 .Invoke(null, new object[] { Enumerable.Range(0, 16).Select(i => new BoardCoordinate(i / 4, i % 4)).ToArray() });
             level.name = "이동 횟수 검증용 수집 레벨";

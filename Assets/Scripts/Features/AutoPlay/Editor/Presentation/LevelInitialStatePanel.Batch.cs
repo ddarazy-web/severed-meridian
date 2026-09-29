@@ -20,6 +20,9 @@ namespace Levels.Editor
         private string batchError;
         private double nextBatchDisplay;
         internal bool IsAnalysisBlocked => batchSession?.NeedsAdvance == true || botSession?.NeedsAdvance == true || balancePanel?.Session?.NeedsAdvance == true;
+        // 일시정지한 반복·밸런스 시험도 재개할 수 있으므로 일괄 시험과 동시에 소유하지 않는다.
+        internal bool HasPendingTest => batchSession?.CanContinue == true || balancePanel?.CanContinue == true ||
+            botSession?.NeedsAdvance == true || botSession?.Status == BotSessionStatus.Ready;
 
         /// <summary>한 판 시험 아래에 최소한의 반복 실행 조작을 붙이고 직전 기록만 복원한다.</summary>
         private void CreateBatchUI()

@@ -11,6 +11,7 @@ namespace Levels.Editor
         [SerializeField] private LevelInitialStatePanel playPanel;
         [SerializeField] private LevelInitialStatePanel diagnosticPanel;
         private LevelAnalysisPanel analysisPanel;
+        private MultiLevelTestPanel multiPanel;
         private VisualElement editorRoot;
         private ObjectField workspaceLevel;
         private Button[] workspaceTabs;
@@ -38,7 +39,7 @@ namespace Levels.Editor
         {
             // Unity의 코드 재컴파일 뒤에도 이 메서드가 다시 호출된다. 이전 패널의 예약 작업과
             // 바인딩을 먼저 해제한다. 직렬화된 레벨·탭 선택은 유지하지만 UI 객체는 재사용하지 않는다.
-            playPanel?.Dispose(); diagnosticPanel?.Dispose(); analysisPanel?.Dispose();
+            playPanel?.Dispose(); diagnosticPanel?.Dispose(); analysisPanel?.Dispose(); multiPanel?.Dispose();
             board?.CancelStroke(); properties?.Unbind(); data?.Dispose(); data = null;
             titleContent = new GUIContent("Match");
             rootVisualElement.Clear();
@@ -75,7 +76,7 @@ namespace Levels.Editor
             header.Add(new ToolbarButton(OpenManual) { text = "사용 설명서", name = "open-level-manual" });
             workspaceContent.Add(header);
             VisualElement tabs = new VisualElement { name = "workspace-tabs" };
-            string[] labels = { "레벨 편집", "플레이 테스트", "초기 보드·진단", "결과·이력" };
+            string[] labels = { "레벨 편집", "플레이 테스트", "초기 보드·진단", "결과·이력", "여러 레벨 시험" };
             workspaceTabs = new Button[labels.Length];
             for (int i = 0; i < labels.Length; i++)
             {
@@ -103,8 +104,11 @@ namespace Levels.Editor
             playPanel.rootVisualElement.AddToClassList("workspace-panel");
             diagnosticPanel.rootVisualElement.AddToClassList("workspace-panel");
             workspaceContent.Add(playPanel.rootVisualElement); workspaceContent.Add(diagnosticPanel.rootVisualElement);
-            analysisPanel = new LevelAnalysisPanel(() => level, () => playPanel.IsAnalysisBlocked || diagnosticPanel.IsAnalysisBlocked);
+            analysisPanel = new LevelAnalysisPanel(() => level, () => playPanel.IsAnalysisBlocked || diagnosticPanel.IsAnalysisBlocked || multiPanel?.CanContinue == true);
             analysisPanel.Root.AddToClassList("workspace-panel"); workspaceContent.Add(analysisPanel.Root);
+            multiPanel = new MultiLevelTestPanel(() => playPanel.HasPendingTest || diagnosticPanel.HasPendingTest,
+                folder => { SelectWorkspaceTab(3); analysisPanel.OpenRecord(folder); });
+            multiPanel.Root.AddToClassList("workspace-panel"); workspaceContent.Add(multiPanel.Root);
             CreateEditorGUI();
             SelectWorkspaceTab(workspaceTab);
             LevelEditorHelp.Apply(rootVisualElement);
@@ -116,7 +120,7 @@ namespace Levels.Editor
             // 숨겨진 패널의 자동 진행만 멈춘다. SetVisible이 복귀 시 재개할 진행 상태를 관리한다.
             if (workspaceTabs == null) return;
             board?.CancelStroke(); data?.ApplyModifiedProperties();
-            workspaceTab = Mathf.Clamp(tab, 0, 3);
+            workspaceTab = Mathf.Clamp(tab, 0, 4);
             // 편집: 좌우 도구와 보드, 플레이: 보드와 조작 버튼, 진단: 보드와 상세 정보가 기준이다.
             // 사용자가 넓혀 둔 창은 줄이지 않고, 전환한 탭에 부족한 축만 늘린다.
             Vector2 required = workspaceTab switch
@@ -124,6 +128,7 @@ namespace Levels.Editor
                 0 => new Vector2(1040, 780),
                 1 => new Vector2(760, 860),
                 3 => new Vector2(1000, 760),
+                4 => new Vector2(1000, 760),
                 _ => new Vector2(800, 900)
             };
             minSize = required;
@@ -146,6 +151,10 @@ namespace Levels.Editor
             editorRoot.style.display = workspaceTab == 0 ? DisplayStyle.Flex : DisplayStyle.None;
             playPanel.SetVisible(workspaceTab == 1); diagnosticPanel.SetVisible(workspaceTab == 2);
             analysisPanel.SetVisible(workspaceTab == 3);
+            multiPanel.SetVisible(workspaceTab == 4);
+            // 일괄 시험이 일시정지 중이어도 실행 객체는 유지된다. 다른 보드 시험의 중복 시작을 막는다.
+            playPanel.rootVisualElement.SetEnabled(!multiPanel.CanContinue);
+            diagnosticPanel.rootVisualElement.SetEnabled(!multiPanel.CanContinue);
             for (int i = 0; i < workspaceTabs.Length; i++) workspaceTabs[i].EnableInClassList("workspace-tab-active", i == workspaceTab);
         }
 

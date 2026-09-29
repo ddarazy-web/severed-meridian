@@ -18,6 +18,7 @@ namespace Levels.Editor
         private readonly Button start, pause, stop;
         private readonly Label progress, recommendations, rows;
         private BotMoveBalanceRecord previous;
+        private BotMoveBalanceReader loading;
         private bool visible;
         private double nextDisplay;
         private string errorMessage;
@@ -50,7 +51,12 @@ namespace Levels.Editor
             Foldout detail = new Foldout { text = "횟수별 성공률과 판단 근거", value = false, name = "balance-detail" }; Root.Add(detail);
             ScrollView scroll = new ScrollView(); scroll.style.maxHeight = 140; detail.Add(scroll);
             rows = new Label { name = "balance-rows" }; rows.style.whiteSpace = WhiteSpace.Normal; scroll.Add(rows);
-            try { previous = Store.Load(); }
+            try
+            {
+                loading = Store.OpenReader(); previous = loading.Record;
+                if (loading.IsDone) loading = null;
+                else EditorApplication.update += ReadTick;
+            }
             catch (Exception error) { errorMessage = "기존 결과를 읽지 못했습니다: " + error.Message; }
             Refresh();
         }
@@ -60,6 +66,7 @@ namespace Levels.Editor
             if (!visible || CanContinue || otherBusy() || source() == null) return;
             try
             {
+                EditorApplication.update -= ReadTick; loading = null;
                 Session?.Dispose(); Session = null; errorMessage = null; prepare();
                 Session = new BotMoveBalanceSession(source(), Store); previous = Session.Record;
                 EditorApplication.update -= Tick; EditorApplication.update += Tick;
@@ -87,6 +94,22 @@ namespace Levels.Editor
             nextDisplay = EditorApplication.timeSinceStartup + .25; Refresh();
         }
 
+        /// <summary>저장 결과를 UI 갱신 사이에 나누어 검증한다. 검증 중·실패 시에는 추천을 표시하지 않는다.</summary>
+        private void ReadTick()
+        {
+            if (loading == null) { EditorApplication.update -= ReadTick; return; }
+            if (!visible) return;
+            Stopwatch budget = Stopwatch.StartNew();
+            do { loading.Advance(); } while (!loading.IsDone && budget.Elapsed.TotalMilliseconds < 8);
+            if (loading.IsDone)
+            {
+                if (loading.Error != null) { errorMessage = "기존 결과를 읽지 못했습니다: " + loading.Error; previous = null; }
+                loading = null; EditorApplication.update -= ReadTick; Refresh();
+            }
+            else if (EditorApplication.timeSinceStartup >= nextDisplay)
+            { nextDisplay = EditorApplication.timeSinceStartup + .25; Refresh(); }
+        }
+
         /// <summary>다른 실행기의 상태만 반영한다. 부모 갱신을 다시 호출하지 않아 순환 갱신을 막는다.</summary>
         internal void RefreshEnabled()
         {
@@ -99,7 +122,12 @@ namespace Levels.Editor
         {
             RefreshEnabled(); changed();
             BotMoveBalanceRecord record = Session?.Record ?? previous;
-            if (record == null) { progress.text = errorMessage ?? "시험 대기"; recommendations.text = "시험 전 · 네 난이도의 이동 횟수를 실제 플레이로 찾습니다."; return; }
+            if (record == null) { progress.text = errorMessage ?? "시험 대기"; recommendations.text = errorMessage == null ? "시험 전 · 네 난이도의 이동 횟수를 실제 플레이로 찾습니다." : "기록 확인 실패 · 추천을 표시하지 않습니다."; rows.text = ""; return; }
+            if (loading != null)
+            {
+                progress.text = $"저장 기록 확인 중 · {loading.CheckedTrials}/{record.trials.Count}개 완료 구간";
+                recommendations.text = "원시 판 검증을 마친 뒤 추천을 표시합니다."; rows.text = ""; return;
+            }
             bool compatible = record.rulesVersion == BotMoveRecommendations.Version && record.engineVersion == BotMoveRecommendations.ExecutionVersion;
             bool complete = record.status == BotBatchStatus.Completed;
             int finished = record.trials.Count * 200 + (Session?.Current?.Record.finished ?? 0);
@@ -114,11 +142,12 @@ namespace Levels.Editor
             rows.text = "기준: 높은 쪽 봇 성공률 · 쉬움 ≥60% / 보통 ≥40% / 어려움 ≥20% / 매우 어려움 >0%\n" +
                 "성공 0%·오류·미완료는 추천 제외. 인간 체감 난이도는 별도 확인이 필요합니다.\n" +
                 string.Join("\n", record.trials.Select(t => $"{t.moves}회 : 기본 {t.basicWon}/100 · 계획 {t.planningWon}/100 · " +
-                    (t.grade < 0 ? "보류 · " + t.reason : BotMoveRecommendations.Titles[t.grade])));
+                    (!compatible ? "평가 버전 다름 · 등급 표시 안 함" : t.grade < 0 ? "보류 · " + t.reason : BotMoveRecommendations.Titles[t.grade])));
         }
 
         public void Dispose()
         {
+            EditorApplication.update -= ReadTick; loading = null;
             EditorApplication.update -= Tick; Session?.Dispose(); Session = null;
         }
     }
