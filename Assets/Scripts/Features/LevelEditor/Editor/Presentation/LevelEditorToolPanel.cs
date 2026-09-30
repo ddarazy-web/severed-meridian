@@ -137,7 +137,8 @@ namespace Levels.Editor
                 operation.text = title + " → " + option.Label + (option.Brush == LevelBrush.Placement && board.Placement.Size == 2
                     ? " · 네 칸 미리보기 후 클릭" : " · 클릭/드래그") +
                     (option.Brush == LevelBrush.Placement || option.Brush == LevelBrush.Fixed || option.Brush == LevelBrush.Random
-                        ? " · 더블클릭으로 같은 층 교체" : "");
+                        ? (option.Layer == PlacementLayer.Block || option.Layer == PlacementLayer.Obstacle
+                            ? " · 더블클릭으로 블록↔장애물 교체" : " · 더블클릭으로 같은 층 교체") : "");
                 Refresh();
             });
             tools.Add(menu);

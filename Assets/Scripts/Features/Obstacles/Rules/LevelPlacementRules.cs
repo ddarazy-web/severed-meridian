@@ -91,7 +91,7 @@ namespace Levels
             return cell.IsActive ? null : "비활성 칸입니다.";
         }
 
-        public static string ObstacleSpaceError(LevelDefinition level, BoardCoordinate origin, ObstacleKind kind, int self = -1)
+        public static string ObstacleSpaceError(LevelDefinition level, BoardCoordinate origin, ObstacleKind kind, int self = -1, bool replaceBlocks = false)
         {
             if (level.Flow?.Walls != null && level.Flow.Walls.Any(wall => LevelFlowRules.InternalWall(wall, origin, Size(kind))))
                 return "2×2 본체 내부에 고철 벽이 있습니다.";
@@ -101,19 +101,22 @@ namespace Levels
                 if (error != null) return coordinate + " " + error;
                 int obstacle = Find(level, PlacementLayer.Obstacle, coordinate);
                 if (obstacle == -2 || (obstacle >= 0 && obstacle != self)) return coordinate + " 다른 장애물이 점유합니다.";
-                if (Find(level, PlacementLayer.Block, coordinate) != -1) return coordinate + " 블록이 점유합니다.";
+                int block = Find(level, PlacementLayer.Block, coordinate);
+                if (block == -2 || (!replaceBlocks && block >= 0)) return coordinate + " 블록이 점유합니다.";
                 if (LevelSupplyRules.HasRecovery(level, coordinate)) return coordinate + " 회수 부품이 점유합니다.";
-                if (Find(level, PlacementLayer.Cover, coordinate) != -1) return coordinate + " 덮개와 겹칠 수 없습니다.";
+                int cover = Find(level, PlacementLayer.Cover, coordinate);
+                if (cover == -2 || (!replaceBlocks && cover >= 0)) return coordinate + " 덮개와 겹칠 수 없습니다.";
             }
             return null;
         }
 
-        public static string BlockSpaceError(LevelDefinition level, BoardCoordinate coordinate)
+        public static string BlockSpaceError(LevelDefinition level, BoardCoordinate coordinate, bool replaceObstacle = false)
         {
             string error = CellError(level, coordinate);
             if (error != null) return error;
             if (LevelSupplyRules.HasRecovery(level, coordinate)) return "회수 부품이 점유합니다.";
-            return Find(level, PlacementLayer.Obstacle, coordinate) == -1 ? null : "장애물이 점유합니다.";
+            int obstacle = Find(level, PlacementLayer.Obstacle, coordinate);
+            return obstacle == -1 || (replaceObstacle && obstacle >= 0) ? null : "장애물이 점유합니다.";
         }
 
         public static string CoverSpaceError(LevelDefinition level, BoardCoordinate coordinate)

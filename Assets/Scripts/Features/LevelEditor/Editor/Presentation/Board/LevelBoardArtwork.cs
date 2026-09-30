@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Levels.Editor
 {
-    /// <summary>편집 보드에서만 사용하는 확정 아트 매핑. 선택 메뉴와 실행 규칙에는 연결하지 않는다.</summary>
+    /// <summary>편집·플레이·재생 보드의 확정 아트 매핑. 실행 규칙에는 연결하지 않는다.</summary>
     internal static class LevelBoardArtwork
     {
         private static readonly string[] colors = { "pink", "yellow", "blue", "green", "purple" };
@@ -30,10 +30,10 @@ namespace Levels.Editor
             await atlas.LoadAsync();
         }
 
-        internal static void Acquire()
+        internal static void Acquire(bool notify = true)
         {
             users++;
-            Loaded?.Invoke();
+            if (notify) Loaded?.Invoke();
         }
 
         private static async UniTask LoadAndNotify(string relativePath)
@@ -61,11 +61,14 @@ namespace Levels.Editor
             ? Load("Blocks/rabbit-" + colors[(int)color] + "-v1-256.png") : null;
 
         internal static Sprite Block(InitialBlockDefinition block)
+            => Block(block.Kind, block.RocketDirection);
+
+        internal static Sprite Block(InitialBlockKind kind, RocketDirection direction)
         {
-            string file = block.Kind switch
+            string file = kind switch
             {
-                InitialBlockKind.Rocket => block.RocketDirection == RocketDirection.Horizontal ? "cleaning-rocket-horizontal-v1" :
-                    block.RocketDirection == RocketDirection.Vertical ? "cleaning-rocket-vertical-v1" : null,
+                InitialBlockKind.Rocket => direction == RocketDirection.Horizontal ? "cleaning-rocket-horizontal-v1" :
+                    direction == RocketDirection.Vertical ? "cleaning-rocket-vertical-v1" : null,
                 InitialBlockKind.Bomb => "moon-bomb-v1",
                 InitialBlockKind.Drone => "collection-drone-v1",
                 InitialBlockKind.Magnet => "rainbow-magnet-v1",
@@ -75,20 +78,23 @@ namespace Levels.Editor
         }
 
         internal static Sprite Obstacle(ObstaclePlacementDefinition obstacle)
+            => Obstacle(obstacle, obstacle.Durability);
+
+        internal static Sprite Obstacle(ObstaclePlacementDefinition obstacle, int durability, int charge = 0)
         {
             if (obstacle.Kind != ObstacleKind.Generator &&
-                (obstacle.Durability < 1 || obstacle.Durability > LevelPlacementRules.MaxDurability(obstacle.Kind))) return null;
+                (durability < 1 || durability > LevelPlacementRules.MaxDurability(obstacle.Kind))) return null;
             int color = (int)obstacle.Color;
             string colorName = color >= 0 && color < colors.Length ? colors[color] : null;
             string file = obstacle.Kind switch
             {
-                ObstacleKind.Crate => "Crate/crate-durability-" + obstacle.Durability + "-v1-256",
-                ObstacleKind.Scrap => "Scrap/scrap-durability-" + obstacle.Durability + "-v1-256",
-                ObstacleKind.Safe => "RecoveryCapsule/recovery-capsule-durability-" + obstacle.Durability + "-v1-256",
-                ObstacleKind.ColorLock when colorName != null => "ColorLock/color-lock-" + colorName + "-durability-" + obstacle.Durability + "-v1-256",
-                ObstacleKind.Appliance when colorName != null => "MetalRodBox/metal-rod-box-" + colorName + "-durability-" + obstacle.Durability + "-v1-256",
+                ObstacleKind.Crate => "Crate/crate-durability-" + durability + "-v1-256",
+                ObstacleKind.Scrap => "Scrap/scrap-durability-" + durability + "-v1-256",
+                ObstacleKind.Safe => "RecoveryCapsule/recovery-capsule-durability-" + durability + "-v1-256",
+                ObstacleKind.ColorLock when colorName != null => "ColorLock/color-lock-" + colorName + "-durability-" + durability + "-v1-256",
+                ObstacleKind.Appliance when colorName != null => "MetalRodBox/metal-rod-box-" + colorName + "-durability-" + durability + "-v1-256",
                 ObstacleKind.Generator when obstacle.RequiredCharge >= 3 && obstacle.RequiredCharge <= 5 =>
-                    "Generator/generator-charge-0-of-" + obstacle.RequiredCharge + "-v1-512",
+                    "Generator/generator-charge-" + Mathf.Clamp(charge, 0, obstacle.RequiredCharge) + "-of-" + obstacle.RequiredCharge + "-v1-512",
                 _ => null
             };
             return file == null ? null : Load("Obstacles/" + file + ".png");

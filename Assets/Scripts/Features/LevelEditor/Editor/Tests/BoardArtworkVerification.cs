@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Board;
+using Simulation;
 using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
@@ -22,6 +23,26 @@ namespace Levels.Editor
             try
             {
                 LevelBoardArtwork.ReleaseAll();
+                LevelDefinition coldLevel = ScriptableObject.CreateInstance<LevelDefinition>();
+                LevelEditorWindow coldWindow = ScriptableObject.CreateInstance<LevelEditorWindow>();
+                try
+                {
+                    LevelBoardEditing.Apply(coldLevel, LevelBrush.Fixed, RabbitColor.Type1, new[] { new BoardCoordinate(0, 0) });
+                    coldWindow.ShowUtility();
+                    coldWindow.SetLevel(coldLevel);
+                    LevelBoardView coldBoard = coldWindow.rootVisualElement.Q<LevelBoardView>();
+                    double deadline = EditorApplication.timeSinceStartup + 15;
+                    while (coldBoard.CellAt(new BoardCoordinate(0, 0)).Q("board-content-art")?.style.backgroundImage.value.sprite == null && EditorApplication.timeSinceStartup < deadline)
+                        await UniTask.Delay(100, DelayType.Realtime);
+                    Require(coldBoard.CellAt(new BoardCoordinate(0, 0)).Q("board-content-art")?.style.backgroundImage.value.sprite != null,
+                        "사전 로드 없이 편집 보드를 열면 일반 블록 이미지 표시", results);
+                }
+                finally
+                {
+                    coldWindow.Close();
+                    UnityEngine.Object.DestroyImmediate(coldLevel);
+                    LevelBoardArtwork.ReleaseAll();
+                }
                 await LevelBoardArtwork.Warmup();
                 Require(LevelBoardArtwork.RequestedAtlasCount == 1, "일반 블록만 요청하면 아틀라스 하나만 로드", results);
                 LevelBoardArtwork.Cover(CoverKind.Web);
@@ -29,6 +50,7 @@ namespace Levels.Editor
                 Require(LevelBoardArtwork.RequestedAtlasCount == 2, "거미줄 추가 시 해당 아틀라스만 추가 로드", results);
                 LevelBoardArtwork.ReleaseAll();
                 Require(LevelBoardArtwork.RequestedAtlasCount == 0, "아틀라스 소유권 해제", results);
+                LevelBoardArtwork.Acquire();
                 foreach (var sources in BoardAtlasPrebuild.SourcePaths().GroupBy(BoardAtlasPrebuild.AddressForPath))
                 {
                     await LevelBoardArtwork.Warmup(sources.First().Substring("Assets/Textures/".Length));
@@ -57,6 +79,7 @@ namespace Levels.Editor
                     }
                 }
                 Require(EditorSettings.spritePackerMode == SpritePackerMode.SpriteAtlasV2, "SpriteAtlasV2 패킹 활성", results);
+                await VerifyRuntimeArtwork(results);
                 foreach (ObstacleKind kind in Enum.GetValues(typeof(ObstacleKind)))
                 {
                     int maximum = LevelPlacementRules.MaxDurability(kind);
@@ -155,12 +178,75 @@ namespace Levels.Editor
             catch (Exception error) { results.Add("FAIL " + error); }
             finally
             {
+                LevelBoardArtwork.Release();
                 UnityEngine.Object.DestroyImmediate(level);
                 Directory.CreateDirectory("Logs/BoardArtworkVerification");
                 File.WriteAllLines("Logs/BoardArtworkVerification/results.txt", results);
                 Debug.Log(string.Join("\n", results));
                 EditorApplication.Exit(results.Any(result => result.StartsWith("FAIL")) ? 1 : 0);
             }
+        }
+
+        private static async UniTask VerifyRuntimeArtwork(List<string> results)
+        {
+            LevelDefinition source = ScriptableObject.CreateInstance<LevelDefinition>();
+            JsonUtility.FromJsonOverwrite("{\"levelNumber\":1,\"missions\":[{\"kind\":0,\"color\":0,\"count\":12}]}", source);
+            try
+            {
+                InitialBlockKind[] kinds = { InitialBlockKind.Rocket, InitialBlockKind.Rocket, InitialBlockKind.Bomb, InitialBlockKind.Drone, InitialBlockKind.Magnet };
+                for (int i = 0; i < kinds.Length; i++)
+                    LevelObstacleEditing.Apply(source, new PlacementBrush { Layer = PlacementLayer.Block, Kind = (int)kinds[i], Direction = (RocketDirection)(i % 2) }, new[] { new BoardCoordinate(0, i) });
+                LevelObstacleEditing.Apply(source, new PlacementBrush { Layer = PlacementLayer.Obstacle, Kind = (int)ObstacleKind.Safe, Durability = 5 }, new[] { new BoardCoordinate(2, 0) });
+                LevelStateBuildResult built = LevelStateBuilder.Build(source, 1);
+                if (!built.IsBuilt) throw new InvalidOperationException(string.Join(" / ", built.Issues));
+                LevelRuntimeState state = built.State;
+                for (int i = 0; i < kinds.Length; i++)
+                {
+                    RuntimeCell cell = state.CellAt(new BoardCoordinate(0, i));
+                    foreach (TextElement target in new TextElement[] { new Button(), new Label() })
+                    {
+                        target.text = LevelInitialStatePanel.CellText(cell, state);
+                        RuntimeBoardArtwork.Bind(target, cell, state);
+                        Sprite sprite = target.Q("runtime-content").style.backgroundImage.value.sprite;
+                        Require(sprite != null && sprite.name == LevelBoardArtwork.Block(kinds[i], (RocketDirection)(i % 2)).name,
+                            "플레이/재생 파워 이미지 " + target.GetType().Name + " " + i, results);
+                        Require(target.text == "" && target.Q("runtime-art").pickingMode == PickingMode.Ignore,
+                            "파워 문자 대체와 클릭 통과 " + i, results);
+                    }
+                }
+                RuntimeCell obstacleCell = state.CellAt(new BoardCoordinate(2, 0));
+                RuntimeObstacle obstacle = state.Obstacles[obstacleCell.ObstacleIndex.Value];
+                typeof(RuntimeObstacle).GetProperty("Durability").SetValue(obstacle, 1);
+                Label damaged = new Label(LevelInitialStatePanel.CellText(obstacleCell, state));
+                RuntimeBoardArtwork.Bind(damaged, obstacleCell, state);
+                Require(damaged.Q("runtime-content").style.backgroundImage.value.sprite.name.Contains("durability-1-"), "피격 후 현재 내구도 이미지", results);
+                Require(source.Obstacles[0].Durability == 5, "이미지 갱신은 원본 내구도 보존", results);
+                LevelEditorWindow.OpenWorkspace(2);
+                LevelEditorWindow runtimeWindow = Resources.FindObjectsOfTypeAll<LevelEditorWindow>().Single();
+                try
+                {
+                    runtimeWindow.position = new Rect(30, 30, 1180, 820);
+                    runtimeWindow.SetLevel(source);
+                    LevelInitialStatePanel panel = runtimeWindow.ActiveSimulationPanel;
+                    typeof(LevelInitialStatePanel).GetMethod("Build", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(panel, null);
+                    await UniTask.Delay(1800, DelayType.Realtime);
+                    for (int i = 0; i < kinds.Length; i++)
+                        Require(panel.rootVisualElement.Q<Button>("initial-cell-0-" + i).Q("runtime-content").style.backgroundImage.value.sprite != null,
+                            "실제 시뮬레이션 보드 파워 이미지 " + i, results);
+                    RuntimeCell generated = panel.CurrentState.CellAt(new BoardCoordinate(1, 1));
+                    typeof(RuntimeCell).GetProperty("Content").SetValue(generated, RuntimeContent.Rocket);
+                    typeof(RuntimeCell).GetProperty("RocketDirection").SetValue(generated, RocketDirection.Vertical);
+                    typeof(LevelInitialStatePanel).GetMethod("DisplayState", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(panel, new object[] { null });
+                    await UniTask.Delay(100, DelayType.Realtime);
+                    Require(panel.rootVisualElement.Q<Button>("initial-cell-1-1").Q("runtime-content").style.backgroundImage.value.sprite.name.Contains("vertical"),
+                        "실행 중 생성된 세로 로켓 이미지 갱신", results);
+                    Directory.CreateDirectory("Logs/BotAnalysisVerification");
+                    typeof(BotAnalysisVerification).GetMethod("CaptureAnalysis", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                        .Invoke(null, new object[] { "runtime-artwork.png" });
+                }
+                finally { runtimeWindow.Close(); }
+            }
+            finally { UnityEngine.Object.DestroyImmediate(source); }
         }
 
         private static void Require(bool condition, string label, List<string> results)

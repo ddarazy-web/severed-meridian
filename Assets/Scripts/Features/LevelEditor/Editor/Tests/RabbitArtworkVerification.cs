@@ -132,13 +132,13 @@ namespace Levels.Editor
                 if (panel.CurrentState != null)
                 {
                     for (int i = 0; i < 5; i++)
-                        Check(panel.rootVisualElement.Q<Button>($"initial-cell-0-{i}").style.backgroundImage.value.texture ==
-                            AssetDatabase.LoadAssetAtPath<Texture2D>(PathFor(i)), "플레이 테스트 색 매핑 " + names[i]);
+                        Check(panel.rootVisualElement.Q<Button>($"initial-cell-0-{i}").Q("runtime-content").style.backgroundImage.value.sprite ==
+                            LevelBoardArtwork.Rabbit((RabbitColor)i), "플레이 테스트 색 매핑 " + names[i]);
                     object cell = panel.CurrentState.CellAt(new BoardCoordinate(0, 0));
                     cell.GetType().GetProperty("Cover").SetValue(cell, (CoverKind?)CoverKind.Mold);
                     typeof(LevelInitialStatePanel).GetMethod("DisplayState", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(panel, new object[] { null });
                     Button covered = panel.rootVisualElement.Q<Button>("initial-cell-0-0");
-                    Check(covered.style.backgroundImage.value.texture == null && covered.text.Contains("곰팡이"), "곰팡이 아래 토끼 이미지 은폐");
+                    Check(covered.Q("runtime-content").style.backgroundImage.value.sprite == null && covered.text.Contains("곰팡이"), "곰팡이 아래 토끼 이미지 은폐");
                 }
                 Check(JsonUtility.ToJson(level) == before, "메뉴·초기 보드 표시 후 원본 보존");
                 LevelBoardEditing.Apply(level, LevelBrush.Erase, RabbitColor.Type1, new[] { new BoardCoordinate(0, 0) });

@@ -165,6 +165,7 @@ namespace Levels.Editor
                     if (!cell.IsActive) label.AddToClassList("inactive");
                     if (cell.Color.HasValue && cell.Cover != CoverKind.Mold) label.AddToClassList("rabbit-" + (int)cell.Color.Value);
                     if (cell.Cover.HasValue) label.AddToClassList("covered");
+                    RuntimeBoardArtwork.Bind(label, cell, state);
                     line.Add(label);
                 }
             }

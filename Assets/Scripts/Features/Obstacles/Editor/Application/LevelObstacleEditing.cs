@@ -72,14 +72,26 @@ namespace Levels.Editor
                     if (!brush.ReplaceExisting && index >= 0 && level.InitialBlocks[index].Kind != blockKind &&
                         !(LevelPlacementRules.IsNormal(level.InitialBlocks[index].Kind) && LevelPlacementRules.IsNormal(blockKind)))
                         return "다른 블록 종류입니다. 더블클릭으로 교체하세요.";
-                    return LevelPlacementRules.BlockSpaceError(level, coordinate);
+                    if (brush.ReplaceExisting)
+                    {
+                        int obstacle = LevelPlacementRules.Find(level, PlacementLayer.Obstacle, coordinate);
+                        if (obstacle >= 0)
+                        {
+                            ObstaclePlacementDefinition body = level.Obstacles[obstacle];
+                            if ((!string.IsNullOrEmpty(body.Id) && level.Obstacles.Count(item => item.Id == body.Id) > 1) ||
+                                LevelPlacementRules.Footprint(body.Coordinate, LevelPlacementRules.Size(body.Kind))
+                                    .Any(cell => LevelPlacementRules.Find(level, PlacementLayer.Obstacle, cell) != obstacle))
+                                return "중복 ID 또는 점유 영역의 본체는 교체할 수 없습니다.";
+                        }
+                    }
+                    return LevelPlacementRules.BlockSpaceError(level, coordinate, brush.ReplaceExisting);
                 case PlacementLayer.Obstacle:
                     ObstacleKind kind = (ObstacleKind)brush.Kind;
                     string valueError = LevelPlacementRules.ObstacleValueError(level, kind, brush.Durability, brush.Color, brush.RequiredCharge);
                     if (valueError != null) return valueError;
                     if (!brush.ReplaceExisting && index >= 0 && (level.Obstacles[index].Kind != kind || LevelPlacementRules.Size(kind) > 1))
                         return "더블클릭으로 교체하거나 속성에서 수정하세요.";
-                    return LevelPlacementRules.ObstacleSpaceError(level, coordinate, kind, index);
+                    return LevelPlacementRules.ObstacleSpaceError(level, coordinate, kind, index, brush.ReplaceExisting);
                 case PlacementLayer.Cover:
                     string coverError = LevelPlacementRules.CoverValueError((CoverKind)brush.Kind, brush.Durability);
                     if (coverError != null) return coverError;
@@ -121,6 +133,34 @@ namespace Levels.Editor
                     continue;
                 }
                 bool added = index < 0;
+                bool removedBlocks = false;
+                if (brush.ReplaceExisting && brush.Layer == PlacementLayer.Block)
+                {
+                    int obstacle = LevelPlacementRules.Find(level, PlacementLayer.Obstacle, coordinate);
+                    if (obstacle >= 0)
+                    {
+                        if (!string.IsNullOrEmpty(level.Obstacles[obstacle].Id)) replacedIds.Add(level.Obstacles[obstacle].Id);
+                        data.FindProperty("obstacles").DeleteArrayElementAtIndex(obstacle);
+                        removedBlocks = true;
+                    }
+                }
+                if (brush.ReplaceExisting && brush.Layer == PlacementLayer.Obstacle)
+                {
+                    BoardCoordinate origin = added ? coordinate : level.Obstacles[index].Coordinate;
+                    // 검증된 점유 영역만 비운다. 같은 SerializedObject로 적용하여 Undo 한 번에 복원한다.
+                    HashSet<BoardCoordinate> footprint = new HashSet<BoardCoordinate>(LevelPlacementRules.Footprint(origin, brush.Size));
+                    foreach (PlacementLayer layer in new[] { PlacementLayer.Block, PlacementLayer.Cover })
+                    {
+                        SerializedProperty occupied = data.FindProperty(ListPath(layer));
+                        for (int i = occupied.arraySize - 1; i >= 0; i--)
+                        {
+                            SerializedProperty cell = occupied.GetArrayElementAtIndex(i).FindPropertyRelative("coordinate");
+                            if (!footprint.Contains(new BoardCoordinate(cell.FindPropertyRelative("row").intValue, cell.FindPropertyRelative("column").intValue))) continue;
+                            occupied.DeleteArrayElementAtIndex(i);
+                            removedBlocks = true;
+                        }
+                    }
+                }
                 if (added) index = list.arraySize++;
                 SerializedProperty item = list.GetArrayElementAtIndex(index);
                 // 종류가 바뀐 장애물은 새 본체다. 이전 발전기 연결을 넘겨주지 않는다.
@@ -150,7 +190,7 @@ namespace Levels.Editor
                         item.FindPropertyRelative("requiredCharge").intValue = 3;
                     }
                 }
-                bool changed = added;
+                bool changed = added || removedBlocks;
                 if (brush.Layer != PlacementLayer.Dust) changed |= SetInt(item, "kind", brush.Kind);
                 switch (brush.Layer)
                 {
@@ -167,7 +207,7 @@ namespace Levels.Editor
                 }
                 if (changed) result.Changed++;
             }
-            if (brush.Layer == PlacementLayer.Obstacle)
+            if (brush.Layer == PlacementLayer.Obstacle || replacedIds.Count > 0)
             {
                 HashSet<string> removedIds = new HashSet<string>(deletions.Select(index => level.Obstacles[index].Id).Where(id => !string.IsNullOrEmpty(id)));
                 removedIds.UnionWith(replacedIds);

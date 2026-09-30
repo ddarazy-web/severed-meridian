@@ -206,20 +206,7 @@ namespace Levels.Editor
                     if (cell.ObstacleIndex.HasValue && display.Obstacles[cell.ObstacleIndex.Value].Definition.Kind == ObstacleKind.ColorLock)
                         button.AddToClassList("rabbit-" + (int)display.Obstacles[cell.ObstacleIndex.Value].Definition.Color);
                     if (cell.Cover.HasValue) button.AddToClassList("covered");
-                    // 초기 후보·수동 플레이·사례 재생은 이 표시 경로를 공유한다.
-                    // 곰팡이 내부 색을 그림으로 노출하지 않고, 파워/장애물의 문자 표시는 유지한다.
-                    Texture2D rabbitTexture = cell.IsActive && cell.Content == RuntimeContent.Normal &&
-                        cell.Color.HasValue && cell.Cover != CoverKind.Mold ? RabbitBlockArtwork.Get(cell.Color.Value) : null;
-                    if (rabbitTexture != null)
-                    {
-                        button.style.backgroundImage = rabbitTexture;
-                        button.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
-                        button.AddToClassList("rabbit-artwork");
-                        // CellText는 상세 정보·검증에서도 쓰므로 변경하지 않는다. 화면 본문에서만
-                        // 일반 블록 이름을 생략하고 거미줄/먼지/도착 정보는 그대로 남긴다.
-                        button.text = button.text.Replace("토" + ((int)cell.Color.Value + 1), "").Trim();
-                        button.tooltip += " / 토" + ((int)cell.Color.Value + 1);
-                    }
+                    RuntimeBoardArtwork.Bind(button, cell, display);
                     button.clicked += () => ShowCell(cell, button); line.Add(button);
                 }
             }
