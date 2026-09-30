@@ -115,9 +115,9 @@ namespace Levels.Editor
                 {
                     Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(PathFor(i));
                     Check(texture != null && texture.width == 256 && texture.height == 256, "256px 텍스처 로드 " + names[i]);
-                    Check(board.CellAt(new BoardCoordinate(0, i)).style.backgroundImage.value.sprite == LevelBoardArtwork.Rabbit((RabbitColor)i) && texture != null, "편집 보드 색 매핑 " + names[i]);
+                    Check(board.CellAt(new BoardCoordinate(0, i)).Q("board-content-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Rabbit((RabbitColor)i) && texture != null, "편집 보드 색 매핑 " + names[i]);
                 }
-                Check(((Label)board.CellAt(new BoardCoordinate(0, 5))).text == "?" &&
+                Check(board.CellAt(new BoardCoordinate(0, 5)).Q<Label>("board-art-badge").text == "?" &&
                     board.CellAt(new BoardCoordinate(0, 5)).style.backgroundImage.value.texture == null, "무작위 물음표 유지");
                 Check(JsonUtility.ToJson(level) == before, "보드 표시가 원본 데이터를 변경하지 않음");
 

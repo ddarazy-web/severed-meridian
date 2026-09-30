@@ -94,14 +94,43 @@ namespace Levels.Editor
             return file == null ? null : Load("Obstacles/" + file + ".png");
         }
 
-        internal static Sprite Cover(CoverKind kind) => kind switch
+        internal static Sprite Cover(CoverKind kind, int durability = 3) => kind switch
         {
-            CoverKind.Web => Load("Obstacles/Web/web-base-v2.png"),
+            CoverKind.Web when durability >= 1 && durability <= 3 => Load("Obstacles/Web/web-durability-" + durability + "-v2-256.png"),
             CoverKind.Mold => Load("Obstacles/Mold/mold-base-v1-256.png"),
             _ => null
         };
 
-        internal static Sprite Dust => Load("Obstacles/Dust/dust-base-v1-256.png");
+        internal static Sprite Dust(int durability) => durability >= 1 && durability <= 3
+            ? Load("Obstacles/Dust/dust-durability-" + durability + "-v1-256.png") : null;
+
+        internal static Sprite Recovery => Load("BoardDevices/Recovery/recovery-part-v1-256.png");
+        internal static Sprite Arrival => Load("BoardDevices/Recovery/recovery-exit-v1-256.png");
+        internal static Sprite Portal(int pair, bool exit)
+        {
+            string shape = (pair % 4) switch { 0 => "cyan-circle", 1 => "orange-triangle", 2 => "purple-diamond", _ => "green-plus" };
+            return Load("BoardDevices/Portals/portal-" + shape + (exit ? "-exit" : "-entry") + "-v1-256.png");
+        }
+        internal static Sprite Wall(bool vertical) => Load("BoardTerrain/Walls/scrap-wall-" + (vertical ? "vertical" : "horizontal") + "-v1-256.png");
+        internal static Sprite Wire(bool vertical) => Load("BoardDevices/Wiring/wire-" + (vertical ? "vertical" : "horizontal") + "-v1-256.png");
+        internal static Sprite Terminal(int slot, bool connected)
+        {
+            string shape = (slot % 3) switch { 0 => "amber-triangle", 1 => "cyan-circle", _ => "purple-diamond" };
+            return Load("BoardDevices/Wiring/terminal-" + shape + (connected ? "-on" : "-off") + "-v1-256.png");
+        }
+        internal static Sprite ChargePulse(int frame) => Load("Effects/GeneratorCharge/charge-pulse-0" + (frame % 4 + 1) + "-v1-256.png");
+
+        // 네 사분면을 따로 고르면 구멍·막다른 길·복수의 오목한 모서리도 표시할 수 있다.
+        internal static Sprite Floor(LevelDefinition level, BoardCoordinate cell, int quadrant)
+        {
+            int row = quadrant < 2 ? -1 : 1, column = quadrant % 2 == 0 ? -1 : 1;
+            bool horizontal = !LevelFlowRules.Active(level, new BoardCoordinate(cell.Row + row, cell.Column));
+            bool vertical = !LevelFlowRules.Active(level, new BoardCoordinate(cell.Row, cell.Column + column));
+            string side = row < 0 ? "top" : "bottom", end = column < 0 ? "left" : "right";
+            string tile = horizontal && vertical ? "outer-" + side + "-" + end : horizontal ? "edge-" + side : vertical ? "edge-" + end :
+                !LevelFlowRules.Active(level, new BoardCoordinate(cell.Row + row, cell.Column + column)) ? "inner-" + side + "-" + end : "center";
+            return Load("BoardTerrain/Floor/floor-" + tile + "-v1-256.png");
+        }
 
         private static Sprite Load(string relativePath)
         {

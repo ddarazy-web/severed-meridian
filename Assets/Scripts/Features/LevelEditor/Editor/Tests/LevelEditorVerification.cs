@@ -151,7 +151,7 @@ namespace Levels.Editor
             yield return null;
             Check(level.InitialBlocks[LevelBoardEditing.FindBlock(level, new BoardCoordinate(2, 1))].Kind == InitialBlockKind.RandomNormal,
                 "선택 칸 속성에서 고정→무작위 교체");
-            Check(window.rootVisualElement.Q<Label>("cell-21").text == "?", "무작위 보드 표시");
+            Check(window.rootVisualElement.Q<Label>("cell-21").Q<Label>("board-art-badge").text == "?", "무작위 보드 표시");
             window.rootVisualElement.Q<PopupField<string>>("selected-block").value = "빈칸";
             yield return null;
             Check(level.InitialBlocks.Count == 7 && level.Board.Cells[21].IsActive, "지우기는 일반 블록만 제거");
@@ -327,7 +327,7 @@ namespace Levels.Editor
             yield return null;
             malformed = JsonUtility.ToJson(level);
             Pointer(EventType.MouseDown, 9, 9); Pointer(EventType.MouseUp, 9, 9);
-            Check(JsonUtility.ToJson(level) == malformed && window.rootVisualElement.Q<Label>("cell-99").text == "—",
+            Check(JsonUtility.ToJson(level) == malformed && window.rootVisualElement.Q<Label>("cell-99").Q<Label>("board-art-badge").text == "—",
                 "누락된 칸은 자동 추가 없이 표시하고 칠하기 차단");
             using (SerializedObject restoreCell = new SerializedObject(level))
             {

@@ -1,0 +1,702 @@
+[
+  {
+    "group": "floor",
+    "name": "floor-center-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-center-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      34,
+      33,
+      264,
+      263
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-edge-top-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-edge-top-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      325,
+      21,
+      298,
+      275
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-edge-right-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-edge-right-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      650,
+      21,
+      276,
+      288
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-edge-bottom-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-edge-bottom-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      941,
+      33,
+      294,
+      267
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-edge-left-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-edge-left-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      22,
+      322,
+      277,
+      289
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-outer-top-left-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-outer-top-left-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      326,
+      322,
+      296,
+      289
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-outer-top-right-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-outer-top-right-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      634,
+      322,
+      295,
+      289
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-outer-bottom-right-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-outer-bottom-right-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      941,
+      322,
+      292,
+      281
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-outer-bottom-left-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-outer-bottom-left-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      22,
+      629,
+      291,
+      276
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-inner-top-left-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-inner-top-left-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      332,
+      637,
+      277,
+      261
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-inner-top-right-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-inner-top-right-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      646,
+      637,
+      275,
+      261
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-inner-bottom-right-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-inner-bottom-right-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      955,
+      641,
+      275,
+      263
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-inner-bottom-left-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-inner-bottom-left-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      24,
+      939,
+      275,
+      271
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-isolated-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-isolated-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      327,
+      923,
+      293,
+      292
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-strip-horizontal-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-strip-horizontal-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      634,
+      981,
+      294,
+      171
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "floor",
+    "name": "floor-strip-vertical-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Floor/floor-strip-vertical-v1-256.png",
+    "source": "exec-847db2ab-58d4-4960-9900-1c19111c3180.png",
+    "sourceRect": [
+      1007,
+      927,
+      157,
+      286
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "recovery",
+    "name": "recovery-part-v1-256",
+    "path": "Assets/Textures/BoardDevices/Recovery/recovery-part-v1-256.png",
+    "source": "exec-c694e8ef-1bd5-48df-a7b9-9beef063cc12.png",
+    "sourceRect": [
+      75,
+      148,
+      1131,
+      987
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "recovery",
+    "name": "recovery-exit-v1-256",
+    "path": "Assets/Textures/BoardDevices/Recovery/recovery-exit-v1-256.png",
+    "source": "exec-173368d6-c23c-49b4-834f-13c79fc5296a.png",
+    "sourceRect": [
+      122,
+      145,
+      1011,
+      964
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "walls",
+    "name": "scrap-wall-horizontal-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Walls/scrap-wall-horizontal-v1-256.png",
+    "source": "exec-2722045a-29c3-47ec-bcf5-1751a8652e1e.png",
+    "sourceRect": [
+      67,
+      275,
+      716,
+      140
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "walls",
+    "name": "scrap-wall-vertical-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Walls/scrap-wall-vertical-v1-256.png",
+    "source": "exec-2722045a-29c3-47ec-bcf5-1751a8652e1e.png",
+    "sourceRect": [
+      938,
+      46,
+      128,
+      605
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "walls",
+    "name": "scrap-wall-corner-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Walls/scrap-wall-corner-v1-256.png",
+    "source": "exec-2722045a-29c3-47ec-bcf5-1751a8652e1e.png",
+    "sourceRect": [
+      180,
+      712,
+      518,
+      473
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "walls",
+    "name": "scrap-wall-endcap-v1-256",
+    "path": "Assets/Textures/BoardTerrain/Walls/scrap-wall-endcap-v1-256.png",
+    "source": "exec-2722045a-29c3-47ec-bcf5-1751a8652e1e.png",
+    "sourceRect": [
+      933,
+      871,
+      139,
+      142
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "portals",
+    "name": "portal-cyan-circle-entry-v1-256",
+    "path": "Assets/Textures/BoardDevices/Portals/portal-cyan-circle-entry-v1-256.png",
+    "source": "exec-9f5e46b6-443d-4d7b-a7da-51a3032953a8.png",
+    "sourceRect": [
+      278,
+      26,
+      285,
+      281
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "portals",
+    "name": "portal-cyan-circle-exit-v1-256",
+    "path": "Assets/Textures/BoardDevices/Portals/portal-cyan-circle-exit-v1-256.png",
+    "source": "exec-9f5e46b6-443d-4d7b-a7da-51a3032953a8.png",
+    "sourceRect": [
+      690,
+      26,
+      286,
+      281
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "portals",
+    "name": "portal-orange-triangle-entry-v1-256",
+    "path": "Assets/Textures/BoardDevices/Portals/portal-orange-triangle-entry-v1-256.png",
+    "source": "exec-9f5e46b6-443d-4d7b-a7da-51a3032953a8.png",
+    "sourceRect": [
+      278,
+      327,
+      286,
+      283
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "portals",
+    "name": "portal-orange-triangle-exit-v1-256",
+    "path": "Assets/Textures/BoardDevices/Portals/portal-orange-triangle-exit-v1-256.png",
+    "source": "exec-9f5e46b6-443d-4d7b-a7da-51a3032953a8.png",
+    "sourceRect": [
+      690,
+      327,
+      287,
+      282
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "portals",
+    "name": "portal-purple-diamond-entry-v1-256",
+    "path": "Assets/Textures/BoardDevices/Portals/portal-purple-diamond-entry-v1-256.png",
+    "source": "exec-9f5e46b6-443d-4d7b-a7da-51a3032953a8.png",
+    "sourceRect": [
+      278,
+      634,
+      287,
+      283
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "portals",
+    "name": "portal-purple-diamond-exit-v1-256",
+    "path": "Assets/Textures/BoardDevices/Portals/portal-purple-diamond-exit-v1-256.png",
+    "source": "exec-9f5e46b6-443d-4d7b-a7da-51a3032953a8.png",
+    "sourceRect": [
+      689,
+      633,
+      288,
+      284
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "portals",
+    "name": "portal-green-plus-entry-v1-256",
+    "path": "Assets/Textures/BoardDevices/Portals/portal-green-plus-entry-v1-256.png",
+    "source": "exec-9f5e46b6-443d-4d7b-a7da-51a3032953a8.png",
+    "sourceRect": [
+      278,
+      935,
+      287,
+      284
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "portals",
+    "name": "portal-green-plus-exit-v1-256",
+    "path": "Assets/Textures/BoardDevices/Portals/portal-green-plus-exit-v1-256.png",
+    "source": "exec-9f5e46b6-443d-4d7b-a7da-51a3032953a8.png",
+    "sourceRect": [
+      689,
+      935,
+      288,
+      284
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "wires",
+    "name": "wire-horizontal-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/wire-horizontal-v1-256.png",
+    "source": "exec-d35d24ab-abed-492c-bbd0-e5799fe963e2.png",
+    "sourceRect": [
+      23,
+      276,
+      580,
+      75
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "wires",
+    "name": "wire-vertical-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/wire-vertical-v1-256.png",
+    "source": "exec-d35d24ab-abed-492c-bbd0-e5799fe963e2.png",
+    "sourceRect": [
+      903,
+      41,
+      75,
+      544
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "wires",
+    "name": "wire-corner-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/wire-corner-v1-256.png",
+    "source": "exec-d35d24ab-abed-492c-bbd0-e5799fe963e2.png",
+    "sourceRect": [
+      23,
+      773,
+      433,
+      440
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "wires",
+    "name": "wire-endcap-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/wire-endcap-v1-256.png",
+    "source": "exec-d35d24ab-abed-492c-bbd0-e5799fe963e2.png",
+    "sourceRect": [
+      898,
+      890,
+      84,
+      83
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "terminals",
+    "name": "terminal-amber-triangle-off-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/terminal-amber-triangle-off-v1-256.png",
+    "source": "exec-cfd975f7-d02a-430e-a386-e1ab6ab6c65a.png",
+    "sourceRect": [
+      224,
+      85,
+      352,
+      316
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "terminals",
+    "name": "terminal-amber-triangle-on-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/terminal-amber-triangle-on-v1-256.png",
+    "source": "exec-cfd975f7-d02a-430e-a386-e1ab6ab6c65a.png",
+    "sourceRect": [
+      680,
+      85,
+      352,
+      316
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "terminals",
+    "name": "terminal-cyan-circle-off-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/terminal-cyan-circle-off-v1-256.png",
+    "source": "exec-cfd975f7-d02a-430e-a386-e1ab6ab6c65a.png",
+    "sourceRect": [
+      224,
+      461,
+      353,
+      316
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "terminals",
+    "name": "terminal-cyan-circle-on-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/terminal-cyan-circle-on-v1-256.png",
+    "source": "exec-cfd975f7-d02a-430e-a386-e1ab6ab6c65a.png",
+    "sourceRect": [
+      680,
+      462,
+      352,
+      315
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "terminals",
+    "name": "terminal-purple-diamond-off-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/terminal-purple-diamond-off-v1-256.png",
+    "source": "exec-cfd975f7-d02a-430e-a386-e1ab6ab6c65a.png",
+    "sourceRect": [
+      224,
+      854,
+      352,
+      316
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "terminals",
+    "name": "terminal-purple-diamond-on-v1-256",
+    "path": "Assets/Textures/BoardDevices/Wiring/terminal-purple-diamond-on-v1-256.png",
+    "source": "exec-cfd975f7-d02a-430e-a386-e1ab6ab6c65a.png",
+    "sourceRect": [
+      679,
+      854,
+      353,
+      316
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "charge-pulse",
+    "name": "charge-pulse-01-v1-256",
+    "path": "Assets/Textures/Effects/GeneratorCharge/charge-pulse-01-v1-256.png",
+    "source": "exec-e5952ec5-06c0-4fe3-9ef7-d5e42ba7b8f7.png",
+    "sourceRect": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "charge-pulse",
+    "name": "charge-pulse-02-v1-256",
+    "path": "Assets/Textures/Effects/GeneratorCharge/charge-pulse-02-v1-256.png",
+    "source": "exec-e5952ec5-06c0-4fe3-9ef7-d5e42ba7b8f7.png",
+    "sourceRect": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "charge-pulse",
+    "name": "charge-pulse-03-v1-256",
+    "path": "Assets/Textures/Effects/GeneratorCharge/charge-pulse-03-v1-256.png",
+    "source": "exec-e5952ec5-06c0-4fe3-9ef7-d5e42ba7b8f7.png",
+    "sourceRect": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "charge-pulse",
+    "name": "charge-pulse-04-v1-256",
+    "path": "Assets/Textures/Effects/GeneratorCharge/charge-pulse-04-v1-256.png",
+    "source": "exec-e5952ec5-06c0-4fe3-9ef7-d5e42ba7b8f7.png",
+    "sourceRect": [
+      627,
+      627,
+      627,
+      627
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "web",
+    "name": "web-durability-1-v2-256",
+    "path": "Assets/Textures/Obstacles/Web/web-durability-1-v2-256.png",
+    "source": "exec-f11c99df-c7ce-42e3-a0e9-48f3f57da930.png",
+    "sourceRect": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "dust",
+    "name": "dust-durability-1-v1-256",
+    "path": "Assets/Textures/Obstacles/Dust/dust-durability-1-v1-256.png",
+    "source": "exec-7db2a24f-3397-4cc7-9946-d79efd6ce8a8.png",
+    "sourceRect": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "web",
+    "name": "web-durability-2-v2-256",
+    "path": "Assets/Textures/Obstacles/Web/web-durability-2-v2-256.png",
+    "source": "exec-e3179992-e3d6-44c1-931e-5b1ef66f231d.png",
+    "sourceRect": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "dust",
+    "name": "dust-durability-2-v1-256",
+    "path": "Assets/Textures/Obstacles/Dust/dust-durability-2-v1-256.png",
+    "source": "exec-6be66629-9a62-42bd-ad88-b318fbc339a7.png",
+    "sourceRect": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "web",
+    "name": "web-durability-3-v2-256",
+    "path": "Assets/Textures/Obstacles/Web/web-durability-3-v2-256.png",
+    "source": "exec-dd6a7ac3-bf75-4973-a640-3afb663c2dd2.png",
+    "sourceRect": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "width": 256,
+    "height": 256
+  },
+  {
+    "group": "dust",
+    "name": "dust-durability-3-v1-256",
+    "path": "Assets/Textures/Obstacles/Dust/dust-durability-3-v1-256.png",
+    "source": "exec-f1a61d5f-7845-4401-9c4b-63d7b8e7f03d.png",
+    "sourceRect": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "width": 256,
+    "height": 256
+  }
+]

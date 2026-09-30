@@ -1,4 +1,4 @@
-﻿// [UNITY-SKILL:SPRITEATLAS]
+// [UNITY-SKILL:SPRITEATLAS]
 using System.IO;
 using System.Linq;
 using Board;
@@ -25,14 +25,16 @@ namespace Levels.Editor
         public static string[] SourcePaths() => Directory.GetFiles("Assets/Textures", "*.png", SearchOption.AllDirectories)
             .Select(path => path.Replace('\\', '/')).Where(path =>
                 path.StartsWith("Assets/Textures/Blocks/") ||
+                path.StartsWith("Assets/Textures/BoardTerrain/") || path.StartsWith("Assets/Textures/BoardDevices/") ||
+                path.StartsWith("Assets/Textures/Effects/GeneratorCharge/") ||
                 path.Contains("/Animations/") ||
                 path.StartsWith("Assets/Textures/Obstacles/") && !new[] { "Crate", "Scrap", "RecoveryCapsule", "MetalRodBox", "ColorLock", "Generator", "Web", "Mold", "Dust", "Lock" }.Contains(path.Split('/')[3]) ||
                 path.StartsWith("Assets/Textures/PowerBlocks/") && (!path.Contains("4frames") || ((TextureImporter)AssetImporter.GetAtPath(path)).spriteImportMode == SpriteImportMode.Multiple) && !path.Contains("launch-frame-1-") ||
                 path.Contains("/Crate/crate-durability-") || path.Contains("/Scrap/scrap-durability-") ||
                 path.Contains("/RecoveryCapsule/recovery-capsule-durability-") || path.Contains("/MetalRodBox/metal-rod-box-") ||
                 path.Contains("/ColorLock/color-lock-") && path.Contains("-durability-") ||
-                path.Contains("/Generator/generator-charge-") || path.EndsWith("/Web/web-base-v2.png") ||
-                path.EndsWith("/Mold/mold-base-v1-256.png") || path.EndsWith("/Dust/dust-base-v1-256.png"))
+                path.Contains("/Generator/generator-charge-") || path.Contains("/Web/web-durability-") && path.EndsWith("-v2-256.png") ||
+                path.EndsWith("/Mold/mold-base-v1-256.png") || path.Contains("/Dust/dust-durability-") && path.EndsWith("-v1-256.png"))
             .OrderBy(path => path).ToArray();
 
         public static void Generate()

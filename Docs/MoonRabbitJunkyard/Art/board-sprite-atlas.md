@@ -9,8 +9,11 @@
 | `Assets/Textures/Blocks/` | `MoonRabbitBoard-Blocks` |
 | `Assets/Textures/PowerBlocks/` | `MoonRabbitBoard-PowerBlocks` |
 | `Assets/Textures/Obstacles/<종류>/` | `MoonRabbitBoard-Obstacles-<종류>` |
+| `Assets/Textures/BoardTerrain/<종류>/` | `MoonRabbitBoard-BoardTerrain-<종류>` |
+| `Assets/Textures/BoardDevices/<종류>/` | `MoonRabbitBoard-BoardDevices-<종류>` |
+| `Assets/Textures/Effects/GeneratorCharge/` | `MoonRabbitBoard-Effects-GeneratorCharge` |
 
-현재 아틀라스 11개: Blocks, PowerBlocks, Crate, Scrap, RecoveryCapsule, MetalRodBox, ColorLock, Generator, Web, Mold, Dust. 페이지는 최대 2048×2048이며 실제 크기는 Unity가 2의 거듭제곱으로 패킹한다. 프레임이 늘어 한 페이지를 넘으면 해당 아틀라스에 페이지를 추가한다. 페이지별 텍스처 전환은 발생할 수 있다.
+현재 아틀라스 17개: 기존 Blocks, PowerBlocks, Crate, Scrap, RecoveryCapsule, MetalRodBox, ColorLock, Generator, Web, Mold, Dust에 Floor, Walls, Recovery, Portals, Wiring, GeneratorCharge를 추가했다. 페이지는 최대 2048×2048이며 실제 크기는 Unity가 2의 거듭제곱으로 패킹한다. 프레임이 늘어 한 페이지를 넘으면 해당 아틀라스에 페이지를 추가한다. 페이지별 텍스처 전환은 발생할 수 있다.
 
 `SpriteAtlasV2`, 회전·타이트 패킹 비활성, 패딩 4px, mipmap 비활성, RGBA32 무압축을 사용한다. 원본 PNG는 보존한다. 선택 메뉴와 플레이 테스트는 기존 표시 경로를 유지하며 편집 보드만 아틀라스 Sprite를 사용한다.
 

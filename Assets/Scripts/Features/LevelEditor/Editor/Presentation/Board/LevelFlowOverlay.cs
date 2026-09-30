@@ -61,9 +61,11 @@ namespace Levels.Editor
                 else if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter) { Complete(); evt.StopImmediatePropagation(); }
                 else if (evt.keyCode == KeyCode.Backspace && draft.Count > 0) { draft.RemoveAt(draft.Count - 1); MarkDirtyRepaint(); evt.StopImmediatePropagation(); }
             });
-            pulse = schedule.Execute(MarkDirtyRepaint).Every(100);
+            pulse = schedule.Execute(() => { AnimateArtwork(); MarkDirtyRepaint(); }).Every(100);
             RegisterCallback<DetachFromPanelEvent>(_ => { CancelInput(); pulse.Pause(); });
             RegisterCallback<AttachToPanelEvent>(_ => pulse.Resume());
+            RegisterCallback<AttachToPanelEvent>(_ => { LevelBoardArtwork.Loaded += RefreshLabels; LevelBoardArtwork.Acquire(); });
+            RegisterCallback<DetachFromPanelEvent>(_ => { LevelBoardArtwork.Loaded -= RefreshLabels; LevelBoardArtwork.Release(); });
         }
 
         public void Display(LevelDefinition target, FlowTool active)
@@ -298,7 +300,8 @@ namespace Levels.Editor
             {
                 if (!wall.IsAdjacent || !Visible(wall.A) || !Visible(wall.B)) continue;
                 BoardEdge segment = LevelFlowRules.WallSegment(wall);
-                Line(painter, Point(segment.A, true), Point(segment.B, true), HighlightWall.HasValue && HighlightWall.Value.Equals(wall) ? Color.white : new Color(0.75f, 0.78f, 0.84f), 6);
+                if (LevelBoardArtwork.Wall(segment.A.Column == segment.B.Column) == null || HighlightWall.HasValue && HighlightWall.Value.Equals(wall))
+                    Line(painter, Point(segment.A, true), Point(segment.B, true), HighlightWall.HasValue && HighlightWall.Value.Equals(wall) ? Color.white : new Color(0.75f, 0.78f, 0.84f), 8);
             }
             if (level.Connections != null)
                 for (int i = 0; i < level.Connections.Count; i++)
@@ -309,13 +312,13 @@ namespace Levels.Editor
                     foreach (BoardEdge segment in LevelFlowRules.Segments(connection.Vertices))
                     {
                         if (!Visible(segment.A, true) || !Visible(segment.B, true)) continue;
-                        Line(painter, Point(segment.A, true), Point(segment.B, true), color, i == HighlightConnection ? 4 : 2);
-                        if (!flowPulse) Mark(painter, Vector2.Lerp(Point(segment.A, true), Point(segment.B, true), phase), Color.white, 2.5f);
+                        if (LevelBoardArtwork.Wire(segment.A.Column == segment.B.Column) == null || i == HighlightConnection)
+                            Line(painter, Point(segment.A, true), Point(segment.B, true), color, i == HighlightConnection ? 6 : 2);
                     }
                     if (connection.Vertices.Count > 0)
                     {
                         foreach (BoardCoordinate terminal in new[] { connection.Vertices[0], connection.Vertices[connection.Vertices.Count - 1] })
-                            if (Visible(terminal, true)) Mark(painter, Point(terminal, true), color, 5);
+                            if (Visible(terminal, true) && LevelBoardArtwork.Terminal(ConnectionSlot(connection), true) == null) Mark(painter, Point(terminal, true), color, 5);
                     }
                 }
             foreach (BoardCoordinate cell in cells) Mark(painter, Point(cell), Color.yellow, 9);
@@ -346,7 +349,9 @@ namespace Levels.Editor
         private void RefreshLabels()
         {
             Clear();
+            artworkPulses.Clear();
             if (level?.Flow == null || !level.Flow.ListsPresent) return;
+            RefreshArtwork();
             for (int i = 0; i < level.Flow.Portals.Count; i++)
             {
                 FlowPortal portal = level.Flow.Portals[i];

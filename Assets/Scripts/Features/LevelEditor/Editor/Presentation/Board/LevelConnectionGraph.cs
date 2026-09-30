@@ -34,6 +34,8 @@ namespace Levels.Editor
             RegisterCallback<PointerUpEvent>(Up);
             RegisterCallback<PointerCaptureOutEvent>(_ => Cancel());
             RegisterCallback<DetachFromPanelEvent>(_ => Cancel());
+            RegisterCallback<AttachToPanelEvent>(_ => { LevelBoardArtwork.Loaded += RefreshPortArtwork; LevelBoardArtwork.Acquire(); });
+            RegisterCallback<DetachFromPanelEvent>(_ => { LevelBoardArtwork.Loaded -= RefreshPortArtwork; LevelBoardArtwork.Release(); });
             RegisterCallback<KeyDownEvent>(evt => { if (evt.keyCode == KeyCode.Escape && IsDragging) { Cancel(); evt.StopImmediatePropagation(); } });
         }
         public void Display(LevelDefinition value, BoardCoordinate? selected, bool show)
@@ -122,6 +124,8 @@ namespace Levels.Editor
             Vector2 point = PortPoint(body, slot);
             VisualElement port = CreatePort("connection-port-" + body + "-" + slot, point, connection >= 0,
                 connection >= 0 ? "연결됨 · 우클릭으로 해제" : "드래그해서 발전기와 장애물을 연결");
+            port.style.left = point.x - 10; port.style.top = point.y - 10; port.style.width = port.style.height = 20;
+            SetPortArtwork(port, body, slot, connection);
             port.RegisterCallback<PointerDownEvent>(evt =>
             {
                 if (evt.button != 0) return;
@@ -143,6 +147,31 @@ namespace Levels.Editor
             });
             if (connection >= 0) AddDeleteMenu(port, () => LevelConnectionEditing.Remove(level, connection));
             Add(port);
+        }
+        private void RefreshPortArtwork()
+        {
+            // 비동기 이미지 로드로 입력 대상을 다시 만들면 진행 중인 포인터 적중 정보가 낡을 수 있다.
+            foreach (VisualElement port in Children())
+            {
+                if (port.name == null || !port.name.StartsWith("connection-port-")) continue;
+                string[] parts = port.name.Split('-'); int body = int.Parse(parts[2]), slot = int.Parse(parts[3]);
+                SetPortArtwork(port, body, slot, Connections(body)[slot]);
+            }
+        }
+        private void SetPortArtwork(VisualElement port, int body, int slot, int connection)
+        {
+            int artSlot = slot;
+            if (connection >= 0 && level.Obstacles[body].Kind != ObstacleKind.Generator)
+            {
+                int generator = LevelConnectionRules.Find(level, level.Connections[connection].GeneratorId);
+                if (generator >= 0) artSlot = Mathf.Max(0, System.Array.IndexOf(Connections(generator), connection));
+            }
+            Sprite art = LevelBoardArtwork.Terminal(artSlot, connection >= 0);
+            if (art == null) return;
+            port.style.backgroundImage = new StyleBackground(art);
+            port.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+            port.style.backgroundColor = Color.clear;
+            port.style.borderLeftWidth = port.style.borderRightWidth = port.style.borderTopWidth = port.style.borderBottomWidth = 0;
         }
         private static VisualElement CreatePort(string name, Vector2 point, bool connected, string tooltip)
         {

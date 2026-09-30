@@ -35,7 +35,10 @@ namespace Levels.Editor
             if (picked != port)
             {
                 Capture("failed-port.png");
-                throw new InvalidOperationException($"연결점 포인터 적중 실패: port={port.worldBound}, picked={picked?.name}, board={Graph.worldBound}, tab={window.WorkspaceTab}");
+                string ancestry = "";
+                for (VisualElement item = picked; item != null; item = item.parent)
+                    ancestry += $" {item.GetType().Name}:{item.name}:{item.pickingMode}:{item.worldBound}";
+                throw new InvalidOperationException($"연결점 포인터 적중 실패: port={port.worldBound}, picked={ancestry}, board={Graph.worldBound}, tab={window.WorkspaceTab}");
             }
             Send(port, EventType.MouseDown, port.worldBound.center);
         }
@@ -119,7 +122,8 @@ namespace Levels.Editor
             Send(Graph, EventType.MouseUp, end); yield return null;
             Check(level.Connections.Count == 1 && !Graph.IsDragging && level.Connections[0].Vertices[0].Equals(C(5, 6)), "실제 포인터 발전기→장애물/선택 슬롯 보존");
             Check(level.Connections[0].Vertices.Last().Equals(C(6, 10)), "선택한 장애물 연결점에 전선 끝점 일치");
-            Check(Graph.Q("connection-port-0-1").resolvedStyle.backgroundColor.g > 0.8f, "연결점 점등"); Capture("connected.png");
+            Check(Graph.Q("connection-port-0-1").style.backgroundImage.value.sprite?.name.Contains("-on-") == true ||
+                Graph.Q("connection-port-0-1").resolvedStyle.backgroundColor.g > 0.8f, "연결점 점등"); Capture("connected.png");
             Check(Graph.Q("connection-candidate-1") == null, "발전기 연결 완료 시 후보 강조 해제");
             ClickPort(0, 0); yield return null;
             Check(Graph.Q("connection-candidate-1") == null, "이미 연결된 장애물 후보 강조 제외");

@@ -348,16 +348,16 @@ namespace Levels.Editor
                     conflict |= index != -1 || obstacleIndex != -1 || coverIndex != -1;
                     text = "부";
                     background = new Color32(77, 103, 117, 255);
+                    rabbitTexture = LevelBoardArtwork.Recovery;
                 }
                 bool isSelected = PlacementSelection.Contains(coordinate) || selectedArea.Contains(coordinate) || (selected.HasValue && selected.Value.Equals(coordinate)) ||
                     (Brush == LevelBrush.SourceSelect && SourceSelection.Contains(coordinate));
                 Color border = preview ? previewError != null ? new Color32(255, 78, 78, 255) : new Color32(255, 225, 90, 255) :
                     isSelected ? UnityEngine.Color.white : errors.Contains(coordinate) || index == -2 || conflict ? new Color32(255, 78, 78, 255) : new Color32(24, 27, 32, 255);
-                // 보드에만 그림을 적용하고, 중복 배치와 회수 부품은 기존 진단 표시를 유지한다.
+                // 보드에만 그림을 적용하고 중복 배치의 진단 표시는 유지한다.
                 bool showRabbit = rabbitTexture != null && active && !conflict &&
-                    !LevelSupplyRules.HasRecovery(level, coordinate) &&
                     (coverIndex == -1 || (coverIndex >= 0 && level.Covers[coverIndex].Kind == CoverKind.Web));
-                cell.style.backgroundImage = showRabbit ? new StyleBackground(rabbitTexture) : new StyleBackground(StyleKeyword.None);
+                cell.style.backgroundImage = new StyleBackground(StyleKeyword.None);
                 cell.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
                 cell.style.unityTextAlign = showRabbit ? TextAnchor.UpperLeft : TextAnchor.MiddleCenter;
                 cell.style.unityTextOutlineWidth = showRabbit ? 1 : 0;
@@ -434,10 +434,25 @@ namespace Levels.Editor
                 dustLabel.text = dustIndex >= 0 ? level.Dust[dustIndex].Durability.ToString() : "";
                 dustLabel.style.display = dustIndex >= 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 // 먼지는 바닥, 내용물은 그 위, 덮개는 최상단 순서로 겹친다.
-                Sprite dustTexture = active && dustIndex >= 0 && !conflict ? LevelBoardArtwork.Dust : null;
-                Sprite coverTexture = active && coverIndex >= 0 && !conflict ? LevelBoardArtwork.Cover(level.Covers[coverIndex].Kind) : null;
-                if (dustTexture != null) cell.style.backgroundImage = new StyleBackground(dustTexture);
-                SetArtworkLayer(cell, "board-content-art", dustTexture != null && showRabbit ? rabbitTexture : null);
+                Sprite dustTexture = active && dustIndex >= 0 && !conflict ? LevelBoardArtwork.Dust(level.Dust[dustIndex].Durability) : null;
+                Sprite coverTexture = active && coverIndex >= 0 && !conflict ? LevelBoardArtwork.Cover(level.Covers[coverIndex].Kind, level.Covers[coverIndex].Durability) : null;
+                SetFloor(cell, coordinate, active);
+                SetArtworkLayer(cell, "board-arrival-art", active && level.Flow != null && level.Flow.Arrivals.Contains(coordinate) ? LevelBoardArtwork.Arrival : null);
+                SetArtworkLayer(cell, "board-dust-art", dustTexture);
+                SetArtworkLayer(cell, "board-content-art", showRabbit ? rabbitTexture : null);
+                Sprite portalTexture = null;
+                if (active && level.Flow?.Portals != null)
+                    for (int pair = 0; pair < level.Flow.Portals.Count; pair++)
+                    {
+                        FlowPortal portal = level.Flow.Portals[pair];
+                        if (portal.Entrance.Equals(coordinate)) portalTexture = LevelBoardArtwork.Portal(pair, false);
+                        else if (portal.HasExit && portal.Exit.Equals(coordinate)) portalTexture = LevelBoardArtwork.Portal(pair, true);
+                    }
+                SetArtworkLayer(cell, "board-portal-art", portalTexture);
+                // 통로와 블록이 함께 있는 칸에서는 내용물을 작게 올려 양쪽 역할을 보존한다.
+                if (portalTexture != null && showRabbit) cell.Q<VisualElement>("board-content-art").BringToFront();
+                VisualElement contentArt = cell.Q<VisualElement>("board-content-art");
+                contentArt.style.left = contentArt.style.right = contentArt.style.top = contentArt.style.bottom = portalTexture != null ? 9 : 0;
                 SetArtworkLayer(cell, "board-cover-art", coverTexture);
                 if (coverTexture != null)
                 {
@@ -458,8 +473,12 @@ namespace Levels.Editor
                     cell.Add(artworkBadge);
                 }
                 artworkBadge.text = cell.text;
-                artworkBadge.style.display = dustTexture != null || coverTexture != null ? DisplayStyle.Flex : DisplayStyle.None;
-                if (dustTexture != null || coverTexture != null) cell.text = "";
+                artworkBadge.style.right = artworkBadge.style.bottom = 1;
+                artworkBadge.style.fontSize = cell.style.fontSize;
+                artworkBadge.style.unityTextAlign = showRabbit || coverTexture != null || dustTexture != null ? TextAnchor.UpperLeft : TextAnchor.MiddleCenter;
+                artworkBadge.style.display = DisplayStyle.Flex;
+                cell.text = "";
+                coverOutline.BringToFront();
                 artworkBadge.BringToFront();
                 dustLabel.BringToFront();
             }
@@ -497,6 +516,38 @@ namespace Levels.Editor
                 }
                 bodies.Add(label);
             }
+        }
+
+        private void SetFloor(VisualElement cell, BoardCoordinate coordinate, bool active)
+        {
+            VisualElement floor = cell.Q<VisualElement>("board-floor-art");
+            if (floor == null)
+            {
+                floor = new VisualElement { name = "board-floor-art", pickingMode = PickingMode.Ignore };
+                floor.style.position = Position.Absolute;
+                floor.style.left = floor.style.right = floor.style.top = floor.style.bottom = 0;
+                for (int quadrant = 0; quadrant < 4; quadrant++)
+                {
+                    VisualElement clip = new VisualElement { pickingMode = PickingMode.Ignore };
+                    clip.style.position = Position.Absolute;
+                    clip.style.left = Length.Percent(quadrant % 2 * 50); clip.style.top = Length.Percent(quadrant / 2 * 50);
+                    clip.style.width = clip.style.height = Length.Percent(50); clip.style.overflow = Overflow.Hidden;
+                    VisualElement tile = new VisualElement { pickingMode = PickingMode.Ignore };
+                    tile.style.position = Position.Absolute;
+                    tile.style.left = Length.Percent(quadrant % 2 * -100); tile.style.top = Length.Percent(quadrant / 2 * -100);
+                    tile.style.width = tile.style.height = Length.Percent(200);
+                    tile.style.backgroundSize = new BackgroundSize(Length.Percent(100), Length.Percent(100));
+                    clip.Add(tile); floor.Add(clip);
+                }
+                cell.Add(floor);
+            }
+            floor.style.display = active ? DisplayStyle.Flex : DisplayStyle.None;
+            for (int quadrant = 0; quadrant < 4; quadrant++)
+            {
+                Sprite sprite = active ? LevelBoardArtwork.Floor(level, coordinate, quadrant) : null;
+                floor[quadrant][0].style.backgroundImage = sprite != null ? new StyleBackground(sprite) : new StyleBackground(StyleKeyword.None);
+            }
+            floor.SendToBack();
         }
 
         private static void SetArtworkLayer(VisualElement cell, string name, Sprite texture)

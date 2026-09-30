@@ -29,7 +29,8 @@ namespace Board
         public static string AddressFor(string relativePath)
         {
             string[] parts = relativePath.Replace('\\', '/').Split('/');
-            return Prefix + (parts[0] == "Obstacles" ? "Obstacles-" + parts[1] : parts[0]);
+            bool byKind = parts[0] == "Obstacles" || parts[0] == "BoardTerrain" || parts[0] == "BoardDevices" || parts[0] == "Effects";
+            return Prefix + (byKind ? parts[0] + "-" + parts[1] : parts[0]);
         }
 
         public async UniTask LoadAsync()
