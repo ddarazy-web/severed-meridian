@@ -1,0 +1,534 @@
+[
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-pink-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 53982,
+    "visiblePixels": 11554
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-pink-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 37949,
+    "visiblePixels": 27587
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-pink-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 35967,
+    "visiblePixels": 29569
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-pink-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 47574,
+    "visiblePixels": 17962
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-yellow-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 54823,
+    "visiblePixels": 10713
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-yellow-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 35007,
+    "visiblePixels": 30529
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-yellow-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 31353,
+    "visiblePixels": 34183
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-yellow-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 48441,
+    "visiblePixels": 17095
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-blue-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 57962,
+    "visiblePixels": 7574
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-blue-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 45991,
+    "visiblePixels": 19545
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-blue-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 52498,
+    "visiblePixels": 13038
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-blue-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 60935,
+    "visiblePixels": 4601
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-green-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 60258,
+    "visiblePixels": 5278
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-green-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 47551,
+    "visiblePixels": 17985
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-green-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 53450,
+    "visiblePixels": 12086
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-green-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 61092,
+    "visiblePixels": 4444
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-purple-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 55652,
+    "visiblePixels": 9884
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-purple-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 36791,
+    "visiblePixels": 28745
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-purple-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 38756,
+    "visiblePixels": 26780
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Match\\Animations\\match-purple-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 53087,
+    "visiblePixels": 12449
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\PowerCreation\\Animations\\power-creation-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 41737,
+    "visiblePixels": 23799
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\PowerCreation\\Animations\\power-creation-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 33895,
+    "visiblePixels": 31641
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\PowerCreation\\Animations\\power-creation-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 32389,
+    "visiblePixels": 33147
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\PowerCreation\\Animations\\power-creation-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 45814,
+    "visiblePixels": 19722
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Rocket\\Animations\\rocket-trail-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 60554,
+    "visiblePixels": 4982
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Rocket\\Animations\\rocket-trail-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 52580,
+    "visiblePixels": 12956
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Rocket\\Animations\\rocket-trail-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 55300,
+    "visiblePixels": 10236
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Rocket\\Animations\\rocket-trail-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 61282,
+    "visiblePixels": 4254
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Rocket\\Animations\\rocket-impact-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 61970,
+    "visiblePixels": 3566
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Rocket\\Animations\\rocket-impact-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 43945,
+    "visiblePixels": 21591
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Rocket\\Animations\\rocket-impact-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 47344,
+    "visiblePixels": 18192
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Rocket\\Animations\\rocket-impact-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 62178,
+    "visiblePixels": 3358
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Drone\\Animations\\drone-target-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 54696,
+    "visiblePixels": 10840
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Drone\\Animations\\drone-target-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 41201,
+    "visiblePixels": 24335
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Drone\\Animations\\drone-target-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 42434,
+    "visiblePixels": 23102
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Drone\\Animations\\drone-target-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 51543,
+    "visiblePixels": 13993
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Drone\\Animations\\drone-impact-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 59001,
+    "visiblePixels": 6535
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Drone\\Animations\\drone-impact-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 39293,
+    "visiblePixels": 26243
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Drone\\Animations\\drone-impact-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 41521,
+    "visiblePixels": 24015
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Drone\\Animations\\drone-impact-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 59327,
+    "visiblePixels": 6209
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Magnet\\Animations\\magnet-pull-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 45154,
+    "visiblePixels": 20382
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Magnet\\Animations\\magnet-pull-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 40508,
+    "visiblePixels": 25028
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Magnet\\Animations\\magnet-pull-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 48468,
+    "visiblePixels": 17068
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Magnet\\Animations\\magnet-pull-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 60499,
+    "visiblePixels": 5037
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Magnet\\Animations\\magnet-transform-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 60148,
+    "visiblePixels": 5388
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Magnet\\Animations\\magnet-transform-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 54498,
+    "visiblePixels": 11038
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Magnet\\Animations\\magnet-transform-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 58062,
+    "visiblePixels": 7474
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\Magnet\\Animations\\magnet-transform-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 62700,
+    "visiblePixels": 2836
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\WoodBreak\\Animations\\wood-break-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 59513,
+    "visiblePixels": 6023
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\WoodBreak\\Animations\\wood-break-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 38119,
+    "visiblePixels": 27417
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\WoodBreak\\Animations\\wood-break-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 48743,
+    "visiblePixels": 16793
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\WoodBreak\\Animations\\wood-break-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 62299,
+    "visiblePixels": 3237
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\MetalBreak\\Animations\\metal-break-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 58900,
+    "visiblePixels": 6636
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\MetalBreak\\Animations\\metal-break-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 47097,
+    "visiblePixels": 18439
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\MetalBreak\\Animations\\metal-break-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 49933,
+    "visiblePixels": 15603
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\MetalBreak\\Animations\\metal-break-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 60948,
+    "visiblePixels": 4588
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\WebBreak\\Animations\\web-break-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 60848,
+    "visiblePixels": 4688
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\WebBreak\\Animations\\web-break-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 47318,
+    "visiblePixels": 18218
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\WebBreak\\Animations\\web-break-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 47811,
+    "visiblePixels": 17725
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\WebBreak\\Animations\\web-break-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 55418,
+    "visiblePixels": 10118
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\DustClear\\Animations\\dust-clear-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 61419,
+    "visiblePixels": 4117
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\DustClear\\Animations\\dust-clear-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 49294,
+    "visiblePixels": 16242
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\DustClear\\Animations\\dust-clear-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 53760,
+    "visiblePixels": 11776
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\DustClear\\Animations\\dust-clear-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 63205,
+    "visiblePixels": 2331
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\MoldClear\\Animations\\mold-clear-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 57729,
+    "visiblePixels": 7807
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\MoldClear\\Animations\\mold-clear-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 45841,
+    "visiblePixels": 19695
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\MoldClear\\Animations\\mold-clear-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 56569,
+    "visiblePixels": 8967
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\MoldClear\\Animations\\mold-clear-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 63889,
+    "visiblePixels": 1647
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\BombExplosion\\Animations\\bomb-explosion-frame-01-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 62629,
+    "visiblePixels": 2907
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\BombExplosion\\Animations\\bomb-explosion-frame-02-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 58781,
+    "visiblePixels": 6755
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\BombExplosion\\Animations\\bomb-explosion-frame-03-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 48297,
+    "visiblePixels": 17239
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\BombExplosion\\Animations\\bomb-explosion-frame-04-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 32586,
+    "visiblePixels": 32950
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\BombExplosion\\Animations\\bomb-explosion-frame-05-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 35267,
+    "visiblePixels": 30269
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\BombExplosion\\Animations\\bomb-explosion-frame-06-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 40170,
+    "visiblePixels": 25366
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\BombExplosion\\Animations\\bomb-explosion-frame-07-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 49708,
+    "visiblePixels": 15828
+  },
+  {
+    "path": "Assets\\Textures\\Effects\\BombExplosion\\Animations\\bomb-explosion-frame-08-v1-256.png",
+    "width": 256,
+    "height": 256,
+    "transparentPixels": 62275,
+    "visiblePixels": 3261
+  }
+]
