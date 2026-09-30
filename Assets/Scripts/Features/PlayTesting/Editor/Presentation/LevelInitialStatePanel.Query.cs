@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Board;
 using Simulation;
@@ -100,6 +100,6 @@ namespace Levels.Editor
             details.text = "조회 좌표: " + string.Join(", ", cells) + "\n실제 교환·제거·파워 효과는 실행하지 않습니다.";
         }
 
-        internal void Dispose() { balancePanel?.Dispose(); ClearBatch(); ClearBot(); search = null; searchWatch?.Stop(); searchSchedule?.Pause(); inputSchedule?.Pause(); resumeCascade = false; ClearExecution(); }
+        internal void Dispose() { balancePanel?.Dispose(); ClearBatch(); ClearBot(); search = null; searchWatch?.Stop(); searchSchedule?.Pause(); inputSchedule?.Pause(); resumeCascade = false; ClearExecution(); ReleasePackedLevel(); }
     }
 }

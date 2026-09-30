@@ -1,3 +1,4 @@
+﻿using MemoryPack;
 using System;
 using Board;
 using UnityEngine;
@@ -14,22 +15,22 @@ namespace Levels
         [InspectorName("고장 난 발전기")] Generator = 5
     }
 
-    [Serializable]
-    public struct ObstaclePlacementDefinition
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public partial struct ObstaclePlacementDefinition
     {
-        [SerializeField] private string id;
-        [SerializeField] private BoardCoordinate coordinate;
-        [SerializeField] private ObstacleKind kind;
-        [SerializeField] private int durability;
-        [SerializeField] private RabbitColor color;
-        [SerializeField] private int requiredCharge;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private string id;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private BoardCoordinate coordinate;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(2)] private ObstacleKind kind;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(3)] private int durability;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(4)] private RabbitColor color;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(5)] private int requiredCharge;
 
-        public BoardCoordinate Coordinate => coordinate;
-        public string Id => id;
-        public ObstacleKind Kind => kind;
-        public int Durability => durability;
-        public RabbitColor Color => color;
-        public int RequiredCharge => requiredCharge;
+        [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
+        [MemoryPackIgnore] public string Id => id;
+        [MemoryPackIgnore] public ObstacleKind Kind => kind;
+        [MemoryPackIgnore] public int Durability => durability;
+        [MemoryPackIgnore] public RabbitColor Color => color;
+        [MemoryPackIgnore] public int RequiredCharge => requiredCharge;
 
         /// <summary>에셋을 만들지 않고 본체 값을 구성한다. 기존 공급 호출은 색·충전의 기본값을 유지한다.</summary>
         /// <param name="id">이 판 내부에서 연결을 구별할 ID.</param><param name="coordinate">본체 기준 칸.</param>

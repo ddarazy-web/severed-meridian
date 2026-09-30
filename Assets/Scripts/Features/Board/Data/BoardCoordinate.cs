@@ -1,16 +1,17 @@
+﻿using MemoryPack;
 using System;
 using UnityEngine;
 
 namespace Board
 {
-    [Serializable]
-    public struct BoardCoordinate : IEquatable<BoardCoordinate>
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public partial struct BoardCoordinate : IEquatable<BoardCoordinate>
     {
-        [SerializeField] private int row;
-        [SerializeField] private int column;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private int row;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private int column;
 
-        public int Row => row;
-        public int Column => column;
+        [MemoryPackIgnore] public int Row => row;
+        [MemoryPackIgnore] public int Column => column;
 
         public BoardCoordinate(int row, int column)
         {

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Board;
 using UnityEngine;
 
@@ -41,6 +41,46 @@ namespace Levels
         public LevelSupplyDefinition Supply => supply;
         public IReadOnlyList<BoardCoordinate> RecoveryParts => recoveryParts;
         public IReadOnlyList<LevelMissionDefinition> Missions => missions;
+
+        public PackedLevel ToPacked() => new PackedLevel
+        {
+            SchemaVersion = schemaVersion,
+            LevelNumber = levelNumber,
+            MoveCount = moveCount,
+            Colors = colors,
+            Board = board,
+            InitialBlocks = initialBlocks,
+            Obstacles = obstacles,
+            Covers = covers,
+            Dust = dust,
+            Flow = flow,
+            Connections = connections,
+            Supply = supply,
+            RecoveryParts = recoveryParts,
+            Missions = missions
+        };
+
+        public static LevelDefinition FromPacked(PackedLevel data)
+        {
+            LevelDefinition level = CreateInstance<LevelDefinition>();
+            level.schemaVersion = data.SchemaVersion;
+            level.levelNumber = data.LevelNumber;
+            level.moveCount = data.MoveCount;
+            level.colors = data.Colors;
+            level.board = data.Board;
+            level.initialBlocks = data.InitialBlocks;
+            level.obstacles = data.Obstacles;
+            level.covers = data.Covers;
+            level.dust = data.Dust;
+            level.flow = data.Flow;
+            level.connections = data.Connections;
+            level.supply = data.Supply;
+            level.recoveryParts = data.RecoveryParts;
+            level.missions = data.Missions;
+            level.name = "Level_" + data.LevelNumber;
+            level.hideFlags = HideFlags.DontSave;
+            return level;
+        }
 
         // OnEnable/OnValidate에서 초기화하지 않는다. 오류가 있는 작업 중 에셋도 그대로 읽는다.
     }

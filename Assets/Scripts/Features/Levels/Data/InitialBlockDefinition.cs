@@ -1,3 +1,4 @@
+﻿using MemoryPack;
 using System;
 using Board;
 using UnityEngine;
@@ -30,19 +31,19 @@ namespace Levels
         [InspectorName("세로 한 줄")] Vertical = 1
     }
 
-    [Serializable]
-    public struct InitialBlockDefinition
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public partial struct InitialBlockDefinition
     {
-        [SerializeField] private BoardCoordinate coordinate;
-        [SerializeField] private InitialBlockKind kind;
-        [SerializeField] private RabbitColor fixedColor;
-        [SerializeField] private RocketDirection rocketDirection;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private BoardCoordinate coordinate;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private InitialBlockKind kind;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(2)] private RabbitColor fixedColor;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(3)] private RocketDirection rocketDirection;
 
-        public BoardCoordinate Coordinate => coordinate;
-        public InitialBlockKind Kind => kind;
-        public RocketDirection RocketDirection => rocketDirection;
+        [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
+        [MemoryPackIgnore] public InitialBlockKind Kind => kind;
+        [MemoryPackIgnore] public RocketDirection RocketDirection => rocketDirection;
 
         // 무작위 유형에서 이전 고정 색을 보존하되 실행 의미를 부여하지 않는다.
-        public RabbitColor? FixedColor => kind == InitialBlockKind.FixedNormal ? fixedColor : null;
+        [MemoryPackIgnore] public RabbitColor? FixedColor => kind == InitialBlockKind.FixedNormal ? fixedColor : null;
     }
 }

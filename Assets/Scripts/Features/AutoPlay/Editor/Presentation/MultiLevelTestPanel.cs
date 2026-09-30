@@ -22,6 +22,7 @@ namespace Levels.Editor
         private readonly List<LevelDefinition> levels = new List<LevelDefinition>();
         private readonly ListView choices, results;
         private readonly PopupField<string> mode;
+        private readonly PopupField<string> levelSource;
         private readonly IntegerField samples;
         private readonly Button start, pause, stop, read, open;
         private readonly VisualElement selectionTools;
@@ -54,6 +55,13 @@ namespace Levels.Editor
             selectionMenu.menu.AppendSeparator();
             selectionMenu.menu.AppendAction("레벨 목록 새로고침", _ => RefreshLevels());
             selectionTools.Add(selectionMenu);
+            levelSource = new PopupField<string>("레벨 입력", new List<string> { "에셋", "MemoryPack" }, 0) { name = "multi-level-source" };
+            selectionTools.Add(levelSource);
+            selectionTools.Add(new Button(() =>
+            {
+                try { LevelPackBuild.Generate(); detail.text = "MemoryPack 갱신 완료"; }
+                catch (Exception error) { detail.text = "MemoryPack 갱신 실패: " + error.Message; }
+            }) { name = "multi-pack-rebuild", text = "MemoryPack 갱신" });
             VisualElement options = new VisualElement(); options.style.flexDirection = FlexDirection.Row; Root.Add(options);
             mode = new PopupField<string>("시험 방식", new List<string> { "현재 횟수 반복 시험", "난이도별 이동 횟수 추천" }, 0) { name = "multi-mode" };
             samples = new IntegerField("전략별 판 수") { value = 100, name = "multi-samples", tooltip = "반복 시험에만 적용합니다. 난이도 판단에는 전략별 정상 100판 이상이 필요합니다." };
@@ -113,7 +121,18 @@ namespace Levels.Editor
             try
             {
                 session?.Dispose();
-                session = new MultiLevelTestSession(choices.selectedIndices.OrderBy(i => i).Select(i => levels[i]), (MultiLevelTestMode)mode.index, samples.value, store);
+                List<LevelDefinition> inputs = new List<LevelDefinition>();
+                try
+                {
+                    foreach (int index in choices.selectedIndices.OrderBy(i => i))
+                        inputs.Add(levelSource.index == 0 ? levels[index] : LevelPackCodec.ReadLevel(
+                            File.ReadAllBytes(LevelPackBuild.FilePath(levels[index].LevelNumber)), levels[index].LevelNumber));
+                    session = new MultiLevelTestSession(inputs, (MultiLevelTestMode)mode.index, samples.value, store);
+                }
+                finally
+                {
+                    if (levelSource.index == 1) foreach (LevelDefinition input in inputs) UnityEngine.Object.DestroyImmediate(input);
+                }
                 record = session.Record; results.ClearSelection(); results.itemsSource = record.entries; results.Rebuild();
                 ResetErrorDetails(); ShowCurrentHistory();
                 repeatReader = null; balanceReader = null; selectedFolder = null; detail.text = "진행 결과를 선택하면 해당 레벨의 결과만 확인합니다.";

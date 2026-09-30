@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Text;
 using Board;
@@ -17,7 +17,10 @@ namespace Levels.Editor
         internal LevelEditorWindow Owner { get; private set; }
         private bool visible;
         private bool resumeCascade;
-        [SerializeField] private LevelDefinition level;
+        [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("level")] private LevelDefinition sourceLevel;
+        [SerializeField] private bool useMemoryPack;
+        private LevelDefinition packedLevel;
+        private LevelDefinition level => useMemoryPack ? packedLevel : sourceLevel;
         [SerializeField] private int seed = 1;
         private Label status;
         private Label details;
@@ -35,19 +38,20 @@ namespace Levels.Editor
         internal void Initialize(LevelEditorWindow owner, LevelDefinition target, bool manual)
         {
             if (manual && !manualMode) seed = BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0);
-            Owner = owner; level = target; manualMode = manual;
+            Owner = owner; sourceLevel = target; manualMode = manual;
             if (manual) startingMode = true;
             CreateGUI();
         }
 
         internal void SetLevel(LevelDefinition target)
         {
-            if (level == target) return;
-            level = target;
+            if (sourceLevel == target) return;
+            sourceLevel = target;
             rootVisualElement.Q<ObjectField>("initial-level")?.SetValueWithoutNotify(target);
             if (balancePanel?.CanContinue == true) { UpdateBotControls(); return; }
             if (batchSession != null) { UpdateBatchControls(); return; }
             Invalidate("레벨이 바뀌었습니다. 다시 구성하세요.");
+            ReloadPackedLevel();
         }
 
         internal void SetVisible(bool value)
@@ -102,7 +106,7 @@ namespace Levels.Editor
             Label title = new Label("MATCH / 초기 보드 확인"); title.AddToClassList("editor-title"); root.Add(title);
             Label boundary = new Label("초기 배치 후보 · 시작 조건 미검사 · 플레이 미지원") { name = "initial-boundary" }; root.Add(boundary);
             VisualElement toolbar = new VisualElement { name = "initial-toolbar" }; toolbar.AddToClassList("initial-toolbar"); root.Add(toolbar);
-            ObjectField asset = new ObjectField("레벨") { name = "initial-level", objectType = typeof(LevelDefinition), allowSceneObjects = false, value = level };
+            ObjectField asset = new ObjectField("레벨") { name = "initial-level", objectType = typeof(LevelDefinition), allowSceneObjects = false, value = sourceLevel };
             asset.RegisterValueChangedCallback(evt => Owner.SetLevel(evt.newValue as LevelDefinition)); toolbar.Add(asset);
             asset.style.display = DisplayStyle.None;
             seedField = new IntegerField("시드") { name = "initial-seed", value = seed };
@@ -128,9 +132,15 @@ namespace Levels.Editor
             AttachQueryResults(inspector);
             CreateManualUI();
             CreateBotUI();
+            VisualElement sourceToolbar = new VisualElement { name = "level-source-toolbar" };
+            sourceToolbar.style.flexDirection = FlexDirection.Row;
+            sourceToolbar.style.flexWrap = Wrap.Wrap;
+            root.Insert(2, sourceToolbar);
+            CreateLevelSourceUI(sourceToolbar);
             Invalidate(manualMode ? "레벨을 지정하고 검사·구성을 누르세요. 창 재생성 후에는 다시 시작해야 합니다." : "레벨과 시드를 지정하고 초기 후보를 구성하세요.");
             inputSchedule?.Pause();
             inputSchedule = root.schedule.Execute(CheckInput).Every(250);
+            ReloadPackedLevel();
             LevelEditorHelp.Apply(root);
         }
 
@@ -162,6 +172,7 @@ namespace Levels.Editor
             if (batchSession?.CanContinue == true) return;
             ClearBatch();
             Invalidate("구성 중…");
+            if (!ReloadPackedLevel()) return;
             inputFingerprint = LevelStateBuilder.Fingerprint(level);
             if (startingMode)
             {

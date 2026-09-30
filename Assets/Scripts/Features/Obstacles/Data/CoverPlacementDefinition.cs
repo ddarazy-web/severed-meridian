@@ -1,3 +1,4 @@
+﻿using MemoryPack;
 using System;
 using Board;
 using UnityEngine;
@@ -10,15 +11,15 @@ namespace Levels
         [InspectorName("우주 곰팡이")] Mold = 1
     }
 
-    [Serializable]
-    public struct CoverPlacementDefinition
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public partial struct CoverPlacementDefinition
     {
-        [SerializeField] private BoardCoordinate coordinate;
-        [SerializeField] private CoverKind kind;
-        [SerializeField] private int durability;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private BoardCoordinate coordinate;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private CoverKind kind;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(2)] private int durability;
 
-        public BoardCoordinate Coordinate => coordinate;
-        public CoverKind Kind => kind;
-        public int Durability => durability;
+        [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
+        [MemoryPackIgnore] public CoverKind Kind => kind;
+        [MemoryPackIgnore] public int Durability => durability;
     }
 }

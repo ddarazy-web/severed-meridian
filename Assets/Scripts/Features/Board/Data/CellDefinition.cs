@@ -1,14 +1,15 @@
+﻿using MemoryPack;
 using System;
 using UnityEngine;
 
 namespace Board
 {
-    [Serializable]
-    public struct CellDefinition
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public partial struct CellDefinition
     {
-        [SerializeField] private bool isActive;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private bool isActive;
 
-        public bool IsActive => isActive;
+        [MemoryPackIgnore] public bool IsActive => isActive;
 
         public CellDefinition(bool isActive)
         {

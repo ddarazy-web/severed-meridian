@@ -149,6 +149,7 @@ namespace Levels.Editor
                 if (element != null) element.style.display = active ? DisplayStyle.None : DisplayStyle.Flex;
             }
             rootVisualElement.Q("initial-toolbar")?.SetEnabled(batchSession == null && !balancing);
+            rootVisualElement.Q("level-source-toolbar")?.SetEnabled(batchSession == null && !balancing);
             rootVisualElement.Q("bot-buttons")?.SetEnabled(batchSession?.CanContinue != true && !balancing);
             rootVisualElement.Q("batch-buttons")?.SetEnabled(!balancing);
             balancePanel?.RefreshEnabled();

@@ -1,3 +1,4 @@
+﻿using MemoryPack;
 using System;
 using System.Collections.Generic;
 using Board;
@@ -7,63 +8,63 @@ namespace Levels
 {
     public enum GravityDirection { Down, Up, Left, Right }
 
-    [Serializable]
-    public struct GravityCell
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public partial struct GravityCell
     {
-        [SerializeField] private BoardCoordinate coordinate;
-        [SerializeField] private GravityDirection direction;
-        public BoardCoordinate Coordinate => coordinate;
-        public GravityDirection Direction => direction;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private BoardCoordinate coordinate;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private GravityDirection direction;
+        [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
+        [MemoryPackIgnore] public GravityDirection Direction => direction;
     }
 
-    [Serializable]
-    public struct FlowPathCell
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public partial struct FlowPathCell
     {
-        [SerializeField] private BoardCoordinate coordinate;
-        [SerializeField] private bool isEnd;
-        [SerializeField] private BoardCoordinate next;
-        public BoardCoordinate Coordinate => coordinate;
-        public bool IsEnd => isEnd;
-        public BoardCoordinate Next => next;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private BoardCoordinate coordinate;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private bool isEnd;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(2)] private BoardCoordinate next;
+        [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
+        [MemoryPackIgnore] public bool IsEnd => isEnd;
+        [MemoryPackIgnore] public BoardCoordinate Next => next;
     }
 
-    [Serializable]
-    public struct FlowMerge
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public partial struct FlowMerge
     {
-        [SerializeField] private BoardCoordinate coordinate;
-        [SerializeField] private List<BoardCoordinate> sources;
-        public BoardCoordinate Coordinate => coordinate;
-        public IReadOnlyList<BoardCoordinate> Sources => sources;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private BoardCoordinate coordinate;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private List<BoardCoordinate> sources;
+        [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
+        [MemoryPackIgnore] public IReadOnlyList<BoardCoordinate> Sources => sources;
     }
 
-    [Serializable]
-    public struct FlowPortal
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public partial struct FlowPortal
     {
-        [SerializeField] private BoardCoordinate entrance;
-        [SerializeField] private bool hasExit;
-        [SerializeField] private BoardCoordinate exit;
-        public BoardCoordinate Entrance => entrance;
-        public bool HasExit => hasExit;
-        public BoardCoordinate Exit => exit;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private BoardCoordinate entrance;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private bool hasExit;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(2)] private BoardCoordinate exit;
+        [MemoryPackIgnore] public BoardCoordinate Entrance => entrance;
+        [MemoryPackIgnore] public bool HasExit => hasExit;
+        [MemoryPackIgnore] public BoardCoordinate Exit => exit;
     }
 
-    [Serializable]
-    public sealed class LevelFlowDefinition
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public sealed partial class LevelFlowDefinition
     {
-        [SerializeField] private List<GravityCell> gravity = new List<GravityCell>();
-        [SerializeField] private List<FlowPathCell> paths = new List<FlowPathCell>();
-        [SerializeField] private List<FlowMerge> merges = new List<FlowMerge>();
-        [SerializeField] private List<BoardEdge> walls = new List<BoardEdge>();
-        [SerializeField] private List<FlowPortal> portals = new List<FlowPortal>();
-        [SerializeField] private List<BoardCoordinate> arrivals = new List<BoardCoordinate>();
-        public IReadOnlyList<GravityCell> Gravity => gravity;
-        public IReadOnlyList<FlowPathCell> Paths => paths;
-        public IReadOnlyList<FlowMerge> Merges => merges;
-        public IReadOnlyList<BoardEdge> Walls => walls;
-        public IReadOnlyList<FlowPortal> Portals => portals;
-        public IReadOnlyList<BoardCoordinate> Arrivals => arrivals;
-        public bool ListsPresent => gravity != null && paths != null && merges != null && walls != null && portals != null && arrivals != null;
-        public bool HasRecords => (gravity?.Count ?? 0) + (paths?.Count ?? 0) + (merges?.Count ?? 0) +
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private List<GravityCell> gravity = new List<GravityCell>();
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private List<FlowPathCell> paths = new List<FlowPathCell>();
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(2)] private List<FlowMerge> merges = new List<FlowMerge>();
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(3)] private List<BoardEdge> walls = new List<BoardEdge>();
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(4)] private List<FlowPortal> portals = new List<FlowPortal>();
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(5)] private List<BoardCoordinate> arrivals = new List<BoardCoordinate>();
+        [MemoryPackIgnore] public IReadOnlyList<GravityCell> Gravity => gravity;
+        [MemoryPackIgnore] public IReadOnlyList<FlowPathCell> Paths => paths;
+        [MemoryPackIgnore] public IReadOnlyList<FlowMerge> Merges => merges;
+        [MemoryPackIgnore] public IReadOnlyList<BoardEdge> Walls => walls;
+        [MemoryPackIgnore] public IReadOnlyList<FlowPortal> Portals => portals;
+        [MemoryPackIgnore] public IReadOnlyList<BoardCoordinate> Arrivals => arrivals;
+        [MemoryPackIgnore] public bool ListsPresent => gravity != null && paths != null && merges != null && walls != null && portals != null && arrivals != null;
+        [MemoryPackIgnore] public bool HasRecords => (gravity?.Count ?? 0) + (paths?.Count ?? 0) + (merges?.Count ?? 0) +
             (walls?.Count ?? 0) + (portals?.Count ?? 0) + (arrivals?.Count ?? 0) > 0;
     }
 }

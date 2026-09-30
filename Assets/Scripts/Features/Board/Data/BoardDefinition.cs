@@ -1,22 +1,23 @@
+﻿using MemoryPack;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Board
 {
-    [Serializable]
-    public sealed class BoardDefinition
+    [Serializable, MemoryPackable(SerializeLayout.Explicit)]
+    public sealed partial class BoardDefinition
     {
         public const int DefaultRows = 10;
         public const int DefaultColumns = 10;
 
-        [SerializeField] private int rows;
-        [SerializeField] private int columns;
-        [SerializeField] private List<CellDefinition> cells = new List<CellDefinition>();
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private int rows;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private int columns;
+        [SerializeField, MemoryPackInclude, MemoryPackOrder(2)] private List<CellDefinition> cells = new List<CellDefinition>();
 
-        public int Rows => rows;
-        public int Columns => columns;
-        public IReadOnlyList<CellDefinition> Cells => cells;
+        [MemoryPackIgnore] public int Rows => rows;
+        [MemoryPackIgnore] public int Columns => columns;
+        [MemoryPackIgnore] public IReadOnlyList<CellDefinition> Cells => cells;
 
         public static BoardDefinition CreateDefault()
         {
