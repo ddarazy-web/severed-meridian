@@ -46,6 +46,7 @@ namespace Levels.Editor
             Undo.postprocessModifications += OnModifications;
             ObjectChangeEvents.changesPublished += OnObjectChanges;
             EditorApplication.projectChanged += ExternalChange;
+            GameScreen.Editor.PuzzleEditorLauncher.Finished += OnGameLaunchFinished;
         }
 
         private void OnDisable()
@@ -57,6 +58,7 @@ namespace Levels.Editor
             Undo.postprocessModifications -= OnModifications;
             ObjectChangeEvents.changesPublished -= OnObjectChanges;
             EditorApplication.projectChanged -= ExternalChange;
+            GameScreen.Editor.PuzzleEditorLauncher.Finished -= OnGameLaunchFinished;
             EditorApplication.update -= RefreshDeferred;
             refreshQueued = false;
             properties?.Unbind();
@@ -107,6 +109,7 @@ namespace Levels.Editor
                 LevelInitialStateWindow.OpenManualLevel(level);
             }) { text = "플레이 테스트", name = "play-level" });
             editorRoot.Add(bar);
+            CreateGameLaunchControls(bar);
             duplicatePanel = new VisualElement { name = "duplicate-panel" };
             duplicatePanel.style.display = DisplayStyle.None;
             duplicatePanel.style.flexShrink = 0;

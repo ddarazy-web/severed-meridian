@@ -36,16 +36,26 @@ namespace GameScreen
             if (!started) InitializeAsync(levelNumber, seed, CancellationToken.None).Forget(Debug.LogException);
         }
 
-        public async UniTask InitializeAsync(int number, int randomSeed, CancellationToken token)
+        public UniTask InitializeAsync(int number, int randomSeed, CancellationToken token)
+            => InitializeCoreAsync(null, number, randomSeed, token);
+
+        // 호출 시 사본의 소유권을 받는다. 성공·실패·취소 모두 이 세션이 반환한다.
+        public UniTask InitializeAsync(LevelDefinition ownedDefinition, int randomSeed, CancellationToken token)
+            => InitializeCoreAsync(ownedDefinition, ownedDefinition != null ? ownedDefinition.LevelNumber : 0, randomSeed, token);
+
+        private async UniTask InitializeCoreAsync(LevelDefinition definition, int number, int randomSeed, CancellationToken token)
         {
-            if (started) throw new InvalidOperationException("이미 시작된 게임 세션입니다.");
+            if (started)
+            {
+                if (definition != null) Destroy(definition);
+                throw new InvalidOperationException("이미 시작된 게임 세션입니다.");
+            }
             started = true;
             using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(token, lifetime.Token);
-            LevelDefinition definition = null;
             try
             {
                 linked.Token.ThrowIfCancellationRequested();
-                definition = await LevelPackLoader.LoadAsync(number);
+                if (definition == null) definition = await LevelPackLoader.LoadAsync(number);
                 linked.Token.ThrowIfCancellationRequested();
                 await PrepareAsync(definition, randomSeed, linked.Token);
             }

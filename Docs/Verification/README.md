@@ -18,4 +18,5 @@
 
 - [1단계 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-01-progress.md)
 - [2단계 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md)
+- [3단계 에디터 게임 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-03-progress.md)
 

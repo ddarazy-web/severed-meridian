@@ -2,7 +2,7 @@
 
 ## 현재 상태
 
-2026-09-30 업데이트: **1단계 완료**. [목표 및 완료 조건](../../../Goals/MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-goal.md), [실행·검증 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-01-progress.md), [씬 실행 방법](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-usage.md). 실제 번들 기반 월드 검사 174개와 기존 에디터 회귀 검사 22개가 통과했다. 2단계도 완료했으며 [실행 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md)과 [사용법](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-02-gameplay-usage.md)에 결과를 남겼다. 3단계 이후는 미시작이다. 아래 초기 정리 기록은 당시 상태다.
+2026-09-30 업데이트: **1단계 완료**. [목표 및 완료 조건](../../../Goals/MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-goal.md), [실행·검증 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-01-progress.md), [씬 실행 방법](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-usage.md). 실제 번들 기반 월드 검사 174개와 기존 에디터 회귀 검사 22개가 통과했다. 2단계도 완료했으며 [실행 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md)과 [사용법](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-02-gameplay-usage.md)에 결과를 남겼다. 3단계도 구현·검증을 완료했다(최종 자동 확인 202 PASS). 4단계 이후는 미시작이다. 아래 초기 정리 기록은 당시 상태다.
 
 목업과 기존 게임 실행기·MemoryPack·아틀라스 구조 조사를 마쳤다. 구현 단계는 아직 완료하지 않았다.
 2026-09-30: 신규 월드 코드 초안 3개는 존재하지 않는 BoardEdge 필드 참조 오류가 확인되어 제거했다. 기존 추적 파일은 수정하지 않았다. 목업에서 추출한 폰트와 라이선스는 원본과 해시가 같음을 확인하여 유지한다. Unity 컴파일 및 Play Mode 검증은 아직 수행하지 않았다.
@@ -33,7 +33,7 @@
 
 ## 3단계 — 레벨 에디터에서 게임 실행
 
-상태: 계획 작성 완료, 구현 미시작. [목표 및 완료 조건](../../../Goals/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-goal.md) · [4개 작업 실행 계획](stage-03-editor-launch-plan.md) · [복사용 목표 명령문](../../../Commands/MoonRabbitJunkyard/WorldGameScreen/stage-03-goal-command.md).
+상태: 구현·검증 완료. [실행 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-03-progress.md) · [사용법](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-usage.md). [목표 및 완료 조건](../../../Goals/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-goal.md) · [4개 작업 실행 계획](stage-03-editor-launch-plan.md) · [복사용 목표 명령문](../../../Commands/MoonRabbitJunkyard/WorldGameScreen/stage-03-goal-command.md).
 
 기존 플레이 테스트를 유지하며 `게임 플레이` 버튼을 추가한다. 선택한 레벨의 에셋 사본 또는 MemoryPack 데이터를 게임 씬으로 전달한다. 에셋 모드에서는 미저장 편집 내용도 사본에 반영한다. Play Mode 종료 후 편집으로 돌아오도록 한다.
 

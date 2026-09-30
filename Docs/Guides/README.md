@@ -6,6 +6,7 @@
 
 - [월드 보드 미리보기 사용 방법](MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-usage.md)
 - [2단계 게임 플레이 사용법](MoonRabbitJunkyard/WorldGameScreen/stage-02-gameplay-usage.md)
+- [3단계 에디터 게임 실행 사용법](MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-usage.md)
 
 ## 기능별 문서
 
