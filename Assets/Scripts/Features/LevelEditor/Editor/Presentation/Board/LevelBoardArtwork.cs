@@ -17,7 +17,21 @@ namespace Levels.Editor
         private static int users;
         internal static event Action Loaded;
 
-        static LevelBoardArtwork() => AssemblyReloadEvents.beforeAssemblyReload += ReleaseAll;
+        static LevelBoardArtwork()
+        {
+            AssemblyReloadEvents.beforeAssemblyReload += ReleaseAll;
+            EditorApplication.playModeStateChanged += OnPlayModeChanged;
+        }
+
+        private static void OnPlayModeChanged(PlayModeStateChange change)
+        {
+            // Play Mode 종료 시 Addressables 핸들은 무효화되지만 Editor 창은 유지된다.
+            // 전환 전에 캐시를 비우고 전환 후 열린 보드가 새 핸들로 이미지를 요청하게 한다.
+            if (change == PlayModeStateChange.ExitingEditMode || change == PlayModeStateChange.ExitingPlayMode)
+                ReleaseAll();
+            else if (change == PlayModeStateChange.EnteredEditMode || change == PlayModeStateChange.EnteredPlayMode)
+                Loaded?.Invoke();
+        }
 
         internal static async UniTask Warmup(string relativePath = "Blocks/")
         {
