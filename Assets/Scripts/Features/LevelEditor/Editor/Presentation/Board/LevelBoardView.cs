@@ -39,6 +39,7 @@ namespace Levels.Editor
         public IReadOnlyCollection<BoardCoordinate> SourceSelection { get; set; } = Array.Empty<BoardCoordinate>();
         public event Action<LevelBrush, RabbitColor, IReadOnlyCollection<BoardCoordinate>> Committed;
         public event Action<int, BoardCoordinate> MoveCommitted;
+        public event Action<BoardCoordinate> ReplacementCommitted;
         public event Action Cancelled;
 
         internal static readonly Color[] Swatches =
@@ -81,6 +82,8 @@ namespace Levels.Editor
             RegisterCallback<PointerUpEvent>(OnPointerUp);
             RegisterCallback<PointerCaptureOutEvent>(_ => CancelStroke());
             RegisterCallback<DetachFromPanelEvent>(_ => CancelStroke());
+            RegisterCallback<AttachToPanelEvent>(_ => { LevelBoardArtwork.Loaded += Redraw; LevelBoardArtwork.Acquire(); });
+            RegisterCallback<DetachFromPanelEvent>(_ => { LevelBoardArtwork.Loaded -= Redraw; LevelBoardArtwork.Release(); });
             RegisterCallback<KeyDownEvent>(evt => { if (evt.keyCode == KeyCode.Escape) CancelStroke(); });
             RegisterCallback<PointerLeaveEvent>(_ => { if (!dragging) { hover = null; Redraw(); } });
         }
@@ -152,6 +155,14 @@ namespace Levels.Editor
             Selected?.Invoke(coordinate);
             if (Brush == LevelBrush.Select || !LevelBoardEditing.CanEdit(level))
                 return;
+            if (evt.clickCount == 2 && (Brush == LevelBrush.Fixed || Brush == LevelBrush.Random ||
+                (Brush == LevelBrush.Placement && !Placement.Erase)))
+            {
+                CancelStroke();
+                ReplacementCommitted?.Invoke(coordinate);
+                evt.StopPropagation();
+                return;
+            }
             dragging = true;
             strokeSource = JsonUtility.ToJson(level);
             pointerId = evt.pointerId;
@@ -278,7 +289,7 @@ namespace Levels.Editor
                 bool active = hasCell && definition.IsActive;
                 int index = LevelBoardEditing.FindBlock(level, coordinate);
                 bool colored = false;
-                Texture2D rabbitTexture = null;
+                Sprite rabbitTexture = null;
                 string text = active ? "·" : "×";
                 Color background = active ? new Color32(66, 72, 84, 255) : new Color32(35, 38, 45, 255);
                 if (index == -2) text = "!";
@@ -291,13 +302,14 @@ namespace Levels.Editor
                         text = ((int)block.FixedColor.Value + 1).ToString();
                         background = Swatches[(int)block.FixedColor.Value];
                         colored = true;
-                        rabbitTexture = RabbitBlockArtwork.Get(block.FixedColor.Value);
+                        rabbitTexture = LevelBoardArtwork.Rabbit(block.FixedColor.Value);
                     }
                     else text = block.Kind switch
                     {
                         InitialBlockKind.Rocket => block.RocketDirection == RocketDirection.Horizontal ? "↔" : block.RocketDirection == RocketDirection.Vertical ? "↕" : "!",
                         InitialBlockKind.Bomb => "폭", InitialBlockKind.Drone => "드", InitialBlockKind.Magnet => "자", _ => "!"
                     };
+                    if (!LevelPlacementRules.IsNormal(block.Kind)) rabbitTexture = LevelBoardArtwork.Block(block);
                 }
                 int obstacleIndex = LevelPlacementRules.Find(level, PlacementLayer.Obstacle, coordinate);
                 int coverIndex = LevelPlacementRules.Find(level, PlacementLayer.Cover, coordinate);
@@ -321,6 +333,7 @@ namespace Levels.Editor
                         colored = true;
                     }
                     if (LevelPlacementRules.Size(obstacle.Kind) == 2) text = "";
+                    rabbitTexture = LevelPlacementRules.Size(obstacle.Kind) == 1 ? LevelBoardArtwork.Obstacle(obstacle) : null;
                 }
                 if (coverIndex >= 0)
                 {
@@ -340,9 +353,8 @@ namespace Levels.Editor
                     (Brush == LevelBrush.SourceSelect && SourceSelection.Contains(coordinate));
                 Color border = preview ? previewError != null ? new Color32(255, 78, 78, 255) : new Color32(255, 225, 90, 255) :
                     isSelected ? UnityEngine.Color.white : errors.Contains(coordinate) || index == -2 || conflict ? new Color32(255, 78, 78, 255) : new Color32(24, 27, 32, 255);
-                // 본체 그림은 정상적인 일반 블록에만 표시한다. 곰팡이·장애물·회수 부품이나
-                // 잘못된 중복 배치에 토끼가 비치지 않도록 표시 가능 여부를 매번 새로 계산한다.
-                bool showRabbit = rabbitTexture != null && active && obstacleIndex == -1 && !conflict &&
+                // 보드에만 그림을 적용하고, 중복 배치와 회수 부품은 기존 진단 표시를 유지한다.
+                bool showRabbit = rabbitTexture != null && active && !conflict &&
                     !LevelSupplyRules.HasRecovery(level, coordinate) &&
                     (coverIndex == -1 || (coverIndex >= 0 && level.Covers[coverIndex].Kind == CoverKind.Web));
                 cell.style.backgroundImage = showRabbit ? new StyleBackground(rabbitTexture) : new StyleBackground(StyleKeyword.None);
@@ -354,7 +366,7 @@ namespace Levels.Editor
                 {
                     background = new Color32(66, 72, 84, 255);
                     colored = false;
-                    // 토끼의 번호 대신 이미지를 쓰되 거미줄 내구도와 오류 표시는 남긴다.
+                    // 이미지가 내구도를 표현하더라도 덮개 내구도와 오류 표시는 남긴다.
                     text = coverIndex >= 0 ? "줄" + level.Covers[coverIndex].Durability : "";
                 }
                 cell.text = text + (errors.Contains(coordinate) && index != -2 ? "!" : "");
@@ -421,6 +433,35 @@ namespace Levels.Editor
                 }
                 dustLabel.text = dustIndex >= 0 ? level.Dust[dustIndex].Durability.ToString() : "";
                 dustLabel.style.display = dustIndex >= 0 ? DisplayStyle.Flex : DisplayStyle.None;
+                // 먼지는 바닥, 내용물은 그 위, 덮개는 최상단 순서로 겹친다.
+                Sprite dustTexture = active && dustIndex >= 0 && !conflict ? LevelBoardArtwork.Dust : null;
+                Sprite coverTexture = active && coverIndex >= 0 && !conflict ? LevelBoardArtwork.Cover(level.Covers[coverIndex].Kind) : null;
+                if (dustTexture != null) cell.style.backgroundImage = new StyleBackground(dustTexture);
+                SetArtworkLayer(cell, "board-content-art", dustTexture != null && showRabbit ? rabbitTexture : null);
+                SetArtworkLayer(cell, "board-cover-art", coverTexture);
+                if (coverTexture != null)
+                {
+                    cell.text = level.Covers[coverIndex].Durability.ToString() + (errors.Contains(coordinate) ? "!" : "");
+                    coverOutline.style.display = DisplayStyle.None;
+                }
+                // 이미지 앞에 수치와 오류를 남기고, 이미지 자체는 입력을 받지 않는다.
+                Label artworkBadge = cell.Q<Label>("board-art-badge");
+                if (artworkBadge == null)
+                {
+                    artworkBadge = new Label { name = "board-art-badge", pickingMode = PickingMode.Ignore };
+                    artworkBadge.style.position = Position.Absolute;
+                    artworkBadge.style.left = artworkBadge.style.top = 1;
+                    artworkBadge.style.fontSize = 11;
+                    artworkBadge.style.color = UnityEngine.Color.white;
+                    artworkBadge.style.unityTextOutlineWidth = 1;
+                    artworkBadge.style.unityTextOutlineColor = UnityEngine.Color.black;
+                    cell.Add(artworkBadge);
+                }
+                artworkBadge.text = cell.text;
+                artworkBadge.style.display = dustTexture != null || coverTexture != null ? DisplayStyle.Flex : DisplayStyle.None;
+                if (dustTexture != null || coverTexture != null) cell.text = "";
+                artworkBadge.BringToFront();
+                dustLabel.BringToFront();
             }
             bodies.Clear();
             if (level?.Obstacles == null) return;
@@ -443,8 +484,35 @@ namespace Levels.Editor
                 label.style.color = UnityEngine.Color.white;
                 label.style.opacity = LevelPlacementRules.Footprint(obstacle.Coordinate, 2).All(cell =>
                     level.Board != null && level.Board.TryGetCell(cell, out CellDefinition definition) && definition.IsActive) ? 1 : 0.55f;
+                Sprite bodyTexture = LevelBoardArtwork.Obstacle(obstacle);
+                if (bodyTexture != null)
+                {
+                    label.tooltip = label.text;
+                    label.text = "";
+                    label.style.backgroundImage = new StyleBackground(bodyTexture);
+                    label.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                    label.style.left = obstacle.Coordinate.Column * CellSize + 3;
+                    label.style.top = obstacle.Coordinate.Row * CellSize + 3;
+                    label.style.width = label.style.height = CellSize * 2 - 6;
+                }
                 bodies.Add(label);
             }
+        }
+
+        private static void SetArtworkLayer(VisualElement cell, string name, Sprite texture)
+        {
+            VisualElement image = cell.Q<VisualElement>(name);
+            if (image == null)
+            {
+                image = new VisualElement { name = name, pickingMode = PickingMode.Ignore };
+                image.style.position = Position.Absolute;
+                image.style.left = image.style.right = image.style.top = image.style.bottom = 0;
+                image.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                cell.Add(image);
+            }
+            image.style.backgroundImage = texture != null ? new StyleBackground(texture) : new StyleBackground(StyleKeyword.None);
+            image.style.display = texture != null ? DisplayStyle.Flex : DisplayStyle.None;
+            image.BringToFront();
         }
     }
 }

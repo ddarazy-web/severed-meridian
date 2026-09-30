@@ -172,6 +172,18 @@ namespace Levels.Editor
             board.SourceSelected += SelectSource;
             board.Cancelled += () => { cancelSupplyDrag?.Invoke(); cancelMergeDrag?.Invoke(); };
             board.Committed += ApplyStroke;
+            board.ReplacementCommitted += coordinate =>
+            {
+                PlacementBrush replacement = board.Brush == LevelBrush.Placement ? board.Placement : new PlacementBrush
+                {
+                    Layer = PlacementLayer.Block,
+                    Kind = board.Brush == LevelBrush.Fixed ? (int)InitialBlockKind.FixedNormal : (int)InitialBlockKind.RandomNormal,
+                    Color = board.Color
+                };
+                replacement.ReplaceExisting = true;
+                operation.text = LevelObstacleEditing.Apply(level, replacement, new[] { coordinate }).ToString();
+                Refresh();
+            };
             board.MoveCommitted += (index, destination) =>
             {
                 LevelObstacleEditing.Move(level, index, destination, out string message);

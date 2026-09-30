@@ -369,12 +369,6 @@ MonoBehaviour:
     rocketDirection: 0
   - coordinate:
       row: 8
-      column: 7
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 8
       column: 6
     kind: 0
     fixedColor: 0
@@ -718,6 +712,12 @@ MonoBehaviour:
   - coordinate:
       row: 9
       column: 0
+    kind: 0
+    fixedColor: 0
+    rocketDirection: 0
+  - coordinate:
+      row: 8
+      column: 7
     kind: 0
     fixedColor: 0
     rocketDirection: 0
@@ -802,4 +802,7 @@ MonoBehaviour:
   missions:
   - kind: 0
     color: 0
-    count: 20
+    count: 30
+  - kind: 0
+    color: 1
+    count: 30

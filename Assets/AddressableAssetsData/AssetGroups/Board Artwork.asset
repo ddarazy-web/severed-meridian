@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Board Artwork
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Board Artwork
+  m_GUID: b9c6f3289867cba46844530310958053
+  m_SerializeEntries:
+  - m_GUID: 0134c7fd1f254884694de568855ffc75
+    m_Address: MoonRabbitBoard-Obstacles-ColorLock
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1bbbf5404166bae4b8630218d6397091
+    m_Address: MoonRabbitBoard-Obstacles-Scrap
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 232a3c697f110cd4d8f07e08ae030fb6
+    m_Address: MoonRabbitBoard-PowerBlocks
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 38465cbb946d3d84c8cb7884740cf137
+    m_Address: MoonRabbitBoard-Obstacles-Generator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3876d353f07c05042b24c9878ffae2fe
+    m_Address: MoonRabbitBoard-Blocks
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae059046fa393484eb5e638647a99bbc
+    m_Address: MoonRabbitBoard-Obstacles-MetalRodBox
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c49f9661b2b01304ab66c93bcbb35207
+    m_Address: MoonRabbitBoard-Obstacles-Dust
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c5f8834ddce9c8a43b006bb6d103b54f
+    m_Address: MoonRabbitBoard-Obstacles-Web
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d5c25cdb4f42bdb4d93065879034985b
+    m_Address: MoonRabbitBoard-Obstacles-Mold
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f18d80c12bedfc040bf67f7766337b2b
+    m_Address: MoonRabbitBoard-Obstacles-RecoveryCapsule
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f658ec9a867db9147ba3e2554a0e8dd9
+    m_Address: MoonRabbitBoard-Obstacles-Crate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 8062bda50f3a08846b6ec88fa4c6cfcc, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 491802c7418dd024fbf5705f10f5425f, type: 2}
+    - {fileID: 11400000, guid: 497fb5151d8e493489ca5ce69177f7e9, type: 2}
+    m_SchemaDisplayOrder:
+    - Board Artwork_BundledAssetGroupSchema
+    - Board Artwork_ContentUpdateGroupSchema
+  m_IncludeInBuild: 1
+  m_IncludeInBuildMigrated: 1

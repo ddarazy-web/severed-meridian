@@ -135,7 +135,9 @@ namespace Levels.Editor
                 RabbitColor color = level.Colors?.FirstOrDefault(value => Enum.IsDefined(typeof(RabbitColor), value)) ?? RabbitColor.Type1;
                 board.Placement = new PlacementBrush { Layer = option.Layer, Kind = option.Kind, Durability = 1, RequiredCharge = 3, Color = color };
                 operation.text = title + " → " + option.Label + (option.Brush == LevelBrush.Placement && board.Placement.Size == 2
-                    ? " · 네 칸 미리보기 후 클릭" : " · 클릭/드래그");
+                    ? " · 네 칸 미리보기 후 클릭" : " · 클릭/드래그") +
+                    (option.Brush == LevelBrush.Placement || option.Brush == LevelBrush.Fixed || option.Brush == LevelBrush.Random
+                        ? " · 더블클릭으로 같은 층 교체" : "");
                 Refresh();
             });
             tools.Add(menu);

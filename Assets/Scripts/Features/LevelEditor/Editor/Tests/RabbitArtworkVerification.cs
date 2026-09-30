@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Board;
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -93,13 +94,16 @@ namespace Levels.Editor
         }
 
         /// <summary>배치 실행 진입점. 원본 레벨·시험 기록은 수정하지 않으며 검사 결과만 Logs에 쓴다.</summary>
-        public static void Run()
+        public static void Run() => RunAsync().Forget(Debug.LogException);
+
+        private static async UniTask RunAsync()
         {
             LevelDefinition level = ScriptableObject.CreateInstance<LevelDefinition>();
             LevelEditorWindow window = null;
             try
             {
                 results.Clear();
+                await LevelBoardArtwork.Warmup();
                 for (int i = 0; i < 5; i++)
                     LevelBoardEditing.Apply(level, LevelBrush.Fixed, (RabbitColor)i, new[] { new BoardCoordinate(0, i) });
                 LevelBoardEditing.Apply(level, LevelBrush.Random, RabbitColor.Type1, new[] { new BoardCoordinate(0, 5) });
@@ -111,7 +115,7 @@ namespace Levels.Editor
                 {
                     Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(PathFor(i));
                     Check(texture != null && texture.width == 256 && texture.height == 256, "256px 텍스처 로드 " + names[i]);
-                    Check(board.CellAt(new BoardCoordinate(0, i)).style.backgroundImage.value.texture == texture && texture != null, "편집 보드 색 매핑 " + names[i]);
+                    Check(board.CellAt(new BoardCoordinate(0, i)).style.backgroundImage.value.sprite == LevelBoardArtwork.Rabbit((RabbitColor)i) && texture != null, "편집 보드 색 매핑 " + names[i]);
                 }
                 Check(((Label)board.CellAt(new BoardCoordinate(0, 5))).text == "?" &&
                     board.CellAt(new BoardCoordinate(0, 5)).style.backgroundImage.value.texture == null, "무작위 물음표 유지");

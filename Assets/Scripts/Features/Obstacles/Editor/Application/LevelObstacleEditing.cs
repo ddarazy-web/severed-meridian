@@ -15,6 +15,7 @@ namespace Levels.Editor
         public RabbitColor Color;
         public RocketDirection Direction;
         public bool Erase;
+        public bool ReplaceExisting;
 
         public int Size => Layer == PlacementLayer.Obstacle && !Erase ? LevelPlacementRules.Size((ObstacleKind)Kind) : 1;
     }
@@ -41,6 +42,12 @@ namespace Levels.Editor
             if (!LevelBoardEditing.CanEdit(level)) return "저장 형식 또는 보드·배치 목록을 확인하세요.";
             int index = LevelPlacementRules.Find(level, brush.Layer, coordinate);
             if (index == -2) return "중복 배치: 기존 Inspector 목록에서 수정하세요.";
+            if (brush.ReplaceExisting && brush.Layer == PlacementLayer.Obstacle && index >= 0)
+            {
+                coordinate = level.Obstacles[index].Coordinate;
+                if (!string.IsNullOrEmpty(level.Obstacles[index].Id) && level.Obstacles.Count(item => item.Id == level.Obstacles[index].Id) > 1)
+                    return "중복 ID의 본체는 교체할 수 없습니다.";
+            }
             if (brush.Layer == PlacementLayer.Obstacle && index >= 0 &&
                 LevelPlacementRules.Footprint(level.Obstacles[index].Coordinate, LevelPlacementRules.Size(level.Obstacles[index].Kind))
                     .Any(cell => LevelPlacementRules.Find(level, PlacementLayer.Obstacle, cell) == -2))
@@ -62,21 +69,21 @@ namespace Levels.Editor
                     if (blockKind == InitialBlockKind.FixedNormal && (level.Colors == null || !level.Colors.Contains(brush.Color) ||
                         !Enum.IsDefined(typeof(RabbitColor), brush.Color))) return "사용 색에 없는 블록입니다.";
                     if (blockKind == InitialBlockKind.Rocket && !Enum.IsDefined(typeof(RocketDirection), brush.Direction)) return "로켓 방향 오류입니다.";
-                    if (index >= 0 && level.InitialBlocks[index].Kind != blockKind &&
+                    if (!brush.ReplaceExisting && index >= 0 && level.InitialBlocks[index].Kind != blockKind &&
                         !(LevelPlacementRules.IsNormal(level.InitialBlocks[index].Kind) && LevelPlacementRules.IsNormal(blockKind)))
-                        return "다른 블록 종류입니다. 블록 층을 지운 뒤 배치하세요.";
+                        return "다른 블록 종류입니다. 더블클릭으로 교체하세요.";
                     return LevelPlacementRules.BlockSpaceError(level, coordinate);
                 case PlacementLayer.Obstacle:
                     ObstacleKind kind = (ObstacleKind)brush.Kind;
                     string valueError = LevelPlacementRules.ObstacleValueError(level, kind, brush.Durability, brush.Color, brush.RequiredCharge);
                     if (valueError != null) return valueError;
-                    if (index >= 0 && (level.Obstacles[index].Kind != kind || LevelPlacementRules.Size(kind) > 1))
-                        return "기존 본체를 지우거나 속성에서 수정하세요.";
+                    if (!brush.ReplaceExisting && index >= 0 && (level.Obstacles[index].Kind != kind || LevelPlacementRules.Size(kind) > 1))
+                        return "더블클릭으로 교체하거나 속성에서 수정하세요.";
                     return LevelPlacementRules.ObstacleSpaceError(level, coordinate, kind, index);
                 case PlacementLayer.Cover:
                     string coverError = LevelPlacementRules.CoverValueError((CoverKind)brush.Kind, brush.Durability);
                     if (coverError != null) return coverError;
-                    if (index >= 0 && (int)level.Covers[index].Kind != brush.Kind) return "다른 덮개입니다. 덮개 층을 지운 뒤 배치하세요.";
+                    if (!brush.ReplaceExisting && index >= 0 && (int)level.Covers[index].Kind != brush.Kind) return "다른 덮개입니다. 더블클릭으로 교체하세요.";
                     return LevelPlacementRules.CoverSpaceError(level, coordinate);
                 case PlacementLayer.Dust:
                     return brush.Durability >= 1 && brush.Durability <= 3 ? null : "먼지 내구도는 1~3입니다.";
@@ -88,7 +95,7 @@ namespace Levels.Editor
         {
             PlacementEditResult result = new PlacementEditResult();
             BoardCoordinate[] targets = coordinates.Distinct().ToArray();
-            if (!LevelBoardEditing.CanEdit(level) || (brush.Size == 2 && targets.Length != 1))
+            if (!LevelBoardEditing.CanEdit(level) || ((brush.Size == 2 || brush.ReplaceExisting) && targets.Length != 1))
             {
                 result.Skipped = targets.Length;
                 result.Reasons.Add("편집할 수 없는 형식이거나 2×2 연속 배치입니다.");
@@ -97,6 +104,7 @@ namespace Levels.Editor
             using SerializedObject data = new SerializedObject(level);
             SerializedProperty list = data.FindProperty(ListPath(brush.Layer));
             HashSet<int> deletions = new HashSet<int>();
+            HashSet<string> replacedIds = new HashSet<string>();
             foreach (BoardCoordinate coordinate in targets)
             {
                 string error = PlacementError(level, brush, coordinate);
@@ -115,6 +123,15 @@ namespace Levels.Editor
                 bool added = index < 0;
                 if (added) index = list.arraySize++;
                 SerializedProperty item = list.GetArrayElementAtIndex(index);
+                // 종류가 바뀐 장애물은 새 본체다. 이전 발전기 연결을 넘겨주지 않는다.
+                if (!added && brush.ReplaceExisting && brush.Layer == PlacementLayer.Obstacle && level.Obstacles[index].Kind != (ObstacleKind)brush.Kind)
+                {
+                    if (!string.IsNullOrEmpty(level.Obstacles[index].Id)) replacedIds.Add(level.Obstacles[index].Id);
+                    item.FindPropertyRelative("id").stringValue = Guid.NewGuid().ToString("N");
+                    item.FindPropertyRelative("durability").intValue = brush.Durability;
+                    item.FindPropertyRelative("color").intValue = (int)brush.Color;
+                    item.FindPropertyRelative("requiredCharge").intValue = brush.RequiredCharge;
+                }
                 // 배열 확장 시 Unity가 마지막 값을 복제하므로 새 항목의 모든 필드를 지정한다.
                 if (added)
                 {
@@ -153,6 +170,7 @@ namespace Levels.Editor
             if (brush.Layer == PlacementLayer.Obstacle)
             {
                 HashSet<string> removedIds = new HashSet<string>(deletions.Select(index => level.Obstacles[index].Id).Where(id => !string.IsNullOrEmpty(id)));
+                removedIds.UnionWith(replacedIds);
                 SerializedProperty connections = data.FindProperty("connections");
                 for (int i = connections.arraySize - 1; i >= 0; i--)
                 {
