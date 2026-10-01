@@ -18,6 +18,7 @@
 
 - [9×9 보드 전환 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-nine-by-nine-board.md)
 - [선택·스와이프 블록 표시 순서 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-swipe-sorting.md)
+- [2×2 장애물의 공격 범위 겹침 피해 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-two-by-two-overlap-damage.md)
 
 - [1단계 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-01-progress.md)
 - [2단계 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md)

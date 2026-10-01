@@ -44,6 +44,41 @@ namespace GameScreen.Editor
                 Check(visual.Obstacles[before.CellAt(anchor).ObstacleIndex.Value].Durability == 7, "접촉 뒤 두 번째 손상 pulse 보존");
             }
             finally { SceneCall(playback, "Reset"); UnityEngine.Object.Destroy(contactLevel); }
+            foreach (int combination in new[] { -1, 3, 9 })
+            {
+                LevelDefinition overlapLevel = combination < 0 ?
+                    (LevelDefinition)typeof(PowerEffectVerification).GetMethod("Make", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null) :
+                    (LevelDefinition)typeof(CombinationVerification).GetMethod("Make", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { combination, RocketDirection.Horizontal, null });
+                using PuzzleArtwork overlapArt = new PuzzleArtwork();
+                try
+                {
+                    BoardCoordinate anchor = combination == 9 ? new BoardCoordinate(0, 0) : new BoardCoordinate(2, 3);
+                    LevelObstacleEditing.Apply(overlapLevel, new PlacementBrush { Layer = PlacementLayer.Block, Erase = true }, LevelPlacementRules.Footprint(anchor, 2));
+                    LevelObstacleEditing.Apply(overlapLevel, new PlacementBrush { Layer = PlacementLayer.Obstacle, Kind = (int)ObstacleKind.Appliance, Durability = 9 }, new[] { anchor });
+                    if (combination < 0) typeof(PowerEffectVerification).GetMethod("Place", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null,
+                        new object[] { overlapLevel, new BoardCoordinate(4, 4), InitialBlockKind.Bomb, RocketDirection.Horizontal, RabbitColor.Type1 });
+                    LevelRuntimeState before = LevelStateBuilder.Build(overlapLevel, 12345).State;
+                    int body = before.CellAt(anchor).ObstacleIndex.Value;
+                    BoardActionExecutor executor = new BoardActionExecutor(before);
+                    BoardActionResult action = combination < 0 ? executor.Activate(new BoardCoordinate(4, 4)) : executor.Swap(new BoardCoordinate(4, 4), new BoardCoordinate(4, 5));
+                    PuzzleEffectTimeline timeline = new PuzzleEffectTimeline(before, action.Changes, action.Effects, action.PowerTrace);
+                    var hits = timeline.Reactions.Where(reaction => reaction.BodyIndex == body && reaction.Record.Response == DamageResponse.Damage).ToArray();
+                    Check(hits.Length == (combination < 0 ? 2 : 4), "폭탄/확대 폭탄/자석 겹침 피해 기록 수 " + combination);
+                    await overlapArt.PrepareAsync(before, CancellationToken.None);
+                    await (UniTask)playbackType.GetMethod("PrepareAsync", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(playback,
+                        new object[] { before, executor.State, overlapArt, timeline, CancellationToken.None });
+                    SceneCall(playback, "Begin", board);
+                    float elapsed = 0;
+                    foreach (var hit in hits)
+                    {
+                        SceneCall(playback, "Tick", hit.Time + .001f - elapsed); elapsed = hit.Time + .001f;
+                        LevelRuntimeState visual = (LevelRuntimeState)playbackType.GetField("visual", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(playback);
+                        Check(visual.Obstacles[body].Durability == hit.Record.DurabilityAfter, "겹침 칸마다 화면 내구도 단계 감소 " + combination + "/" + hit.Record.DurabilityAfter);
+                    }
+                    SceneCall(playback, "Tick", timeline.Duration);
+                }
+                finally { SceneCall(playback, "Reset"); UnityEngine.Object.Destroy(overlapLevel); }
+            }
             foreach (ObstacleKind kind in new[] { ObstacleKind.Crate, ObstacleKind.Scrap, ObstacleKind.Safe, ObstacleKind.ColorLock, ObstacleKind.Appliance })
             foreach (bool destroy in new[] { false, true })
             {
