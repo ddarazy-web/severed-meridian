@@ -95,10 +95,17 @@ namespace GameScreen.Editor
                     foreach (object clip in hoveringClips)
                     {
                         Type clipType = clip.GetType();
-                        Check(((Vector3)clipType.GetField("LaneOffset", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip)).magnitude >= 1.2f,
-                            "드론은 출발점에서 충분히 떨어진 공중 위치로 이동 " + fixture);
+                        float orbitRadius = (float)clipType.GetField("OrbitRadius", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
+                        if (fixture == 2 || fixture == 9)
+                        {
+                            Vector3 from = (Vector3)clipType.GetField("From", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
+                            Vector3 to = (Vector3)clipType.GetField("To", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
+                            Check((bool)clipType.GetField("LiftOnly", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) && Mathf.Abs(to.y - from.y - .65f) < .001f,
+                                "단독·3기 드론은 생성점에서 0.65칸 천천히 상승 " + fixture);
+                        }
+                        else Check(orbitRadius >= 1 && orbitRadius <= 4, "조합 드론 선회 반지름은 블록 1~4칸 " + fixture);
                         Check((float)clipType.GetField("End", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) -
-                            (float)clipType.GetField("Start", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) >= .719f,
+                            (float)clipType.GetField("Start", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) >= (fixture == 2 || fixture == 9 ? .999f : 1.799f),
                             "드론은 공중 이동 후 선회할 시간을 확보 " + fixture);
                     }
                     var droneClips = ((System.Collections.IEnumerable)playbackType.GetField("clips", BindingFlags.Instance | BindingFlags.NonPublic)
@@ -121,8 +128,14 @@ namespace GameScreen.Editor
                         {
                             Transform hover = board.GetComponentsInChildren<Transform>().First(item => item.name == "Drone-hover");
                             Check(Vector3.Distance(hover.localPosition, PuzzleWorldBoard.CellPosition(flight.Record.Origin)) > .01f,
-                                "드론은 표적 비행 대기 중 공중에서 선회");
+                                "드론은 발동 직후 천천히 떠오르기 시작");
                             checkedDroneOrbit = true;
+                        }
+                        if (fixture == 2 && time + .02f >= .60f && time + .02f <= .80f)
+                        {
+                            Transform hover = board.GetComponentsInChildren<Transform>().First(item => item.name == "Drone-hover");
+                            Check(Vector3.Distance(hover.localPosition, PuzzleWorldBoard.CellPosition(flight.Record.Origin) + Vector3.up * .65f) < .001f,
+                                "드론 상승 후 위치를 유지하며 잠시 대기");
                         }
                         if ((fixture == 9 || fixture == 12) && !checkedDroneSeparation && time + .02f >= (timeline.Combination?.IsTransformation == true ? 1.03f : .68f))
                         {

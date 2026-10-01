@@ -22,6 +22,7 @@ namespace GameScreen
             internal Vector3 Offset;
             internal Vector3[] FrameOffsets;
             internal bool Sheet;
+            internal bool LiftOnly;
             internal Vector3 LaneOffset, Control1, Control2;
             internal float OrbitRadius, OrbitPhase, OrbitPeriod, OrbitDirection;
         }
@@ -139,8 +140,9 @@ namespace GameScreen
                 float angle = clip.Angle;
                 if (clip.Label == "Drone-hover")
                 {
-                    position = DroneOrbitPosition(clip.From, clip.LaneOffset, elapsed - clip.Start, elapsed,
-                        clip.OrbitRadius, clip.OrbitPhase, clip.OrbitPeriod, clip.OrbitDirection);
+                    position = clip.LiftOnly ? Vector3.Lerp(clip.From, clip.To, Mathf.SmoothStep(0, 1, Mathf.Clamp01((elapsed - clip.Start) / .55f))) :
+                        DroneOrbitPosition(clip.From, clip.LaneOffset, elapsed - clip.Start, elapsed,
+                            clip.OrbitRadius, clip.OrbitPhase, clip.OrbitPeriod, clip.OrbitDirection);
                     angle += 6 * Mathf.Sin(elapsed * Mathf.PI * 2 / .7f);
                 }
                 else if (clip.Label == "Drone-flight")

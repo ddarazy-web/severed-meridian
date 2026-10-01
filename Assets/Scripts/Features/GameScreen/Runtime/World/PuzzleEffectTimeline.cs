@@ -141,7 +141,10 @@ namespace GameScreen
                 {
                     float hoverStart = records.Where(prior => !prior.IsFlight && prior.Origin.Equals(record.Origin))
                         .Select(prior => Schedule(prior).Start).DefaultIfEmpty(0).Min();
-                    start = Mathf.Max(start, hoverStart + .72f);
+                    bool nearTarget = records.Count(candidate => candidate.IsFlight) <= 3 &&
+                        Combination?.Kind != PowerCombinationKind.RocketDrone && Combination?.Kind != PowerCombinationKind.BombDrone &&
+                        Combination?.Kind != PowerCombinationKind.MagnetDrone;
+                    start = Mathf.Max(start, hoverStart + (nearTarget ? 1 : 1.8f));
                 }
                 // 실제 재탐색 기록이 있을 때만 선회하며 새 표적을 확인하는 시간을 표시한다.
                 if (record.Retargeted) start += .18f;

@@ -16,6 +16,10 @@
 
 ## 월드 게임 화면 (1~8단계)
 
+- [3기 이하 드론 느린 상승·대기·돌파](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-lift-hold.md)
+- [3기 이하 드론 표적 근처 선회](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-near-target.md)
+- [3기 이하 드론 한 바퀴 후 돌진](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-single-lap.md)
+- [드론 반지름 1~4칸 확대·낙하 속도 20% 증가](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-large-orbit-fall-speed.md)
 - [드론 임의 공중 이동·다양한 선회·표적 예고 제거](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-wide-orbit.md)
 - [드론 선회·분리 궤도·빠른 곡선 돌진 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-orbit-flight.md)
 - [9×9 보드 전환 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-nine-by-nine-board.md)

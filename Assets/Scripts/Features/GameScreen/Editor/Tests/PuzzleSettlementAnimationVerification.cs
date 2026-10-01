@@ -91,6 +91,20 @@ namespace GameScreen.Editor
                 Call(session, "Advance");
                 Check(session.IsPresenting, "정착 계산 후 낙하 재생 유지");
                 Check(executor.LastSettlement.Records.Count > 0, "낙하 기록 fixture");
+                object falling = typeof(PuzzleGameSession).GetField("settlementPlayback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session);
+                var fallingTracks = ((System.Collections.IEnumerable)falling.GetType().GetField("tracks", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(falling)).Cast<object>();
+                foreach (object track in fallingTracks)
+                    foreach (object move in ((System.Collections.IEnumerable)track.GetType().GetField("Moves", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(track)).Cast<object>())
+                    {
+                        Type moveType = move.GetType();
+                        SettlementRecord record = (SettlementRecord)moveType.GetField("Record", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(move);
+                        float seconds = (float)moveType.GetField("Seconds", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(move);
+                        if (record.Kind == MovementKind.Supply) continue;
+                        Vector3 start = (Vector3)moveType.GetField("Start", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(move);
+                        Vector3 end = (Vector3)moveType.GetField("End", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(move);
+                        float expected = record.Kind == MovementKind.Portal ? .12f / 1.44f : Mathf.Clamp(.12f * Vector3.Distance(start, end), .12f, .24f) / 1.44f;
+                        Check(Mathf.Abs(seconds - expected) < .001f, "낙하 이동 속도 추가 20% 증가 " + record.Target);
+                    }
                 int round = executor.CascadeRounds;
                 Tick(session, .06f);
                 Call(session, "Advance");

@@ -140,8 +140,8 @@ namespace GameScreen.Editor
                     {
                         Check(owners.All(pair => Vector3.Distance(pair.Value.transform.position, initialPositions[pair.Value]) > .01f),
                             "위·중간·아래 기존 블록이 첫 프레임부터 함께 낙하");
-                        Check(owners.Values.All(image => Mathf.Abs(Vector3.Distance(image.transform.position, initialPositions[image]) - .25f) < .001f),
-                            "기존 세 블록의 낙하 속도·간격 일치");
+                        Check(owners.Values.All(image => Mathf.Abs(Vector3.Distance(image.transform.position, initialPositions[image]) - .36f) < .001f),
+                            "기존 세 블록의 낙하 속도 추가 20% 증가·간격 일치");
                         Check(board.GetComponentsInChildren<SpriteRenderer>().Count(image => image.name == "Supply-playback") == 2,
                             "신규 공급 블록도 낙하 시작부터 대기열 준비");
                     }

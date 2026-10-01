@@ -141,7 +141,7 @@ namespace GameScreen.Editor
                         Check(flight.Record.Retargeted && flight.Record.Center.Equals(new BoardCoordinate(8, 8)), "실제 표적 소실 후 재탐색 기록과 최종 표적 전달");
                         float hoverStart = timeline.Attacks.Where(attack => !attack.Record.IsFlight && attack.Record.Origin.Equals(flight.Record.Origin))
                             .Select(attack => attack.Start).DefaultIfEmpty(0).Min();
-                        Check(Mathf.Abs(flight.Start - Mathf.Max(timeline.Attacks.Take(flight.Record.WaitForAttacks).Max(attack => attack.End), hoverStart + .72f) - .18f) < .001f,
+                        Check(Mathf.Abs(flight.Start - Mathf.Max(timeline.Attacks.Take(flight.Record.WaitForAttacks).Max(attack => attack.End), hoverStart + 1) - .18f) < .001f,
                             "재탐색 드론은 공중 이동·선행 공격 대기 후 0.18초 추가 선회하고 돌진");
                         found = true;
                     }

@@ -34,6 +34,8 @@ namespace GameScreen
             int recoveryBefore, float moveTime, float supplyTime, float landingTime)
         {
             Reset(); snapshot = before; landingSeconds = Mathf.Max(.01f, landingTime);
+            // 기존 20% 증가에 추가 20%를 적용한다. 저장된 원래 시간 / 1.44로 재생한다.
+            moveTime /= 1.44f; supplyTime /= 1.44f;
             Dictionary<PuzzleBoardSnapshot.Image, Track> owners = new Dictionary<PuzzleBoardSnapshot.Image, Track>();
             Dictionary<BoardCoordinate, float> vacantAt = new Dictionary<BoardCoordinate, float>();
             RecoveryRecord[] recoveries = result.State.Recoveries.Skip(recoveryBefore).ToArray();
@@ -69,7 +71,7 @@ namespace GameScreen
                     }
                     float begins = Mathf.Max(track.Ends, available);
                     float seconds = record.Kind == MovementKind.Supply ? Mathf.Max(.01f, supplyTime) : record.Kind == MovementKind.Portal ? Mathf.Max(.01f, moveTime) :
-                        Mathf.Max(.01f, Mathf.Clamp(moveTime * Vector3.Distance(start, end), moveTime, .24f));
+                        Mathf.Max(.01f, Mathf.Clamp(moveTime * Vector3.Distance(start, end), moveTime, .24f / 1.44f));
                     if (record.Kind == MovementKind.Supply) { seconds += begins; begins = 0; }
                     track.Moves.Add(new Move { Record = record, Start = start, End = end, Begins = begins, Seconds = seconds });
                     track.Ends = begins + seconds; duration = Mathf.Max(duration, track.Ends);
