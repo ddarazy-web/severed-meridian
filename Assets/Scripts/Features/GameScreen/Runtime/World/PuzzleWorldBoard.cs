@@ -17,6 +17,7 @@ namespace GameScreen
         private readonly List<SpriteRenderer> decorations = new List<SpriteRenderer>();
         private readonly List<SpriteRenderer> supplyImages = new List<SpriteRenderer>();
         private readonly List<SpriteMask> supplyClips = new List<SpriteMask>();
+        private readonly List<PuzzleEffectSprite> effects = new List<PuzzleEffectSprite>();
         private Sprite supplyClipSprite;
         private int bodyCount, decorationCount;
         private readonly Dictionary<BoardCoordinate, SpriteRenderer> occupants = new Dictionary<BoardCoordinate, SpriteRenderer>();
@@ -24,6 +25,16 @@ namespace GameScreen
         private Vector3 previewOrigin;
 
         public SpriteRenderer OccupantAt(BoardCoordinate at) => occupants.TryGetValue(at, out SpriteRenderer image) ? image : null;
+
+        internal PuzzleEffectSprite EffectAt(int index)
+        {
+            if (supplyClipSprite == null)
+                supplyClipSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 1, 1), new Vector2(.5f, .5f), 1);
+            while (effects.Count <= index) effects.Add(new PuzzleEffectSprite(transform, decorationPrefab, supplyClipSprite));
+            return effects[index];
+        }
+
+        internal void HideEffects() { foreach (PuzzleEffectSprite effect in effects) effect.Hide(); }
 
         internal PuzzleBoardSnapshot Capture()
         {

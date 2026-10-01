@@ -28,7 +28,7 @@ namespace Levels.Editor
                 path.StartsWith("Assets/Textures/Effects/GeneratorCharge/") ||
                 path.Contains("/Animations/") ||
                 path.StartsWith("Assets/Textures/Obstacles/") && !new[] { "Crate", "Scrap", "RecoveryCapsule", "MetalRodBox", "ColorLock", "Generator", "Web", "Mold", "Dust", "Lock" }.Contains(path.Split('/')[3]) ||
-                path.StartsWith("Assets/Textures/PowerBlocks/") && (!path.Contains("4frames") || ((TextureImporter)AssetImporter.GetAtPath(path)).spriteImportMode == SpriteImportMode.Multiple) && !path.Contains("launch-frame-1-") ||
+                path.StartsWith("Assets/Textures/PowerBlocks/") && (!path.Contains("4frames") || path.EndsWith("collection-drone-rotor-4frames-v1.png") || ((TextureImporter)AssetImporter.GetAtPath(path)).spriteImportMode == SpriteImportMode.Multiple) && !path.Contains("launch-frame-1-") ||
                 path.Contains("/Crate/crate-durability-") || path.Contains("/Scrap/scrap-durability-") ||
                 path.Contains("/RecoveryCapsule/recovery-capsule-durability-") || path.Contains("/MetalRodBox/metal-rod-box-") ||
                 path.Contains("/ColorLock/color-lock-") && path.Contains("-durability-") ||
@@ -49,7 +49,7 @@ namespace Levels.Editor
                 importer.mipmapEnabled = false;
                 importer.isReadable = false;
                 if (importer.spriteImportMode != SpriteImportMode.Multiple)
-                    importer.maxTextureSize = path.Contains("/Generator/") ? 512 : 256;
+                    importer.maxTextureSize = path.Contains("/Generator/") || path.EndsWith("collection-drone-rotor-4frames-v1.png") ? 512 : 256;
                 importer.textureCompression = TextureImporterCompression.Uncompressed;
                 importer.filterMode = FilterMode.Bilinear;
                 importer.wrapMode = TextureWrapMode.Clamp;

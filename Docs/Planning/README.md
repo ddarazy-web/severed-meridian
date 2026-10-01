@@ -39,7 +39,7 @@
 - [32단계 작업 계획 — 시험 기록 삭제와 지난 시험 목록](MoonRabbitJunkyard/Core/91_32단계_시험기록관리_작업계획.md)
 - [33단계 작업 계획 — 메뉴 통합 후 사용 흐름 검수](MoonRabbitJunkyard/Core/94_33단계_메뉴통합사용흐름검수_작업계획.md)
 
-## 월드 게임 화면 (1~10단계, 세부 계획 1~7단계)
+## 월드 게임 화면 (1~10단계, 세부 계획 1~8단계)
 
 - [월드 보드 게임 화면 단계별 구현 계획](MoonRabbitJunkyard/WorldGameScreen/2026-09-30-world-game-screen.md)
 - [1단계 월드 보드 표시 Implementation Plan](MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-plan.md)
@@ -49,3 +49,4 @@
 - [5단계 통합 검증과 마무리 Implementation Plan](MoonRabbitJunkyard/WorldGameScreen/stage-05-integration-plan.md)
 - [6단계 스와이프·교환 연출 Implementation Plan](MoonRabbitJunkyard/WorldGameScreen/stage-06-swipe-swap-plan.md)
 - [7단계 제거·낙하·채움 Implementation Plan](MoonRabbitJunkyard/WorldGameScreen/stage-07-settlement-plan.md)
+- [8단계 파워·장애물 상세 연출 계획](MoonRabbitJunkyard/WorldGameScreen/stage-08-power-effects-plan.md)

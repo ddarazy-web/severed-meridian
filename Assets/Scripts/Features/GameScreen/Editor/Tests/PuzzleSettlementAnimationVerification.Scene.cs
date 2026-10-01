@@ -49,11 +49,11 @@ namespace GameScreen.Editor
                     Check(session.TrySwap(action.First, action.Second.Value), "실제 씬 교환 " + size);
                     session.enabled = false;
                     Tick(session, .075f); await Shot("scene-" + size.x + "-swap-mid");
-                    Tick(session, .075f); Tick(session, .06f);
+                    Tick(session, .075f); await WaitForEffectResourcesAsync(session); Tick(session, .06f);
                     Check(session.IsPresenting, "실제 씬 제거 재생 " + size);
                     Check(moves.text == movesBefore.ToString(), "제거 완료 전 HUD 조기 갱신 없음 " + size);
                     await Shot("scene-" + size.x + "-remove-mid");
-                    Tick(session, .06f);
+                    await FinishCurrentEffectsAsync(session);
                     Check(moves.text == (movesBefore - 1).ToString(), "제거 완료 후 HUD 반영 " + size);
                     Call(session, "Advance");
                     Check(session.IsPresenting, "실제 씬 정착 재생 " + size);
@@ -87,7 +87,7 @@ namespace GameScreen.Editor
                     await Shot("scene-" + size.x + "-settled");
                     BoardActionExecutor executor = (BoardActionExecutor)typeof(PuzzleGameSession).GetField("executor", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(session);
                     for (int frame = 0; frame < 20000 && (session.IsPresenting || executor.HasPendingCascade); frame++)
-                    { if (session.IsPresenting) Tick(session, .02f); else Call(session, "Advance"); }
+                    { await WaitForEffectResourcesAsync(session); if (session.IsPresenting) Tick(session, .02f); else Call(session, "Advance"); }
                     for (int step = 0; step < 1000 && direct.HasPendingCascade; step++) direct.AdvanceCascade();
                     Check(!session.IsPresenting && !executor.HasPendingCascade && Snapshot(session.State) == Snapshot(direct.State), "실제 씬 전체 연쇄 상태 동일 " + size);
                     Check(executor.Phase == direct.Phase && Snapshot(executor.Outcome) == Snapshot(direct.Outcome), "실제 씬 Phase·승패 결과 동일 " + size);
@@ -103,7 +103,7 @@ namespace GameScreen.Editor
                 {
                     ActionCandidate action = ActionQuery.Find(session.State).First(candidate => candidate.Kind == QueryActionKind.SwapMatch);
                     Check(session.TrySwap(action.First, action.Second.Value), "낙하 재시작 fixture " + repeat);
-                    Tick(session, .15f); Tick(session, .12f); Call(session, "Advance"); Tick(session, .04f);
+                    Tick(session, .15f); await FinishCurrentEffectsAsync(session); Call(session, "Advance"); Tick(session, .04f);
                     Check(session.IsPresenting && !session.CanUseItems, "낙하 중 다시하기 시작 " + repeat);
                     await session.RestartAsync(CancellationToken.None);
                     Check(session.CanAcceptInput && !session.IsPresenting && Snapshot(session.State) == initial, "낙하 다시하기 상태·잠금 복원 " + repeat);
@@ -112,7 +112,7 @@ namespace GameScreen.Editor
                         board.GetComponentsInChildren<SpriteRenderer>().All(image => Mathf.Approximately(image.color.a, 1)), "낙하 다시하기 임시 표시·알파 복원 " + repeat);
                 }
                 ActionCandidate leaving = ActionQuery.Find(session.State).First(candidate => candidate.Kind == QueryActionKind.SwapMatch);
-                session.TrySwap(leaving.First, leaving.Second.Value); Tick(session, .15f); Tick(session, .12f); Call(session, "Advance");
+                session.TrySwap(leaving.First, leaving.Second.Value); Tick(session, .15f); await FinishCurrentEffectsAsync(session); Call(session, "Advance");
                 Check(session.IsPresenting, "낙하 중 실제 씬 종료 fixture");
                 PuzzleGameSession oldSession = session;
                 await EditorSceneManager.LoadSceneAsyncInPlayMode(PuzzleGameAssets.ScenePath,
@@ -130,6 +130,13 @@ namespace GameScreen.Editor
                 File.WriteAllLines(Output + "scene-results.txt", results);
                 if (Application.isBatchMode) EditorApplication.Exit(exit); else EditorApplication.ExitPlaymode();
             }
+        }
+
+        private static async UniTask FinishCurrentEffectsAsync(PuzzleGameSession session)
+        {
+            await WaitForEffectResourcesAsync(session);
+            for (int frame = 0; frame < 2000 && session.IsPresenting; frame++) Tick(session, .02f);
+            Check(!session.IsPresenting && !session.HasFailed, "현재 효과 종료 후 정착 진행 가능");
         }
 
         private static async UniTask Shot(string name)

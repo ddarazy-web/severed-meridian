@@ -47,6 +47,7 @@ namespace GameScreen.Editor
                         int shownFrames = 0;
                         for (int frame = 0; frame < 20000; frame++)
                         {
+                            await WaitForEffectResourcesAsync(session);
                             BoardActionExecutor executor = (BoardActionExecutor)typeof(PuzzleGameSession).GetField("executor", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session);
                             if (!session.IsPresenting && !executor.HasPendingCascade) break;
                             if (session.IsPresenting)

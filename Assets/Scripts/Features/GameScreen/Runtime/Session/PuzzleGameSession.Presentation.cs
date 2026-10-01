@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Board;
+using Cysharp.Threading.Tasks;
 using Simulation;
 using UnityEngine;
 
@@ -16,13 +18,17 @@ namespace GameScreen
         private readonly PuzzleBoardSettlementPlayback settlementPlayback = new PuzzleBoardSettlementPlayback();
         private PuzzleBoardSnapshot presentationSnapshot;
         private BoardActionResult pendingSwap;
-        public bool IsPresenting => swapPlayback.IsPlaying || removalPlayback.IsPlaying || settlementPlayback.IsPlaying;
+        private LevelRuntimeState presentationBefore;
+        private PuzzlePowerPlayback powerPlayback;
+        private CancellationTokenSource effectLoad;
+        private bool preparingEffects;
+        public bool IsPresenting => preparingEffects || powerPlayback?.IsPlaying == true || swapPlayback.IsPlaying || removalPlayback.IsPlaying || settlementPlayback.IsPlaying;
 
         public bool TrySwap(BoardCoordinate first, BoardCoordinate second)
         {
             if (!CanAcceptInput) return false;
             ActionCandidate candidate = ActionQuery.Swap(State, first, second);
-            presentationSnapshot = board.Capture();
+            CapturePresentation();
             SpriteRenderer a = board.OccupantAt(first), b = board.OccupantAt(second);
             Vector3 direction = PuzzleWorldBoard.CellPosition(second) - PuzzleWorldBoard.CellPosition(first);
             Vector3 worldDelta = board.transform.TransformVector(direction);
@@ -54,15 +60,66 @@ namespace GameScreen
                     if (pendingSwap.IsApplied)
                     {
                         presentationSnapshot.Swap(pendingSwap.First, pendingSwap.Second);
-                        removalPlayback.Begin(presentationSnapshot, State, artwork, pendingSwap.Changes, removalSeconds);
+                        SwapPresentationState(pendingSwap.First, pendingSwap.Second);
+                        BoardActionResult result = pendingSwap; pendingSwap = null;
+                        BeginEffects(result.Changes, result.Effects, result.PowerTrace);
+                        return;
                     }
                     pendingSwap = null;
                     if (removalPlayback.IsPlaying) return;
                     ResetPresentation(); Draw();
                 }
-                else if (removalPlayback.Tick(deltaTime) || settlementPlayback.Tick(deltaTime)) { ResetPresentation(); Draw(); }
+                else if (!preparingEffects && (powerPlayback?.Tick(deltaTime) == true || removalPlayback.Tick(deltaTime) || settlementPlayback.Tick(deltaTime))) { ResetPresentation(); Draw(); }
             }
             catch (Exception error) { Fail("보드 연출 중단: " + error.Message); }
+        }
+
+        private void CapturePresentation()
+        {
+            presentationSnapshot = board.Capture();
+            presentationBefore = new LevelRuntimeState(State);
+        }
+
+        // 교환 연출 종료 시점의 점유자만 옮긴다. 덮개·바닥은 원래 칸에 남긴다.
+        private void SwapPresentationState(BoardCoordinate first, BoardCoordinate second)
+        {
+            RuntimeCell a = presentationBefore.CellAt(first), b = presentationBefore.CellAt(second);
+            (a.Content, b.Content) = (b.Content, a.Content);
+            (a.Color, b.Color) = (b.Color, a.Color);
+            (a.RocketDirection, b.RocketDirection) = (b.RocketDirection, a.RocketDirection);
+            (a.ObstacleIndex, b.ObstacleIndex) = (b.ObstacleIndex, a.ObstacleIndex);
+        }
+
+        private void BeginEffects(IEnumerable<MatchedBlockChange> changes, IEnumerable<EffectRecord> effects, PowerPresentationTrace trace)
+        {
+            PuzzleEffectTimeline timeline = new PuzzleEffectTimeline(presentationBefore, changes, effects, trace);
+            if (timeline.Duration <= 0) { BeginRemoval(changes); return; }
+            PrepareEffectsAsync(timeline).Forget(Debug.LogException);
+        }
+
+        private async UniTask PrepareEffectsAsync(PuzzleEffectTimeline timeline)
+        {
+            CancellationTokenSource load = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
+            effectLoad = load; preparingEffects = true;
+            PuzzlePowerPlayback playback = new PuzzlePowerPlayback();
+            try
+            {
+                Changed?.Invoke();
+                await playback.PrepareAsync(presentationBefore, State, artwork, timeline, load.Token);
+                load.Token.ThrowIfCancellationRequested();
+                // 이전 세션의 늦은 로드 완료가 재시작한 보드의 소유권을 가져오지 않는다.
+                if (effectLoad != load) return;
+                presentationSnapshot?.Restore(); presentationSnapshot = null;
+                powerPlayback = playback; powerPlayback.Begin(board);
+                preparingEffects = false; Changed?.Invoke();
+            }
+            catch (OperationCanceledException) { playback.Reset(); }
+            catch (Exception error) { if (effectLoad == load) Fail("파워 연출 준비 실패: " + error.Message); }
+            finally
+            {
+                if (effectLoad == load) { effectLoad = null; preparingEffects = false; }
+                load.Dispose();
+            }
         }
 
         private void BeginRemoval(IEnumerable<MatchedBlockChange> changes)
@@ -77,6 +134,8 @@ namespace GameScreen
 
         private void ResetPresentation()
         {
+            effectLoad?.Cancel(); effectLoad = null; preparingEffects = false;
+            powerPlayback?.Reset(); powerPlayback = null; presentationBefore = null;
             swapPlayback.Reset();
             removalPlayback.Reset();
             settlementPlayback.Reset();

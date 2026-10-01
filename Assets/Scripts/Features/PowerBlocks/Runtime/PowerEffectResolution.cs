@@ -24,6 +24,8 @@ namespace Simulation
         public int HitGroup { get; internal set; }
         public int ChargeBefore { get; internal set; }
         public int ChargeAfter { get; internal set; }
+        // 이 타격에 딸린 발전기 작동·연결 해제까지 포함한 실제 제거 본체다. 저장 데이터가 아니다.
+        public ReadOnlyCollection<int> RemovedObstacleIndices { get; internal set; } = System.Array.AsReadOnly(System.Array.Empty<int>());
         internal EffectRecord(BoardCoordinate source, BoardCoordinate target, DamageCause cause, DamageReaction reaction,
             RuntimeContent content, int before, int after, RabbitColor? color = null, int coverBefore = 0, int coverAfter = 0, int dustBefore = 0, int dustAfter = 0)
         { Source = source; Target = target; Cause = cause; Response = reaction.Response; Content = content; DurabilityBefore = before; DurabilityAfter = after; OriginalColor = color; Message = reaction.Message;
@@ -74,12 +76,19 @@ namespace Simulation
             MatchedBlockChange[] consumed = matches.ToArray();
             foreach (MatchedBlockChange match in consumed.Where(m => m.IsConsumed)) MissionProgressRules.ConsumeColor(work, match.OriginalColor);
             DroneTargetManager targets = new DroneTargetManager(work, context);
+            // 라스트팡은 같은 결과 목록에 여러 파워를 누적하므로 표시 기록도 함께 누적한다.
+            PowerPresentationTrace trace = records.Count > 0 && context.PowerTrace != null ? context.PowerTrace : new PowerPresentationTrace(combination);
+            context.PowerTrace = trace;
             // 역순으로 쌓아 행·열 순서로 처리한다. 피격 파워의 범위는 남은 부모 범위보다 먼저 처리한다.
             Stack<(BoardCoordinate source, BoardCoordinate target, DamageCause cause, bool request, RabbitColor? color, PowerArea area, int hit, bool magnet)> pending =
                 new Stack<(BoardCoordinate, BoardCoordinate, DamageCause, bool, RabbitColor?, PowerArea, int, bool)>();
-            void PushRange(BoardCoordinate source, IEnumerable<BoardCoordinate> range, int hit, bool magnet = false)
+            void PushRange(BoardCoordinate source, IEnumerable<BoardCoordinate> range, int hit, bool magnet = false,
+                RuntimeContent power = RuntimeContent.Empty, int parent = 0, PowerArea area = PowerArea.Point)
             {
-                foreach (BoardCoordinate target in range.Reverse())
+                BoardCoordinate[] selected = range.ToArray();
+                trace.Add(new PowerAttackRecord(hit, parent, source, source, power,
+                    work.CellAt(source).RocketDirection, area, false, 0, selected));
+                foreach (BoardCoordinate target in selected.Reverse())
                     pending.Push((source, target, DamageCause.Power, false, null, PowerArea.Point, hit, magnet));
             }
             void PushAdjacent(BoardCoordinate source, DamageCause cause, RabbitColor? color, int hit)
@@ -104,7 +113,10 @@ namespace Simulation
                 {
                     for (int i = 0; i < combination.DroneCount; i++)
                         pending.Push((combination.Center, combination.Center, DamageCause.Power, true, null, combination.DroneArea, 0, false));
-                    PushRange(combination.Center, PowerCombinationResolution.Range(work, combination.Center, combination.InitialArea), context.NextHit());
+                    PushRange(combination.Center, PowerCombinationResolution.Range(work, combination.Center, combination.InitialArea), context.NextHit(),
+                        power: combination.Kind == PowerCombinationKind.MagnetMagnet ? RuntimeContent.Magnet :
+                            combination.Kind == PowerCombinationKind.RocketRocket || combination.Kind == PowerCombinationKind.RocketBomb ? RuntimeContent.Rocket :
+                            combination.Kind == PowerCombinationKind.BombBomb ? RuntimeContent.Bomb : RuntimeContent.Drone, area: combination.InitialArea);
                 }
             }
             foreach (MatchedBlockChange match in consumed.Reverse())
@@ -120,8 +132,16 @@ namespace Simulation
                     var landing = landings.Dequeue();
                     DroneTarget target = targets.Land(landing.request, landing.origin);
                     if (target != null)
-                        PushRange(target.Area == PowerArea.Point ? landing.origin : target.Coordinate,
-                            PowerCombinationResolution.Range(work, target.Coordinate, target.Area), context.NextHit());
+                    {
+                        // 타격 Source는 기존 규칙대로 유지하되 별도 표시 기록에는 실제 착탄점도 보존한다.
+                        int landingHit = context.NextHit();
+                        BoardCoordinate source = target.Area == PowerArea.Point ? landing.origin : target.Coordinate;
+                        BoardCoordinate[] selected = PowerCombinationResolution.Range(work, target.Coordinate, target.Area).ToArray();
+                        trace.Add(new PowerAttackRecord(landingHit, 0, landing.origin, target.Coordinate, RuntimeContent.Drone,
+                            null, target.Area, true, trace.Attacks.Count, selected));
+                        foreach (BoardCoordinate coordinate in selected.Reverse())
+                            pending.Push((source, coordinate, DamageCause.Power, false, null, PowerArea.Point, landingHit, false));
+                    }
                     continue;
                 }
                 var hit = pending.Pop();
@@ -135,6 +155,8 @@ namespace Simulation
                 if (reaction.Response == DamageResponse.None) continue;
                 if (reaction.Response == DamageResponse.Unsupported) { error = hit.target + " " + reaction.Message + " · 행동 전체 취소"; return false; }
                 RuntimeCell cell = work.CellAt(hit.target);
+                int? originalBody = cell.ObstacleIndex;
+                int generatorRecordStart = context.Generators.Count;
                 RuntimeContent original = cell.Content;
                 RabbitColor? originalColor = cell.Color;
                 int coverBefore = cell.CoverDurability, dustBefore = cell.DustDurability;
@@ -162,7 +184,9 @@ namespace Simulation
                         range = work.Cells.Where(c => c.IsActive && c.Content == RuntimeContent.Normal && c.Cover != CoverKind.Mold && color.HasValue && c.Color == color).Select(c => c.Coordinate).ToArray();
                     }
                     context.RegisterFire(hit.target);
-                    PushRange(hit.target, range, context.NextHit(), original == RuntimeContent.Magnet);
+                    PushRange(hit.target, range, context.NextHit(), original == RuntimeContent.Magnet, original, hit.hit,
+                        original == RuntimeContent.Rocket ? (cell.RocketDirection == RocketDirection.Horizontal ? PowerArea.Horizontal : PowerArea.Vertical) :
+                        original == RuntimeContent.Bomb ? PowerArea.Blast3 : original == RuntimeContent.Drone ? PowerArea.Plus : PowerArea.Point);
                 }
                 if (reaction.Response == DamageResponse.Damage)
                 {
@@ -181,7 +205,15 @@ namespace Simulation
                 { cell.Content = RuntimeContent.Empty; cell.Color = null; cell.RocketDirection = null; cell.ObstacleIndex = null; }
                 if (reaction.Response == DamageResponse.Remove || reaction.Response == DamageResponse.Activate || reaction.Response == DamageResponse.Damage || reaction.Response == DamageResponse.CoverDamage)
                     targets.Invalidate();
-                records.Add(new EffectRecord(hit.source, hit.target, hit.cause, reaction, original, before, after, originalColor, coverBefore, cell.CoverDurability, dustBefore, cell.DustDurability) { HitGroup = hit.hit, ChargeBefore = chargeBefore, ChargeAfter = chargeAfter });
+                HashSet<int> removedBodies = new HashSet<int>();
+                if (reaction.Response == DamageResponse.Damage && after == 0 && originalBody.HasValue) removedBodies.Add(originalBody.Value);
+                foreach (GeneratorRecord generator in context.Generators.Skip(generatorRecordStart))
+                {
+                    if (generator.Event == GeneratorEvent.Activated || generator.Event == GeneratorEvent.Retired) removedBodies.Add(generator.GeneratorIndex);
+                    if (generator.Event == GeneratorEvent.Disconnected && generator.TargetIndex.HasValue) removedBodies.Add(generator.TargetIndex.Value);
+                }
+                records.Add(new EffectRecord(hit.source, hit.target, hit.cause, reaction, original, before, after, originalColor, coverBefore, cell.CoverDurability, dustBefore, cell.DustDurability)
+                { HitGroup = hit.hit, ChargeBefore = chargeBefore, ChargeAfter = chargeAfter, RemovedObstacleIndices = removedBodies.OrderBy(index => index).ToList().AsReadOnly() });
             }
             if (targets.ReservationCount != 0) { error = "미해제 드론 예약 · 행동 전체 취소"; return false; }
             error = null; return true;

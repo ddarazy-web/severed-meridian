@@ -36,6 +36,7 @@ namespace GameScreen.Editor
                     bool automaticRemoval = false, followingSettlement = false;
                     for (int frame = 0; frame < 20000 && (session.IsPresenting || executor.HasPendingCascade); frame++)
                     {
+                        await WaitForEffectResourcesAsync(session);
                         if (session.IsPresenting) { Tick(session, .02f); continue; }
                         int rounds = executor.CascadeRounds;
                         Call(session, "Advance");

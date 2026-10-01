@@ -88,11 +88,11 @@ namespace GameScreen.Editor
                 Check(session.SetPaused(true), "재생 중 일시정지"); Tick(session, 1);
                 Check(moving.transform.position == pausedAt && session.IsPresenting, "정지 중 재생 시간과 위치 보존");
                 session.SetPaused(false); Tick(session, 0.075f);
-                FinishPresentation(session);
+                await FinishPresentation(session);
                 Check(!session.IsPresenting && Snapshot(session.State) == Snapshot(baseline.State), "표시 완료 후 실행기 결과 동일");
                 Capture(camera, "success-end", 1280, 720);
                 for (int step = 0; step < 1000 && baseline.HasPendingCascade; step++)
-                { Call(session, "Advance"); FinishPresentation(session); baseline.AdvanceCascade(); }
+                { Call(session, "Advance"); await FinishPresentation(session); baseline.AdvanceCascade(); }
                 Check(!baseline.HasPendingCascade && Snapshot(session.State) == Snapshot(baseline.State), "교환 뒤 전체 연쇄 동일");
 
                 Reset();
@@ -117,7 +117,7 @@ namespace GameScreen.Editor
                 Check(Vector3.Distance(moving.transform.position, origin) < 0.1f && Snapshot(session.State) == unchanged, "보드 밖으로 이동하지 않음");
                 Tick(session, 1);
                 PuzzleBoardInput input = owner.AddComponent<PuzzleBoardInput>(); input.Configure(session, board, camera);
-                VerifyGestures(session, input, board, camera, state, art);
+                await VerifyGestures(session, input, board, camera, state, art);
                 UnityEngine.Object.DestroyImmediate(input);
                 Reset();
                 await PuzzleBoardInputVerification.VerifyAsync(board, camera);
@@ -143,14 +143,29 @@ namespace GameScreen.Editor
         private static void Set(object target, string field, object value) => target.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(target, value);
         private static void Call(object target, string method, params object[] args) => target.GetType().GetMethod(method, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(target, args);
         private static void Tick(PuzzleGameSession session, float seconds) => Call(session, "AdvancePresentation", seconds);
-        private static void FinishPresentation(PuzzleGameSession session)
+        private static async UniTask FinishPresentation(PuzzleGameSession session)
         {
-            for (int frame = 0; frame < 10000 && session.IsPresenting; frame++) Tick(session, .02f);
+            float previousScale = Time.timeScale, deadline = Time.realtimeSinceStartup + 20;
+            Time.timeScale = 0;
+            try
+            {
+                FieldInfo preparing = typeof(PuzzleGameSession).GetField("preparingEffects", BindingFlags.NonPublic | BindingFlags.Instance);
+                for (int frame = 0; frame < 10000 && session.IsPresenting; frame++)
+                {
+                    if ((bool)preparing.GetValue(session))
+                    {
+                        while ((bool)preparing.GetValue(session) && Time.realtimeSinceStartup < deadline) await UniTask.Yield();
+                        Check(!(bool)preparing.GetValue(session) && !session.HasFailed, "교환 후 효과 준비 완료");
+                    }
+                    Tick(session, .02f);
+                }
+            }
+            finally { Time.timeScale = previousScale; }
             Check(!session.IsPresenting && !session.HasFailed, "현재 표시 단계 완료");
         }
         private static string Snapshot(object state) => (string)typeof(LevelInitialStateVerification).GetMethod("Snapshot", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new[] { state });
 
-        private static void VerifyGestures(PuzzleGameSession session, PuzzleBoardInput input, PuzzleWorldBoard board, Camera camera, LevelRuntimeState state, PuzzleArtwork art)
+        private static async UniTask VerifyGestures(PuzzleGameSession session, PuzzleBoardInput input, PuzzleWorldBoard board, Camera camera, LevelRuntimeState state, PuzzleArtwork art)
         {
             BoardCoordinate a = new BoardCoordinate(2, 3), b = new BoardCoordinate(3, 3);
             Vector2 Screen(BoardCoordinate at, Vector3 offset = default) => camera.WorldToScreenPoint(board.transform.TransformPoint(PuzzleWorldBoard.CellPosition(at) + offset));
@@ -186,7 +201,7 @@ namespace GameScreen.Editor
             Tick(session, .075f); string committed = Snapshot(session.State);
             board.transform.rotation = Quaternion.Euler(0, 0, 15); input.CancelGesture();
             Tick(session, .075f);
-            FinishPresentation(session);
+            await FinishPresentation(session);
             Check(Snapshot(session.State) == committed && !session.IsPresenting, "확정 후 회전/취소는 규칙 롤백 없음");
             board.transform.rotation = Quaternion.identity;
 

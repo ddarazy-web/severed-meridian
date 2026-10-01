@@ -94,10 +94,10 @@ namespace GameScreen
         public bool TryActivate(BoardCoordinate at)
         {
             if (!CanAcceptInput) return false;
-            presentationSnapshot = board.Capture();
+            CapturePresentation();
             BoardActionResult result = executor.Activate(at);
             Message = result.Message;
-            if (result.IsApplied) BeginRemoval(result.Changes);
+            if (result.IsApplied) BeginEffects(result.Changes, result.Effects, result.PowerTrace);
             else { ResetPresentation(); Changed?.Invoke(); }
             return result.IsApplied;
         }
@@ -114,7 +114,7 @@ namespace GameScreen
             if (!ready || failed || IsPaused || IsRestarting || IsPresenting || !executor.HasPendingCascade) return;
             try
             {
-                presentationSnapshot = board.Capture();
+                CapturePresentation();
                 int recoveryBefore = State.Recoveries.Count;
                 CascadeStepResult step = executor.AdvanceCascade();
                 Message = step.Message;
@@ -124,7 +124,7 @@ namespace GameScreen
                     if (!IsPresenting) { ResetPresentation(); Draw(); } else Changed?.Invoke();
                 }
                 else if (step.Reason == CascadeStepReason.Shuffled) { ResetPresentation(); Draw(); }
-                else BeginRemoval(step.Changes);
+                else BeginEffects(step.Changes, step.Effects, step.PowerTrace);
             }
             catch (Exception error) { Fail("게임 처리 중단: " + error.Message); }
         }

@@ -20,14 +20,15 @@ namespace Simulation
         public ReadOnlyCollection<MatchDecision> Decisions { get; }
         public ReadOnlyCollection<MatchedBlockChange> Changes { get; }
         public ReadOnlyCollection<EffectRecord> Effects { get; }
+        public PowerPresentationTrace PowerTrace { get; }
         public SettlementResult Settlement { get; }
         internal CascadeStepResult(CascadeStepReason reason, string message, int turn, int round, int randomBefore, int randomAfter,
-            IEnumerable<MatchDecision> decisions = null, IEnumerable<MatchedBlockChange> changes = null, IEnumerable<EffectRecord> effects = null, SettlementResult settlement = null)
+            IEnumerable<MatchDecision> decisions = null, IEnumerable<MatchedBlockChange> changes = null, IEnumerable<EffectRecord> effects = null, SettlementResult settlement = null, PowerPresentationTrace powerTrace = null)
         {
             Reason = reason; Message = message; Turn = turn; Round = round; RandomBefore = randomBefore; RandomAfter = randomAfter;
             Decisions = Array.AsReadOnly(decisions?.ToArray() ?? Array.Empty<MatchDecision>());
             Changes = Array.AsReadOnly(changes?.ToArray() ?? Array.Empty<MatchedBlockChange>());
-            Effects = Array.AsReadOnly(effects?.ToArray() ?? Array.Empty<EffectRecord>()); Settlement = settlement;
+            Effects = Array.AsReadOnly(effects?.ToArray() ?? Array.Empty<EffectRecord>()); Settlement = settlement; PowerTrace = powerTrace;
         }
     }
 
@@ -85,7 +86,7 @@ namespace Simulation
                 return RejectStep(CascadeStepReason.Unsupported, error);
             context.ForgetRemoved(work);
             CascadeStepResult result = new CascadeStepResult(CascadeStepReason.Matched, "자동 매칭·효과 완료 · 낙하 대기", Turn, CascadeRounds + 1,
-                State.Random.DrawCount, work.Random.DrawCount, decisions, changes, effects);
+                State.Random.DrawCount, work.Random.DrawCount, decisions, changes, effects, powerTrace: context.PowerTrace);
             seenCascadeStates[key] = State.Random.DrawCount;
             State = work; TurnEffects = context; CascadeRounds++; Phase = BoardActionPhase.WaitingForFall;
             RecordStep(result); return result;

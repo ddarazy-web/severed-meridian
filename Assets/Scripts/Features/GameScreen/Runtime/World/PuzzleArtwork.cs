@@ -40,6 +40,16 @@ namespace GameScreen
             if (state.Flow.Portals.Count > 0) Add(PuzzleArtworkPaths.Portal(0, false));
             if (state.Flow.Arrivals.Count > 0) Add(PuzzleArtworkPaths.Arrival);
             if (state.Connections.Count > 0) Add(PuzzleArtworkPaths.Wire(false));
+            await LoadAsync(addresses, cancellationToken);
+            void Add(string path) { if (path != null) addresses.Add(BoardSpriteAtlas.AddressFor(path)); }
+        }
+
+        internal UniTask PrepareEffectsAsync(IEnumerable<string> paths, CancellationToken cancellationToken)
+            => LoadAsync(paths.Where(path => path != null).Select(BoardSpriteAtlas.AddressFor).Distinct(), cancellationToken);
+
+        private async UniTask LoadAsync(IEnumerable<string> addresses, CancellationToken cancellationToken)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(PuzzleArtwork));
             pending++;
             try
             {
@@ -63,7 +73,6 @@ namespace GameScreen
                 pending--;
                 if (disposed && pending == 0) Release();
             }
-            void Add(string path) { if (path != null) addresses.Add(BoardSpriteAtlas.AddressFor(path)); }
         }
 
         public Sprite Get(string path)

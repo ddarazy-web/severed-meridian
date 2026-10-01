@@ -35,13 +35,14 @@ namespace GameScreen
         public bool TryUseItem(BoardItem item, BoardCoordinate? first = null, BoardCoordinate? second = null)
         {
             if (!CanUseItems) return false;
-            presentationSnapshot = board.Capture();
+            CapturePresentation();
             ItemUseResult result = executor.UseItem(item, first, second);
             Message = result.Message;
             if (result.IsApplied && item != BoardItem.Shuffle)
             {
-                if (item == BoardItem.Swap && first.HasValue && second.HasValue) presentationSnapshot.Swap(first.Value, second.Value);
-                BeginRemoval(result.Changes);
+                if (item == BoardItem.Swap && first.HasValue && second.HasValue)
+                { presentationSnapshot.Swap(first.Value, second.Value); SwapPresentationState(first.Value, second.Value); }
+                BeginEffects(result.Changes, result.Effects, result.PowerTrace);
             }
             else { ResetPresentation(); if (result.IsApplied) Draw(); else Changed?.Invoke(); }
             return result.IsApplied;

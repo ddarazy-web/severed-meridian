@@ -44,15 +44,16 @@ namespace Simulation
         public ReadOnlyCollection<MatchedBlockChange> Changes { get; }
         public bool IsActivation { get; }
         public ReadOnlyCollection<EffectRecord> Effects { get; }
+        public PowerPresentationTrace PowerTrace { get; }
         internal BoardActionResult(BoardActionReason reason, string message, BoardCoordinate first, BoardCoordinate second,
             int before, int after, int randomBefore, int randomAfter, int turn, IEnumerable<MatchDecision> decisions = null, IEnumerable<MatchedBlockChange> changes = null,
-            IEnumerable<EffectRecord> effects = null, bool isActivation = false)
+            IEnumerable<EffectRecord> effects = null, bool isActivation = false, PowerPresentationTrace powerTrace = null)
         {
             Reason = reason; Message = message; First = first; Second = second; MovesBefore = before; MovesAfter = after;
             RandomBefore = randomBefore; RandomAfter = randomAfter; Turn = turn;
             Decisions = Array.AsReadOnly(decisions?.ToArray() ?? Array.Empty<MatchDecision>());
             Changes = Array.AsReadOnly(changes?.ToArray() ?? Array.Empty<MatchedBlockChange>());
-            Effects = Array.AsReadOnly(effects?.ToArray() ?? Array.Empty<EffectRecord>()); IsActivation = isActivation;
+            Effects = Array.AsReadOnly(effects?.ToArray() ?? Array.Empty<EffectRecord>()); IsActivation = isActivation; PowerTrace = powerTrace;
         }
     }
 
@@ -166,7 +167,7 @@ namespace Simulation
             }
             work.MovesRemaining--;
             LastApplied = new BoardActionResult(BoardActionReason.Applied, "매칭·효과 처리 완료 · 낙하 대기", first, second,
-                State.MovesRemaining, work.MovesRemaining, State.Random.DrawCount, work.Random.DrawCount, Turn + 1, decisions, changes, effects, activation);
+                State.MovesRemaining, work.MovesRemaining, State.Random.DrawCount, work.Random.DrawCount, Turn + 1, decisions, changes, effects, activation, context.PowerTrace);
             State = work; TurnEffects = context; Turn++; Phase = BoardActionPhase.WaitingForFall;
             CascadeRounds = 0; LastSettlement = null; LastCascadeStep = null; cascadeHistory.Clear(); seenCascadeStates.Clear();
             return LastApplied;

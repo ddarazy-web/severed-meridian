@@ -28,6 +28,7 @@ namespace Simulation
         private readonly List<TargetingRecord> targeting = new List<TargetingRecord>();
         public System.Collections.ObjectModel.ReadOnlyCollection<TargetingRecord> Targeting => targeting.AsReadOnly();
         public PowerCombination Combination { get; internal set; }
+        public PowerPresentationTrace PowerTrace { get; internal set; }
         private int targetRequest;
         private int lastHit;
         private readonly HashSet<(int hit, BoardCoordinate cell)> hitCells = new HashSet<(int, BoardCoordinate)>();
@@ -100,6 +101,7 @@ namespace Simulation
             copy.targetRequest = targetRequest;
             copy.lastHit = lastHit; copy.hitCells.UnionWith(hitCells);
             copy.Combination = Combination;
+            copy.PowerTrace = PowerTrace;
             copy.RemovedMold = RemovedMold; copy.MoldSpread = MoldSpread;
             foreach (KeyValuePair<BoardCoordinate, long> arrival in arrivals) copy.arrivals.Add(arrival.Key, arrival.Value);
             return copy;

@@ -21,13 +21,14 @@ namespace Simulation
         public int RandomAfter { get; }
         public ReadOnlyCollection<MatchedBlockChange> Changes { get; }
         public ReadOnlyCollection<EffectRecord> Effects { get; }
+        public PowerPresentationTrace PowerTrace { get; }
         public ShuffleResult Shuffle { get; }
         internal ItemUseResult(BoardItem item, bool applied, string message, BoardCoordinate? first, BoardCoordinate? second, int turn,
-            int moves, int before, int after, IEnumerable<MatchedBlockChange> changes = null, IEnumerable<EffectRecord> effects = null, ShuffleResult shuffle = null)
+            int moves, int before, int after, IEnumerable<MatchedBlockChange> changes = null, IEnumerable<EffectRecord> effects = null, ShuffleResult shuffle = null, PowerPresentationTrace powerTrace = null)
         {
             Item = item; IsApplied = applied; Message = message; First = first; Second = second; Turn = turn; MovesRemaining = moves;
             RandomBefore = before; RandomAfter = after; Changes = Array.AsReadOnly(changes?.ToArray() ?? Array.Empty<MatchedBlockChange>());
-            Effects = Array.AsReadOnly(effects?.ToArray() ?? Array.Empty<EffectRecord>()); Shuffle = shuffle;
+            Effects = Array.AsReadOnly(effects?.ToArray() ?? Array.Empty<EffectRecord>()); Shuffle = shuffle; PowerTrace = powerTrace;
         }
     }
 
@@ -99,7 +100,7 @@ namespace Simulation
                 if (!PowerEffectResolution.Apply(work, changes, null, context, effects, out string error)) return Reject(error);
             }
             ItemUseResult result = new ItemUseResult(item, true, "아이템 사용 완료 · 후속 처리 대기", first, second, Turn + 1,
-                work.MovesRemaining, before, work.Random.DrawCount, changes, effects, shuffled);
+                work.MovesRemaining, before, work.Random.DrawCount, changes, effects, shuffled, context.PowerTrace);
             State = work; TurnEffects = context; Turn++; itemUses.Add(result);
             Phase = item == BoardItem.Shuffle ? BoardActionPhase.WaitingForAutomaticMatch : BoardActionPhase.WaitingForFall;
             CascadeRounds = 0; LastApplied = null; LastSettlement = null; LastCascadeStep = null;

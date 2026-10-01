@@ -76,7 +76,8 @@ namespace Simulation
 
         private CascadeStepResult RecordEnding(CascadeStepReason reason, string message, int before, IEnumerable<EffectRecord> effects = null)
         {
-            CascadeStepResult result = new CascadeStepResult(reason, message, Turn, CascadeRounds, before, State.Random.DrawCount, effects: effects);
+            CascadeStepResult result = new CascadeStepResult(reason, message, Turn, CascadeRounds, before, State.Random.DrawCount, effects: effects,
+                powerTrace: effects != null ? TurnEffects.PowerTrace : null);
             RecordStep(result); return result;
         }
 

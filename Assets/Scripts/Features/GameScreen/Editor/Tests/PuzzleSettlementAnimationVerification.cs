@@ -73,6 +73,7 @@ namespace GameScreen.Editor
                 Dictionary<SpriteRenderer, Vector3> initialScales = board.GetComponentsInChildren<SpriteRenderer>().ToDictionary(image => image, image => image.transform.localScale);
                 Check(session.TrySwap(a, b), "유효 교환 시작");
                 Tick(session, .15f);
+                await WaitForEffectResourcesAsync(session);
                 Check(session.IsPresenting, "교환 종료 후 제거 재생 유지");
                 BoardActionPhase phase = session.Phase;
                 Call(session, "Advance");
@@ -82,6 +83,7 @@ namespace GameScreen.Editor
                 Check(initialScales.Any(pair => pair.Key.enabled && pair.Key.color.a > 0 && pair.Key.color.a < 1 &&
                     pair.Key.transform.localScale.x < pair.Value.x && pair.Key.transform.localScale.y < pair.Value.y), "제거 중간 축소");
                 Tick(session, .06f);
+                for (int frame = 0; frame < 1000 && session.IsPresenting; frame++) Tick(session, .02f);
                 Check(!session.IsPresenting, "제거 종료");
                 Check(initialScales.All(pair => pair.Key.transform.localScale == pair.Value && pair.Key.color.a == 1), "제거 종료 원래 축척·알파 복원");
                 foreach (MatchedBlockChange change in executor.LastApplied.Changes.Where(change => change.IsTransformation))
@@ -108,6 +110,7 @@ namespace GameScreen.Editor
                 Check(session.TryActivate(powerCell.Coordinate) && session.IsPresenting, "파워 탭 제거 재생");
                 for (int frame = 0; frame < 20000 && (session.IsPresenting || executor.HasPendingCascade); frame++)
                 {
+                    await WaitForEffectResourcesAsync(session);
                     if (session.IsPresenting) Tick(session, .02f);
                     else Call(session, "Advance");
                 }
@@ -131,6 +134,19 @@ namespace GameScreen.Editor
         private static void Set(object target, string field, object value) => target.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(target, value);
         private static void Call(object target, string method, params object[] args) => target.GetType().GetMethod(method, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(target, args);
         private static void Tick(PuzzleGameSession session, float seconds) => Call(session, "AdvancePresentation", seconds);
+        private static async UniTask WaitForEffectResourcesAsync(PuzzleGameSession session)
+        {
+            FieldInfo field = typeof(PuzzleGameSession).GetField("preparingEffects", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (!(bool)field.GetValue(session)) return;
+            float previousScale = Time.timeScale, deadline = Time.realtimeSinceStartup + 20;
+            Time.timeScale = 0;
+            try
+            {
+                while ((bool)field.GetValue(session) && Time.realtimeSinceStartup < deadline) await UniTask.Yield();
+                Check(!(bool)field.GetValue(session) && !session.HasFailed, "검사 프레임 전에 효과 아틀라스 준비 완료");
+            }
+            finally { Time.timeScale = previousScale; }
+        }
         private static string Snapshot(object state) => (string)typeof(LevelInitialStateVerification).GetMethod("Snapshot", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new[] { state });
     }
 }
