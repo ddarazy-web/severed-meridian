@@ -118,6 +118,36 @@ namespace GameScreen.Editor
                     }
                     finally { UnityEngine.Object.DestroyImmediate(level); }
                 }
+                LevelDefinition pending = (LevelDefinition)typeof(TargetPowerVerification).GetMethod("Make", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
+                try
+                {
+                    typeof(TargetPowerVerification).GetMethod("Mission", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null,
+                        new object[] { pending, MissionKind.Color, 2, RabbitColor.Type5 });
+                    foreach (var placement in new[] { (new BoardCoordinate(4, 0), InitialBlockKind.Rocket), (new BoardCoordinate(4, 2), InitialBlockKind.Drone) })
+                        typeof(PowerEffectVerification).GetMethod("Place", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null,
+                            new object[] { pending, placement.Item1, placement.Item2, RocketDirection.Horizontal, RabbitColor.Type1 });
+                    bool found = false;
+                    for (int seed = 0; seed < 16 && !found; seed++)
+                    {
+                        LevelRuntimeState initial = LevelStateBuilder.Build(pending, seed).State;
+                        foreach (RuntimeCell cell in initial.Cells.Where(cell => cell.Content == RuntimeContent.Normal))
+                            typeof(RuntimeCell).GetProperty("Color").SetValue(cell, cell.Coordinate.Equals(new BoardCoordinate(4, 8)) || cell.Coordinate.Equals(new BoardCoordinate(8, 8)) ? RabbitColor.Type5 : RabbitColor.Type2);
+                        TurnEffectContext context = (TurnEffectContext)typeof(TargetPowerVerification).GetMethod("Context", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
+                        var effects = (List<EffectRecord>)typeof(TargetPowerVerification).GetMethod("Effects", BindingFlags.NonPublic | BindingFlags.Static)
+                            .Invoke(null, new object[] { initial, new BoardCoordinate(4, 0), context });
+                        if (!context.Targeting.Any(record => record.Event == TargetingEvent.Retargeted)) continue;
+                        PuzzleEffectTimeline timeline = new PuzzleEffectTimeline(initial, Array.Empty<MatchedBlockChange>(), effects, context.PowerTrace);
+                        var flight = timeline.Attacks.Single(attack => attack.Record.IsFlight);
+                        Check(flight.Record.Retargeted && flight.Record.Center.Equals(new BoardCoordinate(8, 8)), "실제 표적 소실 후 재탐색 기록과 최종 표적 전달");
+                        float hoverStart = timeline.Attacks.Where(attack => !attack.Record.IsFlight && attack.Record.Origin.Equals(flight.Record.Origin))
+                            .Select(attack => attack.Start).DefaultIfEmpty(0).Min();
+                        Check(Mathf.Abs(flight.Start - Mathf.Max(timeline.Attacks.Take(flight.Record.WaitForAttacks).Max(attack => attack.End), hoverStart + .72f) - .18f) < .001f,
+                            "재탐색 드론은 공중 이동·선행 공격 대기 후 0.18초 추가 선회하고 돌진");
+                        found = true;
+                    }
+                    Check(found, "표적 소실 재탐색 표시 fixture 재현");
+                }
+                finally { UnityEngine.Object.DestroyImmediate(pending); }
                 VerifyRocketBodyArrival();
                 PropertyInfo removedBodies = typeof(EffectRecord).GetProperty("RemovedObstacleIndices");
                 Check(removedBodies != null, "타격 결과에 발전기 간접 제거 본체 기록");

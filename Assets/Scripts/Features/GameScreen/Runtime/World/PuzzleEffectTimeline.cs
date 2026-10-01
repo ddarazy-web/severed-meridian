@@ -22,7 +22,7 @@ namespace GameScreen
                 float launch = Start;
                 if (Record.IsFlight)
                 {
-                    float flight = Mathf.Clamp(Vector3.Distance(PuzzleWorldBoard.CellPosition(Record.Origin), PuzzleWorldBoard.CellPosition(Record.Center)) * .06f, .30f, .55f);
+                    float flight = Mathf.Clamp(Vector3.Distance(PuzzleWorldBoard.CellPosition(Record.Origin), PuzzleWorldBoard.CellPosition(Record.Center)) * .045f, .18f, .38f);
                     launch += flight;
                     if (Record.Area != PowerArea.Horizontal && Record.Area != PowerArea.Vertical)
                         return launch + (Record.Area == PowerArea.Point ? 0 : .12f);
@@ -137,6 +137,14 @@ namespace GameScreen
                     if (parent != null) start = Mathf.Max(start, Schedule(parent).ImpactAt(record.Origin));
                 }
                 for (int i = 0; i < record.WaitForAttacks; i++) start = Mathf.Max(start, Schedule(records[i]).End);
+                if (record.IsFlight)
+                {
+                    float hoverStart = records.Where(prior => !prior.IsFlight && prior.Origin.Equals(record.Origin))
+                        .Select(prior => Schedule(prior).Start).DefaultIfEmpty(0).Min();
+                    start = Mathf.Max(start, hoverStart + .72f);
+                }
+                // 실제 재탐색 기록이 있을 때만 선회하며 새 표적을 확인하는 시간을 표시한다.
+                if (record.Retargeted) start += .18f;
                 Attack attack = new Attack(record, start); attacks.Add(record.HitGroup, attack); return attack;
             }
         }

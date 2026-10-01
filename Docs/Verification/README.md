@@ -16,6 +16,8 @@
 
 ## 월드 게임 화면 (1~8단계)
 
+- [드론 임의 공중 이동·다양한 선회·표적 예고 제거](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-wide-orbit.md)
+- [드론 선회·분리 궤도·빠른 곡선 돌진 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-orbit-flight.md)
 - [9×9 보드 전환 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-nine-by-nine-board.md)
 - [선택·스와이프 블록 표시 순서 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-swipe-sorting.md)
 - [2×2 장애물의 공격 범위 겹침 피해 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-two-by-two-overlap-damage.md)

@@ -18,12 +18,14 @@ namespace Simulation
         public PowerArea Area { get; }
         public bool IsFlight { get; }
         public int WaitForAttacks { get; }
+        public bool Retargeted { get; }
         public ReadOnlyCollection<BoardCoordinate> Targets { get; }
         internal PowerAttackRecord(int hit, int parent, BoardCoordinate origin, BoardCoordinate center,
-            RuntimeContent power, RocketDirection? direction, PowerArea area, bool flight, int wait, IEnumerable<BoardCoordinate> targets)
+            RuntimeContent power, RocketDirection? direction, PowerArea area, bool flight, int wait, IEnumerable<BoardCoordinate> targets, bool retargeted = false)
         {
             HitGroup = hit; ParentHitGroup = parent; Origin = origin; Center = center;
             Power = power; Direction = direction; Area = area; IsFlight = flight; WaitForAttacks = wait;
+            Retargeted = retargeted;
             Targets = targets.ToList().AsReadOnly();
         }
     }

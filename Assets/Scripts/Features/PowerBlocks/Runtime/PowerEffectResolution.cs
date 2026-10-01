@@ -138,7 +138,8 @@ namespace Simulation
                         BoardCoordinate source = target.Area == PowerArea.Point ? landing.origin : target.Coordinate;
                         BoardCoordinate[] selected = PowerCombinationResolution.Range(work, target.Coordinate, target.Area).ToArray();
                         trace.Add(new PowerAttackRecord(landingHit, 0, landing.origin, target.Coordinate, RuntimeContent.Drone,
-                            null, target.Area, true, trace.Attacks.Count, selected));
+                            null, target.Area, true, trace.Attacks.Count, selected,
+                            context.Targeting.Any(record => record.Request == landing.request && record.Event == TargetingEvent.Retargeted)));
                         foreach (BoardCoordinate coordinate in selected.Reverse())
                             pending.Push((source, coordinate, DamageCause.Power, false, null, PowerArea.Point, landingHit, false));
                     }

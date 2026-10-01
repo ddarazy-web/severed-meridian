@@ -86,7 +86,7 @@ namespace GameScreen.Editor
                     PuzzleEffectTimeline schedule = (PuzzleEffectTimeline)playback.GetType().GetField("timeline", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(playback);
                     var flight = schedule.Attacks.FirstOrDefault(attack => attack.Record.IsFlight);
                     float captureTime = fixture == 0 ? .20f : flight == null ? .38f : flight.Start + Mathf.Clamp(
-                        Vector3.Distance(PuzzleWorldBoard.CellPosition(flight.Record.Origin), PuzzleWorldBoard.CellPosition(flight.Record.Center)) * .06f, .30f, .55f) + .01f;
+                        Vector3.Distance(PuzzleWorldBoard.CellPosition(flight.Record.Origin), PuzzleWorldBoard.CellPosition(flight.Record.Center)) * .045f, .18f, .38f) + .01f;
                     SceneCall(session, "AdvancePresentation", captureTime - .14f);
                     await PowerShot("scene-power-" + fixture + "-contact");
                     for (int frame = 0; frame < 20000 && (session.IsPresenting || executor.HasPendingCascade); frame++)
