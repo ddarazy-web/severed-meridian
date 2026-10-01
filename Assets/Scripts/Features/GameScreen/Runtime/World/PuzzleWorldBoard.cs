@@ -3,6 +3,7 @@ using Board;
 using Levels;
 using Simulation;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace GameScreen
 {
@@ -14,12 +15,68 @@ namespace GameScreen
         private readonly List<PuzzleCellView> cells = new List<PuzzleCellView>();
         private readonly List<SpriteRenderer> bodies = new List<SpriteRenderer>();
         private readonly List<SpriteRenderer> decorations = new List<SpriteRenderer>();
+        private readonly List<SpriteRenderer> supplyImages = new List<SpriteRenderer>();
+        private readonly List<SpriteMask> supplyClips = new List<SpriteMask>();
+        private Sprite supplyClipSprite;
         private int bodyCount, decorationCount;
         private readonly Dictionary<BoardCoordinate, SpriteRenderer> occupants = new Dictionary<BoardCoordinate, SpriteRenderer>();
         private SpriteRenderer preview;
         private Vector3 previewOrigin;
 
         public SpriteRenderer OccupantAt(BoardCoordinate at) => occupants.TryGetValue(at, out SpriteRenderer image) ? image : null;
+
+        internal PuzzleBoardSnapshot Capture()
+        {
+            PuzzleBoardSnapshot snapshot = new PuzzleBoardSnapshot();
+            foreach (KeyValuePair<BoardCoordinate, SpriteRenderer> pair in occupants)
+                if (pair.Value.enabled && pair.Value.sprite != null)
+                {
+                    PuzzleBoardSnapshot.Image image = new PuzzleBoardSnapshot.Image(pair.Value, pair.Key, transform, OccupantOrigin(pair.Value));
+                    snapshot.Images.Add(pair.Key, image); snapshot.Owned.Add(image);
+                }
+            return snapshot;
+        }
+
+        internal PuzzleBoardSnapshot.Image SupplyImage(SettlementRecord record, LevelRuntimeState state, PuzzleArtwork art)
+        {
+            int index = supplyImages.FindIndex(image => !image.gameObject.activeSelf);
+            if (index < 0) index = supplyImages.Count;
+            SpriteRenderer renderer = Take(supplyImages, obstaclePrefab, index);
+            if (supplyClipSprite == null)
+                supplyClipSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 1, 1), new Vector2(.5f, .5f), 1);
+            if (index == supplyClips.Count)
+            {
+                // 이웃 생성구 마스크가 다른 공급 그림까지 드러내지 않도록 쌍별로 격리한다.
+                SortingGroup group = new GameObject("Supply-group", typeof(SortingGroup)).GetComponent<SortingGroup>();
+                group.transform.SetParent(transform, false); group.sortingOrder = 10;
+                renderer.transform.SetParent(group.transform, false);
+                SpriteMask mask = new GameObject("Supply-clip", typeof(SpriteMask)).GetComponent<SpriteMask>();
+                mask.transform.SetParent(group.transform, false); mask.sprite = supplyClipSprite;
+                mask.isCustomRangeActive = false;
+                supplyClips.Add(mask);
+            }
+            SpriteMask clip = supplyClips[index]; clip.gameObject.SetActive(true);
+            clip.transform.localPosition = CellPosition(record.Target);
+            // 내부 생성구에서도 공급되는 동안에는 대상 한 칸 안에서만 드러난다.
+            renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            string path = record.Content switch
+            {
+                RuntimeContent.Normal => PuzzleArtworkPaths.Rabbit(record.Color.Value),
+                RuntimeContent.Recovery => PuzzleArtworkPaths.Recovery,
+                RuntimeContent.Obstacle => PuzzleArtworkPaths.Obstacle(state.Obstacles[record.ObstacleIndex.Value]),
+                RuntimeContent.Rocket => PuzzleArtworkPaths.Power(InitialBlockKind.Rocket, record.Direction ?? RocketDirection.Horizontal),
+                RuntimeContent.Bomb => PuzzleArtworkPaths.Power(InitialBlockKind.Bomb, default),
+                RuntimeContent.Drone => PuzzleArtworkPaths.Power(InitialBlockKind.Drone, default),
+                RuntimeContent.Magnet => PuzzleArtworkPaths.Power(InitialBlockKind.Magnet, default),
+                _ => null
+            };
+            Sprite sprite = art.Get(path);
+            float size = (record.Content == RuntimeContent.Obstacle ? .96f : .92f) * BoardArtworkLayout.ContentScale(sprite);
+            PuzzleCellView.Set(renderer, sprite, size);
+            renderer.name = "Supply-playback"; renderer.color = Color.white; renderer.sortingOrder = 10;
+            renderer.transform.localPosition = CellPosition(record.Target) + new Vector3(BoardArtworkLayout.ContentOffsetX(sprite), BoardArtworkLayout.ContentOffsetY(sprite), 0) * size;
+            return new PuzzleBoardSnapshot.Image(renderer, record.Target, transform, renderer.transform.localPosition, true, clip);
+        }
 
         public Vector3 OccupantOrigin(SpriteRenderer image) => image == preview ? previewOrigin : image.transform.localPosition;
 
@@ -139,6 +196,11 @@ namespace GameScreen
             if (index == pool.Count) pool.Add(Instantiate(prefab, transform));
             pool[index].gameObject.SetActive(true);
             return pool[index];
+        }
+
+        private void OnDestroy()
+        {
+            if (supplyClipSprite != null) Destroy(supplyClipSprite);
         }
     }
 }

@@ -85,33 +85,37 @@ namespace Levels.Editor
             {
                 BoardCoordinate[] points = twoSources ? new[] { C(0, 0), C(0, 2), C(1, 1) } : new[] { C(0, 1), C(1, 0), C(1, 2) };
                 LevelDefinition level = Make(points); HashSet<BoardCoordinate> chosen = new HashSet<BoardCoordinate>();
+                foreach (BoardCoordinate source in points.Where(c => c.Row == 0))
+                    Source(level, source, SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal));
                 for (int seed = 0; seed < 32; seed++)
                 {
-                    LevelRuntimeState state = Build(level, seed); Empty(state, points.Where(c => c.Row == 1));
+                    LevelRuntimeState state = Build(level, seed); Empty(state, points);
                     SettlementResult result = SettlementResolution.Resolve(state);
-                    Check(result.IsApplied && result.Records.Count == 1 && result.Records[0].Kind == MovementKind.Diagonal && result.RandomAfter == result.RandomBefore + 1, "대각선 단순 경쟁 한 번 선택 " + twoSources + "/" + seed);
-                    chosen.Add(twoSources ? result.Records[0].Source : result.Records[0].Target);
+                    SettlementRecord diagonal = result.Records.Single(r => r.Kind == MovementKind.Diagonal);
+                    Check(result.IsApplied && result.Records.Count(r => r.Kind == MovementKind.Supply) == (twoSources ? 2 : 1) && result.RandomAfter == result.RandomBefore + 1, "신규 공급 대각선 단순 경쟁 한 번 선택 " + twoSources + "/" + seed);
+                    chosen.Add(twoSources ? diagonal.Source : diagonal.Target);
                 }
                 Check(chosen.Count == 2, "대각선 양쪽 모두 선택 가능 " + twoSources);
             }
             LevelDefinition straight = Make(new[] { C(0, 1), C(1, 1), C(1, 0), C(1, 2) });
             LevelRuntimeState priority = Build(straight); Empty(priority, new[] { C(1, 1), C(1, 0), C(1, 2) });
-            Check(!MovementQuery.Find(priority, true).Any(c => c.IsAllowed) && SettlementResolution.Resolve(priority).Records[0].Kind == MovementKind.Gravity, "자신의 직선 목적지 우선");
+            Check(!MovementQuery.Find(priority, true, new HashSet<BoardCoordinate> { C(0, 1) }).Any(c => c.IsAllowed) && SettlementResolution.Resolve(priority).Records[0].Kind == MovementKind.Gravity, "자신의 직선 목적지 우선");
             LevelDefinition region = Make(new[] { C(0, 0), C(1, 1) }); LevelFlowEditing.SetGravity(region, new[] { C(1, 1) }, GravityDirection.Right);
             LevelRuntimeState differing = Build(region); Empty(differing, new[] { C(1, 1) });
-            Check(!MovementQuery.Find(differing, true).Any(c => c.IsAllowed), "서로 다른 중력 대각선 금지");
+            Check(!MovementQuery.Find(differing, true, new HashSet<BoardCoordinate> { C(0, 0) }).Any(c => c.IsAllowed), "서로 다른 중력 대각선 금지");
             LevelFlowEditing.SetPath(region, new[] { C(1, 1) }); LevelFlowEditing.SetGravity(region, new[] { C(1, 1) }, GravityDirection.Down);
             LevelRuntimeState pathEnd = Build(region); Empty(pathEnd, new[] { C(1, 1) });
-            Check(!MovementQuery.Find(pathEnd, true).Any(c => c.IsAllowed), "직접 경로 대각선 유입 금지");
+            Check(!MovementQuery.Find(pathEnd, true, new HashSet<BoardCoordinate> { C(0, 0) }).Any(c => c.IsAllowed), "직접 경로 대각선 유입 금지");
             foreach (bool both in new[] { false, true })
             {
                 BoardCoordinate[] square = { C(0, 0), C(0, 1), C(1, 0), C(1, 1) }; LevelDefinition level = Make(square);
                 typeof(PowerEffectVerification).GetMethod("Crate", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { level, C(0, 1), 2 });
                 typeof(PowerEffectVerification).GetMethod("Crate", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { level, C(1, 0), 2 });
                 List<BoardEdge> walls = new List<BoardEdge> { new BoardEdge(C(0, 0), C(0, 1)) }; if (both) walls.Add(new BoardEdge(C(0, 0), C(1, 0)));
-                LevelFlowEditing.SetWalls(level, walls, false); LevelRuntimeState state = Build(level); Empty(state, new[] { C(1, 1) });
+                Source(level, C(0, 0), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal));
+                LevelFlowEditing.SetWalls(level, walls, false); LevelRuntimeState state = Build(level); Empty(state, new[] { C(0, 0), C(1, 1) });
                 SettlementResult result = SettlementResolution.Resolve(state);
-                Check(result.IsApplied && result.Records.Count == (both ? 0 : 1) && result.State.Obstacles.All(o => o.Durability == 2), "대각선 벽 두 경로/상자 점유 " + both);
+                Check(result.IsApplied && result.Records.Count(r => r.Kind == MovementKind.Diagonal) == (both ? 0 : 1) && result.State.Obstacles.All(o => o.Durability == 2), "대각선 벽 두 경로/상자 점유 " + both);
             }
             LevelRuntimeState hole = Build(Make(new[] { C(0, 0), C(2, 0) })); Empty(hole, new[] { C(2, 0) });
             SettlementResult blocked = SettlementResolution.Resolve(hole);
@@ -237,13 +241,15 @@ namespace Levels.Editor
             Check(SettlementResolution.Resolve(cycle).Reason == SettlementReason.InvalidFlow && Snapshot(cycle) == original, "현재 중력 순환 사전 거절/원본 보존");
 
             LevelDefinition repeat = Make(new[] { C(0, 0), C(1, 1), C(2, 1) }); LevelFlowEditing.SetPortal(repeat, C(2, 1), C(0, 0));
-            LevelRuntimeState repeating = Build(repeat); Empty(repeating, new[] { C(1, 1), C(2, 1) }); string beforeRepeat = Snapshot(repeating);
+            Source(repeat, C(0, 0), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal));
+            LevelRuntimeState repeating = Build(repeat); Empty(repeating, new[] { C(0, 0), C(1, 1), C(2, 1) }); string beforeRepeat = Snapshot(repeating);
             Check(SettlementResolution.Resolve(repeating).Reason == SettlementReason.Repeating && Snapshot(repeating) == beforeRepeat, "일차 흐름 비순환이어도 대각선 포함 반복 감지/보존");
 
             BoardCoordinate[] loop = { C(0, 1), C(1, 0), C(1, 2), C(2, 0), C(2, 1), C(2, 2) };
             LevelDefinition wandering = Make(loop); LevelFlowEditing.SetGravity(wandering, new[] { C(2, 0), C(2, 1) }, GravityDirection.Right);
             LevelFlowEditing.SetPortal(wandering, C(2, 2), C(0, 1)); LevelFlowEditing.SetMerge(wandering, C(2, 2), new[] { C(1, 2), C(2, 1) });
-            LevelRuntimeState randomLoop = Build(wandering); Empty(randomLoop, loop.Where(c => !c.Equals(C(0, 1)))); string beforeLoop = Snapshot(randomLoop);
+            Source(wandering, C(0, 1), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal));
+            LevelRuntimeState randomLoop = Build(wandering); Empty(randomLoop, loop); string beforeLoop = Snapshot(randomLoop);
             Check(SettlementResolution.Resolve(randomLoop).Reason == SettlementReason.LimitReached && Snapshot(randomLoop) == beforeLoop, "난수 진행 반복도 내부 한도 실패/난수 포함 보존");
 
             BoardCoordinate[] snake = Enumerable.Range(0, BoardDefinition.DefaultRows).SelectMany(r => Enumerable.Range(0, BoardDefinition.DefaultColumns).Select(c => C(r, r % 2 == 0 ? c : BoardDefinition.DefaultColumns - 1 - c))).ToArray();

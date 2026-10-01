@@ -52,9 +52,10 @@ namespace GameScreen.Editor
                     Tick(session, .075f);
                     Check(left.sprite == leftSprite && right.sprite == rightSprite, "파워/점유자 원화 유지 " + first + "/" + second);
                     if (applied)
-                        Check(Vector3.Distance(right.transform.position, (leftStart + rightStart) * .5f) < .001f, "점유자 본체 중간 이동 " + first + "/" + second);
+                        Check(Vector3.Distance(right.transform.position, rightStart + board.transform.TransformVector(PuzzleWorldBoard.CellPosition(a) - PuzzleWorldBoard.CellPosition(b)) * .5f) < .001f, "점유자 본체 중간 이동 " + first + "/" + second);
                     else Check(right.transform.position == rightStart, "자석 제한 대상 고정 " + second);
                     Tick(session, .3f);
+                    FinishPresentation(session);
                     Check(!session.IsPresenting && Snapshot(session.State) == Snapshot(baseline.State), "콘텐츠 최종 결과 동일 " + first + "/" + second);
                 }
                 finally { UnityEngine.Object.DestroyImmediate(owner); }

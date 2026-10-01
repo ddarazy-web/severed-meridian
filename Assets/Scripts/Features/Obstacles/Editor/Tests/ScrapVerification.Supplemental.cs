@@ -63,10 +63,11 @@ namespace Levels.Editor
             HashSet<BoardCoordinate> choices = new HashSet<BoardCoordinate>();
             for (int seed = 1; seed <= 12; seed++)
             {
-                LevelDefinition level = Sparse(C(0, 1), C(1, 0), C(1, 2)); Place(level, C(0, 1), 4);
-                LevelRuntimeState state = Build(level, seed); Empty(state, new[] { C(1, 0), C(1, 2) }); SettlementResult result = SettlementResolution.Resolve(state);
-                Check(result.IsApplied && result.Records.Single().Kind == MovementKind.Diagonal && result.State.Cells.Single(c => c.ObstacleIndex == 0).Coordinate.Row == 1, "고철 대각선 경쟁 " + seed);
-                choices.Add(result.Records[0].Target); Occupancy(result.State, "대각선" + seed);
+                LevelDefinition level = Sparse(C(0, 1), C(1, 0), C(1, 2));
+                Invoke(typeof(SettlementVerification), "Source", null, level, C(0, 1), SupplyExhaustion.Stop, new[] { new SupplyItem(SupplyKind.Scrap, durability: 4) });
+                LevelRuntimeState state = Build(level, seed); Empty(state, new[] { C(0, 1), C(1, 0), C(1, 2) }); SettlementResult result = SettlementResolution.Resolve(state);
+                Check(result.IsApplied && result.Records.Count(r => r.Kind == MovementKind.Diagonal) == 1 && result.State.Cells.Single(c => c.ObstacleIndex == 0).Coordinate.Row == 1, "신규 고철 대각선 경쟁 " + seed);
+                choices.Add(result.Records.Single(r => r.Kind == MovementKind.Diagonal).Target); Occupancy(result.State, "대각선" + seed);
             }
             Check(choices.Count == 2, "고철 대각선 양쪽 선택");
             LevelDefinition wall = Sparse(C(0, 0), C(1, 0)); Place(wall, C(0, 0), 2); LevelFlowEditing.SetWalls(wall, new[] { new BoardEdge(C(0, 0), C(1, 0)) }, false);

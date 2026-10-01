@@ -56,9 +56,14 @@ namespace Levels.Editor
                 Check(merged.IsApplied && merged.Records.Single().Source.Equals(C(1, 0)) && merged.State.Obstacles[0].Durability == 2, "합류 우선 공급원 고정 상자이면 차선 이동");
                 Check(Snapshot(merged.State.Flow) == flow && merged.State.Cells.Select(c => c.Gravity).SequenceEqual(blocked.Cells.Select(c => c.Gravity)), "이동 후 바닥/경로/통로/합류 설정 유지");
 
-                LevelRuntimeState separate = Build(Make(new[] { C(0, 0), C(1, 1), C(0, 4), C(1, 5) }));
-                Empty(separate, new[] { C(1, 1), C(1, 5) }); SettlementResult independent = SettlementResolution.Resolve(separate);
-                Check(independent.IsApplied && independent.Records.Count == 2 && independent.Records.All(r => r.Kind == MovementKind.Diagonal && r.Batch == 1) && independent.RandomAfter == independent.RandomBefore && independent.Records.Select(r => r.Target).Distinct().Count() == 2, "독립 대각선 동시 묶음/중복 점유 없음/난수 무소비");
+                BoardCoordinate[] diagonalCells = { C(0, 0), C(1, 1), C(0, 4), C(1, 5) };
+                LevelDefinition diagonal = Make(diagonalCells);
+                Source(diagonal, C(0, 0), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal));
+                Source(diagonal, C(0, 4), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal));
+                LevelRuntimeState separate = Build(diagonal);
+                Empty(separate, diagonalCells); SettlementResult independent = SettlementResolution.Resolve(separate);
+                SettlementRecord[] diagonalRecords = independent.Records.Where(r => r.Kind == MovementKind.Diagonal).ToArray();
+                Check(independent.IsApplied && diagonalRecords.Length == 2 && diagonalRecords.All(r => r.Batch == 2) && independent.RandomAfter == independent.RandomBefore && diagonalRecords.Select(r => r.Target).Distinct().Count() == 2, "독립 대각선 동시 묶음/중복 점유 없음/난수 무소비");
 
                 BoardActionExecutor executor = new BoardActionExecutor(Build(FallingBoard()));
                 Check(executor.Swap(C(3, 3), C(2, 3)).IsApplied, "조회 보존 검사용 실제 효과 완료");

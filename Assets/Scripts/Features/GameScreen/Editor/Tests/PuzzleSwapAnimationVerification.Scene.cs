@@ -73,7 +73,8 @@ namespace GameScreen.Editor
                     session.SetPaused(true); Tick(session, 1);
                     Check(moves.text == before.ToString() && session.IsPresenting, "정지 UI 통지에도 HUD 조기 갱신 없음 " + size);
                     session.SetPaused(false); Tick(session, .075f);
-                    Check(!session.IsPresenting && moves.text == (before - 1).ToString(), "HUD 교환 완료 후 갱신 " + size);
+                    FinishPresentation(session);
+                    Check(!session.IsPresenting && moves.text == (before - 1).ToString(), "HUD 교환·제거 완료 후 갱신 " + size);
                     InputSystem.QueueStateEvent(mouse, new MouseState { position = to }); InputSystem.Update(); Call(input, "Update");
                     // 결과 한 프레임을 캡처하는 동안 다음 연쇄만 정지한다.
                     session.enabled = false;

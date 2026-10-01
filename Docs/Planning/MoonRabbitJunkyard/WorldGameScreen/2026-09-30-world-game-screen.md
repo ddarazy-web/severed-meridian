@@ -2,7 +2,7 @@
 
 ## 현재 상태
 
-2026-10-01 최신 상태: **1~6단계 완료**. 6단계 스와이프·교환 연출은 Editor 검사 312개를 통과했다. [작업 계획](stage-06-swipe-swap-plan.md) · [목표·완료 조건](../../../Goals/MoonRabbitJunkyard/WorldGameScreen/stage-06-swipe-swap-goal.md) · [검증 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-06-progress.md) · [사용 안내](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-06-swipe-swap-usage.md). 다음은 **7단계 제거·낙하·채움**이며 미시작이다. 사용자 최신 지시에 따라 **플레이어와 Addressables 콘텐츠 빌드를 모두 실행하지 않는다.** 이전 단계 문서의 빌드 절차는 이번 실행 권한이 아니다. 아래 초기 상태는 과거 기록이다.
+2026-10-01 최신 상태: **1~7단계 완료**. 7단계 제거·낙하·채움은 기존 규칙 기록을 재생하며 관련 Editor 검사 883개를 통과했다. [작업 계획](stage-07-settlement-plan.md) · [목표·완료 조건](../../../Goals/MoonRabbitJunkyard/WorldGameScreen/stage-07-settlement-goal.md) · [검증 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-07-progress.md) · [사용 안내](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-07-settlement-usage.md). 다음은 **8단계 파워 상세 효과**다. 9×9, 장애물·로켓 표시 보정을 유지했다. **플레이어·Addressables 콘텐츠 빌드는 실행하지 않았다.** 아래 초기 상태는 과거 기록이다.
 
 2026-09-30 업데이트: **1단계 완료**. [목표 및 완료 조건](../../../Goals/MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-goal.md), [실행·검증 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-01-progress.md), [씬 실행 방법](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-usage.md). 실제 번들 기반 월드 검사 174개와 기존 에디터 회귀 검사 22개가 통과했다. 2단계도 완료했으며 [실행 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md)과 [사용법](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-02-gameplay-usage.md)에 결과를 남겼다. 3단계도 구현·검증을 완료했다(최종 자동 확인 202 PASS). 4단계도 2026-10-01 구현·검증을 완료했다. 5단계는 미시작이다. 아래 초기 정리 기록은 당시 상태다.
 
@@ -67,7 +67,7 @@ uGUI로 이동 수, 미션, 아이템, 일시정지, 결과 화면을 기능별 
 | 9 — 조작감과 진행 피드백 | 소리·진동, 미션 수집, 이동 수·연쇄 강조, 시작·승패·라스트팡 | 행동과 진행 결과가 명확히 전달됨 |
 | 10 — 속도 조정과 안정화 | 연쇄 시간·효과 재사용, 정지·회전·다시하기·중단, Editor 성능 관찰 | 입력 잠금/표시 잔류/수명 누수 없이 반복 플레이 |
 
-7~10단계는 순서와 범위만 정한 후속 로드맵이다. 구현 완료를 의미하지 않으며 앞 단계 결과를 반영해 각각 세부 계획·목표를 작성한다. 6단계는 기본 교환에 집중하고 교환 후 낙하/채움의 기존 즉시 갱신은 7단계까지 유지한다.
+7단계 제거·낙하·채움의 구현·Editor 검증을 완료했다. 8~10단계는 순서와 범위만 정한 후속 로드맵이다. 앞 단계 결과를 반영해 각각 세부 계획·목표를 작성한다.
 
 ## 공통 범위
 

@@ -92,13 +92,13 @@ namespace GameScreen
         }
 
         public bool TryActivate(BoardCoordinate at)
-            => CanAcceptInput && Apply(executor.Activate(at));
-
-        private bool Apply(BoardActionResult result)
         {
+            if (!CanAcceptInput) return false;
+            presentationSnapshot = board.Capture();
+            BoardActionResult result = executor.Activate(at);
             Message = result.Message;
-            if (result.IsApplied) Draw();
-            else Changed?.Invoke();
+            if (result.IsApplied) BeginRemoval(result.Changes);
+            else { ResetPresentation(); Changed?.Invoke(); }
             return result.IsApplied;
         }
 
@@ -114,9 +114,17 @@ namespace GameScreen
             if (!ready || failed || IsPaused || IsRestarting || IsPresenting || !executor.HasPendingCascade) return;
             try
             {
+                presentationSnapshot = board.Capture();
+                int recoveryBefore = State.Recoveries.Count;
                 CascadeStepResult step = executor.AdvanceCascade();
                 Message = step.Message;
-                Draw();
+                if (step.Settlement != null && step.Settlement.IsApplied)
+                {
+                    settlementPlayback.Begin(presentationSnapshot, board, step.Settlement, artwork, recoveryBefore, fallSeconds, supplySeconds, landingSeconds);
+                    if (!IsPresenting) { ResetPresentation(); Draw(); } else Changed?.Invoke();
+                }
+                else if (step.Reason == CascadeStepReason.Shuffled) { ResetPresentation(); Draw(); }
+                else BeginRemoval(step.Changes);
             }
             catch (Exception error) { Fail("게임 처리 중단: " + error.Message); }
         }

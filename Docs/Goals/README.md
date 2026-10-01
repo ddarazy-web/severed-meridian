@@ -38,7 +38,7 @@
 - [32단계 개발 목표 — 시험 기록 관리](MoonRabbitJunkyard/Core/92_32단계_개발목표.md)
 - [33단계 개발 목표 — 메뉴 통합 후 사용 흐름 검수](MoonRabbitJunkyard/Core/95_33단계_개발목표.md)
 
-## 월드 게임 화면 (1~6단계)
+## 월드 게임 화면 (1~7단계)
 
 - [1단계 목표 — 월드 보드 표시](MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-goal.md)
 - [2단계 실제 게임 플레이 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-02-gameplay-goal.md)
@@ -46,3 +46,4 @@
 - [4단계 목업 UI 구성 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-04-mockup-ui-goal.md)
 - [5단계 통합 검증과 마무리 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-05-integration-goal.md)
 - [6단계 스와이프·교환 연출 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-06-swipe-swap-goal.md)
+- [7단계 제거·낙하·채움 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-07-settlement-goal.md)

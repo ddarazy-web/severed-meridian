@@ -59,7 +59,7 @@ namespace Simulation
     // 사용자 행동과 단계별 연쇄를 소유한다. 조회와 Editor 표시에는 상태 변경을 맡기지 않는다.
     public sealed partial class BoardActionExecutor
     {
-        public const string Version = "board-action-last-pang-supply-v14";
+        public const string Version = "board-action-fresh-diagonal-v15";
         public LevelRuntimeState State { get; private set; }
         public BoardActionPhase Phase { get; private set; }
         public int Turn { get; private set; }

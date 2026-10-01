@@ -8,7 +8,7 @@ using Levels;
 namespace Simulation
 {
     public enum MovementKind { Gravity, Path, Portal, Diagonal, Supply }
-    public enum MovementReason { Allowed, Immovable, End, Outside, Wall, Occupied, PrimaryFirst, DifferentRegion }
+    public enum MovementReason { Allowed, Immovable, End, Outside, Wall, Occupied, PrimaryFirst, DifferentRegion, ExistingBlock }
 
     public sealed class MovementCandidate
     {
@@ -22,7 +22,7 @@ namespace Simulation
             MovementReason.Allowed => "이동 가능", MovementReason.Immovable => "이동 불가 점유자",
             MovementReason.End => "경로 끝칸", MovementReason.Outside => "보드 밖 또는 비활성 칸",
             MovementReason.Wall => "벽 차단", MovementReason.Occupied => "목적지 점유 중",
-            MovementReason.PrimaryFirst => "직선·경로·통로 이동 우선", _ => "대각선 구역 제한"
+            MovementReason.PrimaryFirst => "직선·경로·통로 이동 우선", MovementReason.ExistingBlock => "이번 채움에서 신규 공급된 블록만 대각선 이동 가능", _ => "대각선 구역 제한"
         };
         internal MovementCandidate(BoardCoordinate source, BoardCoordinate target, MovementKind kind, MovementReason reason)
         { Source = source; Target = target; Kind = kind; Reason = reason; }
@@ -30,7 +30,7 @@ namespace Simulation
 
     public static class MovementQuery
     {
-        public const string Version = "movement-query-recovery-v3";
+        public const string Version = "movement-query-fresh-supply-v4";
         internal static bool Active(LevelRuntimeState state, BoardCoordinate coordinate) => coordinate.Row >= 0 && coordinate.Row < state.Rows &&
             coordinate.Column >= 0 && coordinate.Column < state.Columns && state.CellAt(coordinate).IsActive;
         private static bool Wall(LevelRuntimeState state, BoardCoordinate a, BoardCoordinate b) => state.Flow.Walls.Contains(new BoardEdge(a, b));
@@ -65,7 +65,7 @@ namespace Simulation
                 kind != MovementKind.Portal && Wall(state, source, target) ? MovementReason.Wall : MovementReason.Allowed);
         }
 
-        public static ReadOnlyCollection<MovementCandidate> Find(LevelRuntimeState state, bool diagonal = false)
+        public static ReadOnlyCollection<MovementCandidate> Find(LevelRuntimeState state, bool diagonal = false, ISet<BoardCoordinate> freshSupply = null)
         {
             List<MovementCandidate> found = new List<MovementCandidate>();
             HashSet<BoardCoordinate> primaryTargets = diagonal ? new HashSet<BoardCoordinate>(Find(state).Where(c => c.IsAllowed).Select(c => c.Target)) : null;
@@ -86,6 +86,7 @@ namespace Simulation
                     BoardCoordinate target = new BoardCoordinate(cell.Coordinate.Row + dr + dc * side, cell.Coordinate.Column + dc + dr * side);
                     MovementReason reason;
                     if (!canMove) reason = MovementReason.Immovable;
+                    else if (freshSupply == null || !freshSupply.Contains(cell.Coordinate)) reason = MovementReason.ExistingBlock;
                     else if (next.Kind != MovementKind.Gravity || (next.IsAllowed && state.CellAt(next.Target).Content == RuntimeContent.Empty) || primaryTargets.Contains(target)) reason = MovementReason.PrimaryFirst;
                     else if (!Active(state, target)) reason = MovementReason.Outside;
                     else if (state.CellAt(target).Gravity != cell.Gravity || state.Flow.Paths.Any(p => p.Coordinate.Equals(target))) reason = MovementReason.DifferentRegion;

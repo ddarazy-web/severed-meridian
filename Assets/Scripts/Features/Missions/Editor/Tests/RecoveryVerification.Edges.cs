@@ -60,10 +60,11 @@ namespace Levels.Editor
             HashSet<BoardCoordinate> choices = new HashSet<BoardCoordinate>();
             for (int seed = 1; seed <= 12; seed++)
             {
-                LevelDefinition level = Sparse(C(0, 1), C(1, 0), C(1, 2)); Place(level, C(0, 1));
+                LevelDefinition level = Sparse(C(0, 1), C(1, 0), C(1, 2));
+                Invoke(typeof(SettlementVerification), "Source", level, C(0, 1), SupplyExhaustion.Stop, new[] { new SupplyItem(SupplyKind.Recovery) });
                 LevelFlowEditing.SetArrival(level, C(1, 0), false); LevelFlowEditing.SetArrival(level, C(1, 2), false);
-                LevelRuntimeState state = Build(level, seed); Empty(state, new[] { C(1, 0), C(1, 2) }); SettlementResult result = SettlementResolution.Resolve(state);
-                Check(result.IsApplied && result.Records.Single().Kind == MovementKind.Diagonal && result.State.Recoveries.Count == 1, "대각선 경쟁·여러 도착 중 한 번 회수 " + seed);
+                LevelRuntimeState state = Build(level, seed); Empty(state, new[] { C(0, 1), C(1, 0), C(1, 2) }); SettlementResult result = SettlementResolution.Resolve(state);
+                Check(result.IsApplied && result.Records.Count(r => r.Kind == MovementKind.Diagonal) == 1 && result.State.Recoveries.Count == 1, "신규 회수 부품 대각선 경쟁·여러 도착 중 한 번 회수 " + seed);
                 choices.Add(result.State.Recoveries[0].Coordinate); UnityEngine.Object.DestroyImmediate(level);
             }
             Check(choices.Count == 2, "대각선 양쪽 도착 선택");

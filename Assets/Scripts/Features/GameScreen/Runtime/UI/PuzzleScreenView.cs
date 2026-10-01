@@ -67,9 +67,9 @@ namespace GameScreen
                 : session.IsReady ? "시험용 아이템 · 수량 무제한" : session.Message);
             cancel.gameObject.SetActive(selected);
             message.rectTransform.offsetMax = new Vector2(selected ? -75 : 0, 0);
-            pauseButton.interactable = session.IsReady && !session.IsRestarting && session.Outcome == null;
+            pauseButton.interactable = session.IsReady && !session.IsRestarting && (session.Outcome == null || session.IsPresenting);
             pause.gameObject.SetActive(session.IsPaused);
-            bool ended = session.Outcome != null && session.Phase == BoardActionPhase.Stopped && !session.IsRestarting;
+            bool ended = session.Outcome != null && session.Phase == BoardActionPhase.Stopped && !session.IsRestarting && !session.IsPresenting;
             input.SetUIBlocked(ended || session.IsPaused || description.gameObject.activeSelf);
             if (ended)
             {

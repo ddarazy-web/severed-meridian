@@ -23,7 +23,7 @@ namespace GameScreen
 
         public bool SetPaused(bool paused)
         {
-            if (!ready || failed || IsRestarting || Phase == BoardActionPhase.Stopped) return false;
+            if (!ready || failed || IsRestarting || (Phase == BoardActionPhase.Stopped && !IsPresenting)) return false;
             IsPaused = paused;
             Changed?.Invoke();
             return true;
@@ -35,9 +35,15 @@ namespace GameScreen
         public bool TryUseItem(BoardItem item, BoardCoordinate? first = null, BoardCoordinate? second = null)
         {
             if (!CanUseItems) return false;
+            presentationSnapshot = board.Capture();
             ItemUseResult result = executor.UseItem(item, first, second);
             Message = result.Message;
-            if (result.IsApplied) Draw(); else Changed?.Invoke();
+            if (result.IsApplied && item != BoardItem.Shuffle)
+            {
+                if (item == BoardItem.Swap && first.HasValue && second.HasValue) presentationSnapshot.Swap(first.Value, second.Value);
+                BeginRemoval(result.Changes);
+            }
+            else { ResetPresentation(); if (result.IsApplied) Draw(); else Changed?.Invoke(); }
             return result.IsApplied;
         }
 

@@ -57,7 +57,7 @@ namespace Simulation
     // 입력을 직접 변경하지 않는다. 완료한 작업 사본만 실행기가 반영한다.
     public static class SettlementResolution
     {
-        public const string Version = "settlement-last-pang-supply-v9";
+        public const string Version = "settlement-fresh-diagonal-v10";
         private static readonly RabbitColor[] LastPangColors = (RabbitColor[])Enum.GetValues(typeof(RabbitColor));
         /// <param name="original">정착 전 상태. 원본은 변경하지 않는다.</param>
         /// <param name="turnEffects">현재 턴의 보호·피격 기록.</param>
@@ -87,13 +87,15 @@ namespace Simulation
             // 실패하면 중간 보드·난수·공급 커서를 원본에 남기지 않고 전체 작업을 거절한다.
             TurnEffectContext context = (turnEffects ?? new TurnEffectContext(0, Array.Empty<MatchedBlockChange>())).CopyForFall();
             List<SettlementRecord> records = new List<SettlementRecord>();
+            // 이번 정착에서 생성한 점유자만 추적한다. 다음 연쇄나 저장 데이터에는 전달하지 않는다.
+            HashSet<BoardCoordinate> freshSupply = new HashSet<BoardCoordinate>();
             Dictionary<string, int> seen = new Dictionary<string, int>();
             RecoveryRules.Collect(work, context.Turn, 0);
             int limit = Math.Max(1024, work.Cells.Count * work.Cells.Count * 4);
             for (int batch = 1; batch <= limit; batch++)
             {
                 // 난수를 쓰지 않은 동일 상태 재방문은 확정 순환이다. 난수가 달라졌으면 한도까지 계속 확인한다.
-                string key = string.Join(";", work.Cells.Select(c => (int)c.Content + "," + c.Color + "," + c.RocketDirection + "," + c.ObstacleIndex + "," + context.IsProtected(c.Coordinate))) +
+                string key = string.Join(";", work.Cells.Select(c => (int)c.Content + "," + c.Color + "," + c.RocketDirection + "," + c.ObstacleIndex + "," + context.IsProtected(c.Coordinate) + "," + freshSupply.Contains(c.Coordinate))) +
                     "|" + work.Supply.ScrapGenerated + "|" + work.Recoveries.Count + "|" +
                     string.Join(";", work.Supply.Sources.Select(s => s.ItemIndex + "," + s.ItemConsumed));
                 if (seen.TryGetValue(key, out int drawCount) && drawCount == work.Random.DrawCount)
@@ -108,9 +110,18 @@ namespace Simulation
                     RuntimeMerge merge = work.Flow.Merges.FirstOrDefault(m => m.Coordinate.Equals(group.Key));
                     moves.Add(merge == null ? group.Single() : group.OrderBy(c => merge.Sources.IndexOf(c.Source)).First());
                 }
-                if (moves.Count == 0) moves = SelectDiagonal(work);
-                // 직접 낙하가 더 이상 없을 때 대각선 채우기를 시도한다. 이동이 있으면 다시
-                // 후보를 찾으며, 이동도 끝난 뒤 공급한다. 매칭 판정은 정착 완료 이후 실행기에서 한다.
+                if (moves.Count == 0)
+                {
+                    // 상단에서 아직 생성·이동할 블록이 있으면 빈칸을 대각선으로 선점하지 않는다.
+                    int beforeSupply = records.Count;
+                    Supply(work, context, batch, records, lastPang);
+                    if (records.Count > beforeSupply)
+                    {
+                        for (int i = beforeSupply; i < records.Count; i++) freshSupply.Add(records[i].Target);
+                        continue;
+                    }
+                    moves = SelectDiagonal(work, freshSupply);
+                }
                 if (moves.Count > 0)
                 {
                     context.MoveProtection(moves);
@@ -122,22 +133,21 @@ namespace Simulation
                         target.ObstacleIndex = source.ObstacleIndex;
                         source.Content = RuntimeContent.Empty; source.Color = null; source.RocketDirection = null;
                         source.ObstacleIndex = null;
+                        if (freshSupply.Remove(move.Source)) freshSupply.Add(move.Target);
                         records.Add(new SettlementRecord(batch, move.Kind, move.Source, target, context.IsProtected(move.Target)));
                     }
                     RecoveryRules.Collect(work, context.Turn, batch);
+                    freshSupply.RemoveWhere(at => work.CellAt(at).Content == RuntimeContent.Empty);
                     continue;
                 }
-                int beforeSupply = records.Count;
-                Supply(work, context, batch, records, lastPang);
-                if (records.Count == beforeSupply)
-                    return new SettlementResult(SettlementReason.Applied, "정착 완료 · 자동 매칭 대기", original, work, context, records);
+                return new SettlementResult(SettlementReason.Applied, "정착 완료 · 자동 매칭 대기", original, work, context, records);
             }
             return Reject(SettlementReason.LimitReached, "정착 처리 한도 " + limit + "회 초과 · 상태 전체 보존. 경로와 대각선 경쟁을 확인하세요.");
         }
 
-        private static List<MovementCandidate> SelectDiagonal(LevelRuntimeState work)
+        private static List<MovementCandidate> SelectDiagonal(LevelRuntimeState work, ISet<BoardCoordinate> freshSupply)
         {
-            List<MovementCandidate> pending = MovementQuery.Find(work, true).Where(c => c.IsAllowed).ToList();
+            List<MovementCandidate> pending = MovementQuery.Find(work, true, freshSupply).Where(c => c.IsAllowed).ToList();
             List<MovementCandidate> selected = new List<MovementCandidate>();
             while (pending.Count > 0)
             {
