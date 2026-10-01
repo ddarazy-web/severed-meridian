@@ -174,8 +174,11 @@ namespace GameScreen.Editor
             foreach (Vector3 axis in new[] { Vector3.down, Vector3.up, Vector3.left, Vector3.right })
             {
                 Reset();
+                int originalOrder = board.OccupantAt(a).sortingOrder;
                 Call(input, "BeginPointer", 11, Screen(a));
+                Check(board.OccupantAt(a).sortingOrder > board.OccupantAt(b).sortingOrder, "선택 즉시 주변 블록보다 앞에 표시 " + axis);
                 Call(input, "UpdatePointer", 11, Screen(a, axis * .24f));
+                Check(board.OccupantAt(a).sortingOrder > board.OccupantAt(b).sortingOrder, "드래그 중 선택 블록 앞 순서 유지 " + axis);
                 Check(session.State.MovesRemaining == state.MovesRemaining && !session.IsPresenting, "0.24칸 미확정 " + axis);
                 Check(Vector3.Distance(board.OccupantAt(a).transform.position, board.transform.TransformPoint(PuzzleWorldBoard.CellPosition(a))) > .2f, "드래그 미리보기 " + axis);
                 Call(input, "UpdatePointer", 11, Screen(a, axis * .25f));
@@ -187,6 +190,7 @@ namespace GameScreen.Editor
                 string after = Snapshot(session.State);
                 Call(input, "UpdatePointer", 11, Screen(b));
                 Call(input, "EndPointer", 11, Screen(b));
+                Check(board.OccupantAt(a).sortingOrder == originalOrder, "확정한 스와이프도 손을 놓으면 원래 순서 복원 " + axis);
                 Check(Snapshot(session.State) == after, "이동/종료 추가 행동 없음 " + axis);
                 Tick(session, 1);
             }
@@ -196,6 +200,12 @@ namespace GameScreen.Editor
             Reset(); Call(input, "BeginPointer", 11, Screen(a)); Call(input, "UpdatePointer", 11, Screen(a, Vector3.down * .2f));
             input.CancelGesture();
             Check(board.OccupantAt(a).transform.position == board.transform.TransformPoint(PuzzleWorldBoard.CellPosition(a)), "미확정 취소 위치 복원");
+            Check(board.OccupantAt(a).sortingOrder == board.OccupantAt(b).sortingOrder, "미확정 취소 표시 순서 복원");
+            Reset();
+            int releaseOrder = board.OccupantAt(a).sortingOrder;
+            Call(input, "BeginPointer", 11, Screen(a)); Call(input, "UpdatePointer", 11, Screen(a, Vector3.down * .2f));
+            Call(input, "EndPointer", 11, Screen(a, Vector3.down * .2f));
+            Check(board.OccupantAt(a).sortingOrder == releaseOrder && !session.IsPresenting, "교환 미확정 손 놓기 표시 순서 복원");
             Reset(); Call(input, "BeginPointer", 11, Screen(a)); Call(input, "EndPointer", 11, Screen(b));
             Check(session.State.MovesRemaining == state.MovesRemaining - 1, "Ended-only 제스처 교환");
             Tick(session, .075f); string committed = Snapshot(session.State);

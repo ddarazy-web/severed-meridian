@@ -114,6 +114,7 @@ namespace GameScreen
             { SelectionMessage = null; SelectionChanged?.Invoke(); }
             pointer = id;
             committed = false;
+            if (!SelectedItem.HasValue && ActionQuery.Movable(session.State, session.State.CellAt(pressed))) board.Preview(pressed, Vector3.zero);
         }
 
         private void UpdatePointer(int id, Vector2 position)
@@ -153,8 +154,8 @@ namespace GameScreen
             if (!committed) UpdatePointer(id, position);
             if (pointer != id) return;
             pointer = null;
+            session.EndSwipePreview();
             if (committed) { committed = false; return; }
-            board.ClearPreview();
             if (EventSystem.current != null)
             {
                 uiHits.Clear();
@@ -192,7 +193,8 @@ namespace GameScreen
         public void CancelGesture()
         {
             pointer = null; committed = false;
-            if (board != null) board.ClearPreview();
+            if (session != null) session.EndSwipePreview();
+            else if (board != null) board.ClearPreview();
             Selected = null;
         }
         private void OnEnable() => EnhancedTouchSupport.Enable();

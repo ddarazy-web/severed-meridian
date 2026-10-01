@@ -17,6 +17,7 @@
 ## 월드 게임 화면 (1~8단계)
 
 - [9×9 보드 전환 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-nine-by-nine-board.md)
+- [선택·스와이프 블록 표시 순서 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-swipe-sorting.md)
 
 - [1단계 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-01-progress.md)
 - [2단계 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md)

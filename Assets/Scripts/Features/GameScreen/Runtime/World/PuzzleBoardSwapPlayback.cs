@@ -18,8 +18,8 @@ namespace GameScreen
             Reset();
             first = a; second = b; firstOrigin = aOrigin; secondOrigin = bOrigin;
             firstDelta = aDelta; secondDelta = bDelta;
-            if (first != null) { firstStart = first.transform.localPosition; firstOrder = first.sortingOrder; first.sortingOrder += 2; }
-            if (second != null) { secondStart = second.transform.localPosition; secondOrder = second.sortingOrder; second.sortingOrder += 1; }
+            if (first != null) { firstStart = first.transform.localPosition; firstOrder = first.sortingOrder; first.sortingOrder = PuzzleWorldBoard.SwipeSortingOrder; }
+            if (second != null) { secondStart = second.transform.localPosition; secondOrder = second.sortingOrder; second.sortingOrder = PuzzleWorldBoard.SwipeSortingOrder - 1; }
             elapsed = 0; duration = Mathf.Max(0.01f, seconds); returnTrip = returns; rejected = reject;
             IsPlaying = true;
         }
@@ -50,6 +50,13 @@ namespace GameScreen
             if (first != null) { first.transform.localPosition = firstOrigin; first.sortingOrder = firstOrder; }
             if (second != null) { second.transform.localPosition = secondOrigin; second.sortingOrder = secondOrder; }
             first = second = null; IsPlaying = false; elapsed = 0;
+        }
+
+        // 손을 놓은 뒤에도 이동은 이어가고 표시 순서만 복원한다.
+        public void ReleaseSorting()
+        {
+            if (first != null) first.sortingOrder = firstOrder;
+            if (second != null) second.sortingOrder = secondOrder;
         }
     }
 }

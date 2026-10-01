@@ -24,6 +24,9 @@ namespace GameScreen
         private bool preparingEffects;
         public bool IsPresenting => preparingEffects || powerPlayback?.IsPlaying == true || swapPlayback.IsPlaying || removalPlayback.IsPlaying || settlementPlayback.IsPlaying;
 
+        public void EndSwipePreview()
+        { board.ClearPreview(); swapPlayback.ReleaseSorting(); }
+
         public bool TrySwap(BoardCoordinate first, BoardCoordinate second)
         {
             if (!CanAcceptInput) return false;
@@ -39,12 +42,14 @@ namespace GameScreen
             bool rejected = !result.IsApplied && !returns;
             if (rejected) { b = null; worldDelta = board.transform.TransformVector(direction.normalized); }
             // 원래 그림과 미리보기 위치를 보존한다. 매칭 후 결과는 재생 종료 때만 그린다.
-            swapPlayback.Begin(a, a != null ? board.OccupantOrigin(a) : Vector3.zero,
+            Vector3 aOrigin = a != null ? board.OccupantOrigin(a) : Vector3.zero;
+            Vector3 bOrigin = b != null ? board.OccupantOrigin(b) : Vector3.zero;
+            board.ReleasePreview();
+            swapPlayback.Begin(a, aOrigin,
                 a != null ? a.transform.parent.InverseTransformVector(worldDelta) : Vector3.zero,
-                b, b != null ? board.OccupantOrigin(b) : Vector3.zero,
+                b, bOrigin,
                 b != null ? b.transform.parent.InverseTransformVector(-worldDelta) : Vector3.zero,
                 swapSeconds, returns, rejected);
-            board.ReleasePreview();
             Changed?.Invoke();
             return result.IsApplied;
         }

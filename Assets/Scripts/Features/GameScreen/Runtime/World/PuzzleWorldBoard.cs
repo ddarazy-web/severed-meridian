@@ -23,6 +23,8 @@ namespace GameScreen
         private readonly Dictionary<BoardCoordinate, SpriteRenderer> occupants = new Dictionary<BoardCoordinate, SpriteRenderer>();
         private SpriteRenderer preview;
         private Vector3 previewOrigin;
+        private int previewOrder;
+        internal const int SwipeSortingOrder = 50;
 
         public SpriteRenderer OccupantAt(BoardCoordinate at) => occupants.TryGetValue(at, out SpriteRenderer image) ? image : null;
 
@@ -38,6 +40,8 @@ namespace GameScreen
 
         internal PuzzleBoardSnapshot Capture()
         {
+            // 교환 스냅샷에는 선택 전 순서를 저장한다. 미리보기 위치와 원점은 유지한다.
+            if (preview != null) preview.sortingOrder = previewOrder;
             PuzzleBoardSnapshot snapshot = new PuzzleBoardSnapshot();
             foreach (KeyValuePair<BoardCoordinate, SpriteRenderer> pair in occupants)
                 if (pair.Value.enabled && pair.Value.sprite != null)
@@ -97,19 +101,28 @@ namespace GameScreen
             if (image != preview)
             {
                 ClearPreview(); preview = image;
-                if (preview != null) previewOrigin = preview.transform.localPosition;
+                if (preview != null)
+                {
+                    previewOrigin = preview.transform.localPosition;
+                    previewOrder = preview.sortingOrder;
+                    preview.sortingOrder = SwipeSortingOrder;
+                }
             }
             if (preview != null) preview.transform.localPosition = previewOrigin + preview.transform.parent.InverseTransformVector(transform.TransformVector(offset));
         }
 
         public void ClearPreview()
         {
-            if (preview != null) preview.transform.localPosition = previewOrigin;
+            if (preview != null) { preview.transform.localPosition = previewOrigin; preview.sortingOrder = previewOrder; }
             preview = null;
         }
 
         // 교환 재생기가 현재 표시 위치와 원점을 인수한 뒤 호출한다.
-        public void ReleasePreview() => preview = null;
+        public void ReleasePreview()
+        {
+            if (preview != null) preview.sortingOrder = previewOrder;
+            preview = null;
+        }
         public const float HalfWidth = BoardDefinition.DefaultColumns * 0.5f;
         public const float HalfHeight = BoardDefinition.DefaultRows * 0.5f;
         public static Vector3 CellPosition(BoardCoordinate at) => new Vector3(at.Column - HalfWidth + 0.5f, HalfHeight - 0.5f - at.Row, 0);
