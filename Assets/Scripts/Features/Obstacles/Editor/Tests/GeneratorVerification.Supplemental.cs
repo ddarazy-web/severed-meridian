@@ -49,7 +49,7 @@ namespace Levels.Editor
             Check(manager.ExpectedComplete == 1 && manager.ExpectedCharge == 1 && manager.ExpectedDamage == 1, "직접/간접 같은 본체 예상 완료 중복 제거");
             reservations.Remove(1); reservations.Remove(2);
             Check(manager.ExpectedComplete == 0 && manager.ExpectedCharge == 0 && manager.Query().Any(t => t.ObstacleIndex == 0), "예약 취소 예상량/후보 복구");
-            reservations.Add(3, generator); Hit(state, C(4, 8), context); Invoke(typeof(DroneTargetManager), "Invalidate", manager);
+            reservations.Add(3, generator); Hit(state, C(4, 7), context); Invoke(typeof(DroneTargetManager), "Invalidate", manager);
             DroneTarget landed = (DroneTarget)Invoke(typeof(DroneTargetManager), "Land", manager, 3, C(0, 0));
             Check(landed.Content == RuntimeContent.Normal && manager.ReservationCount == 0 && context.Targeting.Any(r => r.Event == TargetingEvent.Retargeted), "후보 소멸 후 재탐색/일반 대체/해제");
             UnityEngine.Object.DestroyImmediate(overlap);

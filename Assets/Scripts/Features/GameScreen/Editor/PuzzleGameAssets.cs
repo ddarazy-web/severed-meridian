@@ -35,13 +35,13 @@ namespace GameScreen.Editor
             {
                 GameObject[] roots = scene.GetRootGameObjects();
                 PuzzleWorldBoard board = roots.SelectMany(item => item.GetComponentsInChildren<PuzzleWorldBoard>(true)).Single();
-                Camera camera = roots.SelectMany(item => item.GetComponentsInChildren<Camera>(true)).Single();
+                Camera camera = roots.SelectMany(item => item.GetComponentsInChildren<Camera>(true)).Single(item => item.GetComponentInParent<PuzzleScreenView>() == null);
                 PuzzleGameSession session = roots.SelectMany(item => item.GetComponentsInChildren<PuzzleGameSession>(true)).SingleOrDefault();
                 if (session == null) session = ((GameObject)PrefabUtility.InstantiatePrefab(prefab, scene)).GetComponent<PuzzleGameSession>();
                 session.Configure(board, camera);
                 PuzzleBoardInput input = session.GetComponent<PuzzleBoardInput>(); input.Configure(session, board, camera);
-                PuzzlePlayDebugView view = session.GetComponent<PuzzlePlayDebugView>(); view.Configure(session, input);
-                foreach (Component component in new Component[] { session, input, view })
+                PuzzlePlayDebugView view = session.GetComponent<PuzzlePlayDebugView>(); if (view != null) view.Configure(session, input);
+                foreach (Component component in new Component[] { session, input, view }.Where(item => item != null))
                 { EditorUtility.SetDirty(component); PrefabUtility.RecordPrefabInstancePropertyModifications(component); }
                 foreach (PuzzleBoardPreview preview in roots.SelectMany(item => item.GetComponentsInChildren<PuzzleBoardPreview>(true)))
                 { preview.enabled = false; EditorUtility.SetDirty(preview); }
@@ -80,7 +80,7 @@ namespace GameScreen.Editor
                 SceneManager.SetActiveScene(scene);
                 GameObject cameraObject = new GameObject("Board Camera", typeof(Camera));
                 Camera camera = cameraObject.GetComponent<Camera>();
-                camera.orthographic = true; camera.orthographicSize = 5.7f;
+                camera.orthographic = true; camera.orthographicSize = (PuzzleWorldBoard.HalfHeight + 0.7f);
                 camera.transform.position = new Vector3(0, 0, -10);
                 camera.clearFlags = CameraClearFlags.SolidColor;
                 camera.backgroundColor = new Color(0.32f, 0.41f, 0.45f);

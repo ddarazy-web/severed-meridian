@@ -118,7 +118,7 @@ namespace Levels.Editor
         {
             LevelDefinition level = Make();
             JsonUtility.FromJsonOverwrite("{\"missions\":[{\"kind\":1,\"count\":3}]}", level);
-            foreach (BoardCoordinate coordinate in new[] { C(5, 5), C(5, 6), C(9, 9) })
+            foreach (BoardCoordinate coordinate in new[] { C(5, 5), C(5, 6), C(8, 8) })
                 Invoke(typeof(PowerEffectVerification), "Crate", null, level, coordinate, 1);
             LevelRuntimeState state = Build(level); TurnEffectContext context = Context(); DroneTargetManager manager = Manager(state, context);
             string before = Snapshot(state), history = Snapshot(context);

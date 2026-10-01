@@ -146,7 +146,7 @@ namespace Levels.Editor
             VisualElement headers = new VisualElement();
             headers.style.flexDirection = FlexDirection.Row;
             headers.style.marginLeft = 30;
-            for (int c = 1; c <= 10; c++)
+            for (int c = 1; c <= BoardDefinition.DefaultColumns; c++)
             {
                 Label header = new Label(c.ToString());
                 header.style.width = LevelBoardView.CellSize;
@@ -160,7 +160,7 @@ namespace Levels.Editor
             VisualElement rowLabels = new VisualElement();
             rowLabels.style.width = 30;
             rowLabels.style.flexShrink = 0;
-            for (int r = 1; r <= 10; r++)
+            for (int r = 1; r <= BoardDefinition.DefaultRows; r++)
             {
                 Label label = new Label(r.ToString());
                 label.style.height = LevelBoardView.CellSize;
@@ -406,7 +406,7 @@ namespace Levels.Editor
                 return;
             }
             Toggle active = new Toggle("칸 활성") { name = "selected-active" };
-            active.SetValueWithoutNotify(level.Board.Cells[coordinate.Row * 10 + coordinate.Column].IsActive);
+            active.SetValueWithoutNotify(level.Board.Cells[coordinate.Row * BoardDefinition.DefaultColumns + coordinate.Column].IsActive);
             active.RegisterValueChangedCallback(evt => ApplyStroke(evt.newValue ? LevelBrush.Activate : LevelBrush.Deactivate,
                 RabbitColor.Type1, new[] { coordinate }));
             selectedProperties.Add(active);
@@ -447,7 +447,7 @@ namespace Levels.Editor
                 else if (choice - 2 < colors.Count) ApplyStroke(LevelBrush.Fixed, colors[choice - 2], new[] { coordinate });
             });
             selectedProperties.Add(kind);
-            if (!level.Board.Cells[coordinate.Row * 10 + coordinate.Column].IsActive)
+            if (!level.Board.Cells[coordinate.Row * BoardDefinition.DefaultColumns + coordinate.Column].IsActive)
                 selectedProperties.Add(new Label("비활성 칸은 기존 블록 지우기만 가능합니다."));
         }
 
@@ -536,8 +536,8 @@ namespace Levels.Editor
                 {
                     board.CancelStroke();
                     if (level != issueOwner || JsonUtility.ToJson(level) != issueSnapshot) { Refresh(); return; }
-                    if (issue.Coordinate.HasValue && issue.Coordinate.Value.Row >= 0 && issue.Coordinate.Value.Row < 10 &&
-                        issue.Coordinate.Value.Column >= 0 && issue.Coordinate.Value.Column < 10)
+                    if (issue.Coordinate.HasValue && issue.Coordinate.Value.Row >= 0 && issue.Coordinate.Value.Row < BoardDefinition.DefaultRows &&
+                        issue.Coordinate.Value.Column >= 0 && issue.Coordinate.Value.Column < BoardDefinition.DefaultColumns)
                     {
                         if (issue.PropertyPath.StartsWith("obstacles")) board.Layer = PlacementLayer.Obstacle;
                         else if (issue.PropertyPath.StartsWith("covers")) board.Layer = PlacementLayer.Cover;

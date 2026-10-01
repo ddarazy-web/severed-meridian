@@ -24,7 +24,7 @@ namespace Levels.Editor
                     Check(result.Reason == SettlementReason.Repeating && result.State == null && Snapshot(state) == before && state.Obstacles.Count == 0 && state.Supply.ScrapGenerated == 0,
                         "고철 생성 후 반복 실패에서 본체/커서/카운터/난수 전체 폐기 " + maintain);
                 }
-                LevelDefinition full = Make(); Place(full, C(9, 8), 2); Place(full, C(9, 9), 2); Maintain(full, new[] { C(0, 0) }, 1, 6, 3);
+                LevelDefinition full = Make(); Place(full, C(8, 7), 2); Place(full, C(8, 8), 2); Maintain(full, new[] { C(0, 0) }, 1, 6, 3);
                 LevelRuntimeState over = Build(full); Empty(over, new[] { C(0, 0) }); SettlementResult maintained = SettlementResolution.Resolve(over);
                 Check(maintained.IsApplied && maintained.State.LiveScrapCount == 2 && maintained.State.Supply.ScrapGenerated == 0 && maintained.State.CellAt(C(0, 0)).Content == RuntimeContent.Normal, "최초 배치 목표 초과시 제거/추가 없이 일반 공급");
                 LevelDefinition random = Make(); Fixed(random, C(0, 0), new SupplyItem(SupplyKind.Scrap));

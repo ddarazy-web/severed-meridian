@@ -39,6 +39,7 @@ namespace Levels
         {
             LevelPack pack = MemoryPackSerializer.Deserialize<LevelPack>(bytes);
             Validate(pack);
+            foreach (PackedLevel level in pack.Levels) LevelBoardSizeMigration.Crop(level);
             return pack;
         }
 

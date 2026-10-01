@@ -25,7 +25,7 @@ namespace Levels.Editor
         private static string Replay(LevelDefinition level)
         {
             BoardActionExecutor executor = new BoardActionExecutor(Build(level));
-            BoardActionResult action = executor.Activate(C(9, 0));
+            BoardActionResult action = executor.Activate(C(8, 0));
             if (!action.IsApplied) throw new InvalidOperationException(action.Message);
             Finish(executor);
             if (executor.State.Recoveries.Count != 2 || executor.State.Missions[0].Progress != 2)
@@ -88,13 +88,13 @@ namespace Levels.Editor
             root.Q<ObjectField>("initial-level").value = fixture; Click("initial-build");
             for (int wait = 0; (window.IsSearching || window.CurrentState == null) && wait < 100; wait++) yield return null;
             string json = JsonUtility.ToJson(fixture), file = File.ReadAllText(AssetDatabase.GetAssetPath(fixture)), initial = Snapshot(window.CurrentState);
-            Check(root.Q<Button>("initial-cell-8-0").text.Contains("회수") && root.Q<Button>("initial-cell-9-0").text.Contains("도착"), "부품과 도착 바닥 보드 표시");
+            Check(root.Q<Button>("initial-cell-7-0").text.Contains("회수") && root.Q<Button>("initial-cell-8-0").text.Contains("도착"), "부품과 도착 바닥 보드 표시");
             Capture("initial-wide.png");
             BoardActionExecutor manual = new BoardActionExecutor(window.CurrentState);
             root.Q<Toggle>("execution-mode").value = true;
-            Click("initial-cell-9-0"); Click("execution-activate"); yield return null;
-            Check(window.Execution.LastApplied.IsApplied && window.Execution.State.CellAt(C(8, 0)).Content == RuntimeContent.Recovery, "실제 UI 로켓 관통·부품 불파괴");
-            manual.Activate(C(9, 0)); Finish(manual);
+            Click("initial-cell-8-0"); Click("execution-activate"); yield return null;
+            Check(window.Execution.LastApplied.IsApplied && window.Execution.State.CellAt(C(7, 0)).Content == RuntimeContent.Recovery, "실제 UI 로켓 관통·부품 불파괴");
+            manual.Activate(C(8, 0)); Finish(manual);
             Click("execution-settle"); yield return null;
             Check(window.Execution.State.Recoveries.Count == 2 && root.Q<Label>("initial-overview").text.Contains("회수 부품"), "실제 낙하·고정 공급·회수 기록");
             Capture("settled-wide.png");
@@ -113,7 +113,7 @@ namespace Levels.Editor
             Check(JsonUtility.ToJson(fixture) == json && File.ReadAllText(AssetDatabase.GetAssetPath(fixture)) == file && !EditorUtility.IsDirty(fixture) && Snapshot(window.CurrentState) == initial, "원본 JSON·파일·dirty·초기 사본 보존");
             Click("execution-reset"); yield return null;
             Check(window.Execution == null && Snapshot(window.CurrentState) == initial, "동일 시드 재시작·회수 및 커서 초기화");
-            root.Q<Toggle>("execution-mode").value = true; Click("initial-cell-9-0"); Click("execution-activate");
+            root.Q<Toggle>("execution-mode").value = true; Click("initial-cell-8-0"); Click("execution-activate");
             for (int step = 0; window.Execution.Outcome == null && step < 100; step++)
             {
                 Click(window.Execution.Phase == BoardActionPhase.WaitingForFall ? "execution-settle" : "execution-automatic");
@@ -128,11 +128,11 @@ namespace Levels.Editor
             foreach (int moves in new[] { 1, 20 })
             {
                 LevelDefinition ending = (LevelDefinition)Invoke(typeof(BoardActionVerification), "Make", new Dictionary<BoardCoordinate, int>
-                { [C(9, 0)] = 0, [C(9, 1)] = 1, [C(9, 2)] = 0, [C(8, 1)] = 0 }, moves);
+                { [C(8, 0)] = 0, [C(8, 1)] = 1, [C(8, 2)] = 0, [C(7, 1)] = 0 }, moves);
                 root.Q<ObjectField>("initial-level").value = ending; Click("initial-build");
                 for (int wait = 0; (window.IsSearching || window.CurrentState == null) && wait < 100; wait++) yield return null;
                 root.Q<Toggle>("execution-mode").value = true;
-                Click("initial-cell-8-1"); Click("initial-cell-9-1"); Click("execution-swap"); Click("execution-cascade");
+                Click("initial-cell-7-1"); Click("initial-cell-8-1"); Click("execution-swap"); Click("execution-cascade");
                 for (int wait = 0; window.CascadeRunning && wait < 100; wait++) yield return null;
                 Check(window.Execution.Outcome?.Kind == (moves == 1 ? BoardOutcomeKind.MovesExhausted : BoardOutcomeKind.Blocked) &&
                     root.Q<Label>("initial-details").text.Contains(moves == 1 ? "이동 수 소진" : "진행 불가"), "실제 UI 종료 이유 표시 " + moves);
@@ -146,12 +146,12 @@ namespace Levels.Editor
             // 원본이 아닌 실행 사본의 손상 데이터를 주입해 실제 입력 경로의 오류 표시를 검증한다.
             Set(window.Execution.State.CellAt(C(0, 0)), "Content", RuntimeContent.Obstacle);
             string invalid = Snapshot(window.Execution.State);
-            Click("initial-cell-9-0"); Click("execution-activate"); yield return null;
+            Click("initial-cell-8-0"); Click("execution-activate"); yield return null;
             Check(window.Execution.Outcome?.Kind == BoardOutcomeKind.Aborted && Snapshot(window.Execution.State) == invalid &&
                 root.Q<Label>("initial-details").text.Contains("실행 중단") && !root.Q<Button>("execution-activate").enabledInHierarchy, "손상 실행 사본은 실제 UI 오류 종료·입력 차단·원자성");
             Capture("aborted.png");
             Click("execution-reset"); yield return null;
-            root.Q<Toggle>("execution-mode").value = true; Click("initial-cell-9-0"); Click("execution-activate"); Click("execution-cascade");
+            root.Q<Toggle>("execution-mode").value = true; Click("initial-cell-8-0"); Click("execution-activate"); Click("execution-cascade");
             root.Q<ObjectField>("initial-level").value = null; yield return null;
             Check(window.Execution == null && !window.CascadeRunning, "레벨 전환시 연쇄 실행 해제");
             window.Owner.Close(); yield return null;

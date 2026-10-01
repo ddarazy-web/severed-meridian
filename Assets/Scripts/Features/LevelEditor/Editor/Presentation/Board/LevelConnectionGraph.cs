@@ -28,7 +28,7 @@ namespace Levels.Editor
         public LevelConnectionGraph()
         {
             name = "connection-graph"; pickingMode = PickingMode.Ignore; focusable = true;
-            style.position = Position.Absolute; style.left = style.top = 0; style.width = style.height = 400;
+            style.position = Position.Absolute; style.left = style.top = 0; style.width = style.height = (LevelBoardView.CellSize * BoardDefinition.DefaultColumns);
             generateVisualContent += DrawPreview;
             RegisterCallback<PointerMoveEvent>(Move);
             RegisterCallback<PointerUpEvent>(Up);
@@ -49,11 +49,11 @@ namespace Levels.Editor
         }
         private static BoardCoordinate Slot(ObstaclePlacementDefinition body, int slot) => slot == 0 ? new BoardCoordinate(body.Coordinate.Row, body.Coordinate.Column + 1) :
             slot == 1 ? new BoardCoordinate(body.Coordinate.Row + 1, body.Coordinate.Column + 2) : new BoardCoordinate(body.Coordinate.Row + 2, body.Coordinate.Column + 1);
-        private static Vector2 Point(BoardCoordinate vertex) => new Vector2(vertex.Column * 40, vertex.Row * 40);
+        private static Vector2 Point(BoardCoordinate vertex) => new Vector2(vertex.Column * LevelBoardView.CellSize, vertex.Row * LevelBoardView.CellSize);
         private BoardCoordinate TargetTerminal(int body)
         {
             Vector2 point = PortPoint(body, 0);
-            return new BoardCoordinate(Mathf.RoundToInt(point.y / 40), Mathf.RoundToInt(point.x / 40));
+            return new BoardCoordinate(Mathf.RoundToInt(point.y / LevelBoardView.CellSize), Mathf.RoundToInt(point.x / LevelBoardView.CellSize));
         }
         private int[] Connections(int body)
         {
@@ -192,8 +192,8 @@ namespace Levels.Editor
         {
             var highlight = new VisualElement { name = name, pickingMode = PickingMode.Ignore };
             highlight.style.position = Position.Absolute;
-            highlight.style.left = cell.Column * 40 + 2; highlight.style.top = cell.Row * 40 + 2;
-            highlight.style.width = highlight.style.height = size * 40 - 4;
+            highlight.style.left = cell.Column * LevelBoardView.CellSize + 2; highlight.style.top = cell.Row * LevelBoardView.CellSize + 2;
+            highlight.style.width = highlight.style.height = size * LevelBoardView.CellSize - 4;
             ColorCandidate(highlight, hovered);
             return highlight;
         }

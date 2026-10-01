@@ -57,5 +57,6 @@ namespace Levels
         [MemoryPackIgnore] public int ScrapLimit => scrapLimit;
         [MemoryPackIgnore] public int ScrapDurability => scrapDurability;
         [MemoryPackIgnore] public int RecoveryTarget => recoveryTarget;
+        internal void CropTo(BoardDefinition board) => sources?.RemoveAll(item => !board.Contains(item.Coordinate));
     }
 }

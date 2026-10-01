@@ -50,7 +50,7 @@ namespace GameScreen.Editor
                 board = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(PuzzleGameAssets.Folder + "/PuzzleWorldBoard.prefab"), root.transform).GetComponent<PuzzleWorldBoard>();
                 camera = new GameObject("Verification Camera", typeof(Camera)).GetComponent<Camera>();
                 camera.transform.SetParent(root.transform); camera.transform.position = new Vector3(0, 0, -10);
-                camera.orthographic = true; camera.orthographicSize = 5.7f;
+                camera.orthographic = true; camera.orthographicSize = (PuzzleWorldBoard.HalfHeight + 0.7f);
                 PuzzleGameSession loaded = NewSession();
                 await loaded.InitializeAsync(1, 12345, CancellationToken.None);
                 Check(loaded.CanAcceptInput && loaded.State.LevelNumber == 1, "MemoryPack 시작 탐색 및 콜드 이미지 로드");
@@ -62,12 +62,14 @@ namespace GameScreen.Editor
                 BoardActionExecutor baseline = new BoardActionExecutor(session.State);
                 string before = Snapshot(session.State);
                 Check(!session.TrySwap(new BoardCoordinate(3, 2), new BoardCoordinate(3, 5)) && Snapshot(session.State) == before, "InvalidSwapPreservesState");
+                Present(session);
                 int moves = session.State.MovesRemaining;
                 BoardCoordinate first = new BoardCoordinate(2, 3), second = new BoardCoordinate(3, 3);
                 Check(session.TrySwap(first, second) && session.State.MovesRemaining == moves - 1, "ValidSwapConsumesOneMove");
                 Check(!session.TrySwap(first, second), "같은 프레임 중복 행동 차단");
                 baseline.Swap(first, second);
                 Check(Snapshot(session.State) == Snapshot(baseline.State), "실행기 행동 직후 상태 동일");
+                Present(session);
                 Check(board.GetComponentsInChildren<SpriteRenderer>().Any(r => r.sprite != null && r.sprite.name.StartsWith("cleaning-rocket")), "ColdPowerSpawnHasArtwork");
                 Finish(session, baseline);
                 Check(JsonUtility.ToJson(rocket) == original, "원본 레벨 보존");
@@ -75,8 +77,8 @@ namespace GameScreen.Editor
                 LevelDefinition win = (LevelDefinition)Invoke(typeof(RecoveryVerification), "PlayFixture");
                 session = await FromState(LevelStateBuilder.Build(win, 12345).State);
                 baseline = new BoardActionExecutor(session.State);
-                Check(session.TryActivate(new BoardCoordinate(9, 0)), "파워 제자리 발동");
-                baseline.Activate(new BoardCoordinate(9, 0));
+                Check(session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)), "파워 제자리 발동");
+                baseline.Activate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0));
                 bool sawWinningCascade = false;
                 for (int step = 0; step < 1000 && baseline.HasPendingCascade; step++)
                 {
@@ -88,11 +90,11 @@ namespace GameScreen.Editor
                 Check(Snapshot(session.State) == Snapshot(baseline.State), "회수 미션·라스트팡 최종 상태 동일");
                 UnityEngine.Object.Destroy(session.gameObject); UnityEngine.Object.Destroy(win); await UniTask.Yield();
                 LevelDefinition lose = (LevelDefinition)Invoke(typeof(PowerEffectVerification), "Make");
-                Invoke(typeof(PowerEffectVerification), "Place", lose, new BoardCoordinate(9, 0), InitialBlockKind.Rocket, RocketDirection.Horizontal, RabbitColor.Type1);
+                Invoke(typeof(PowerEffectVerification), "Place", lose, new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0), InitialBlockKind.Rocket, RocketDirection.Horizontal, RabbitColor.Type1);
                 JsonUtility.FromJsonOverwrite("{\"moveCount\":1,\"missions\":[{\"kind\":0,\"color\":0,\"count\":100}]}", lose);
                 session = await FromState(LevelStateBuilder.Build(lose, 12345).State);
                 baseline = new BoardActionExecutor(session.State);
-                session.TryActivate(new BoardCoordinate(9, 0)); baseline.Activate(new BoardCoordinate(9, 0)); Finish(session, baseline);
+                session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)); baseline.Activate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)); Finish(session, baseline);
                 Check(session.Outcome?.Kind == BoardOutcomeKind.MovesExhausted && !session.CanAcceptInput, "이동 소진 및 종료 입력 차단");
                 UnityEngine.Object.Destroy(session.gameObject); UnityEngine.Object.Destroy(lose); await UniTask.Yield();
                 PuzzleGameSession pending = NewSession();
@@ -127,12 +129,12 @@ namespace GameScreen.Editor
                 Check(startRejected && !session.CanAcceptInput && session.State == null, "시작 조건 실패 시 실행기/입력 생성 차단");
                 UnityEngine.Object.Destroy(session.gameObject); UnityEngine.Object.Destroy(invalidStart); await UniTask.Yield();
                 LevelDefinition damage = (LevelDefinition)Invoke(typeof(PowerEffectVerification), "Make");
-                Invoke(typeof(PowerEffectVerification), "Place", damage, new BoardCoordinate(9, 0), InitialBlockKind.Rocket, RocketDirection.Horizontal, RabbitColor.Type1);
-                Invoke(typeof(PowerEffectVerification), "Crate", damage, new BoardCoordinate(9, 1), 3);
+                Invoke(typeof(PowerEffectVerification), "Place", damage, new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0), InitialBlockKind.Rocket, RocketDirection.Horizontal, RabbitColor.Type1);
+                Invoke(typeof(PowerEffectVerification), "Crate", damage, new BoardCoordinate(BoardDefinition.DefaultRows - 1, 1), 3);
                 session = await FromState(LevelStateBuilder.Build(damage, 12345).State);
                 baseline = new BoardActionExecutor(session.State);
-                Check(session.TryActivate(new BoardCoordinate(9, 0)), "장애물 피해용 로켓 발동");
-                baseline.Activate(new BoardCoordinate(9, 0));
+                Check(session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)), "장애물 피해용 로켓 발동");
+                baseline.Activate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0));
                 Check(session.State.Obstacles[0].Durability < 3 && Snapshot(session.State) == Snapshot(baseline.State), "장애물 내구도와 미션 변화 일치");
                 Finish(session, baseline);
                 UnityEngine.Object.Destroy(session.gameObject); UnityEngine.Object.Destroy(damage); await UniTask.Yield();
@@ -173,10 +175,12 @@ namespace GameScreen.Editor
         }
         private static void Finish(PuzzleGameSession session, BoardActionExecutor baseline)
         {
+            Present(session);
             for (int i = 0; i < 1000 && baseline.HasPendingCascade; i++) { Advance(session); baseline.AdvanceCascade(); }
             Check(!baseline.HasPendingCascade && session.Phase == baseline.Phase && Snapshot(session.State) == Snapshot(baseline.State), "연쇄 종료 및 실행기 상태 일치");
         }
         private static void Advance(PuzzleGameSession session) => typeof(PuzzleGameSession).GetMethod("Advance", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(session, null);
+        private static void Present(PuzzleGameSession session) => typeof(PuzzleGameSession).GetMethod("AdvancePresentation", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(session, new object[] { 1f });
         private static void Set(object target, string field, object value) => target.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(target, value);
         private static object Invoke(Type type, string method, params object[] args) => type.GetMethod(method, BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, args);
         private static string Snapshot(object state) => (string)Invoke(typeof(LevelInitialStateVerification), "Snapshot", state);

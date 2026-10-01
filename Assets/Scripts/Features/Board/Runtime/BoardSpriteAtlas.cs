@@ -41,6 +41,11 @@ namespace Board
                 handle = Addressables.LoadAssetAsync<SpriteAtlas>(address);
                 requested = true;
             }
+#if UNITY_EDITOR
+            // 편집 모드의 로컬 아틀라스는 게임 루프 갱신 없이도 미리보기에 사용할 수 있어야 한다.
+            // 최초 요청에서만 완료시키며 Play Mode와 플레이어는 기존 비동기 로드를 유지한다.
+            if (!Application.isPlaying && !handle.IsDone) handle.WaitForCompletion();
+#endif
             await handle.ToUniTask();
             if (disposed) throw new ObjectDisposedException(nameof(BoardSpriteAtlas));
         }

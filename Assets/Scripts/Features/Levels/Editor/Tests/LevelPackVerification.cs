@@ -129,7 +129,7 @@ namespace Levels.Editor
                 owned.Clear();
                 Directory.CreateDirectory("Logs/LevelPackVerification");
                 File.WriteAllLines("Logs/LevelPackVerification/results.txt", results);
-                EditorApplication.Exit(results.Any(value => value.StartsWith("FAIL")) ? 1 : 0);
+                if (Application.isBatchMode) EditorApplication.Exit(results.Any(value => value.StartsWith("FAIL")) ? 1 : 0);
             }
         }
         private static LevelDefinition New() { var value = ScriptableObject.CreateInstance<LevelDefinition>(); owned.Add(value); return value; }

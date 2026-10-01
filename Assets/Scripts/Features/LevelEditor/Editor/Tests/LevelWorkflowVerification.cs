@@ -142,7 +142,7 @@ namespace Levels.Editor
                 using (PointerDownEvent evt = PointerDownEvent.GetPooled(new Event { type = EventType.MouseDown, button = 0, mousePosition = port.worldBound.center }))
                 { evt.target = port; port.SendEvent(evt); }
                 yield return null;
-                Vector2 end = scenario == 1 ? graph.LocalToWorld(new Vector2(4 * 40 + 20, 2 * 40 + 20)) : graph.Q("connection-port-1-0").worldBound.center;
+                Vector2 end = scenario == 1 ? graph.LocalToWorld(new Vector2(4 * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f, 2 * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f)) : graph.Q("connection-port-1-0").worldBound.center;
                 using (PointerMoveEvent evt = PointerMoveEvent.GetPooled(new Event { type = EventType.MouseDrag, button = 0, mousePosition = end }))
                 { evt.target = graph; graph.SendEvent(evt); }
                 yield return null;

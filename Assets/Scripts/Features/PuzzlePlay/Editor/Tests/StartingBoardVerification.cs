@@ -79,7 +79,7 @@ namespace Levels.Editor
         private static void Patterns()
         {
             foreach (int axis in new[] { 0, 1 })
-                foreach (int length in new[] { 3, 4, 5, 6, 10 })
+                foreach (int length in new[] { 3, 4, 5, 6, BoardDefinition.DefaultColumns })
                 {
                     LevelRuntimeState state = Empty();
                     BoardCoordinate[] cells = Enumerable.Range(0, length).Select(i => C(axis == 0 ? 0 : i, axis == 0 ? i : 0)).ToArray();

@@ -26,6 +26,8 @@ namespace Levels
         [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
         [MemoryPackIgnore] public bool IsEnd => isEnd;
         [MemoryPackIgnore] public BoardCoordinate Next => next;
+        internal FlowPathCell(BoardCoordinate end) { coordinate = end; isEnd = true; next = default; }
+        internal FlowPathCell AsEnd() => new FlowPathCell { coordinate = coordinate, isEnd = true, next = default };
     }
 
     [Serializable, MemoryPackable(SerializeLayout.Explicit)]
@@ -35,6 +37,7 @@ namespace Levels
         [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private List<BoardCoordinate> sources;
         [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
         [MemoryPackIgnore] public IReadOnlyList<BoardCoordinate> Sources => sources;
+        internal void CropSources(BoardDefinition board) => sources?.RemoveAll(cell => !board.Contains(cell));
     }
 
     [Serializable, MemoryPackable(SerializeLayout.Explicit)]
@@ -66,5 +69,30 @@ namespace Levels
         [MemoryPackIgnore] public bool ListsPresent => gravity != null && paths != null && merges != null && walls != null && portals != null && arrivals != null;
         [MemoryPackIgnore] public bool HasRecords => (gravity?.Count ?? 0) + (paths?.Count ?? 0) + (merges?.Count ?? 0) +
             (walls?.Count ?? 0) + (portals?.Count ?? 0) + (arrivals?.Count ?? 0) > 0;
+
+        internal void CropTo(BoardDefinition board)
+        {
+            gravity?.RemoveAll(item => !board.Contains(item.Coordinate));
+            paths?.RemoveAll(item => !board.Contains(item.Coordinate));
+            if (paths != null)
+                for (int i = 0; i < paths.Count; i++)
+                    if (!paths[i].IsEnd && !board.Contains(paths[i].Next)) paths[i] = paths[i].AsEnd();
+            walls?.RemoveAll(item => !board.Contains(item.A) || !board.Contains(item.B));
+            if (portals != null)
+            {
+                // 출구만 잘린 통로는 입구에서 멈춘다. 기본 중력으로 새 합류/순환이 생기는 것을 막는다.
+                foreach (FlowPortal portal in portals)
+                    if (board.Contains(portal.Entrance) && portal.HasExit && !board.Contains(portal.Exit) && paths != null &&
+                        !paths.Exists(path => path.Coordinate.Equals(portal.Entrance)))
+                        paths.Add(new FlowPathCell(portal.Entrance));
+                portals.RemoveAll(item => !board.Contains(item.Entrance) || (item.HasExit && !board.Contains(item.Exit)));
+            }
+            arrivals?.RemoveAll(item => !board.Contains(item));
+            if (merges != null)
+            {
+                foreach (FlowMerge merge in merges) merge.CropSources(board);
+                merges.RemoveAll(item => !board.Contains(item.Coordinate) || (item.Sources != null && item.Sources.Count < 2));
+            }
+        }
     }
 }

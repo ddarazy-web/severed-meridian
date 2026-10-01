@@ -1,3 +1,4 @@
+using Board;
 using System;
 using System.Collections;
 using System.IO;
@@ -94,7 +95,7 @@ namespace Levels.Editor
             bool dirty = EditorUtility.IsDirty(mixed);
             Click("initial-build"); yield return null;
             Check(window.CurrentState != null && window.CurrentState.MovesRemaining == 37, "미저장 정의 UI 구성");
-            Check(window.rootVisualElement.Query<Button>().ToList().Count(button => button.name.StartsWith("initial-cell-")) == 100, "100칸 읽기 전용 보드 표시");
+            Check(window.rootVisualElement.Query<Button>().ToList().Count(button => button.name.StartsWith("initial-cell-")) == BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns, "81칸 읽기 전용 보드 표시");
             string snapshot = Snapshot(window.CurrentState);
             Click("initial-cell-5-5"); yield return null;
             Check(window.rootVisualElement.Q<Label>("initial-details").text.Contains("generator → target"), "선택 본체 연결 속성 표시");
@@ -129,7 +130,7 @@ namespace Levels.Editor
             Capture("narrow.png");
             ScrollView board = window.rootVisualElement.Q<ScrollView>("initial-board-scroll");
             Check(board.horizontalScroller.highValue > 0 && board.verticalScroller.highValue > 0, "좁은 창 양방향 스크롤 범위");
-            Button lastCell = window.rootVisualElement.Q<Button>("initial-cell-9-9"); board.ScrollTo(lastCell);
+            Button lastCell = window.rootVisualElement.Q<Button>("initial-cell-8-8"); board.ScrollTo(lastCell);
             yield return null;
             Check(board.contentViewport.worldBound.Overlaps(lastCell.worldBound), "좁은 창 마지막 칸까지 스크롤 접근");
             Capture("narrow-end.png");

@@ -23,7 +23,7 @@ namespace Levels.Editor
                 BoardCoordinate cut = C(axis, 1 - axis);
                 using (SerializedObject edit = new SerializedObject(level))
                 {
-                    edit.FindProperty("board.cells").GetArrayElementAtIndex(cut.Row * 10 + cut.Column).FindPropertyRelative("isActive").boolValue = false;
+                    edit.FindProperty("board.cells").GetArrayElementAtIndex(cut.Row * BoardDefinition.DefaultColumns + cut.Column).FindPropertyRelative("isActive").boolValue = false;
                     edit.ApplyModifiedPropertiesWithoutUndo();
                 }
                 LevelRuntimeState state = Build(level);
@@ -69,7 +69,7 @@ namespace Levels.Editor
             using (SerializedObject edit = new SerializedObject(fixedLevel))
             {
                 SerializedProperty cells = edit.FindProperty("board.cells"), blocks = edit.FindProperty("initialBlocks"); blocks.arraySize = 6;
-                for (int i = 0; i < cells.arraySize; i++) cells.GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i / 10 < 2 && i % 10 < 3;
+                for (int i = 0; i < cells.arraySize; i++) cells.GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i / BoardDefinition.DefaultColumns < 2 && i % BoardDefinition.DefaultColumns < 3;
                 int[] colors = { 0, 1, 0, 0, 0, 2 };
                 for (int i = 0; i < 6; i++)
                 {
@@ -88,7 +88,7 @@ namespace Levels.Editor
             using (SerializedObject edit = new SerializedObject(hard))
             {
                 SerializedProperty cells = edit.FindProperty("board.cells");
-                for (int i = 0; i < cells.arraySize; i++) cells.GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i / 10 <= 4 && i % 10 <= 4 && i / 10 % 2 == 0 && i % 10 % 2 == 0;
+                for (int i = 0; i < cells.arraySize; i++) cells.GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i / BoardDefinition.DefaultColumns <= 4 && i % BoardDefinition.DefaultColumns <= 4 && i / BoardDefinition.DefaultColumns % 2 == 0 && i % BoardDefinition.DefaultColumns % 2 == 0;
                 edit.ApplyModifiedPropertiesWithoutUndo();
             }
             System.Diagnostics.Stopwatch total = System.Diagnostics.Stopwatch.StartNew();

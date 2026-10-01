@@ -36,7 +36,7 @@ namespace Levels.Editor
             Place(pending, C(4, 0), InitialBlockKind.Rocket); Place(pending, C(4, 2), InitialBlockKind.Drone);
             LevelRuntimeState pendingState = Build(pending);
             foreach (RuntimeCell cell in pendingState.Cells.Where(c => c.Content == RuntimeContent.Normal)) Set(cell, "Color", RabbitColor.Type2);
-            Set(pendingState.CellAt(C(4, 9)), "Color", RabbitColor.Type5); Set(pendingState.CellAt(C(9, 9)), "Color", RabbitColor.Type5);
+            Set(pendingState.CellAt(C(4, 8)), "Color", RabbitColor.Type5); Set(pendingState.CellAt(C(8, 8)), "Color", RabbitColor.Type5);
             bool retargeted = false;
             for (int seed = 0; seed < 16 && !retargeted; seed++)
             {
@@ -44,7 +44,7 @@ namespace Levels.Editor
                 foreach (RuntimeCell cell in work.Cells.Where(c => c.Content == RuntimeContent.Normal)) Set(cell, "Color", pendingState.CellAt(cell.Coordinate).Color);
                 TurnEffectContext context = Context(); Effects(work, C(4, 0), context);
                 if (!context.Targeting.Any(r => r.Event == TargetingEvent.Retargeted)) continue;
-                Check(context.Targeting.Last(r => r.Event == TargetingEvent.Landed).Target.Value.Equals(C(9, 9)) && work.Missions[0].Progress == 2,
+                Check(context.Targeting.Last(r => r.Event == TargetingEvent.Landed).Target.Value.Equals(C(8, 8)) && work.Missions[0].Progress == 2,
                     "실제 부모 로켓이 예약 파괴 → 남은 미션 재조준/실제 진행2");
                 retargeted = true;
             }
@@ -64,13 +64,13 @@ namespace Levels.Editor
             List<EffectRecord> edgeEffects = Effects(edgeState, C(0, 0), edgeContext);
             Check(edgeEffects.Any(e => e.Target.Equals(C(0, 1)) && e.Response == DamageResponse.Remove), "드론 +는 벽을 무시");
             LevelDefinition sparse = (LevelDefinition)Invoke(typeof(BoardActionVerification), "Make", null,
-                new Dictionary<BoardCoordinate, int> { [C(0, 0)] = 0, [C(0, 1)] = 1, [C(9, 9)] = 0 }, 20);
+                new Dictionary<BoardCoordinate, int> { [C(0, 0)] = 0, [C(0, 1)] = 1, [C(8, 8)] = 0 }, 20);
             Place(sparse, C(0, 0), InitialBlockKind.Drone);
             TurnEffectContext sparseContext = Context(); List<EffectRecord> sparseEffects = Effects(Build(sparse), C(0, 0), sparseContext);
             Check(sparseEffects.Count(e => e.Response == DamageResponse.Remove) == 2, "비활성칸 제외 +1칸/추가1칸");
 
             LevelDefinition equal = Make(); Mission(equal, MissionKind.Color, 1); Mission(equal, MissionKind.Crate, 1);
-            Invoke(typeof(PowerEffectVerification), "Crate", null, equal, C(9, 9), 1);
+            Invoke(typeof(PowerEffectVerification), "Crate", null, equal, C(8, 8), 1);
             HashSet<RuntimeContent> selected = new HashSet<RuntimeContent>();
             for (int seed = 0; seed < 80; seed++)
             {
@@ -91,7 +91,7 @@ namespace Levels.Editor
             TurnEffectContext oneContext = Context(); DroneTargetManager oneManager = Manager(single, oneContext);
             int draws = single.Random.DrawCount; int request = (int)Invoke(typeof(DroneTargetManager), "Request", oneManager, C(0, 0));
             Check(single.Random.DrawCount == draws && oneManager.ReservationCount == 1, "드론 단일 후보 선택 무난수");
-            Set(single.CellAt(C(9, 9)), "Content", RuntimeContent.Empty); Set(single.CellAt(C(9, 9)), "Color", null); Invoke(typeof(DroneTargetManager), "Invalidate", oneManager);
+            Set(single.CellAt(C(8, 8)), "Content", RuntimeContent.Empty); Set(single.CellAt(C(8, 8)), "Color", null); Invoke(typeof(DroneTargetManager), "Invalidate", oneManager);
             Check(Invoke(typeof(DroneTargetManager), "Land", oneManager, request, C(0, 0)) == null && oneManager.ReservationCount == 0 && oneManager.ExpectedComplete == 0,
                 "예약 후 모든 후보 소실: 해제/재탐색/추가 타격 없음");
 

@@ -1,3 +1,4 @@
+using Board;
 using System.Collections;
 using System.IO;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Levels.Editor
 {
     public static partial class LevelWorkflowVerification
     {
-        /// <summary>기존 결과를 재사용하여 실제 도킹·결과 최소 창·10×10 조작을 검사한다.</summary>
+        /// <summary>기존 결과를 재사용하여 실제 도킹·결과 최소 창·9×9 조작을 검사한다.</summary>
         public static void Presentation()
         {
             Results.Clear(); resultOverride = "presentation";
@@ -53,13 +54,13 @@ namespace Levels.Editor
             Click("manual-start");
             while (play.IsSearching) yield return null;
             if (play.Execution == null) { Click("manual-start"); yield return null; }
-            Check(play.CurrentState.Rows == 10 && play.CurrentState.Columns == 10 && play.Execution != null, "실제 10×10 수동 판 준비");
-            Results.Add("TIME 10x10 준비 UI 포함 ms=" + watch.Elapsed.TotalMilliseconds.ToString("F3"));
+            Check(play.CurrentState.Rows == BoardDefinition.DefaultRows && play.CurrentState.Columns == BoardDefinition.DefaultColumns && play.Execution != null, "실제 9×9 수동 판 준비");
+            Results.Add("TIME 9x9 준비 UI 포함 ms=" + watch.Elapsed.TotalMilliseconds.ToString("F3"));
             var target = play.CurrentState.Cells.First(c => c.Content == Simulation.RuntimeContent.Normal).Coordinate;
             watch.Restart(); Click("item-Hammer"); Click($"initial-cell-{target.Row}-{target.Column}");
             while (play.CascadeRunning) yield return null;
-            Check(play.Execution.ItemUses.Count == 1, "10×10 아이템 조작과 후속 연쇄 완료");
-            Results.Add("TIME 10x10 아이템·연쇄 UI 포함 ms=" + watch.Elapsed.TotalMilliseconds.ToString("F3"));
+            Check(play.Execution.ItemUses.Count == 1, "9×9 아이템 조작과 후속 연쇄 완료");
+            Results.Add("TIME 9x9 아이템·연쇄 UI 포함 ms=" + watch.Elapsed.TotalMilliseconds.ToString("F3"));
             string path = File.ReadAllText(Evidence + "/connections-record.txt");
             window.SelectWorkspaceTab(3); window.position = new Rect(20, 20, 680, 480);
             var panel = (LevelAnalysisPanel)typeof(LevelEditorWindow).GetField("analysisPanel", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(window);

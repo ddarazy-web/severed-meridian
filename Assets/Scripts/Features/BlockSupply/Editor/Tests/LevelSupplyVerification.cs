@@ -83,7 +83,7 @@ namespace Levels.Editor
 
             level = LevelAssetOperations.CreateAtPath(folder + "/Supply.asset");
             SetInt(level, "levelNumber", 55001);
-            Check(level.Supply.Sources.Count == 10 && level.Supply.Sources.Select(source => source.Coordinate).Distinct().Count() == 10, "새 레벨 상단 생성구 10개");
+            Check(level.Supply.Sources.Count == BoardDefinition.DefaultColumns && level.Supply.Sources.Select(source => source.Coordinate).Distinct().Count() == BoardDefinition.DefaultColumns, "새 레벨 상단 생성구 9개");
             Mission(MissionKind.Color, 30);
             Check(LevelDefinitionValidator.Validate(level).Count == 0, "색 수집은 초기 수량 부족으로 오판하지 않음");
             Check(LevelSupplyEditing.SetSourceProperty(level, new[] { 0, 1 }, "mode", (int)SupplyMode.Fixed) == null, "생성구 공통 방식 변경");
@@ -118,11 +118,11 @@ namespace Levels.Editor
             Check(Issues().Any(issue => issue.Message.Contains("도착 바닥")), "회수 도착 바닥 누락 오류");
             using (SerializedObject data = new SerializedObject(level))
             {
-                LevelFlowEditing.SetCoordinates(data.FindProperty("flow.arrivals"), new[] { C(9, 6) }); data.ApplyModifiedProperties();
+                LevelFlowEditing.SetCoordinates(data.FindProperty("flow.arrivals"), new[] { C(8, 6) }); data.ApplyModifiedProperties();
             }
             Check(!Issues().Any(issue => issue.Message.Contains("도착 바닥")), "유효 도착 바닥 확인");
             before = JsonUtility.ToJson(level);
-            Check(LevelSupplyEditing.PlaceSources(level, new[] { C(9, 6) }) != null && JsonUtility.ToJson(level) == before, "생성구/도착 바닥 중첩 원자적 거절");
+            Check(LevelSupplyEditing.PlaceSources(level, new[] { C(8, 6) }) != null && JsonUtility.ToJson(level) == before, "생성구/도착 바닥 중첩 원자적 거절");
             Mission(MissionKind.Mold, 0);
             Check(!Issues().Any(issue => issue.Code == LevelValidationCode.InvalidMission || issue.Code == LevelValidationCode.InsufficientSupply), "곰팡이는 고정 수량이 아닌 전부 제거");
             Mission(MissionKind.Recovery, 6);

@@ -21,6 +21,8 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 
 ## 달 토끼 고물상 시작점
 
+- 현재 보드 기준: [9×9(81칸) 전환 결정](Decisions/MoonRabbitJunkyard/2026-10-01-nine-by-nine-board.md). 과거 10×10 검증 기록은 당시 조건으로 보존한다.
+
 - [게임 기획서](Contents/MoonRabbitJunkyard/기획서.md)
 - [월드 게임 화면 전체 단계 계획](Planning/MoonRabbitJunkyard/WorldGameScreen/2026-09-30-world-game-screen.md)
 - 완료된 3단계: [계획](Planning/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-plan.md) · [목표·완료 조건](Goals/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-goal.md) · [목표 명령어](Commands/MoonRabbitJunkyard/WorldGameScreen/stage-03-goal-command.md)
@@ -28,9 +30,15 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 - [2단계 진행·검증 기록](Verification/MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md) · [게임 실행 안내](Guides/MoonRabbitJunkyard/WorldGameScreen/stage-02-gameplay-usage.md)
 - [HTML 사용 매뉴얼](MoonRabbitJunkyard/Manual/index.html) · [게임 화면 목업](MoonRabbitJunkyard/Mockups/puzzle-screen.html)
 
+- 완료된 4단계 (2026-10-01): [계획](Planning/MoonRabbitJunkyard/WorldGameScreen/stage-04-mockup-ui-plan.md) · [목표·완료 조건](Goals/MoonRabbitJunkyard/WorldGameScreen/stage-04-mockup-ui-goal.md) · [목표 명령어](Commands/MoonRabbitJunkyard/WorldGameScreen/stage-04-goal-command.md)
+
+- 5단계 (통합 검증 완료): [계획](Planning/MoonRabbitJunkyard/WorldGameScreen/stage-05-integration-plan.md) · [목표·완료 조건](Goals/MoonRabbitJunkyard/WorldGameScreen/stage-05-integration-goal.md) · [목표 명령어](Commands/MoonRabbitJunkyard/WorldGameScreen/stage-05-goal-command.md) · [검증 기록](Verification/MoonRabbitJunkyard/WorldGameScreen/stage-05-progress.md) · [실행 안내](Guides/MoonRabbitJunkyard/WorldGameScreen/stage-05-integration-usage.md)
+
+- 6단계 (구현·Editor 검증 완료): [계획](Planning/MoonRabbitJunkyard/WorldGameScreen/stage-06-swipe-swap-plan.md) · [목표·완료 조건](Goals/MoonRabbitJunkyard/WorldGameScreen/stage-06-swipe-swap-goal.md) · [목표 명령문](Commands/MoonRabbitJunkyard/WorldGameScreen/stage-06-goal-command.md) · [검증 기록](Verification/MoonRabbitJunkyard/WorldGameScreen/stage-06-progress.md) · [사용 안내](Guides/MoonRabbitJunkyard/WorldGameScreen/stage-06-swipe-swap-usage.md). 플레이어·Addressables 콘텐츠 빌드 미실행. 다음은 7단계 제거·낙하·채움이다.
+
 ## 작성·분류 기준
 
-- `Core`는 기존 규칙·레벨 에디터·자동 플레이 개발 1~33단계다. `WorldGameScreen`은 월드 게임 화면 개발 1~5단계다. 두 흐름의 같은 단계 번호를 혼동하지 않는다.
+- `Core`는 기존 규칙·레벨 에디터·자동 플레이 개발 1~33단계다. `WorldGameScreen`은 월드 게임 화면 개발 1~10단계이며 6단계까지 세부 계획이 있다. 두 흐름의 같은 단계 번호를 혼동하지 않는다.
 - 새 계획, 목표, 명령어, 진행 기록, 사용 안내는 각각 해당 역할 폴더 아래 `MoonRabbitJunkyard/WorldGameScreen/`에 작성한다. 여러 역할이 섞인 기존 문서는 주된 목적에 따라 한 곳에 두고 서로 링크한다.
 - 이전 목표 문서에 포함된 실행문은 역사적 내용으로 보존한다. 새로 만드는 독립 목표 명령문은 `Commands`로 분리한다.
 - 실제 결과와 과거 상태 설명을 문서 정리 작업에서 임의로 변경하지 않는다. 오래된 날짜·상태는 당시 기록일 수 있다.

@@ -63,5 +63,18 @@ namespace GameScreen
             string shape = (slot % 3) switch { 0 => "amber-triangle", 1 => "cyan-circle", _ => "purple-diamond" };
             return "BoardDevices/Wiring/terminal-" + shape + (connected ? "-on" : "-off") + "-v1-256";
         }
+        public static string Mission(LevelMissionDefinition mission) => mission.Kind switch
+        {
+            MissionKind.Color => Rabbit(mission.Color),
+            MissionKind.Crate => "Obstacles/Crate/crate-durability-1-v1-256",
+            MissionKind.Web => "Obstacles/Web/web-durability-1-v2-256",
+            MissionKind.Scrap => "Obstacles/Scrap/scrap-durability-1-v1-256",
+            MissionKind.Dust => Dust(1),
+            MissionKind.Safe => "Obstacles/RecoveryCapsule/recovery-capsule-durability-1-v1-256",
+            MissionKind.ColorLock => "Obstacles/ColorLock/color-lock-pink-durability-1-v1-256",
+            MissionKind.Appliance => "Obstacles/MetalRodBox/metal-rod-box-pink-durability-1-v1-256",
+            MissionKind.Mold => "Obstacles/Mold/mold-base-v1-256",
+            MissionKind.Recovery => Recovery, _ => null
+        };
     }
 }

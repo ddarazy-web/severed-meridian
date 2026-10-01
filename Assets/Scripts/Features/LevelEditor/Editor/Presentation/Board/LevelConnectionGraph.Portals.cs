@@ -12,7 +12,7 @@ namespace Levels.Editor
         private BoardCoordinate? portalSource, portalTarget;
         private bool portalFromEntrance;
         private readonly List<BoardCoordinate> portalCandidates = new List<BoardCoordinate>();
-        private static Vector2 CellPoint(BoardCoordinate cell) => Point(cell) + new Vector2(20, 20);
+        private static Vector2 CellPoint(BoardCoordinate cell) => Point(cell) + Vector2.one * (LevelBoardView.CellSize / 2f);
         private bool SelectedPortal(FlowPortal portal) => selection.HasValue &&
             (portal.Entrance.Equals(selection.Value) || (portal.HasExit && portal.Exit.Equals(selection.Value)));
 
@@ -66,8 +66,8 @@ namespace Levels.Editor
                 portalSource = cell; portalFromEntrance = entrance;
                 portalCandidates.Clear();
                 // 후보는 시작 시 한 번만 계산하고 원본 변경 시 공통 취소 처리에서 비운다.
-                for (int row = 0; row < 10; row++)
-                    for (int column = 0; column < 10; column++)
+                for (int row = 0; row < BoardDefinition.DefaultRows; row++)
+                    for (int column = 0; column < BoardDefinition.DefaultColumns; column++)
                     {
                         var candidate = new BoardCoordinate(row, column);
                         if (PortalTargetError(candidate) == null) portalCandidates.Add(candidate);
@@ -81,9 +81,9 @@ namespace Levels.Editor
         private void FindPortalTarget(Vector2 position)
         {
             cursor = position; portalTarget = null; routeError = null;
-            if (position.x >= 0 && position.y >= 0 && position.x < 400 && position.y < 400)
+            if (position.x >= 0 && position.y >= 0 && position.x < (LevelBoardView.CellSize * BoardDefinition.DefaultColumns) && position.y < (LevelBoardView.CellSize * BoardDefinition.DefaultRows))
             {
-                var cell = new BoardCoordinate(Mathf.FloorToInt(position.y / 40), Mathf.FloorToInt(position.x / 40));
+                var cell = new BoardCoordinate(Mathf.FloorToInt(position.y / LevelBoardView.CellSize), Mathf.FloorToInt(position.x / LevelBoardView.CellSize));
                 if (LevelFlowRules.Active(level, cell))
                 {
                     portalTarget = cell;

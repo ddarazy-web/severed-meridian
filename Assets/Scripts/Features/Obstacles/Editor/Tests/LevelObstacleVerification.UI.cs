@@ -70,7 +70,7 @@ namespace Levels.Editor
         {
             yield return null; yield return null;
             LevelBoardView board = window.rootVisualElement.Q<LevelBoardView>();
-            Check(board.panel != null && board.Children().OfType<Label>().Count() == 100, "실제 UI 패널·100칸 표시");
+            Check(board.panel != null && board.Children().OfType<Label>().Count() == BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns, "실제 UI 패널·81칸 표시");
             Check(EditorApplication.ExecuteMenuItem("Match/레벨 에디터"), "Match 메뉴 실행");
             window.Focus(); yield return null;
             Layer("장애물/장치"); yield return null;
@@ -161,19 +161,19 @@ namespace Levels.Editor
             Check(EditorWindow.focusedWindow == focus && board.MoveIndex == -1, "실제 창 포커스 상실 이동 취소");
             focus.Close(); window.Focus(); yield return null;
 
-            Click("place-Obstacle-5"); CellClick(8, 7); yield return null;
+            Click("place-Obstacle-5"); CellClick(7, 7); yield return null;
             Check(level.Obstacles.Last().Kind == ObstacleKind.Generator && level.Obstacles.Last().RequiredCharge == 3,
                 "발전기 2×2·기본 충전 3");
             window.rootVisualElement.Q<IntegerField>("selected-requiredCharge").value = 5; yield return null;
             Check(level.Obstacles.Last().RequiredCharge == 5 && window.rootVisualElement.Query<HelpBox>().ToList().Any(box => box.text.Contains("실제 충전")),
                 "발전기 필요 충전량·게임 실행 미지원 안내");
-            Click("tool-Select"); CellClick(9, 8); yield return null;
+            Click("tool-Select"); CellClick(8, 8); yield return null;
             Click("delete-placement"); yield return null;
             Check(!level.Obstacles.Any(item => item.Kind == ObstacleKind.Generator), "발전기 다른 점유 칸 전체 삭제");
             Undo.PerformUndo(); yield return null;
             Check(level.Obstacles.Last().Kind == ObstacleKind.Generator, "발전기 삭제 Undo");
 
-            Click("tool-Select"); CellClick(8, 7); yield return null;
+            Click("tool-Select"); CellClick(7, 7); yield return null;
             Click("move-obstacle"); Click("save-level");
             Check(board.MoveIndex == -1, "저장으로 대기 중인 이동 취소");
             Button oldMove = window.rootVisualElement.Q<Button>("move-obstacle");
@@ -241,7 +241,7 @@ namespace Levels.Editor
             IEnumerator menuChecks = VerifyToolMenus();
             while (menuChecks.MoveNext()) yield return menuChecks.Current;
             Layer("장애물/장치"); yield return null;
-            Click("tool-Select"); CellClick(8, 7); yield return null;
+            Click("tool-Select"); CellClick(7, 7); yield return null;
             Click("validate-level"); yield return null;
             Check(window.rootVisualElement.Q<Label>("validation-status").text.Contains("미지원"), "검사 미지원 범위 표시");
             window.position = new Rect(10, 10, 1000, 780);
@@ -252,7 +252,7 @@ namespace Levels.Editor
             Capture("obstacles-wide.png");
             window.position = new Rect(60, 60, 680, 480); yield return null; yield return null;
             ScrollView scroll = window.rootVisualElement.Q<ScrollView>("board-scroll");
-            scroll.ScrollTo(board.CellAt(new BoardCoordinate(9, 9))); yield return null;
+            scroll.ScrollTo(board.CellAt(new BoardCoordinate(8, 8))); yield return null;
             Check(scroll.horizontalScroller.highValue > 0 && scroll.verticalScroller.highValue > 0, "좁은 창 2축 스크롤");
             Capture("obstacles-narrow.png");
             Click("save-level");

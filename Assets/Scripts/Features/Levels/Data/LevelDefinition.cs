@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Levels
 {
-    public sealed class LevelDefinition : ScriptableObject
+    public sealed class LevelDefinition : ScriptableObject, ISerializationCallbackReceiver
     {
         public const int CurrentSchemaVersion = 4;
 
@@ -62,6 +62,7 @@ namespace Levels
 
         public static LevelDefinition FromPacked(PackedLevel data)
         {
+            LevelBoardSizeMigration.Crop(data);
             LevelDefinition level = CreateInstance<LevelDefinition>();
             level.schemaVersion = data.SchemaVersion;
             level.levelNumber = data.LevelNumber;
@@ -82,6 +83,9 @@ namespace Levels
             return level;
         }
 
-        // OnEnable/OnValidate에서 초기화하지 않는다. 오류가 있는 작업 중 에셋도 그대로 읽는다.
+        public void OnBeforeSerialize() { }
+        public void OnAfterDeserialize() => LevelBoardSizeMigration.Crop(ToPacked());
+
+        // OnEnable/OnValidate에서 초기화하지 않는다. 완전한 구형 10×10만 잘라내고 오류 데이터는 보존한다.
     }
 }

@@ -1,5 +1,7 @@
 # 2단계 실제 게임 플레이 Implementation Plan
 
+> 2026-10-01 변경: 현재 보드는 **9×9(81칸)**이다. 아래 10×10·100칸 계획과 검증 수치는 당시 기록으로 보존하며 9×9 검증 결과가 아니다. 현재 크기·표시·데이터 전환 기준은 [9×9 보드 결정](../../../Decisions/MoonRabbitJunkyard/2026-10-01-nine-by-nine-board.md)을 따른다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: `superpowers:executing-plans`를 사용해 작업별로 구현·검증한다. 체크박스는 실제 검증 뒤 갱신한다. 이 계획은 하위 에이전트 실행을 요구하지 않는다.
 
 상태: 2026-09-30 완료. 작업별 증거와 실행 방식의 차이는 [실행 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md)에 기록했다.

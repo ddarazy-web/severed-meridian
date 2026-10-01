@@ -231,29 +231,29 @@ namespace Levels.Editor
         {
             ResetBoard();
             PlacementBrush big = Obstacle(ObstacleKind.Appliance, 9);
-            Check(Place(big, 8, 8).Changed == 1 && level.Obstacles.Count == 1, "9행9열 2×2 설치 성공");
+            Check(Place(big, 7, 7).Changed == 1 && level.Obstacles.Count == 1, "8행8열 2×2 설치 성공");
             AssetDatabase.SaveAssetIfDirty(level);
             int noMoveGroup = Undo.GetCurrentGroup();
-            Check(!LevelObstacleEditing.Move(level, 0, new BoardCoordinate(8, 8), out _) && !EditorUtility.IsDirty(level) &&
+            Check(!LevelObstacleEditing.Move(level, 0, new BoardCoordinate(7, 7), out _) && !EditorUtility.IsDirty(level) &&
                 Undo.GetCurrentGroup() == noMoveGroup, "자기 자리 이동은 dirty·Undo를 만들지 않음");
-            Check(Place(big, 9, 0).Changed == 0 && Place(big, 0, 9).Changed == 0, "끝 행/열 2×2 설치 실패");
-            foreach (BoardCoordinate cell in LevelPlacementRules.Footprint(new BoardCoordinate(8, 8), 2))
+            Check(Place(big, 8, 0).Changed == 0 && Place(big, 0, 8).Changed == 0, "끝 행/열 2×2 설치 실패");
+            foreach (BoardCoordinate cell in LevelPlacementRules.Footprint(new BoardCoordinate(7, 7), 2))
                 Place(new PlacementBrush { Layer = PlacementLayer.Dust, Durability = 2 }, cell.Row, cell.Column);
             string before = JsonUtility.ToJson(level);
-            Check(LevelObstacleEditing.Move(level, 0, new BoardCoordinate(7, 8), out _) && level.Dust.Count == 4 && level.Obstacles[0].Durability == 9,
+            Check(LevelObstacleEditing.Move(level, 0, new BoardCoordinate(6, 7), out _) && level.Dust.Count == 4 && level.Obstacles[0].Durability == 9,
                 "자기 점유와 겹치는 2×2 이동·먼지와 공유 내구도 보존");
             Undo.FlushUndoRecordObjects(); Undo.PerformUndo();
             Check(JsonUtility.ToJson(level) == before, "2×2 이동 한 번 Undo");
             Undo.PerformRedo();
-            Check(level.Obstacles[0].Coordinate.Equals(new BoardCoordinate(7, 8)), "2×2 이동 Redo");
-            Place(Obstacle(ObstacleKind.Crate, 1), 6, 8);
+            Check(level.Obstacles[0].Coordinate.Equals(new BoardCoordinate(6, 7)), "2×2 이동 Redo");
+            Place(Obstacle(ObstacleKind.Crate, 1), 5, 7);
             before = JsonUtility.ToJson(level);
-            Check(!LevelObstacleEditing.Move(level, 0, new BoardCoordinate(6, 8), out _) && JsonUtility.ToJson(level) == before,
+            Check(!LevelObstacleEditing.Move(level, 0, new BoardCoordinate(5, 7), out _) && JsonUtility.ToJson(level) == before,
                 "다른 점유와 겹치는 이동 원자적 취소");
-            SetBool(level, "board.cells.Array.data[68].isActive", false);
-            Check(!LevelObstacleEditing.Move(level, 0, new BoardCoordinate(6, 8), out _), "비활성 목적 칸 이동 거절");
-            Check(!LevelObstacleEditing.Move(level, 0, new BoardCoordinate(9, 9), out _), "보드 밖 이동 거절");
-            foreach (BoardCoordinate cell in LevelPlacementRules.Footprint(new BoardCoordinate(7, 8), 2))
+            SetBool(level, "board.cells.Array.data[52].isActive", false);
+            Check(!LevelObstacleEditing.Move(level, 0, new BoardCoordinate(5, 7), out _), "비활성 목적 칸 이동 거절");
+            Check(!LevelObstacleEditing.Move(level, 0, new BoardCoordinate(8, 8), out _), "보드 밖 이동 거절");
+            foreach (BoardCoordinate cell in LevelPlacementRules.Footprint(new BoardCoordinate(6, 7), 2))
             {
                 before = JsonUtility.ToJson(level);
                 Check(Erase(PlacementLayer.Obstacle, cell.Row, cell.Column).Changed == 1 && level.Obstacles.Count == 1 && level.Dust.Count == 4,

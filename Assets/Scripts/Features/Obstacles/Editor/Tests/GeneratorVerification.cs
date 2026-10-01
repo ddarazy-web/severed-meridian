@@ -26,13 +26,13 @@ namespace Levels.Editor
         private static LevelDefinition Make(ObstacleKind kind, int charge)
         {
             LevelDefinition level = (LevelDefinition)Invoke(typeof(PowerEffectVerification), "Make", null);
-            foreach (BoardCoordinate origin in new[] { C(4, 4), C(4, 8) })
+            foreach (BoardCoordinate origin in new[] { C(4, 4), C(4, 7) })
                 LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Block, Erase = true }, LevelPlacementRules.Footprint(origin, 2));
             LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Obstacle, Kind = (int)ObstacleKind.Generator, RequiredCharge = charge }, new[] { C(4, 4) });
-            LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Obstacle, Kind = (int)kind, Durability = LevelPlacementRules.MaxDurability(kind), Color = RabbitColor.Type1 }, new[] { C(4, 8) });
+            LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Obstacle, Kind = (int)kind, Durability = LevelPlacementRules.MaxDurability(kind), Color = RabbitColor.Type1 }, new[] { C(4, 7) });
             string error = LevelConnectionEditing.Add(level, level.Obstacles[0].Id, level.Obstacles[1].Id);
             if (error != null) throw new InvalidOperationException(error);
-            error = LevelConnectionEditing.SetWire(level, 0, new[] { C(4, 6), C(4, 7), C(4, 8) });
+            error = LevelConnectionEditing.SetWire(level, 0, new[] { C(4, 6), C(4, 7) });
             if (error != null) throw new InvalidOperationException(error);
             MissionKind mission = kind == ObstacleKind.Crate ? MissionKind.Crate : kind == ObstacleKind.Safe ? MissionKind.Safe : kind == ObstacleKind.ColorLock ? MissionKind.ColorLock : MissionKind.Appliance;
             JsonUtility.FromJsonOverwrite("{\"missions\":[{\"kind\":" + (int)mission + ",\"count\":1}]}", level);
@@ -76,7 +76,7 @@ namespace Levels.Editor
                     UnityEngine.Object.DestroyImmediate(level);
                 }
             LevelDefinition direct = Make(ObstacleKind.Appliance, 3); LevelRuntimeState work = Build(direct); TurnEffectContext turnContext = Context();
-            for (int i = 0; i < 9; i++) Hit(work, C(4, 8), turnContext);
+            for (int i = 0; i < 9; i++) Hit(work, C(4, 7), turnContext);
             Check(work.Obstacles[0].Charge == 0 && !work.Cells.Any(c => c.ObstacleIndex.HasValue) && work.Missions[0].Progress == 1, "마지막 대상 직접 파괴 자동 철거/무충전");
             Check(turnContext.Generators.Count(g => g.Event == GeneratorEvent.Retired) == 1, "자동 철거 단일 기록");
             UnityEngine.Object.DestroyImmediate(direct);

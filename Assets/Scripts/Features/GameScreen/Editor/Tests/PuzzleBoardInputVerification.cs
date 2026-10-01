@@ -58,6 +58,10 @@ namespace GameScreen.Editor
                 camera.aspect = previousAspect; camera.orthographicSize = previousSize;
                 Check(!input.TryGetCoordinate(Screen(new BoardCoordinate(0, 0)), out _), "비활성 칸 거절");
                 Check(!input.TryGetCoordinate(new Vector2(-100, -100), out _), "보드 밖 거절");
+                BoardCoordinate last = new BoardCoordinate(BoardDefinition.DefaultRows - 1, BoardDefinition.DefaultColumns - 1);
+                Check(!input.TryGetCoordinate(Screen(last), out found) && found.Equals(last), "마지막 비활성 칸 좌표 변환");
+                Check(!input.TryGetCoordinate(Screen(new BoardCoordinate(last.Row, BoardDefinition.DefaultColumns)), out _), "오른쪽 보드 경계 밖 거절");
+                Check(!input.TryGetCoordinate(Screen(new BoardCoordinate(BoardDefinition.DefaultRows, last.Column)), out _), "아래쪽 보드 경계 밖 거절");
 
                 Call(input, "BeginPointer", 1, Screen(a)); Call(input, "EndPointer", 1, Screen(a));
                 Check(input.Selected.HasValue && input.Selected.Value.Equals(a), "첫 탭 선택");
@@ -92,6 +96,11 @@ namespace GameScreen.Editor
                     Check(hits.Count > 0, "UI 차단 검사 전 실제 Raycast 준비");
                     Call(input, "BeginPointer", 1, Screen(a)); Call(input, "EndPointer", 1, Screen(b));
                     Check(session.State.MovesRemaining == initial.MovesRemaining && !input.Selected.HasValue, "UIStartIgnored");
+                    panel.SetActive(false);
+                    Call(input, "BeginPointer", 1, Screen(a));
+                    panel.SetActive(true); Canvas.ForceUpdateCanvases();
+                    Call(input, "EndPointer", 1, Screen(b));
+                    Check(session.State.MovesRemaining == initial.MovesRemaining && !input.Selected.HasValue, "UIEndIgnored");
                 }
                 finally { UnityEngine.Object.DestroyImmediate(ui); UnityEngine.Object.DestroyImmediate(events); }
 
@@ -140,7 +149,12 @@ namespace GameScreen.Editor
                 Call(input, "BeginPointer", 1, Screen(a)); Call(input, "EndPointer", 1, Screen(b));
                 Check(session.State.MovesRemaining == initial.MovesRemaining - 1, "파워 드래그는 결합 교환");
 
-                void Reset() => Field(session, "executor", new BoardActionExecutor(initial));
+                void Reset()
+                {
+                    Call(session, "ResetPresentation");
+                    Field(session, "executor", new BoardActionExecutor(initial));
+                    board.Draw(session.State, art);
+                }
             }
             catch (Exception error) { results.Add("FAIL " + error); throw; }
             finally

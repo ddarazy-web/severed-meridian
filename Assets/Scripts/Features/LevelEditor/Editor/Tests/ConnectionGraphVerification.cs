@@ -84,7 +84,7 @@ namespace Levels.Editor
             Check(LevelConnectionEditing.ConnectAuto(level, generator, target, C(5, 6)) != null && JsonUtility.ToJson(level) == blocked, "진입로 없는 연결점 거절/반쪽 연결 없음");
             JsonUtility.FromJsonOverwrite(before, level); Undo.ClearUndo(level);
             Check(LevelConnectionEditing.Add(level, generator, target) == null && level.Connections[0].Vertices.Count == 0, "기존 수동 대상 추가 유지");
-            var manual = new[] { C(4, 6), C(4, 7), C(4, 8) };
+            var manual = new[] { C(4, 6), C(4, 7) };
             Check(LevelConnectionEditing.SetWire(level, 0, manual) == null && level.Connections[0].Vertices.SequenceEqual(manual), "기존 수동 전선 지정 유지");
             Check(LevelConnectionEditing.Remove(level, 0) == null && level.Connections.Count == 0, "기존 수동 연결 삭제 유지");
             Undo.PerformUndo(); Check(level.Connections.Count == 1 && level.Connections[0].Vertices.SequenceEqual(manual), "수동 연결 Undo 복원");
@@ -121,7 +121,7 @@ namespace Levels.Editor
                 "발전기 대상 노란색 강조/포인터 입력 보존");
             Send(Graph, EventType.MouseUp, end); yield return null;
             Check(level.Connections.Count == 1 && !Graph.IsDragging && level.Connections[0].Vertices[0].Equals(C(5, 6)), "실제 포인터 발전기→장애물/선택 슬롯 보존");
-            Check(level.Connections[0].Vertices.Last().Equals(C(6, 10)), "선택한 장애물 연결점에 전선 끝점 일치");
+            Check(level.Connections[0].Vertices.Last().Equals(C(6, 9)), "선택한 장애물 연결점에 전선 끝점 일치");
             Check(Graph.Q("connection-port-0-1").style.backgroundImage.value.sprite?.name.Contains("-on-") == true ||
                 Graph.Q("connection-port-0-1").resolvedStyle.backgroundColor.g > 0.8f, "연결점 점등"); Capture("connected.png");
             Check(Graph.Q("connection-candidate-1") == null, "발전기 연결 완료 시 후보 강조 해제");
@@ -138,13 +138,13 @@ namespace Levels.Editor
             JsonUtility.FromJsonOverwrite("{\"moveCount\":20}", level); Refresh();
             LevelContextMenuVerification.Action(window, "연결 해제", Graph.Q("connection-port-0-1")).Execute(); yield return null;
             Check(level.Connections.Count == 0, "연결점 우클릭 해제"); Undo.PerformUndo(); yield return null; Refresh();
-            Undo.PerformUndo(); yield return null; Refresh(); Select(C(4, 8)); yield return null;
+            Undo.PerformUndo(); yield return null; Refresh(); Select(C(4, 7)); yield return null;
             ClickPort(1, 0); yield return null; end = Graph.Q("connection-port-0-2").worldBound.center;
             Check(Graph.Q("connection-candidate-0") != null && Graph.Q("connection-candidate-1") == null, "장애물에서 드래그 시 연결 가능 발전기 강조");
             Send(Graph, EventType.MouseDrag, end); yield return null; Capture("reverse-preview.png");
             Send(Graph, EventType.MouseUp, end); yield return null;
             Check(level.Connections.Count == 1 && level.Connections[0].Vertices[0].Equals(C(6, 5)), "실제 포인터 장애물→발전기");
-            Check(level.Connections[0].Vertices.Last().Equals(C(6, 10)), "역방향 드래그 장애물 연결점 유지");
+            Check(level.Connections[0].Vertices.Last().Equals(C(6, 9)), "역방향 드래그 장애물 연결점 유지");
             Undo.PerformUndo(); yield return null; Refresh(); Select(C(4, 4)); yield return null;
             string before = JsonUtility.ToJson(level); ClickPort(0, 0); yield return null;
             Send(Graph, EventType.MouseUp, Graph.LocalToWorld(new Vector2(20, 20))); yield return null;

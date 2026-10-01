@@ -104,7 +104,7 @@ namespace Levels.Editor
                 new Dictionary<BoardCoordinate, int> { [C(0, 0)] = 0, [C(0, 1)] = 0, [C(0, 2)] = 0, [C(0, 3)] = 0 }, 20);
             BoardActionExecutor automatic = (BoardActionExecutor)Invoke(typeof(CascadeVerification), "Automatic", null, line, 12345);
             Web(automatic.State.CellAt(C(0, 1)), 3);
-            Invoke(typeof(TurnEffectContext), "RecordArrival", automatic.TurnEffects, C(9, 9), C(0, 1), 1, true);
+            Invoke(typeof(TurnEffectContext), "RecordArrival", automatic.TurnEffects, C(8, 8), C(0, 1), 1, true);
             CascadeStepResult relocated = automatic.ResolveAutomaticMatch();
             Check(relocated.IsApplied && (relocated.Decisions[0].Spawn.Value.Equals(C(0, 0)) || relocated.Decisions[0].Spawn.Value.Equals(C(0, 2))), "덮인 최종 도착 칸에서 최단거리 대체 생성");
             Check(automatic.State.CellAt(C(0, 1)).Content == RuntimeContent.Normal && automatic.State.CellAt(C(0, 1)).CoverDurability == 2, "대체 생성 후 원래 칸 보존");
@@ -120,7 +120,7 @@ namespace Levels.Editor
             foreach (RuntimeCell cell in residual.State.Cells.Where(c => c.IsActive)) Web(cell, 3);
             residual.ResolveAutomaticMatch(); residual.Settle();
             Set(residual, "Phase", BoardActionPhase.WaitingForAutomaticMatch);
-            Invoke(typeof(TurnEffectContext), "RecordArrival", residual.TurnEffects, C(9, 9), C(0, 0), 2, true);
+            Invoke(typeof(TurnEffectContext), "RecordArrival", residual.TurnEffects, C(8, 8), C(0, 0), 2, true);
             Check(residual.ResolveAutomaticMatch().IsApplied && residual.LastCascadeStep.Reason == CascadeStepReason.Matched && residual.State.CellAt(C(0, 0)).CoverDurability == 2,
                 "새 같은 색 유입은 매칭 참여/동일 턴 거미줄 재피해 없음");
         }
@@ -128,7 +128,7 @@ namespace Levels.Editor
         private static void TargetChecks()
         {
             LevelDefinition level = Make(); Missions(level); LevelRuntimeState state = Build(level); TurnEffectContext context = Context();
-            RuntimeCell web = state.CellAt(C(4, 4)), exposed = state.CellAt(C(9, 9));
+            RuntimeCell web = state.CellAt(C(4, 4)), exposed = state.CellAt(C(8, 8));
             foreach (RuntimeCell cell in state.Cells) if (cell.Content == RuntimeContent.Normal) Set(cell, "Color", RabbitColor.Type2);
             Set(web, "Color", RabbitColor.Type1); Web(web, 2); Set(web, "DustDurability", 1); Set(exposed, "Color", RabbitColor.Type1); Set(exposed, "DustDurability", 1);
             DroneTargetManager manager = (DroneTargetManager)Invoke(typeof(TargetPowerVerification), "Manager", null, state, context);
@@ -163,9 +163,9 @@ namespace Levels.Editor
         private static LevelDefinition CreateFixture(int pair)
         {
             LevelDefinition level = (LevelDefinition)Invoke(typeof(CombinationVerification), "Make", null, pair, RocketDirection.Horizontal, null);
-            Invoke(typeof(PowerEffectVerification), "Crate", null, level, C(9, 9), 2);
+            Invoke(typeof(PowerEffectVerification), "Crate", null, level, C(8, 8), 2);
             Check(LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Cover, Kind = (int)CoverKind.Web, Durability = 2 }, new[] { C(4, 6) }).Changed == 1, "실제 편집 거미줄 배치 " + pair);
-            Check(LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Dust, Durability = 2 }, new[] { C(4, 6), C(4, 7), C(9, 9) }).Changed == 3, "실제 편집 먼지 중첩 배치 " + pair);
+            Check(LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Dust, Durability = 2 }, new[] { C(4, 6), C(4, 7), C(8, 8) }).Changed == 3, "실제 편집 먼지 중첩 배치 " + pair);
             JsonUtility.FromJsonOverwrite("{\"missions\":[{\"kind\":0,\"color\":0,\"count\":100},{\"kind\":1,\"count\":1},{\"kind\":2,\"count\":1},{\"kind\":4,\"count\":3}]}", level);
             Check(LevelDefinitionValidator.Validate(level).Count == 0 && new StartConditionReport(LevelStateBuilder.Build(level, 12345).State).IsSatisfied, "실제 4미션/층 배치 및 시작 검증 " + pair);
             return level;

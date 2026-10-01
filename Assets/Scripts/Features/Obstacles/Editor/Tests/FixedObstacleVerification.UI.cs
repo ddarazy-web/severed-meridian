@@ -119,7 +119,7 @@ namespace Levels.Editor
             {
                 root.Q<ObjectField>("initial-level").value = levels[i]; Click("initial-build"); yield return null;
                 string json = JsonUtility.ToJson(levels[i]), file = File.ReadAllText(AssetDatabase.GetAssetPath(levels[i])), initial = Snapshot(window.CurrentState);
-                Check(root.Q<Button>("initial-cell-9-9").text.Contains("토3") && root.Q<Button>("initial-cell-9-9").ClassListContains("rabbit-2") && root.Q<Button>("initial-cell-7-7").text.Contains("#2") && root.Q<Button>("initial-cell-8-8").text.Contains("#2"), "자물쇠 색/번호 표식 및 폐가전 동일 본체 표시 " + i);
+                Check(root.Q<Button>("initial-cell-8-6").text.Contains("토3") && root.Q<Button>("initial-cell-8-6").ClassListContains("rabbit-2") && root.Q<Button>("initial-cell-7-7").text.Contains("#2") && root.Q<Button>("initial-cell-8-8").text.Contains("#2"), "자물쇠 색/번호 표식 및 폐가전 동일 본체 표시 " + i);
                 root.Q<Toggle>("execution-mode").value = true; Click("initial-cell-4-4"); Click("initial-cell-4-5"); Click("execution-swap"); yield return null;
                 Check(window.Execution.LastApplied.IsApplied && window.Execution.TurnEffects.Combination.Kind == new[] { PowerCombinationKind.RocketBomb, PowerCombinationKind.MagnetRocket, PowerCombinationKind.MagnetDrone }[i] && root.Q<Label>("initial-details").text.Contains("중심"), "실제 UI 조합/중심 표시 " + i);
                 if (i > 0) Check(root.Q<Label>("initial-details").text.Contains("선택 색") && root.Q<Label>("initial-overview").text.Contains("조합 변환 기록"), "실제 UI 색/변환 기록 " + i);

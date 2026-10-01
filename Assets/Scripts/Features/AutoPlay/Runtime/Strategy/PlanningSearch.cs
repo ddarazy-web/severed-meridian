@@ -86,7 +86,7 @@ namespace AutoPlay
                 else
                 {
                     // 목표 진행과 이동 비용이 같을 때 다음 행동의 파워·직접 범위를 보조로 본다.
-                    // 현재 기본 평가의 파워는 0~5, 범위는 최대 100칸이므로 보조값은 605 이하다.
+                    // 현재 기본 평가의 파워는 0~5, 범위는 최대 81칸이므로 보조값은 586 이하다.
                     // 주 가치를 1,000배 해 이동 비용 1회의 차이조차 이 보조값이 뒤집지 못하게 한다.
                     long value = second.Value(initialRemaining, initial.MovesRemaining) * 1000L +
                         children[child].PowerValue * 101L + children[child].ClearValue;

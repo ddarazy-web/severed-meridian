@@ -47,7 +47,7 @@ namespace Levels.Editor
         }
         private static LevelDefinition FallingBoard()
         {
-            BoardCoordinate[] cells = new[] { C(2, 3), C(3, 2), C(3, 4), C(3, 5) }.Concat(Enumerable.Range(3, 7).Select(r => C(r, 3))).ToArray();
+            BoardCoordinate[] cells = new[] { C(2, 3), C(3, 2), C(3, 4), C(3, 5) }.Concat(Enumerable.Range(3, BoardDefinition.DefaultRows - 3).Select(r => C(r, 3))).ToArray();
             LevelDefinition level = Make(cells);
             foreach (BoardCoordinate c in new[] { C(2, 3), C(3, 2), C(3, 4), C(3, 5) })
                 LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Block, Kind = (int)InitialBlockKind.FixedNormal, Color = RabbitColor.Type1 }, new[] { c });
@@ -145,9 +145,9 @@ namespace Levels.Editor
         }
         private static void SupplyChecks()
         {
-            BoardCoordinate[] randomColumn = Enumerable.Range(0, 10).Select(i => C(i, 0)).ToArray();
+            BoardCoordinate[] randomColumn = Enumerable.Range(0, BoardDefinition.DefaultRows).Select(i => C(i, 0)).ToArray();
             LevelDefinition powers = Make(randomColumn);
-            Source(powers, C(0, 0), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.RandomPower, 10));
+            Source(powers, C(0, 0), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.RandomPower, BoardDefinition.DefaultRows));
             HashSet<RuntimeContent> kinds = new HashSet<RuntimeContent>();
             HashSet<RocketDirection> directions = new HashSet<RocketDirection>();
             for (int seed = 0; seed < 8; seed++)
@@ -168,18 +168,18 @@ namespace Levels.Editor
             }
             Check(kinds.Count == 3 && directions.Count == 2, "랜덤 파워 모든 종류/양방향 등장");
             UnityEngine.Object.DestroyImmediate(powers);
-            BoardCoordinate[] column = Enumerable.Range(0, 10).Select(i => C(i, 3)).ToArray(); LevelDefinition level = Make(column);
+            BoardCoordinate[] column = Enumerable.Range(0, BoardDefinition.DefaultRows).Select(i => C(i, 3)).ToArray(); LevelDefinition level = Make(column);
             Source(level, C(0, 3), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal, 2, RabbitColor.Type3),
                 new SupplyItem(SupplyKind.Rocket, direction: RocketDirection.Vertical), new SupplyItem(SupplyKind.Bomb), new SupplyItem(SupplyKind.Drone), new SupplyItem(SupplyKind.Magnet));
             LevelRuntimeState state = Build(level); Empty(state, column); string original = Snapshot(state); SettlementResult result = SettlementResolution.Resolve(state);
             SettlementRecord[] generated = result.Records.Where(r => r.Kind == MovementKind.Supply).ToArray();
             Check(result.IsApplied && generated.Select(r => r.Content).SequenceEqual(new[] { RuntimeContent.Normal, RuntimeContent.Normal, RuntimeContent.Rocket, RuntimeContent.Bomb, RuntimeContent.Drone, RuntimeContent.Magnet }), "고정 목록 수량/파워 4종 순서");
-            Check(result.State.CellAt(C(7, 3)).RocketDirection == RocketDirection.Vertical && result.State.CellAt(C(9, 3)).Color == RabbitColor.Type3, "공급 블록 색/방향 낙하 유지");
-            Check(result.State.Supply.Sources[0].ItemIndex == 5 && result.State.Supply.Sources[0].ItemConsumed == 0 && result.RandomBefore == result.RandomAfter && result.EmptyCells.Count == 4, "고정 공급 커서/소진 중단/난수 무소비");
+            Check(result.State.CellAt(C(6, 3)).RocketDirection == RocketDirection.Vertical && result.State.CellAt(C(8, 3)).Color == RabbitColor.Type3, "공급 블록 색/방향 낙하 유지");
+            Check(result.State.Supply.Sources[0].ItemIndex == 5 && result.State.Supply.Sources[0].ItemConsumed == 0 && result.RandomBefore == result.RandomAfter && result.EmptyCells.Count == 3, "고정 공급 커서/소진 중단/난수 무소비");
             Check(Snapshot(state) == original && !generated.Any(r => r.Protected), "공급 원본 보존/파워 보호 없음");
             LevelDefinition fallback = Make(column); Source(fallback, C(0, 3), SupplyExhaustion.Random, new SupplyItem(SupplyKind.FixedNormal));
             LevelRuntimeState empty = Build(fallback); Empty(empty, column); SettlementResult filled = SettlementResolution.Resolve(empty);
-            Check(filled.IsApplied && filled.EmptyCells.Count == 0 && filled.RandomAfter - filled.RandomBefore == 9 && filled.State.Cells.Where(c => c.IsActive).All(c => filled.State.Colors.Contains(c.Color.Value)), "고정 소진 후 무작위/선택 색 범위");
+            Check(filled.IsApplied && filled.EmptyCells.Count == 0 && filled.RandomAfter - filled.RandomBefore == 8 && filled.State.Cells.Where(c => c.IsActive).All(c => filled.State.Colors.Contains(c.Color.Value)), "고정 소진 후 무작위/선택 색 범위");
             LevelRuntimeState occupied = Build(fallback); string blockedBefore = Snapshot(occupied); SettlementResult blocked = SettlementResolution.Resolve(occupied);
             Check(blocked.IsApplied && blocked.Records.Count == 0 && Snapshot(blocked.State) == blockedBefore, "막힌 생성구 커서/난수 무소비");
             LevelDefinition inflow = Make(new[] { C(0, 0), C(1, 0) }); Source(inflow, C(1, 0), SupplyExhaustion.Stop, new SupplyItem(SupplyKind.Bomb));
@@ -205,15 +205,15 @@ namespace Levels.Editor
             BoardActionExecutor moving = new BoardActionExecutor(Build(falling));
             Check(moving.Swap(C(3, 3), C(2, 3)).IsApplied && moving.State.MovesRemaining == 0, "보호 낙하 통합 마지막 수 효과");
             SettlementResult moved = moving.Settle();
-            Check(moved.IsApplied && moving.TurnEffects.IsProtected(C(9, 3)) && !moving.TurnEffects.IsProtected(C(3, 3)) && moved.Records.Any(r => r.Protected), "보호 파워 낙하/이전 보호 좌표 해제");
-            Check(moving.State.CellAt(C(8, 3)).Content == RuntimeContent.Rocket && !moving.TurnEffects.IsProtected(C(8, 3)) &&
-                DamageReaction.Evaluate(moving.State, C(8, 3), DamageCause.Power, C(8, 2), moving.TurnEffects).Response == DamageResponse.Activate, "공급 파워 보호 없음/소모 좌표 발동 기록 분리");
+            Check(moved.IsApplied && moving.TurnEffects.IsProtected(C(8, 3)) && !moving.TurnEffects.IsProtected(C(3, 3)) && moved.Records.Any(r => r.Protected), "보호 파워 낙하/이전 보호 좌표 해제");
+            Check(moving.State.CellAt(C(7, 3)).Content == RuntimeContent.Rocket && !moving.TurnEffects.IsProtected(C(7, 3)) &&
+                DamageReaction.Evaluate(moving.State, C(7, 3), DamageCause.Power, C(7, 2), moving.TurnEffects).Response == DamageResponse.Activate, "공급 파워 보호 없음/소모 좌표 발동 기록 분리");
             Check(moving.State.MovesRemaining == 0 && moving.Turn == 1 && moving.Phase == BoardActionPhase.WaitingForAutomaticMatch, "마지막 수에도 정착 완료/승패 미판정");
         }
 
         private static void TerminationAndSupplyEdges()
         {
-            BoardCoordinate[] line = Enumerable.Range(0, 10).Select(r => C(r, 0)).ToArray();
+            BoardCoordinate[] line = Enumerable.Range(0, BoardDefinition.DefaultRows).Select(r => C(r, 0)).ToArray();
             foreach (int count in new[] { 3, 4, 5 })
             {
                 LevelDefinition random = Make(line);
@@ -221,7 +221,7 @@ namespace Levels.Editor
                 LevelObstacleEditing.Apply(random, new PlacementBrush { Layer = PlacementLayer.Block, Kind = (int)InitialBlockKind.FixedNormal, Color = RabbitColor.Type1 }, line);
                 LevelSupplyEditing.PlaceSources(random, new[] { C(0, 0) });
                 LevelRuntimeState state = Build(random); Empty(state, line); SettlementResult result = SettlementResolution.Resolve(state);
-                Check(result.IsApplied && result.RandomAfter - result.RandomBefore == 10 && result.State.Cells.Where(c => c.IsActive).All(c => (int)c.Color.Value < count), "Random 생성구 선택 색 " + count + "종/생성 시만 난수");
+                Check(result.IsApplied && result.RandomAfter - result.RandomBefore == BoardDefinition.DefaultRows && result.State.Cells.Where(c => c.IsActive).All(c => (int)c.Color.Value < count), "Random 생성구 선택 색 " + count + "종/생성 시만 난수");
             }
             BoardCoordinate[] pair = Enumerable.Range(0, 3).SelectMany(r => new[] { C(r, 0), C(r, 2) }).ToArray();
             LevelDefinition independent = Make(pair);
@@ -246,11 +246,11 @@ namespace Levels.Editor
             LevelRuntimeState randomLoop = Build(wandering); Empty(randomLoop, loop.Where(c => !c.Equals(C(0, 1)))); string beforeLoop = Snapshot(randomLoop);
             Check(SettlementResolution.Resolve(randomLoop).Reason == SettlementReason.LimitReached && Snapshot(randomLoop) == beforeLoop, "난수 진행 반복도 내부 한도 실패/난수 포함 보존");
 
-            BoardCoordinate[] snake = Enumerable.Range(0, 10).SelectMany(r => Enumerable.Range(0, 10).Select(c => C(r, r % 2 == 0 ? c : 9 - c))).ToArray();
+            BoardCoordinate[] snake = Enumerable.Range(0, BoardDefinition.DefaultRows).SelectMany(r => Enumerable.Range(0, BoardDefinition.DefaultColumns).Select(c => C(r, r % 2 == 0 ? c : BoardDefinition.DefaultColumns - 1 - c))).ToArray();
             LevelDefinition longPath = Make(snake); LevelFlowEditing.SetPath(longPath, snake);
-            Source(longPath, snake[0], SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal, 100));
+            Source(longPath, snake[0], SupplyExhaustion.Stop, new SupplyItem(SupplyKind.FixedNormal, 81));
             LevelRuntimeState longEmpty = Build(longPath); Empty(longEmpty, snake); SettlementResult full = SettlementResolution.Resolve(longEmpty);
-            Check(full.IsApplied && full.EmptyCells.Count == 0 && full.Records.Count(r => r.Kind == MovementKind.Supply) == 100 && full.Records.Count == 5050 && full.State.Supply.Sources[0].ItemIndex == 1, "10x10 최장 경로 100개 공급/4950칸 이동 정상 종료");
+            Check(full.IsApplied && full.EmptyCells.Count == 0 && full.Records.Count(r => r.Kind == MovementKind.Supply) == 81 && full.Records.Count == 3321 && full.State.Supply.Sources[0].ItemIndex == 1, "9x9 최장 경로 81개 공급/3240칸 이동 정상 종료");
             Check(MatchQuery.Find(full.State).Count > 0 && full.State.Cells.All(c => c.Content == RuntimeContent.Normal), "정착 중/후 매칭 제거하지 않음");
         }
     }

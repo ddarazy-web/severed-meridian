@@ -66,8 +66,8 @@ namespace GameScreen
         }
         private void Update()
         {
-            // 작은 맵도 10칸 기준 크기를 유지한다. 세로 화면에서는 너비를 기준으로 맞춘다.
-            if (boardCamera != null) boardCamera.orthographicSize = 5.7f / Mathf.Min(1, boardCamera.aspect);
+            // 작은 맵도 기본 보드 기준 크기를 유지한다. 세로 화면에서는 너비를 기준으로 맞춘다.
+            if (boardCamera != null) boardCamera.orthographicSize = (PuzzleWorldBoard.HalfHeight + 0.7f) / Mathf.Min(1, boardCamera.aspect);
         }
         private void OnDestroy()
         {

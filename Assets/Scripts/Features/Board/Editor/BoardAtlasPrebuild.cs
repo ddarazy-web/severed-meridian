@@ -7,20 +7,19 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
 using UnityEditor.U2D;
 using UnityEngine;
 using UnityEngine.U2D;
 
 namespace Levels.Editor
 {
-    public sealed class BoardAtlasPrebuild : IPreprocessBuildWithReport
+    public sealed class BoardAtlasPrebuild : BuildPlayerProcessor
     {
         public const string AtlasDirectory = "Assets/Textures/Atlases";
         public static string AtlasPath(string address) => AtlasDirectory + "/" + address + ".spriteatlasv2";
         public static string AddressForPath(string path) => BoardSpriteAtlas.AddressFor(path.Substring("Assets/Textures/".Length));
-        public int callbackOrder => -1000;
-        public void OnPreprocessBuild(BuildReport report) => Generate();
+        public override int callbackOrder => -1000;
+        public override void PrepareForBuild(BuildPlayerContext context) => Generate();
 
         public static string[] SourcePaths() => Directory.GetFiles("Assets/Textures", "*.png", SearchOption.AllDirectories)
             .Select(path => path.Replace('\\', '/')).Where(path =>

@@ -31,7 +31,7 @@ namespace Levels.Editor
                 DataChecks();
                 protection = ProtectionBoard(); AssetDatabase.CreateAsset(protection, folder + "/Protection.asset");
                 bomb = Make(); Place(bomb, C(3, 3), InitialBlockKind.Bomb); AssetDatabase.CreateAsset(bomb, folder + "/Bomb.asset");
-                rejected = ProtectionBoard(); Place(rejected, C(6, 9), InitialBlockKind.Drone); AssetDatabase.CreateAsset(rejected, folder + "/Rejected.asset");
+                rejected = ProtectionBoard(); Place(rejected, C(6, 8), InitialBlockKind.Drone); AssetDatabase.CreateAsset(rejected, folder + "/Rejected.asset");
                 Check(EditorApplication.ExecuteMenuItem("Match/초기 보드 확인"), "Match 메뉴 진입");
                 window = Resources.FindObjectsOfTypeAll<LevelEditorWindow>().Single().ActiveSimulationPanel; window.Owner.position = new Rect(10, 10, 1000, 780); window.Owner.Focus();
                 sequence = UI(); EditorApplication.update += Tick;

@@ -18,8 +18,8 @@ namespace Levels.Editor
             if (!LevelConnectionRules.Terminal(generator, start)) return "발전기 연결점 위치를 확인하세요.";
             if (end.HasValue && !LevelConnectionRules.Terminal(target, end.Value)) return "장애물 연결점 위치를 확인하세요.";
             HashSet<BoardCoordinate> blocked = new HashSet<BoardCoordinate>(level.Connections.Where(c => c.Vertices != null).SelectMany(c => c.Vertices));
-            for (int row = 0; row <= 10; row++)
-                for (int column = 0; column <= 10; column++)
+            for (int row = 0; row <= BoardDefinition.DefaultRows; row++)
+                for (int column = 0; column <= BoardDefinition.DefaultColumns; column++)
                 {
                     BoardCoordinate vertex = new BoardCoordinate(row, column);
                     if (level.Obstacles.Any(body => LevelConnectionRules.Inside(body, vertex))) blocked.Add(vertex);
@@ -28,7 +28,7 @@ namespace Levels.Editor
             HashSet<BoardEdge> walls = new HashSet<BoardEdge>(level.Flow.Walls.Where(w => w.IsAdjacent).Select(LevelFlowRules.WallSegment));
             Queue<BoardCoordinate> queue = new Queue<BoardCoordinate>(); queue.Enqueue(start);
             Dictionary<BoardCoordinate, BoardCoordinate> previous = new Dictionary<BoardCoordinate, BoardCoordinate> { [start] = start };
-            // 최대121개 꼭짓점만 탐색한다. 기존 전선/벽을 움직이지 않고 최단 유효 경로를 찾는다.
+            // 최대100개 꼭짓점만 탐색한다. 기존 전선/벽을 움직이지 않고 최단 유효 경로를 찾는다.
             while (queue.Count > 0)
             {
                 BoardCoordinate current = queue.Dequeue();
@@ -42,7 +42,7 @@ namespace Levels.Editor
                 foreach (BoardCoordinate next in new[] { new BoardCoordinate(current.Row - 1, current.Column), new BoardCoordinate(current.Row, current.Column + 1),
                     new BoardCoordinate(current.Row + 1, current.Column), new BoardCoordinate(current.Row, current.Column - 1) })
                 {
-                    if (next.Row < 0 || next.Row > 10 || next.Column < 0 || next.Column > 10 || blocked.Contains(next) || previous.ContainsKey(next) || walls.Contains(new BoardEdge(current, next))) continue;
+                    if (next.Row < 0 || next.Row > BoardDefinition.DefaultRows || next.Column < 0 || next.Column > BoardDefinition.DefaultColumns || blocked.Contains(next) || previous.ContainsKey(next) || walls.Contains(new BoardEdge(current, next))) continue;
                     previous.Add(next, current); queue.Enqueue(next);
                 }
             }

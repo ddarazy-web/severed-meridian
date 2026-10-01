@@ -58,7 +58,7 @@ namespace GameScreen.Editor
                 Check(UnityEngine.Object.FindObjectsByType<PuzzleGameSession>(FindObjectsSortMode.None).Length == 1, "생성 2회 후 세션 하나");
                 Check(!UnityEngine.Object.FindFirstObjectByType<PuzzleBoardPreview>().enabled, "Preview 중복 실행 차단");
                 Check(session.State.LevelNumber == 1, "실제 씬 MemoryPack 레벨 1");
-                Camera camera = UnityEngine.Object.FindFirstObjectByType<Camera>();
+                Camera camera = session.BoardCamera;
                 PuzzleWorldBoard board = UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>();
                 PuzzleBoardInput input = session.GetComponent<PuzzleBoardInput>();
                 Capture(camera, "gameplay-landscape.png", 1280, 720);
@@ -71,6 +71,8 @@ namespace GameScreen.Editor
                 int moves = initialMoves;
                 Tap(action.First); Tap(action.Second.Value);
                 Check(session.State.MovesRemaining == moves - 1, "실제 씬 마우스 두 탭 교환 1회");
+                typeof(PuzzleGameSession).GetMethod("AdvancePresentation", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(session, new object[] { 1f });
+                typeof(PuzzleGameSession).GetMethod("AdvancePresentation", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(session, new object[] { 1f });
                 Check(board.GetComponentsInChildren<SpriteRenderer>().Any(r => r.sprite != null && r.sprite.name.StartsWith("cleaning-rocket")), "실제 매칭 생성 로켓 이미지");
                 Capture(camera, "gameplay-created-rocket.png", 1280, 720);
                 await Ready(session);
@@ -113,16 +115,19 @@ namespace GameScreen.Editor
             RenderTexture render = RenderTexture.GetTemporary(width, height, 24);
             RenderTexture previous = RenderTexture.active, target = camera.targetTexture;
             float size = camera.orthographicSize;
+            Rect oldRect = camera.rect;
+            float oldAspect = camera.aspect;
             Texture2D image = new Texture2D(width, height, TextureFormat.RGB24, false);
             try
             {
-                camera.targetTexture = render; camera.orthographicSize = 5.7f / Mathf.Min(1, (float)width / height);
+                camera.targetTexture = render; camera.orthographicSize = (PuzzleWorldBoard.HalfHeight + 0.7f) / Mathf.Min(1, (float)width / height);
+                camera.rect = new Rect(0, 0, 1, 1); camera.aspect = (float)width / height;
                 camera.Render(); RenderTexture.active = render; image.ReadPixels(new Rect(0, 0, width, height), 0, 0); image.Apply();
                 File.WriteAllBytes(Output + file, image.EncodeToPNG());
                 Check(image.GetPixels32().Count(p => p.r > 180 && p.b > 100 && p.g < 190) > 500, "화면에 실제 토끼 픽셀: " + file);
             }
             finally
-            { camera.targetTexture = target; camera.orthographicSize = size; RenderTexture.active = previous; RenderTexture.ReleaseTemporary(render); UnityEngine.Object.Destroy(image); }
+            { camera.targetTexture = target; camera.orthographicSize = size; camera.rect = oldRect; camera.aspect = oldAspect; RenderTexture.active = previous; RenderTexture.ReleaseTemporary(render); UnityEngine.Object.Destroy(image); }
         }
         private static void Check(bool pass, string name) { if (!pass) throw new Exception(name); results.Add("PASS " + name); }
     }

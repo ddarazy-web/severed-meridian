@@ -24,7 +24,7 @@ namespace Levels.Editor
             {
                 BoardCoordinate cell = mergeOrder[i];
                 var label = new Label((i + 1).ToString()) { name = "merge-rank-" + cell.Row + "-" + cell.Column, pickingMode = PickingMode.Ignore };
-                label.style.position = Position.Absolute; label.style.left = cell.Column * 40 + 2; label.style.top = cell.Row * 40 + 18;
+                label.style.position = Position.Absolute; label.style.left = cell.Column * LevelBoardView.CellSize + 2; label.style.top = cell.Row * LevelBoardView.CellSize + 18;
                 label.style.width = label.style.height = 20; label.style.fontSize = 13;
                 label.style.unityTextAlign = TextAnchor.MiddleCenter; label.style.unityFontStyleAndWeight = FontStyle.Bold;
                 label.style.color = Color.black; label.style.backgroundColor = new Color(0.4f, 0.92f, 0.7f);

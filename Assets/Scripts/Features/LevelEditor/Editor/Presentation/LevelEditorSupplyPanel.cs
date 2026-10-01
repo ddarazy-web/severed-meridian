@@ -73,7 +73,7 @@ namespace Levels.Editor
                 {
                     if (!SupplyViewCurrent(owner, snapshot)) return;
                     board.CancelStroke(); board.Brush = LevelBrush.SourceSelect;
-                    if (cell.Row < 0 || cell.Row >= 10 || cell.Column < 0 || cell.Column >= 10)
+                    if (cell.Row < 0 || cell.Row >= BoardDefinition.DefaultRows || cell.Column < 0 || cell.Column >= BoardDefinition.DefaultColumns)
                     { operation.text = "보드 밖 생성구입니다. 원본 Inspector에서 수정하세요."; return; }
                     SelectSource(cell, false); boardScroll.ScrollTo(board.CellAt(cell));
                 }) { text = $"{cell.Row + 1},{cell.Column + 1} · {mode}" + (source.Mode == SupplyMode.Fixed ? $" · {total}개" : ""),

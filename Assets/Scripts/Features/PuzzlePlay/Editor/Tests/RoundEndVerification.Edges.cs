@@ -22,7 +22,7 @@ namespace Levels.Editor
         private static void EdgeChecks()
         {
             LevelDefinition arrival = (LevelDefinition)Invoke(typeof(RecoveryVerification), "Make", 1);
-            Invoke(typeof(RecoveryVerification), "Place", arrival, C(9, 0));
+            Invoke(typeof(RecoveryVerification), "Place", arrival, C(8, 0));
             LevelRuntimeState rawArrival = Build(arrival); BoardActionExecutor initialized = new BoardActionExecutor(rawArrival);
             Finish(initialized, true);
             Check(initialized.Outcome?.Kind == BoardOutcomeKind.Won && initialized.Outcome.Turn == 0 && initialized.Outcome.MovesRemaining == 20 &&
@@ -30,7 +30,7 @@ namespace Levels.Editor
             UnityEngine.Object.DestroyImmediate(arrival);
 
             LevelDefinition deadlock = (LevelDefinition)Invoke(typeof(BoardActionVerification), "Make",
-                new Dictionary<BoardCoordinate, int> { [C(9, 0)] = 0, [C(9, 1)] = 0, [C(9, 2)] = 1, [C(9, 3)] = 1, [C(9, 4)] = 0 }, 20);
+                new Dictionary<BoardCoordinate, int> { [C(8, 0)] = 0, [C(8, 1)] = 0, [C(8, 2)] = 1, [C(8, 3)] = 1, [C(8, 4)] = 0 }, 20);
             BoardActionExecutor repaired = new BoardActionExecutor(Build(deadlock));
             Check(MatchQuery.Find(repaired.State).Count == 0 && ActionQuery.Find(repaired.State).Count == 0, "자동 재배치 진입용 무매칭·무행동 보드");
             Set(repaired, "TurnEffects", Activator.CreateInstance(typeof(TurnEffectContext), BindingFlags.NonPublic | BindingFlags.Instance, null, new object[] { 0, Array.Empty<MatchedBlockChange>() }, null));
@@ -93,7 +93,7 @@ namespace Levels.Editor
                 UnityEngine.Object.DestroyImmediate(matched);
             }
             LevelDefinition divided = (LevelDefinition)Invoke(typeof(PowerEffectVerification), "Make");
-            LevelFlowEditing.SetWalls(divided, Enumerable.Range(0, 10).Select(row => new BoardEdge(C(row, 4), C(row, 5))).ToArray(), false);
+            LevelFlowEditing.SetWalls(divided, Enumerable.Range(0, BoardDefinition.DefaultRows).Select(row => new BoardEdge(C(row, 4), C(row, 5))).ToArray(), false);
             Invoke(typeof(PowerEffectVerification), "Place", divided, C(0, 0), InitialBlockKind.Magnet, RocketDirection.Horizontal, RabbitColor.Type1);
             bool crossed = false;
             for (int seed = 1; seed <= 16 && !crossed; seed++)
@@ -165,8 +165,8 @@ namespace Levels.Editor
             Set(lastPang.State.CellAt(C(0, 0)), "RocketDirection", (RocketDirection?)RocketDirection.Horizontal);
             for (int column = 2; column <= 5; column++)
             {
-                Set(lastPang.State.CellAt(C(9, column)), "Content", RuntimeContent.Normal);
-                Set(lastPang.State.CellAt(C(9, column)), "Color", (RabbitColor?)RabbitColor.Type1);
+                Set(lastPang.State.CellAt(C(8, column)), "Content", RuntimeContent.Normal);
+                Set(lastPang.State.CellAt(C(8, column)), "Color", (RabbitColor?)RabbitColor.Type1);
             }
             Check(lastPang.AdvanceCascade().Reason == CascadeStepReason.LastPang && lastPang.LastPangWaves == 1, "첫 라스트팡 발동 묶음");
             Check(lastPang.AdvanceCascade().Reason == CascadeStepReason.Settled && lastPang.AdvanceCascade().Reason == CascadeStepReason.Matched, "라스트팡도 정상 정착 후 매칭");

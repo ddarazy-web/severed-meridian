@@ -7,17 +7,16 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 namespace Levels.Editor
 {
-    public sealed class LevelPackBuild : IPreprocessBuildWithReport
+    public sealed class LevelPackBuild : BuildPlayerProcessor
     {
         public const string OutputFolder = "Assets/Data/LevelPacks";
         public const string BuilderPath = "Assets/AddressableAssetsData/DataBuilders/LevelPackAddressablesBuilder.asset";
-        public int callbackOrder => -950;
-        public void OnPreprocessBuild(BuildReport report) => Generate();
+        public override int callbackOrder => -950;
+        public override void PrepareForBuild(BuildPlayerContext context) => Generate();
 
         public static string FilePath(int number) => OutputFolder + "/" + Path.GetFileName(LevelPackCodec.Address(number)) + ".bytes";
 

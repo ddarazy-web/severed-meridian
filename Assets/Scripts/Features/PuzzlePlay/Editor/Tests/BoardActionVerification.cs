@@ -29,7 +29,7 @@ namespace Levels.Editor
             using SerializedObject edit = new SerializedObject(level);
             edit.FindProperty("moveCount").intValue = moves;
             SerializedProperty cells = edit.FindProperty("board.cells"), blocks = edit.FindProperty("initialBlocks"); blocks.arraySize = colors.Count;
-            for (int i = 0; i < cells.arraySize; i++) cells.GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = colors.ContainsKey(C(i / 10, i % 10));
+            for (int i = 0; i < cells.arraySize; i++) cells.GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = colors.ContainsKey(C(i / BoardDefinition.DefaultColumns, i % BoardDefinition.DefaultColumns));
             int index = 0;
             foreach (KeyValuePair<BoardCoordinate, int> point in colors)
             {
@@ -220,14 +220,14 @@ namespace Levels.Editor
             string before = Snapshot(source);
             Set(executor.State.Missions[0], "Progress", 2);
             Check(Snapshot(source) == before, "복사본 미션 변경 원본 독립");
-            LevelDefinition powerLevel = Make(new Dictionary<BoardCoordinate, int> { [C(3, 2)] = 0, [C(3, 3)] = 1, [C(3, 4)] = 0, [C(3, 5)] = 0, [C(2, 3)] = 0, [C(9, 9)] = 2 });
+            LevelDefinition powerLevel = Make(new Dictionary<BoardCoordinate, int> { [C(3, 2)] = 0, [C(3, 3)] = 1, [C(3, 4)] = 0, [C(3, 5)] = 0, [C(2, 3)] = 0, [C(8, 8)] = 2 });
             LevelRuntimeState other = Build(powerLevel);
-            Set(other.CellAt(C(9, 9)), "Content", RuntimeContent.Bomb);
-            Set(other.CellAt(C(9, 9)), "Color", null);
+            Set(other.CellAt(C(8, 8)), "Content", RuntimeContent.Bomb);
+            Set(other.CellAt(C(8, 8)), "Color", null);
             BoardActionExecutor withPower = new BoardActionExecutor(other);
             string supply = Snapshot(withPower.State.Supply), flow = Snapshot(withPower.State.Flow);
             BoardActionResult result = withPower.Swap(C(2, 3), C(3, 3));
-            Check(result.IsApplied && withPower.State.CellAt(C(9, 9)).Content == RuntimeContent.Bomb && withPower.State.Missions[0].Progress == 4 && Snapshot(withPower.State.Supply) == supply && Snapshot(withPower.State.Flow) == flow, "기존 파워/공급/흐름 보존·변환 포함 색4개 집계");
+            Check(result.IsApplied && withPower.State.CellAt(C(8, 8)).Content == RuntimeContent.Bomb && withPower.State.Missions[0].Progress == 4 && Snapshot(withPower.State.Supply) == supply && Snapshot(withPower.State.Flow) == flow, "기존 파워/공급/흐름 보존·변환 포함 색4개 집계");
         }
     }
 }

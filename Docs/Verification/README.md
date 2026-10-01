@@ -14,9 +14,13 @@
 - [32단계 구현·검증 진행 기록](MoonRabbitJunkyard/Core/93_32단계_검증진행기록.md)
 - [33단계 검증 진행 기록](MoonRabbitJunkyard/Core/96_33단계_검증진행기록.md)
 
-## 월드 게임 화면 (1~5단계)
+## 월드 게임 화면 (1~6단계)
+
+- [9×9 보드 전환 검증](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-nine-by-nine-board.md)
 
 - [1단계 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-01-progress.md)
 - [2단계 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md)
 - [3단계 에디터 게임 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-03-progress.md)
-
+- [4단계 목업 UI 구현·검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-04-progress.md)
+- [5단계 통합 검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-05-progress.md)
+- [6단계 스와이프·교환 연출 검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-06-progress.md)

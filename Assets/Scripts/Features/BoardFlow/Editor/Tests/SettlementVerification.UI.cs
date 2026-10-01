@@ -106,15 +106,15 @@ namespace Levels.Editor
             Check(root.Q<Button>("execution-settle").enabledInHierarchy && window.Execution.State.MovesRemaining == 0, "낙하 대기/마지막 수 정착 버튼 활성"); Capture("before-wide.png");
             string applied = Snapshot(window.Execution.LastApplied); TurnEffectContext previousContext = window.Execution.TurnEffects;
             Click("execution-settle"); yield return null;
-            Check(window.Execution.Phase == BoardActionPhase.WaitingForAutomaticMatch && window.Execution.TurnEffects.IsProtected(C(9, 3)) && !window.Execution.TurnEffects.IsProtected(C(8, 3)), "UI 정착/보호 이동/공급 보호 구분");
-            Check(previousContext.IsProtected(C(3, 3)) && !previousContext.IsProtected(C(9, 3)) && previousContext.HasFired(C(2, 3)) && !window.Execution.TurnEffects.HasFired(C(2, 3)), "턴 기록 독립 복사/소모 파워 좌표 정리");
+            Check(window.Execution.Phase == BoardActionPhase.WaitingForAutomaticMatch && window.Execution.TurnEffects.IsProtected(C(8, 3)) && !window.Execution.TurnEffects.IsProtected(C(7, 3)), "UI 정착/보호 이동/공급 보호 구분");
+            Check(previousContext.IsProtected(C(3, 3)) && !previousContext.IsProtected(C(8, 3)) && previousContext.HasFired(C(2, 3)) && !window.Execution.TurnEffects.HasFired(C(2, 3)), "턴 기록 독립 복사/소모 파워 좌표 정리");
             Check(!root.Q<Button>("execution-settle").enabledInHierarchy && !root.Q<Button>("execution-swap").enabledInHierarchy && !root.Q<Button>("execution-activate").enabledInHierarchy, "정착 후 모든 실행 입력 차단");
             Check(root.Q<Label>("initial-boundary").text.Contains("자동 매칭 대기") && root.Q<Label>("initial-overview").text.Contains("목록 0:0 → 1:0") && root.Q<Label>("initial-details").text.Contains("남은 이동 0"), "정착 결과/커서/수 표시");
             Check(Snapshot(window.Execution.LastApplied) == applied && Snapshot(window.CurrentState) == startState && JsonUtility.ToJson(falling) == originalJson && File.ReadAllText(AssetDatabase.GetAssetPath(falling)) == originalFile && EditorUtility.IsDirty(falling) == dirty, "UI 원본/파일/dirty/시작 상태/직전 행동 보존");
             string settled = Snapshot(window.Execution.State), result = Snapshot(window.Execution.LastSettlement); Capture("after-wide.png");
             window.Owner.position = new Rect(10, 10, 680, 480); yield return null; yield return null;
             Check(root.Q<Button>("execution-settle").worldBound.xMax <= 680 && root.Q<Button>("execution-reset").worldBound.xMax <= 680 && root.Q<ScrollView>("initial-inspector").resolvedStyle.width >= 200, "좁은 창 정착/초기화/결과 접근");
-            root.Q<ScrollView>("initial-board-scroll").ScrollTo(root.Q<Button>("initial-cell-9-3")); yield return null; Capture("after-narrow.png");
+            root.Q<ScrollView>("initial-board-scroll").ScrollTo(root.Q<Button>("initial-cell-8-3")); yield return null; Capture("after-narrow.png");
             Click("execution-reset"); yield return null; Check(window.Execution == null && Snapshot(window.CurrentState) == startState, "정착 초기화 시작 상태 복원");
             root.Q<Toggle>("execution-mode").value = true; Click("initial-cell-3-3"); Click("initial-cell-2-3"); Click("execution-swap"); Click("execution-settle"); yield return null;
             Check(Snapshot(window.Execution.State) == settled && Snapshot(window.Execution.LastSettlement) == result, "같은 시드 교환+효과+정착 재현");

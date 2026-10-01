@@ -101,7 +101,7 @@ namespace Levels.Editor
             LevelDefinition level = Make(); Obstacle(level, ObstacleKind.Appliance, 9, C(4, 4)); SetMission(level, ObstacleKind.Appliance);
             Place(level, C(4, 0), InitialBlockKind.Rocket); Place(level, C(6, 4), InitialBlockKind.Bomb);
             BoardActionExecutor executor = new BoardActionExecutor(Build(level)); BoardActionResult rocket = executor.Activate(C(4, 0));
-            Check(rocket.IsApplied && executor.State.Obstacles[0].Durability == 7 && executor.State.CellAt(C(4, 9)).Content == RuntimeContent.Empty, "로켓 두 칸2피해/끝까지 관통");
+            Check(rocket.IsApplied && executor.State.Obstacles[0].Durability == 7 && executor.State.CellAt(C(4, 8)).Content == RuntimeContent.Empty, "로켓 두 칸2피해/끝까지 관통");
             Hit(executor.State, C(6, 4), executor.TurnEffects);
             Check(executor.State.Obstacles[0].Durability == 5, "별도 폭탄 두 칸 반복 피해");
             foreach (int durability in new[] { 1, 3, 9 })

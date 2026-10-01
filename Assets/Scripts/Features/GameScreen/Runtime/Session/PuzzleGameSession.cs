@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace GameScreen
 {
-    public sealed class PuzzleGameSession : MonoBehaviour
+    public sealed partial class PuzzleGameSession : MonoBehaviour
     {
         [SerializeField, Min(1)] private int levelNumber = 1;
         [SerializeField] private int seed = 12345;
@@ -23,8 +23,8 @@ namespace GameScreen
         public LevelRuntimeState State => executor?.State;
         public BoardOutcome Outcome => executor?.Outcome;
         public BoardActionPhase Phase => executor?.Phase ?? BoardActionPhase.Stopped;
-        public bool CanAcceptInput => isActiveAndEnabled && ready && !failed &&
-            Phase == BoardActionPhase.Ready && Outcome == null;
+        public bool CanAcceptInput => isActiveAndEnabled && ready && !failed && !IsPaused && !IsRestarting &&
+            !IsPresenting && Phase == BoardActionPhase.Ready && Outcome == null;
         public string Message { get; private set; } = "레벨 로딩 중";
         public event Action Changed;
 
@@ -57,6 +57,8 @@ namespace GameScreen
                 linked.Token.ThrowIfCancellationRequested();
                 if (definition == null) definition = await LevelPackLoader.LoadAsync(number);
                 linked.Token.ThrowIfCancellationRequested();
+                initialBytes = LevelPackCodec.Encode(new[] { definition });
+                levelNumber = number; seed = randomSeed;
                 await PrepareAsync(definition, randomSeed, linked.Token);
             }
             catch (OperationCanceledException) { ready = false; artwork?.Dispose(); }
@@ -89,9 +91,6 @@ namespace GameScreen
             Message = "블록을 선택하거나 드래그하세요"; Changed?.Invoke();
         }
 
-        public bool TrySwap(BoardCoordinate first, BoardCoordinate second)
-            => CanAcceptInput && Apply(executor.Swap(first, second));
-
         public bool TryActivate(BoardCoordinate at)
             => CanAcceptInput && Apply(executor.Activate(at));
 
@@ -105,13 +104,14 @@ namespace GameScreen
 
         private void Update()
         {
-            if (boardCamera != null) boardCamera.orthographicSize = 5.7f / Mathf.Min(1, boardCamera.aspect);
+            if (boardCamera != null && !HasScreenLayout) boardCamera.orthographicSize = (PuzzleWorldBoard.HalfHeight + 0.7f) / Mathf.Min(1, boardCamera.aspect);
+            if (IsPresenting) { AdvancePresentation(Time.deltaTime); return; }
             Advance();
         }
 
         private void Advance()
         {
-            if (!ready || failed || !executor.HasPendingCascade) return;
+            if (!ready || failed || IsPaused || IsRestarting || IsPresenting || !executor.HasPendingCascade) return;
             try
             {
                 CascadeStepResult step = executor.AdvanceCascade();
@@ -130,6 +130,7 @@ namespace GameScreen
         private void Fail(string message)
         {
             failed = true; ready = false; Message = message;
+            ResetPresentation();
             artwork?.Dispose();
             if (this != null && !lifetime.IsCancellationRequested) Changed?.Invoke();
             Debug.LogError(message);
@@ -151,6 +152,7 @@ namespace GameScreen
         private void OnDestroy()
         {
             ready = false;
+            ResetPresentation();
             lifetime.Cancel(); artwork?.Dispose(); lifetime.Dispose();
             Changed = null;
         }

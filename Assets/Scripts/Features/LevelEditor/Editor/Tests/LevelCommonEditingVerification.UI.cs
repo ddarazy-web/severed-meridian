@@ -162,7 +162,7 @@ namespace Levels.Editor
         private static void Cell(int row, int column, bool additive = false)
         {
             LevelBoardView board = window.rootVisualElement.Q<LevelBoardView>();
-            Vector2 position = board.LocalToWorld(new Vector2(column * 40 + 20, row * 40 + 20));
+            Vector2 position = board.LocalToWorld(new Vector2(column * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f, row * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f));
             Event input = new Event { type = EventType.MouseDown, button = 0, mousePosition = position, modifiers = additive ? EventModifiers.Control : EventModifiers.None };
             using PointerDownEvent evt = PointerDownEvent.GetPooled(input); evt.target = board; board.SendEvent(evt);
         }

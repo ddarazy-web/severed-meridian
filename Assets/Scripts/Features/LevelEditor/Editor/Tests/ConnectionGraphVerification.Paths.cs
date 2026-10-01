@@ -15,7 +15,7 @@ namespace Levels.Editor
         {
             Evidence = "Logs/PathDragVerification"; testPortals = testPaths = true; Start();
         }
-        private static void PathInput(EventType type, int row, int column) => Send(Flow, type, Flow.LocalToWorld(new Vector2(column * 40 + 20, row * 40 + 20)));
+        private static void PathInput(EventType type, int row, int column) => Send(Flow, type, Flow.LocalToWorld(new Vector2(column * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f, row * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f)));
         private static void PathReset(string data)
         {
             Flow.CancelInput(); JsonUtility.FromJsonOverwrite(data, level); Undo.ClearUndo(level); Refresh();

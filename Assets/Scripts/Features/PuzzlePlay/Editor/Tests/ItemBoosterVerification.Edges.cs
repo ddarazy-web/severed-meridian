@@ -57,9 +57,9 @@ namespace Levels.Editor
             Check(swapping.UseItem(BoardItem.Swap, C(4, 4), C(4, 3)).IsApplied && swapping.State.CellAt(C(4, 3)).ObstacleIndex == 0 && swapping.State.Obstacles[0].Durability == 3, "고철은 피해 없이 위치 교환");
             UnityEngine.Object.DestroyImmediate(wall);
             LevelDefinition recovery = (LevelDefinition)Invoke(typeof(RecoveryVerification), "Make", 1);
-            Invoke(typeof(RecoveryVerification), "Place", recovery, C(8, 0));
+            Invoke(typeof(RecoveryVerification), "Place", recovery, C(7, 0));
             BoardActionExecutor recovered = new BoardActionExecutor(Build(recovery));
-            Check(!recovered.CanSelectItemTarget(BoardItem.Hammer, C(8, 0)) && recovered.UseItem(BoardItem.Swap, C(8, 0), C(9, 0)).IsApplied &&
+            Check(!recovered.CanSelectItemTarget(BoardItem.Hammer, C(7, 0)) && recovered.UseItem(BoardItem.Swap, C(7, 0), C(8, 0)).IsApplied &&
                 recovered.State.Recoveries.Count == 1 && recovered.State.MovesRemaining == 20, "회수 부품 망치 불가·매칭 없이 도착 교환");
             Finish(recovered); Check(recovered.Outcome?.Kind == BoardOutcomeKind.Won && recovered.ItemUses.Count == 1, "아이템 후 정상 성공·라스트팡 종료");
             UnityEngine.Object.DestroyImmediate(recovery);
@@ -83,7 +83,7 @@ namespace Levels.Editor
         {
             LevelDefinition level = (LevelDefinition)Invoke(typeof(PowerEffectVerification), "Make");
             LevelRuntimeState mold = Build(level);
-            Set(mold.CellAt(C(9, 9)), "Cover", (CoverKind?)CoverKind.Mold); Set(mold.CellAt(C(9, 9)), "CoverDurability", 1);
+            Set(mold.CellAt(C(8, 8)), "Cover", (CoverKind?)CoverKind.Mold); Set(mold.CellAt(C(8, 8)), "CoverDurability", 1);
             BoardActionExecutor executor = new BoardActionExecutor(mold);
             executor.UseItem(BoardItem.Hammer, C(0, 0)); Finish(executor);
             Check(executor.State.Cells.Count(c => c.Cover == CoverKind.Mold) == 1 && executor.TurnEffects.MoldSpread.Reason == MoldSpreadReason.NoTurn, "실제 곰팡이가 있어도 아이템 후 확산 생략");
@@ -117,7 +117,7 @@ namespace Levels.Editor
             Set(source.CellAt(C(0, 0)), "Cover", (CoverKind?)CoverKind.Web); Set(source.CellAt(C(0, 0)), "CoverDurability", 2);
             Set(source.CellAt(C(0, 1)), "Content", RuntimeContent.Normal); Set(source.CellAt(C(0, 1)), "Color", (RabbitColor?)RabbitColor.Type1);
             Set(source.CellAt(C(0, 1)), "Cover", (CoverKind?)CoverKind.Mold); Set(source.CellAt(C(0, 1)), "CoverDurability", 1);
-            Set(source.CellAt(C(9, 9)), "Content", RuntimeContent.Rocket); Set(source.CellAt(C(9, 9)), "RocketDirection", (RocketDirection?)RocketDirection.Horizontal);
+            Set(source.CellAt(C(8, 8)), "Content", RuntimeContent.Rocket); Set(source.CellAt(C(8, 8)), "RocketDirection", (RocketDirection?)RocketDirection.Horizontal);
             BoardActionExecutor waiting = new BoardActionExecutor(source, Selected);
             Check(waiting.PendingBoosters.Count == 3 && waiting.BoosterPlacements.Count == 0 && Snapshot(source) == Snapshot(waiting.State), "덮개·기존 파워 제외·후보0 무난수 대기");
             Check(waiting.UseItem(BoardItem.Hammer, C(0, 1)).IsApplied, "곰팡이 내용물 노출로 부스터 후보 제공");

@@ -60,7 +60,7 @@ namespace Levels.Editor
             Click("new-level"); window.rootVisualElement.Q<TextField>("level-file-name").value = unique;
             Click("confirm-level-name"); yield return null;
             created = window.CurrentLevel;
-            Check(created != null && created.name == unique && created.Board.Cells.Count == 100, "지정한 이름으로 새 레벨 생성");
+            Check(created != null && created.name == unique && created.Board.Cells.Count == 81, "지정한 이름으로 새 레벨 생성");
             string path = AssetDatabase.GetAssetPath(created);
             Check(string.IsNullOrEmpty(AssetDatabase.MoveAsset(path, folder + "/Before.asset")), "소유 검증 폴더로 이동");
             path = AssetDatabase.GetAssetPath(created);

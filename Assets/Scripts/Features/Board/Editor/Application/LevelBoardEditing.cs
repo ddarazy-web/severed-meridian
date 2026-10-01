@@ -12,12 +12,12 @@ namespace Levels.Editor
     {
         /// <summary>작업 중 미완성 내용은 허용하되 배열을 편집하는 데 필요한 구조를 확인한다.</summary>
         /// <param name="level">편집할 레벨.</param>
-        /// <returns>현재 형식의 10×10 배열에 안전하게 접근할 수 있으면 true.</returns>
+        /// <returns>현재 형식의 9×9 배열에 안전하게 접근할 수 있으면 true.</returns>
         public static bool CanEdit(LevelDefinition level)
         {
             return level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion &&
-                level.Board != null && level.Board.Rows == 10 && level.Board.Columns == 10 &&
-                level.Board.Cells != null && level.Board.Cells.Count == 100 && level.InitialBlocks != null &&
+                level.Board != null && level.Board.Rows == BoardDefinition.DefaultRows && level.Board.Columns == BoardDefinition.DefaultColumns &&
+                level.Board.Cells != null && level.Board.Cells.Count == (BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns) && level.InitialBlocks != null &&
                 level.Obstacles != null && level.Covers != null && level.Dust != null;
         }
 
@@ -66,7 +66,7 @@ namespace Levels.Editor
                 if (!level.Board.Contains(coordinate))
                     continue;
                 SerializedProperty active = data.FindProperty("board.cells")
-                    .GetArrayElementAtIndex(coordinate.Row * 10 + coordinate.Column).FindPropertyRelative("isActive");
+                    .GetArrayElementAtIndex(coordinate.Row * BoardDefinition.DefaultColumns + coordinate.Column).FindPropertyRelative("isActive");
                 if (brush == LevelBrush.Activate || brush == LevelBrush.Deactivate)
                 {
                     // 칸을 끄는 행위와 내용 삭제는 별개다. 장애물·연결을 몰래 잃지 않도록

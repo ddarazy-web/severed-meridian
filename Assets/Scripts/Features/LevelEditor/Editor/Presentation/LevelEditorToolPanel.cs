@@ -211,7 +211,7 @@ namespace Levels.Editor
             for (int i = 0; i < items.Count; i++)
             {
                 BoardCoordinate coordinate = items[i].Coordinate;
-                bool inBoard = coordinate.Row >= 0 && coordinate.Row < 10 && coordinate.Column >= 0 && coordinate.Column < 10;
+                bool inBoard = coordinate.Row >= 0 && coordinate.Row < BoardDefinition.DefaultRows && coordinate.Column >= 0 && coordinate.Column < BoardDefinition.DefaultColumns;
                 Button item = new Button(() =>
                 {
                     board.CancelStroke();

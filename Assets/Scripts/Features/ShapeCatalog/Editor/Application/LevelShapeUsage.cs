@@ -1,3 +1,4 @@
+using Board;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,7 +41,7 @@ namespace Levels.Editor
                     LevelDefinition saved = copies.OfType<LevelDefinition>().SingleOrDefault();
                     if (saved == null || EditorUtility.IsPersistent(saved))
                         throw new IOException("저장된 레벨을 읽지 못했습니다: " + path);
-                    if (saved.Board?.Rows != 10 || saved.Board.Columns != 10 || saved.Board.Cells?.Count != 100) continue;
+                    if (saved.Board?.Rows != BoardDefinition.DefaultRows || saved.Board.Columns != BoardDefinition.DefaultColumns || saved.Board.Cells?.Count != (BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns)) continue;
                     string key = new string(saved.Board.Cells.Select(cell => cell.IsActive ? '1' : '0').ToArray());
                     if (!byMask.TryGetValue(key, out LevelShapePreset[] matches)) continue;
                     Entry entry = new Entry { Path = path, Number = saved.LevelNumber, Obstacles = LevelShapeRecommendations.DescribeObstacles(saved) };

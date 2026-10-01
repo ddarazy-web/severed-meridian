@@ -74,8 +74,8 @@ namespace Levels.Editor
                 LevelDefinition invalid = LevelAssetOperations.CreateAtPath(state.folder + "/Invalid.asset");
                 LevelMissionEditing.Add(normal);
                 LevelMissionEditing.Add(independent);
-                Check(normal.Board.Rows == 10 && normal.Board.Columns == 10 && normal.Board.Cells.Count == 100 &&
-                    normal.Board.Cells.All(cell => cell.IsActive), "기본 에셋: 10×10 활성 100칸");
+                Check(normal.Board.Rows == 9 && normal.Board.Columns == 9 && normal.Board.Cells.Count == 81 &&
+                    normal.Board.Cells.All(cell => cell.IsActive), "기본 에셋: 9×9 활성 81칸");
                 Check(normal.InitialBlocks.Count == 0 && normal.Colors.Count == 5 &&
                     LevelDefinitionValidator.Validate(normal).Count == 0, "활성 빈칸과 기본 색 정의");
                 Check(LevelAssetOperations.FindNumberConflicts(normal).Count >= 2, "레벨 번호 중복 검색");
@@ -83,7 +83,7 @@ namespace Levels.Editor
 
                 ConfigureNormal(normal);
                 string independentBefore = JsonUtility.ToJson(independent);
-                Check(independent.Board.Cells[99].IsActive && independent.InitialBlocks.Count == 0 &&
+                Check(independent.Board.Cells[80].IsActive && independent.InitialBlocks.Count == 0 &&
                     independent.MoveCount == 20, "다른 에셋에 변경 전파 없음");
                 Check(LevelDefinitionValidator.Validate(normal).Count == 0, "고정·무작위 혼합 배치 정상 판정");
                 Check(normal.InitialBlocks[0].FixedColor == RabbitColor.Type2 &&
@@ -167,7 +167,7 @@ namespace Levels.Editor
             data.FindProperty("levelNumber").intValue = 4321;
             data.FindProperty("moveCount").intValue = 27;
             data.FindProperty("colors").arraySize = 3;
-            data.FindProperty("board.cells").GetArrayElementAtIndex(99).FindPropertyRelative("isActive").boolValue = false;
+            data.FindProperty("board.cells").GetArrayElementAtIndex(80).FindPropertyRelative("isActive").boolValue = false;
             SerializedProperty blocks = data.FindProperty("initialBlocks");
             blocks.arraySize = 2;
             SetBlock(blocks.GetArrayElementAtIndex(0), 0, 0, InitialBlockKind.FixedNormal, RabbitColor.Type2);
@@ -301,7 +301,7 @@ namespace Levels.Editor
             VerifyInvalidField("schemaVersion", 99, LevelValidationCode.UnsupportedSchemaVersion);
             VerifyInvalidField("levelNumber", 0, LevelValidationCode.InvalidLevelNumber);
             VerifyInvalidField("moveCount", 0, LevelValidationCode.InvalidMoveCount);
-            VerifyInvalidField("board.rows", 9, LevelValidationCode.UnsupportedBoardSize);
+            VerifyInvalidField("board.rows", 8, LevelValidationCode.UnsupportedBoardSize);
             VerifyInvalidField("board.columns", 0, LevelValidationCode.CellCountMismatch);
 
             LevelDefinition level = ScriptableObject.CreateInstance<LevelDefinition>();

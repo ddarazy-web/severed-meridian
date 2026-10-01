@@ -1,3 +1,4 @@
+using Board;
 using Simulation;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -43,14 +44,19 @@ namespace Levels.Editor
                             sprite = LevelBoardArtwork.Obstacle(body.Definition, body.Durability, body.Charge);
                             if (LevelPlacementRules.Size(body.Definition.Kind) == 2)
                             {
-                                content.style.width = content.style.height = Length.Percent(200);
-                                content.style.left = Length.Percent(-100 * (cell.Coordinate.Column - body.Definition.Coordinate.Column));
-                                content.style.top = Length.Percent(-100 * (cell.Coordinate.Row - body.Definition.Coordinate.Row));
+                                float inset = (2 - BoardArtworkLayout.LargeObstacleSize) * 50;
+                                content.style.width = content.style.height = Length.Percent(BoardArtworkLayout.LargeObstacleSize * 100);
+                                content.style.left = Length.Percent(inset - 100 * (cell.Coordinate.Column - body.Definition.Coordinate.Column));
+                                content.style.top = Length.Percent(inset - 100 * (cell.Coordinate.Row - body.Definition.Coordinate.Row));
                             }
                             break;
                     }
                 }
                 content.style.backgroundImage = sprite != null ? new StyleBackground(sprite) : new StyleBackground(StyleKeyword.None);
+                float contentScale = BoardArtworkLayout.ContentScale(sprite);
+                content.style.scale = new Scale(Vector3.one * contentScale);
+                content.style.translate = new Translate(Length.Percent(100 * contentScale * BoardArtworkLayout.ContentOffsetX(sprite)),
+                    Length.Percent(-100 * contentScale * BoardArtworkLayout.ContentOffsetY(sprite)));
                 Sprite dustSprite = LevelBoardArtwork.Dust(cell.DustDurability);
                 dust.style.backgroundImage = dustSprite != null ? new StyleBackground(dustSprite) : new StyleBackground(StyleKeyword.None);
                 Sprite coverSprite = cell.Cover.HasValue ? LevelBoardArtwork.Cover(cell.Cover.Value, cell.CoverDurability) : null;

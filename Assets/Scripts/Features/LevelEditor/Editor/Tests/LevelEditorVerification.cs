@@ -97,7 +97,7 @@ namespace Levels.Editor
             yield return null;
             yield return null;
             LevelBoardView board = window.rootVisualElement.Q<LevelBoardView>();
-            Check(board.panel != null && board.worldBound.width == 400 && board.Children().OfType<Label>().Count() == 100, "실제 창에 100칸과 포인터 패널 배치");
+            Check(board.panel != null && board.worldBound.width == LevelBoardView.CellSize * BoardDefinition.DefaultColumns && board.Children().OfType<Label>().Count() == BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns, "실제 창에 81칸과 포인터 패널 배치");
             Check(!EditorUtility.IsDirty(level) && level.InitialBlocks.Count == 0, "창 열기만으로 원본 변경 없음");
             string independent = JsonUtility.ToJson(other);
 
@@ -136,7 +136,7 @@ namespace Levels.Editor
             Click("tool-Deactivate");
             Pointer(EventType.MouseDown, 2, 1); Pointer(EventType.MouseUp, 2, 1);
             yield return null;
-            Check(!level.Board.Cells[21].IsActive && level.InitialBlocks.Count == 8, "비활성화해도 블록 보존");
+            Check(!level.Board.Cells[2 * BoardDefinition.DefaultColumns + 1].IsActive && level.InitialBlocks.Count == 8, "비활성화해도 블록 보존");
             Click("tool-Random");
             Pointer(EventType.MouseDown, 2, 1); Pointer(EventType.MouseUp, 2, 1);
             yield return null;
@@ -146,22 +146,22 @@ namespace Levels.Editor
             Pointer(EventType.MouseDown, 2, 1);
             window.rootVisualElement.Q<Toggle>("selected-active").value = true;
             yield return null;
-            Check(level.Board.Cells[21].IsActive, "선택 칸 속성에서 재활성화");
+            Check(level.Board.Cells[2 * BoardDefinition.DefaultColumns + 1].IsActive, "선택 칸 속성에서 재활성화");
             window.rootVisualElement.Q<PopupField<string>>("selected-block").value = "무작위 ?";
             yield return null;
             Check(level.InitialBlocks[LevelBoardEditing.FindBlock(level, new BoardCoordinate(2, 1))].Kind == InitialBlockKind.RandomNormal,
                 "선택 칸 속성에서 고정→무작위 교체");
-            Check(window.rootVisualElement.Q<Label>("cell-21").Q<Label>("board-art-badge").text == "?", "무작위 보드 표시");
+            Check(window.rootVisualElement.Q<Label>("cell-19").Q<Label>("board-art-badge").text == "?", "무작위 보드 표시");
             window.rootVisualElement.Q<PopupField<string>>("selected-block").value = "빈칸";
             yield return null;
-            Check(level.InitialBlocks.Count == 7 && level.Board.Cells[21].IsActive, "지우기는 일반 블록만 제거");
+            Check(level.InitialBlocks.Count == 7 && level.Board.Cells[2 * BoardDefinition.DefaultColumns + 1].IsActive, "지우기는 일반 블록만 제거");
 
             Click("tool-Random");
-            Pointer(EventType.MouseDown, 4, 8); Pointer(EventType.MouseDrag, 4, 12); Pointer(EventType.MouseUp, 4, 12);
+            Pointer(EventType.MouseDown, 4, 7); Pointer(EventType.MouseDrag, 4, 12); Pointer(EventType.MouseUp, 4, 12);
             yield return null;
-            Check(LevelBoardEditing.FindBlock(level, new BoardCoordinate(4, 8)) >= 0 &&
-                LevelBoardEditing.FindBlock(level, new BoardCoordinate(4, 9)) >= 0, "보드 밖에서 놓기: 내부 경계까지 완료");
-            Pointer(EventType.MouseDown, 5, 9); Pointer(EventType.MouseDrag, 5, 12);
+            Check(LevelBoardEditing.FindBlock(level, new BoardCoordinate(4, 7)) >= 0 &&
+                LevelBoardEditing.FindBlock(level, new BoardCoordinate(4, 8)) >= 0, "보드 밖에서 놓기: 내부 경계까지 완료");
+            Pointer(EventType.MouseDown, 5, 8); Pointer(EventType.MouseDrag, 5, 12);
             Pointer(EventType.MouseDrag, 7, 12); Pointer(EventType.MouseDrag, 7, 0); Pointer(EventType.MouseUp, 7, 0);
             yield return null;
             Check(LevelBoardEditing.FindBlock(level, new BoardCoordinate(6, 5)) < 0 &&
@@ -268,7 +268,7 @@ namespace Levels.Editor
             Click("confirm-level-name"); yield return null;
             LevelDefinition disposable = window.CurrentLevel;
             string disposablePath = AssetDatabase.GetAssetPath(disposable);
-            Check(disposable != level && disposable.Board.Cells.Count == 100 && disposablePath.StartsWith(LevelAssetOperations.DefaultFolder),
+            Check(disposable != level && disposable.Board.Cells.Count == BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns && disposablePath.StartsWith(LevelAssetOperations.DefaultFolder),
                 "편집 창 새 레벨 버튼: 기본 경로에 독립 에셋 생성");
             AssetDatabase.DeleteAsset(disposablePath);
             yield return null; yield return null; yield return null;
@@ -307,31 +307,31 @@ namespace Levels.Editor
             Check(window.rootVisualElement.Q<Label>("operation-status").text.Contains("행 21, 열 21"), "범위 밖 오류 좌표를 보정하지 않고 표시");
             Click("tool-Erase"); Pointer(EventType.MouseDown, 8, 8); Pointer(EventType.MouseUp, 8, 8);
             Check(JsonUtility.ToJson(level) == invalidBefore, "중복 배치 지우기 거부·원본 유지");
-            Click("tool-Random"); Pointer(EventType.MouseDown, 9, 0); Pointer(EventType.MouseUp, 9, 0);
+            Click("tool-Random"); Pointer(EventType.MouseDown, 8, 0); Pointer(EventType.MouseUp, 8, 0);
             yield return null;
             Check(level.InitialBlocks.Count == 15 && level.InitialBlocks.Count(block => block.Coordinate.Equals(new BoardCoordinate(8, 8))) == 2 &&
                 level.InitialBlocks.Any(block => block.Coordinate.Row == 20 && (int)block.Kind == 77), "정상 칸 편집 시 오류 항목 보존");
             Check(window.rootVisualElement.Q<Label>("validation-status").text.Contains("다시 검사"), "편집 후 오래된 검사 결과 무효화");
 
-            SetInt(level, "board.rows", 9); yield return null;
+            SetInt(level, "board.rows", 8); yield return null;
             string malformed = JsonUtility.ToJson(level);
             Pointer(EventType.MouseDown, 0, 0); Pointer(EventType.MouseUp, 0, 0);
             Check(JsonUtility.ToJson(level) == malformed && !window.rootVisualElement.Q<PopupField<string>>("menu-normal").enabledSelf,
                 "잘못된 보드 구조는 칠하기 차단·자동 보정 없음");
-            SetInt(level, "board.rows", 10); yield return null;
+            SetInt(level, "board.rows", BoardDefinition.DefaultRows); yield return null;
             using (SerializedObject missingCell = new SerializedObject(level))
             {
-                missingCell.FindProperty("board.cells").arraySize = 99;
+                missingCell.FindProperty("board.cells").arraySize = 80;
                 missingCell.ApplyModifiedProperties();
             }
             yield return null;
             malformed = JsonUtility.ToJson(level);
-            Pointer(EventType.MouseDown, 9, 9); Pointer(EventType.MouseUp, 9, 9);
-            Check(JsonUtility.ToJson(level) == malformed && window.rootVisualElement.Q<Label>("cell-99").Q<Label>("board-art-badge").text == "—",
+            Pointer(EventType.MouseDown, 8, 8); Pointer(EventType.MouseUp, 8, 8);
+            Check(JsonUtility.ToJson(level) == malformed && window.rootVisualElement.Q<Label>("cell-80").Q<Label>("board-art-badge").text == "—",
                 "누락된 칸은 자동 추가 없이 표시하고 칠하기 차단");
             using (SerializedObject restoreCell = new SerializedObject(level))
             {
-                restoreCell.FindProperty("board.cells").arraySize = 100;
+                restoreCell.FindProperty("board.cells").arraySize = 81;
                 restoreCell.ApplyModifiedProperties();
             }
             SetInt(level, "schemaVersion", 99); yield return null;
@@ -359,7 +359,7 @@ namespace Levels.Editor
             yield return null; yield return null;
             ScrollView scroll = window.rootVisualElement.Q<ScrollView>("board-scroll");
             Check(scroll.contentContainer.worldBound.width > scroll.contentViewport.worldBound.width, "좁은 창에서 보드 가로 스크롤 제공");
-            scroll.ScrollTo(window.rootVisualElement.Q<Label>("cell-99"));
+            scroll.ScrollTo(window.rootVisualElement.Q<Label>("cell-80"));
             yield return null;
             Capture("editor-narrow.png");
 
@@ -402,7 +402,7 @@ namespace Levels.Editor
         private static void Pointer(EventType type, int row, int column)
         {
             LevelBoardView board = window.rootVisualElement.Q<LevelBoardView>();
-            Vector2 position = board.LocalToWorld(new Vector2(column * 40 + 20, row * 40 + 20));
+            Vector2 position = board.LocalToWorld(new Vector2(column * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f, row * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f));
             Event input = new Event { type = type, button = 0, mousePosition = position };
             if (type == EventType.MouseDown)
             {

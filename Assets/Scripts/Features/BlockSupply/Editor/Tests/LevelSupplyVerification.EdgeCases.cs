@@ -30,7 +30,7 @@ namespace Levels.Editor
                 Check(JsonUtility.ToJson(level.Supply) == sourceBefore, "생성구 삭제 한 번 Undo");
                 JsonUtility.FromJsonOverwrite(clean, level);
                 LevelSupplyEditing.PlaceSources(level, level.Supply.Sources.Select(source => source.Coordinate).ToArray(), true);
-                Check(LevelSupplyEditing.AddTopSources(level) == null && level.Supply.Sources.Count == 10, "명시적 상단 생성구 일괄 추가");
+                Check(LevelSupplyEditing.AddTopSources(level) == null && level.Supply.Sources.Count == BoardDefinition.DefaultColumns, "명시적 상단 생성구 일괄 추가");
                 Undo.PerformUndo(); Check(level.Supply.Sources.Count == 0, "상단 생성구 일괄 추가 한 번 Undo");
                 JsonUtility.FromJsonOverwrite(clean, level);
                 Check(LevelMissionEditing.Add(level) == null && LevelMissionEditing.Add(level) == null && LevelMissionEditing.Add(level) == null && level.Missions.Count == 4,

@@ -146,7 +146,7 @@ namespace Levels.Editor
             Capture("after-wide.png");
             window.Owner.position = new Rect(10, 10, 680, 480); yield return null; yield return null;
             Check(root.Q<Button>("execution-reset").worldBound.xMax <= 680 && root.Q<ScrollView>("initial-inspector").resolvedStyle.width >= 200, "좁은 창 실행/초기화/상세 접근");
-            ScrollView board = root.Q<ScrollView>("initial-board-scroll"); Button last = root.Q<Button>("initial-cell-9-9"); board.ScrollTo(last); yield return null;
+            ScrollView board = root.Q<ScrollView>("initial-board-scroll"); Button last = root.Q<Button>("initial-cell-8-8"); board.ScrollTo(last); yield return null;
             Check(board.contentViewport.worldBound.Overlaps(last.worldBound), "실행 후 좁은 창 끝칸 접근"); Capture("after-narrow.png");
             Click("execution-reset"); yield return null;
             Check(window.Execution == null && Snapshot(window.CurrentState) == source && root.Query<Button>(className: "execution-created").ToList().Count == 0, "같은 시드 초기화 상태/선택/결과 복원");

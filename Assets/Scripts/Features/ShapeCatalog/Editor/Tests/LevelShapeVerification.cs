@@ -46,6 +46,19 @@ namespace Levels.Editor
 
         private static IEnumerator Run()
         {
+            LevelShapePreset legacy = ScriptableObject.CreateInstance<LevelShapePreset>();
+            try
+            {
+                bool[] oldCells = Enumerable.Range(0, 100).Select(index => index % 3 == 0).ToArray();
+                typeof(LevelShapePreset).GetField("cells", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(legacy, oldCells);
+                legacy.OnAfterDeserialize();
+                Check(legacy.IsValid && legacy.Cells.Count == 81 && Enumerable.Range(0, 81)
+                    .All(index => legacy.Cells[index] == oldCells[index / 9 * 10 + index % 9]), "기존 모양 마지막 행·열 제거와 좌표 보존");
+                bool[] migrated = legacy.Cells.ToArray();
+                legacy.OnAfterDeserialize();
+                Check(legacy.Cells.SequenceEqual(migrated), "등록 모양 변환 재실행 보존");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(legacy); }
             var baseline = LevelShapeRecommendations.LoadAll().Select(p => AssetDatabase.GetAssetPath(p)).ToArray();
             Check(LevelShapeRecommendations.Register(null, out _) != null, "레벨 미선택 등록 거절");
             LevelDefinition source = LevelAssetOperations.CreateAtPath(folder + "/Source_" + Guid.NewGuid().ToString("N") + ".asset");
@@ -53,7 +66,7 @@ namespace Levels.Editor
             using (SerializedObject edit = new SerializedObject(source))
             {
                 // 기존 사용자 목록과 우연히 충돌하지 않는 검증 전용 모양을 만든다.
-                for (int i = 0; i < 100; i++) edit.FindProperty("board.cells").GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i < 10 || random.Next(2) == 0;
+                for (int i = 0; i < BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns; i++) edit.FindProperty("board.cells").GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i < BoardDefinition.DefaultColumns || random.Next(2) == 0;
                 edit.FindProperty("levelNumber").intValue = 910021;
                 var obstacles = edit.FindProperty("obstacles"); obstacles.arraySize = 2;
                 foreach (int i in new[] { 0, 1 }) obstacles.GetArrayElementAtIndex(i).FindPropertyRelative("kind").intValue = (int)ObstacleKind.Crate;
@@ -68,7 +81,7 @@ namespace Levels.Editor
             Check(LevelShapeRecommendations.Register(source, out var first) == null, "저장한 사용자 모양 등록");
             registeredPaths.Add(AssetDatabase.GetAssetPath(first));
             Check(JsonUtility.ToJson(source) == original, "등록 후 원본 내용 보존");
-            Check(first.Cells.SequenceEqual(source.Board.Cells.Select(c => c.IsActive)), "등록 모양 100칸 일치");
+            Check(first.Cells.SequenceEqual(source.Board.Cells.Select(c => c.IsActive)), "등록 모양 81칸 일치");
             Check(first.ObstacleHistory.Contains("나무상자 · 2개") && first.ObstacleHistory.Contains("거미줄 · 1칸") && first.ObstacleHistory.Contains("먼지 · 1칸"), "종류별 장애물·덮개·먼지 사용 기록");
             Check(File.Exists(registeredPaths[0]) && LevelShapeRecommendations.LoadAll().Contains(first), "등록 파일 저장과 목록 조회");
             int count = LevelShapeRecommendations.LoadAll().Count;
@@ -81,21 +94,21 @@ namespace Levels.Editor
             }
             AssetDatabase.SaveAssetIfDirty(source);
             Check(LevelShapeRecommendations.Register(source, out duplicate) != null && duplicate == first && first.ObstacleHistory.Count == 3, "장애물이 달라도 중복·기존 기록 유지");
-            bool saved = first.Cells[99];
+            bool saved = first.Cells[80];
             using (SerializedObject edit = new SerializedObject(source))
             {
-                edit.FindProperty("board.cells").GetArrayElementAtIndex(99).FindPropertyRelative("isActive").boolValue = !saved;
+                edit.FindProperty("board.cells").GetArrayElementAtIndex(80).FindPropertyRelative("isActive").boolValue = !saved;
                 edit.ApplyModifiedPropertiesWithoutUndo();
             }
             AssetDatabase.SaveAssetIfDirty(source);
-            Check(first.Cells[99] == saved, "원본 수정과 등록 모양 독립");
+            Check(first.Cells[80] == saved, "원본 수정과 등록 모양 독립");
             Check(LevelShapeRecommendations.Register(source, out var second) == null, "한 칸 다른 모양 별도 등록");
             registeredPaths.Add(AssetDatabase.GetAssetPath(second));
             Check(second.name != first.name && second.ObstacleHistory.Count == 0, "같은 원본의 다른 모양은 고유 이름·빈 장애물 기록");
             string firstPath = registeredPaths[0], firstName = first.name;
             Resources.UnloadAsset(first);
             first = AssetDatabase.LoadAssetAtPath<LevelShapePreset>(firstPath);
-            Check(first != null && first.Cells[99] == saved && first.ObstacleHistory.Count == 3, "디스크 재로딩 후 모양과 사용 기록 유지");
+            Check(first != null && first.Cells[80] == saved && first.ObstacleHistory.Count == 3, "디스크 재로딩 후 모양과 사용 기록 유지");
 
             window = LevelEditorWindow.OpenWorkspace(0, source, true); window.ShowUtility(); window.position = new Rect(20,20,1160,780);
             yield return null;
@@ -137,7 +150,7 @@ namespace Levels.Editor
             Check(first.Cells.SequenceEqual(second.Cells) == false && first.ObstacleHistory.Count == 3 && JsonUtility.ToJson(source) == sourceBefore,
                 "등록 이름 변경 후 모양·장애물 기록·원본 레벨 보존");
             Resources.UnloadAsset(first); first = AssetDatabase.LoadAssetAtPath<LevelShapePreset>(registeredPaths[0]);
-            Check(first.name == renamed && first.Cells[99] == saved && first.ObstacleHistory.Count == 3, "변경된 이름 디스크 재로딩");
+            Check(first.name == renamed && first.Cells[80] == saved && first.ObstacleHistory.Count == 3, "변경된 이름 디스크 재로딩");
             Capture("catalog.png");
             original = JsonUtility.ToJson(source);
             Click("close-shape-recommendations");
@@ -158,9 +171,9 @@ namespace Levels.Editor
             List<LevelValidationIssue> issues = new List<LevelValidationIssue>();
             LevelFlowRules.Validate(created, issues); LevelSupplyRules.Validate(created, issues);
             Check(issues.Count == 0, "적용 모양의 기본 공급 정합성");
-            Check(created.Board.Cells.Where(c=>c.IsActive).Count() == created.Supply.Sources.Sum(s => Enumerable.Range(s.Coordinate.Row,10-s.Coordinate.Row).TakeWhile(r => first.Cells[r*10+s.Coordinate.Column]).Count()), "모든 활성 칸 아래 중력 공급");
+            Check(created.Board.Cells.Where(c=>c.IsActive).Count() == created.Supply.Sources.Sum(s => Enumerable.Range(s.Coordinate.Row,BoardDefinition.DefaultRows-s.Coordinate.Row).TakeWhile(r => first.Cells[r*BoardDefinition.DefaultColumns+s.Coordinate.Column]).Count()), "모든 활성 칸 아래 중력 공급");
             AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(source));
-            Check(first.Cells[99] == saved && first.SourceLevelNumber == 910021 && first.ObstacleHistory.Count == 3, "원본 삭제 후 등록 기록 유지");
+            Check(first.Cells[80] == saved && first.SourceLevelNumber == 910021 && first.ObstacleHistory.Count == 3, "원본 삭제 후 등록 기록 유지");
             window.position = new Rect(20,20,680,480); Click("show-shape-recommendations"); yield return null;
             window.rootVisualElement.Q<PopupField<string>>("shape-choice").value = firstName; yield return null;
             Capture("catalog-narrow.png");

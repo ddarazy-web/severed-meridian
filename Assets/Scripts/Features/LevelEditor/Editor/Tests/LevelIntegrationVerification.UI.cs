@@ -93,7 +93,7 @@ namespace Levels.Editor
             Click("add-mission"); yield return null;
             window.rootVisualElement.Q<IntegerField>("mission-count-0").value = 12; yield return null;
             Check(level.Missions.Count == 1 && level.Missions[0].Count == 12, "기본 설정에서 미션 작성");
-            Tool("tool-Deactivate"); Paint(9, 9); yield return null;
+            Tool("tool-Deactivate"); Paint(8, 8); yield return null;
             Tool("tool-Fixed-0"); Paint(2, 2); yield return null;
             Tool("place-Block-" + (int)InitialBlockKind.Rocket); Paint(2, 3); yield return null;
             Tool("place-Obstacle-" + (int)ObstacleKind.Crate); Paint(4, 2); Paint(4, 3); yield return null;
@@ -144,7 +144,7 @@ namespace Levels.Editor
         private static void FlowClick(int row, int column) => PointerCell(window.rootVisualElement.Q<LevelFlowOverlay>(), row, column);
         private static void PointerCell(VisualElement target, int row, int column)
         {
-            Vector2 position = target.LocalToWorld(new Vector2(column * 40 + 20, row * 40 + 20));
+            Vector2 position = target.LocalToWorld(new Vector2(column * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f, row * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f));
             Event input = new Event { type = EventType.MouseDown, button = 0, mousePosition = position };
             using (PointerDownEvent down = PointerDownEvent.GetPooled(input)) { down.target = target; target.SendEvent(down); }
             input.type = EventType.MouseUp;

@@ -169,10 +169,10 @@ namespace Levels.Editor
             Click("tool-tab-2"); yield return null;
             Capture("used-styled.png");
             Menu("menu-flow", "직접 경로"); yield return null;
-            CellClick(9, 0); CellClick(9, 1);
+            CellClick(8, 0); CellClick(8, 1);
             SetInt(level, "moveCount", 31); yield return null;
             Check(Overlay.DraftCount == 0, "외부 원본 변경 시 경로 미리보기 취소");
-            CellClick(9, 0); CellClick(9, 1);
+            CellClick(8, 0); CellClick(8, 1);
             LevelDefinition other = CreateFlowLevel(folder + "/Other.asset"); SetInt(other, "levelNumber", 54003);
             window.SetLevel(other); yield return null;
             Check(Overlay.DraftCount == 0 && Overlay.Tool == FlowTool.None, "레벨 전환 시 입력·도구 초기화");
@@ -187,19 +187,19 @@ namespace Levels.Editor
         {
             Menu("menu-flow", "중력 ↑"); yield return null;
             string original = JsonUtility.ToJson(level);
-            Pointer(EventType.MouseDown, 380, 380);
+            Pointer(EventType.MouseDown, 340, 340);
             Overlay.ReleasePointer(PointerId.mousePointerId); yield return null;
-            Pointer(EventType.MouseUp, 380, 380);
+            Pointer(EventType.MouseUp, 340, 340);
             Check(!Overlay.IsDragging && JsonUtility.ToJson(level) == original, "흐름 포인터 캡처 상실 원자적 취소");
             Menu("menu-flow", "직접 경로"); yield return null;
-            CellClick(9, 0); CellClick(9, 1);
+            CellClick(8, 0); CellClick(8, 1);
             LevelEditorVerification.ChooseMenuTool(window, "tool-Random"); yield return null;
             Check(Overlay.DraftCount == 0 && Overlay.Tool == FlowTool.None && JsonUtility.ToJson(level) == original, "일반 배치 도구 전환 시 경로 취소");
             Menu("menu-flow", "직접 경로"); yield return null;
-            CellClick(9, 0); CellClick(9, 1); Key(KeyCode.Backspace);
+            CellClick(8, 0); CellClick(8, 1); Key(KeyCode.Backspace);
             Check(Overlay.DraftCount == 1, "경로 한 단계 되돌리기");
-            CellClick(9, 1); Key(KeyCode.Return); yield return null;
-            Check(level.Flow.Paths.Any(item => item.Coordinate.Equals(C(9, 1)) && item.IsEnd), "Enter 경로 확정");
+            CellClick(8, 1); Key(KeyCode.Return); yield return null;
+            Check(level.Flow.Paths.Any(item => item.Coordinate.Equals(C(8, 1)) && item.IsEnd), "Enter 경로 확정");
             Undo.PerformUndo(); yield return null;
             Menu("menu-flow", "흐름 선택"); yield return null;
             CellClick(1, 3); yield return null;
@@ -262,7 +262,7 @@ namespace Levels.Editor
             Check(window.rootVisualElement.Q<Label>("operation-status").text.Contains("flow.paths") && JsonUtility.ToJson(invalidFlow) == invalidBefore, "범위 밖 경로 오류 위치 안내·원본 보존");
             window.SetLevel(level); yield return null;
             Menu("menu-flow", "직접 경로"); yield return null;
-            CellClick(9, 0); CellClick(9, 1);
+            CellClick(8, 0); CellClick(8, 1);
             LevelFlowOverlay detached = Overlay;
             original = JsonUtility.ToJson(level);
             window.Close(); yield return null;
@@ -296,6 +296,8 @@ namespace Levels.Editor
         private static void Pointer(EventType type, float x, float y) => SendPointer(Overlay, type, new Vector2(x, y));
         private static void SendPointer(VisualElement target, EventType type, Vector2 point)
         {
+            // 기존 시나리오의 40px 격자 좌표를 실제 편집기 칸 크기에 맞춘다.
+            point *= LevelBoardView.CellSize / 40f;
             Event input = new Event { type = type, button = 0, mousePosition = target.LocalToWorld(point) };
             if (type == EventType.MouseDown) { using PointerDownEvent evt = PointerDownEvent.GetPooled(input); evt.target = target; target.SendEvent(evt); }
             else if (type == EventType.MouseUp) { using PointerUpEvent evt = PointerUpEvent.GetPooled(input); evt.target = target; target.SendEvent(evt); }

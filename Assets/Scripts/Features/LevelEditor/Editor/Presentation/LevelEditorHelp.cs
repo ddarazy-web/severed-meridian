@@ -107,7 +107,7 @@ namespace Levels.Editor
                 ("supply-scrapLimit", "고철 유지 생성구가 함께 사용하는 추가 생성 한도입니다.", "missions.html#maintenance"),
                 ("supply-scrapDurability", "유지 방식으로 추가할 고철의 내구도입니다.", "missions.html#maintenance"),
                 ("supply-recoveryTarget", "회수 유지 생성구가 보드에 유지할 부품 수량입니다.", "missions.html#maintenance"),
-                ("new-level", "파일 이름을 입력해 기본 10×10 레벨을 만듭니다.", "files.html#create"),
+                ("new-level", "파일 이름을 입력해 기본 9×9 레벨을 만듭니다.", "files.html#create"),
                 ("duplicate-level", "현재 레벨을 별도의 새 파일로 복제합니다.", "files.html#duplicate"),
                 ("play-level", "현재 편집 내용을 반영하고 수동 플레이 탭으로 이동합니다.", "play.html#manual"),
                 ("erase-layer", "현재 편집 층의 내용만 지웁니다. 다른 층은 그대로 둡니다.", "board.html#tools"),

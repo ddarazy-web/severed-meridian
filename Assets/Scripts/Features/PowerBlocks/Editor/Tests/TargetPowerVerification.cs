@@ -144,7 +144,7 @@ namespace Levels.Editor
         private static void MagnetChecks()
         {
             LevelDefinition level = Make(); Place(level, C(3, 3), InitialBlockKind.Magnet); Place(level, C(8, 8), InitialBlockKind.Drone);
-            Invoke(typeof(PowerEffectVerification), "Crate", null, level, C(9, 9), 3);
+            Invoke(typeof(PowerEffectVerification), "Crate", null, level, C(7, 7), 3);
             HashSet<RabbitColor> selected = new HashSet<RabbitColor>();
             for (int seed = 0; seed < 20; seed++)
             {
@@ -192,8 +192,8 @@ namespace Levels.Editor
             Check(crates.State.Missions[0].Progress == 1 && crates.State.Obstacles[1].Durability == 1, "상자 완전 제거만 실제 진행/부분 피해 미집계");
 
             LevelDefinition unsupported = Make(); Place(unsupported, C(4, 4), InitialBlockKind.Drone);
-            LevelObstacleEditing.Apply(unsupported, new PlacementBrush { Layer = PlacementLayer.Block, Erase = true }, new[] { C(9, 9) });
-            LevelObstacleEditing.Apply(unsupported, new PlacementBrush { Layer = PlacementLayer.Obstacle, Kind = (int)ObstacleKind.Safe, Durability = 1 }, new[] { C(9, 9) });
+            LevelObstacleEditing.Apply(unsupported, new PlacementBrush { Layer = PlacementLayer.Block, Erase = true }, new[] { C(8, 8) });
+            LevelObstacleEditing.Apply(unsupported, new PlacementBrush { Layer = PlacementLayer.Obstacle, Kind = (int)ObstacleKind.Safe, Durability = 1 }, new[] { C(8, 8) });
             LevelRuntimeState unsupportedState = Build(unsupported);
             typeof(RuntimeMission).GetField("<Definition>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(unsupportedState.Missions[0],
                 JsonUtility.FromJson<LevelMissionDefinition>("{\"kind\":99,\"count\":1}"));

@@ -20,6 +20,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 04f3866de8c2b9540b0d2c27855af51f
+    m_Address: MoonRabbitBoard-Effects-WebBreak
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 06d3932aa0c41d0498b342f7bbb1628d
+    m_Address: MoonRabbitBoard-Effects-DustClear
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 06fdfc469be00b6488f291d691edc692
     m_Address: MoonRabbitBoard-BoardDevices-Wiring
     m_ReadOnly: 0
@@ -35,8 +45,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 267788afb2713884a92e617350794ab4
+    m_Address: MoonRabbitBoard-Effects-Rocket
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 33faf32af672ffc4bae7424ee4b7c67d
     m_Address: MoonRabbitBoard-BoardTerrain-Floor
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 358f804a7d811c84baadc64e9867716b
+    m_Address: MoonRabbitBoard-Effects-Drone
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -55,6 +75,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58ea7d0192566bc4cbc04b13c13752fc
+    m_Address: MoonRabbitBoard-Effects-Magnet
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 76ba86795c2169c42abafc238825c4a0
     m_Address: MoonRabbitBoard-Effects-GeneratorCharge
     m_ReadOnly: 0
@@ -65,13 +90,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8e82f07e8cc7a404cb7c0cd69559169e
+    m_Address: MoonRabbitBoard-Effects-PowerCreation
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a3ca77014444e584781ee6e204ec14f5
     m_Address: MoonRabbitBoard-BoardTerrain-Walls
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: acb2bb80505176f4db5aca864740dc1a
+    m_Address: MoonRabbitBoard-Effects-WoodBreak
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae059046fa393484eb5e638647a99bbc
     m_Address: MoonRabbitBoard-Obstacles-MetalRodBox
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0f3a805bd38f7447b9d019ab0556438
+    m_Address: MoonRabbitBoard-Effects-MoldClear
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2a2571e925518f4b89c21259f3cc064
+    m_Address: MoonRabbitBoard-Effects-Match
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c382a1d4e0fa5d442b6405402ab7b2a0
+    m_Address: MoonRabbitBoard-Effects-MetalBreak
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -87,6 +137,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d5c25cdb4f42bdb4d93065879034985b
     m_Address: MoonRabbitBoard-Obstacles-Mold
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e486de4d8189abf4db6f9717d2c22b99
+    m_Address: MoonRabbitBoard-Effects-BombExplosion
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

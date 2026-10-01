@@ -31,6 +31,9 @@ namespace Levels.Editor
 
         /// <param name="name">검증 로그 폴더에 저장할 이미지 이름.</param>
         private static void CaptureAnalysis(string name)
+            => CaptureWindow(name, "Match");
+
+        internal static void CaptureWindow(string name, string titlePrefix)
         {
 #if UNITY_EDITOR_WIN
             // ReadScreenPixel은 이 PC의 백그라운드 Editor에서 바탕화면을 반환했다.
@@ -40,7 +43,7 @@ namespace Levels.Editor
                 GetWindowThreadProcessId(handle, out uint process);
                 if (process != owner) return true;
                 StringBuilder title = new StringBuilder(256); GetWindowText(handle, title, title.Capacity);
-                if (title.ToString().StartsWith("Match", StringComparison.Ordinal)) target = handle;
+                if (title.ToString().StartsWith(titlePrefix, StringComparison.Ordinal)) target = handle;
                 return true;
             }, IntPtr.Zero);
             if (target == IntPtr.Zero || !GetWindowRect(target, out CaptureRect rect)) throw new InvalidOperationException("검증 Match 창을 찾지 못했습니다.");

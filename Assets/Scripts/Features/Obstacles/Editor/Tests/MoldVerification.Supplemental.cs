@@ -28,9 +28,9 @@ namespace Levels.Editor
             Check(DamageReaction.Evaluate(blocked, C(4, 4), DamageCause.AdjacentMatch, C(4, 5), Context()).Response == DamageResponse.Wall, "벽 너머 인접 피해 금지");
             Hit(blocked, C(4, 4), Context()); Check(blocked.CellAt(C(4, 4)).Cover == null && blocked.CellAt(C(4, 4)).Content == RuntimeContent.Normal, "직접 파워 벽과 무관 덮개 제거");
 
-            LevelDefinition portal = Make(); Mold(portal, C(0, 0)); LevelFlowEditing.SetPortal(portal, C(0, 0), C(9, 9)); LevelFlowEditing.SetMerge(portal, C(9, 9), new[] { C(0,0), C(8,9) });
+            LevelDefinition portal = Make(); Mold(portal, C(0, 0)); LevelFlowEditing.SetPortal(portal, C(0, 0), C(8, 8)); LevelFlowEditing.SetMerge(portal, C(8, 8), new[] { C(0,0), C(7, 8) });
             LevelRuntimeState remote = Build(portal);
-            foreach(RuntimeCell cell in remote.Cells.Where(c => c.Cover == null && !c.Coordinate.Equals(C(9, 9)))) { Set(cell, "Content", RuntimeContent.Empty); Set(cell, "Color", null); }
+            foreach(RuntimeCell cell in remote.Cells.Where(c => c.Cover == null && !c.Coordinate.Equals(C(8, 8)))) { Set(cell, "Content", RuntimeContent.Empty); Set(cell, "Color", null); }
             Check(End(remote, Context()).Reason == MoldSpreadReason.NoCandidate, "원격 통로 출구 확산 금지");
             LevelDefinition objects = Make(); Mold(objects, C(4, 4));
             Invoke(typeof(ScrapVerification), "Place", null, objects, C(4, 5), 3); Invoke(typeof(PowerEffectVerification), "Crate", null, objects, C(3, 4), 3);
@@ -41,7 +41,7 @@ namespace Levels.Editor
             foreach(bool complete in new[] { false, true })
             {
                 LevelDefinition last = (LevelDefinition)Invoke(typeof(CombinationVerification), "Make", null, 1, RocketDirection.Horizontal, null);
-                Mold(last, C(9, 0)); JsonUtility.FromJsonOverwrite("{\"moveCount\":1}", last);
+                Mold(last, C(8, 0)); JsonUtility.FromJsonOverwrite("{\"moveCount\":1}", last);
                 BoardActionExecutor executor = new BoardActionExecutor(Build(last)); Check(executor.Swap(C(4, 4), C(4, 5)).IsApplied, "곰팡이 마지막 수 조합 " + complete);
                 if(complete) foreach(RuntimeMission mission in executor.State.Missions) Set(mission, "Progress", mission.Target);
                 Check(executor.TurnEffects.MoldSpread == null, "효과 중 확산 없음 " + complete);

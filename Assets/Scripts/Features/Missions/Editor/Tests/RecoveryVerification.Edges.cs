@@ -110,7 +110,7 @@ namespace Levels.Editor
             Check(!rejected.Swap(C(4, 4), C(4, 5)).IsApplied && Snapshot(rejected.State) == original, "매칭 없는 부품 교환·난수·미션 보존");
             UnityEngine.Object.DestroyImmediate(invalid);
             LevelDefinition last = PlayFixture(); JsonUtility.FromJsonOverwrite("{\"moveCount\":1}", last);
-            BoardActionExecutor final = new BoardActionExecutor(Build(last)); final.Activate(C(9, 0)); Finish(final);
+            BoardActionExecutor final = new BoardActionExecutor(Build(last)); final.Activate(C(8, 0)); Finish(final);
             Check(final.State.MovesRemaining == 0 && final.State.Recoveries.Count == 2 && final.State.Missions[0].Progress == 2 && !final.HasPendingCascade, "마지막 수 전체 회수 연쇄 완료·승리 조기 확정 없음");
             UnityEngine.Object.DestroyImmediate(last);
         }
@@ -130,11 +130,11 @@ namespace Levels.Editor
             SettlementResult repeated = SettlementResolution.Resolve(loop);
             Check(repeated.Reason == SettlementReason.Repeating && repeated.State == null && Snapshot(loop) == before && loop.Recoveries.Count == 0, "순환 실패시 공급·회수·난수 전체 원자성");
             UnityEngine.Object.DestroyImmediate(failure);
-            LevelDefinition invalid = Make(1); Place(invalid, C(9, 0)); Invoke(typeof(PowerEffectVerification), "Crate", invalid, C(8, 8), 1);
+            LevelDefinition invalid = Make(1); Place(invalid, C(8, 0)); Invoke(typeof(PowerEffectVerification), "Crate", invalid, C(8, 8), 1);
             LevelRuntimeState unsupported = Build(invalid);
             typeof(RuntimeObstacle).GetField("<Definition>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(unsupported.Obstacles[0], JsonUtility.FromJson<ObstaclePlacementDefinition>("{\"kind\":99,\"durability\":1}"));
             BoardActionExecutor initial = new BoardActionExecutor(unsupported);
-            Check(initial.State.Recoveries.Count == 0 && initial.State.Missions[0].Progress == 0 && initial.State.CellAt(C(9, 0)).Content == RuntimeContent.Recovery &&
+            Check(initial.State.Recoveries.Count == 0 && initial.State.Missions[0].Progress == 0 && initial.State.CellAt(C(8, 0)).Content == RuntimeContent.Recovery &&
                 initial.Outcome.Kind == BoardOutcomeKind.Aborted && initial.Settle().Reason == SettlementReason.WrongPhase, "초기 정규화 미지원시 회수 사본 미커밋·실행 중단");
             UnityEngine.Object.DestroyImmediate(invalid);
             MixedSupplyChecks();
@@ -172,7 +172,7 @@ namespace Levels.Editor
         private static void IndirectChecks()
         {
             LevelDefinition level = (LevelDefinition)Invoke(typeof(GeneratorVerification), "Make", ObstacleKind.Crate, 3);
-            Place(level, C(3, 4)); LevelFlowEditing.SetArrival(level, C(9, 4), false);
+            Place(level, C(3, 4)); LevelFlowEditing.SetArrival(level, C(8, 4), false);
             JsonUtility.FromJsonOverwrite("{\"missions\":[{\"kind\":" + (int)MissionKind.Recovery + ",\"count\":1}]}", level);
             LevelRuntimeState state = Build(level);
             TurnEffectContext context = (TurnEffectContext)Invoke(typeof(TargetPowerVerification), "Context");

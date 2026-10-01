@@ -135,7 +135,7 @@ namespace Levels.Editor
             Check(JsonUtility.ToJson(random) == json && EditorUtility.IsDirty(random) == dirty, "UI 원본 JSON/dirty 보존");
             window.Owner.position = new Rect(10, 10, 680, 480); yield return null; yield return null;
             ScrollView board = root.Q<ScrollView>("initial-board-scroll");
-            Button last = root.Q<Button>("initial-cell-9-9"); board.ScrollTo(last); yield return null;
+            Button last = root.Q<Button>("initial-cell-8-8"); board.ScrollTo(last); yield return null;
             Check(board.contentViewport.worldBound.Overlaps(last.worldBound) && root.Q<Button>("initial-new-seed").worldBound.xMax <= 680, "좁은 창 끝칸/입력 접근");
             Capture("success-narrow.png");
             root.Q<IntegerField>("initial-seed").value = 7; yield return null;

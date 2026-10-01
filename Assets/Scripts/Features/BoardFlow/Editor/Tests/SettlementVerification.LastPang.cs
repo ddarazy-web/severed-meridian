@@ -18,14 +18,14 @@ namespace Levels.Editor
             {
                 MethodInfo resolve = typeof(SettlementResolution).GetMethod("Resolve", new[] { typeof(LevelRuntimeState), typeof(TurnEffectContext), typeof(bool) });
                 Check(resolve != null, "라스트팡 전용 공급 진입점");
-                BoardCoordinate[] column = Enumerable.Range(0, 10).Select(i => C(i, 0)).ToArray();
+                BoardCoordinate[] column = Enumerable.Range(0, BoardDefinition.DefaultRows).Select(i => C(i, 0)).ToArray();
                 foreach (SupplyKind kind in (SupplyKind[])Enum.GetValues(typeof(SupplyKind)))
                 {
                     LevelDefinition level = Make(column);
                     try
                     {
                         JsonUtility.FromJsonOverwrite("{\"colors\":[0,1,2,3],\"initialBlocks\":[]}", level);
-                        Source(level, C(0, 0), SupplyExhaustion.Stop, new SupplyItem(kind, 10));
+                        Source(level, C(0, 0), SupplyExhaustion.Stop, new SupplyItem(kind, BoardDefinition.DefaultRows));
                         LevelRuntimeState input = Build(level, 879610835); Empty(input, column);
                         string before = Snapshot(input);
                         SettlementResult result = (SettlementResult)resolve.Invoke(null, new object[] { input, null, true });

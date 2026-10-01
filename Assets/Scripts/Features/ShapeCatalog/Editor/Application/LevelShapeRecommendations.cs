@@ -38,7 +38,7 @@ namespace Levels.Editor
         }
 
         /// <summary>사용 가능한 등록 모양을 이름순으로 읽는다. 파일을 자동 생성하지 않는다.</summary>
-        /// <returns>등록한 10×10 모양 목록. 첫 사용 시에는 빈 목록이다.</returns>
+        /// <returns>등록한 9×9 모양 목록. 첫 사용 시에는 빈 목록이다.</returns>
         internal static List<LevelShapePreset> LoadAll() => AssetDatabase.FindAssets("t:LevelShapePreset", new[] { "Assets" })
             .Select(guid => AssetDatabase.LoadAssetAtPath<LevelShapePreset>(AssetDatabase.GUIDToAssetPath(guid)))
             .Where(item => item != null && item.IsValid).OrderBy(item => item.name, StringComparer.Ordinal)
@@ -54,8 +54,8 @@ namespace Levels.Editor
             if (source == null || !AssetDatabase.GetAssetPath(source).StartsWith("Assets/", StringComparison.Ordinal))
                 return "저장한 레벨 파일을 먼저 선택하세요.";
             if (EditorUtility.IsDirty(source)) return "레벨에 저장하지 않은 변경이 있습니다. 저장한 뒤 등록하세요.";
-            if (source.Board?.Rows != 10 || source.Board.Columns != 10 || source.Board.Cells?.Count != 100 || !source.Board.Cells.Any(cell => cell.IsActive))
-                return "사용할 칸이 있는 10×10 보드가 필요합니다.";
+            if (source.Board?.Rows != BoardDefinition.DefaultRows || source.Board.Columns != BoardDefinition.DefaultColumns || source.Board.Cells?.Count != (BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns) || !source.Board.Cells.Any(cell => cell.IsActive))
+                return "사용할 칸이 있는 9×9 보드가 필요합니다.";
             bool[] mask = source.Board.Cells.Select(cell => cell.IsActive).ToArray();
             // 이름·색·장애물·미션은 제외하고 활성 칸 좌표만 비교한다.
             // 회전·이동은 별개의 모양이다. 중복 등록으로 장애물 사용 기록을 바꾸지 않는다.
@@ -113,16 +113,16 @@ namespace Levels.Editor
             using (SerializedObject edit = new SerializedObject(level))
             {
                 edit.FindProperty("levelNumber").intValue = number;
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns; i++)
                     edit.FindProperty("board.cells").GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = shape.Cells[i];
                 edit.FindProperty("supply.sources").arraySize = 0;
                 edit.ApplyModifiedPropertiesWithoutUndo();
             }
             // 장애물 이력은 복제하지 않는다. 기본 아래 중력으로 각 세로 구간을 채울
             // 생성구만 추가한다. 원본의 특수 중력·경로·미션도 함께 복사하지 않는다.
-            BoardCoordinate[] sources = Enumerable.Range(0, 100)
-                .Where(i => shape.Cells[i] && (i < 10 || !shape.Cells[i-10]))
-                .Select(i => new BoardCoordinate(i/10, i%10)).ToArray();
+            BoardCoordinate[] sources = Enumerable.Range(0, BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns)
+                .Where(i => shape.Cells[i] && (i < BoardDefinition.DefaultColumns || !shape.Cells[i-BoardDefinition.DefaultColumns]))
+                .Select(i => new BoardCoordinate(i/BoardDefinition.DefaultColumns, i%BoardDefinition.DefaultColumns)).ToArray();
             string error = LevelSupplyEditing.PlaceSources(level, sources);
             if (error != null) throw new InvalidOperationException(error);
             AssetDatabase.SaveAssetIfDirty(level);

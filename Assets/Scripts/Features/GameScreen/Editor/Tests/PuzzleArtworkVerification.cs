@@ -23,13 +23,13 @@ namespace GameScreen.Editor
                         if (!File.Exists("Assets/Textures/" + path + ".png")) throw new Exception("Missing power artwork: " + path);
                     }
                 File.WriteAllText("Logs/WorldBoardVerification/mapping.txt", "PASS: power mappings resolve to existing textures");
-                EditorApplication.Exit(0);
+                if (Application.isBatchMode) EditorApplication.Exit(0);
             }
             catch (Exception error)
             {
                 File.WriteAllText("Logs/WorldBoardVerification/mapping.txt", "FAIL: " + error);
                 Debug.LogException(error);
-                EditorApplication.Exit(1);
+                if (Application.isBatchMode) EditorApplication.Exit(1);
             }
         }
     }

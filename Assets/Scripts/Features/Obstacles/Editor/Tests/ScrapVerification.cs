@@ -81,7 +81,7 @@ namespace Levels.Editor
                     Empty(state, state.Cells.Where(c => c.Content == RuntimeContent.Normal).Select(c => c.Coordinate).ToArray());
                     SettlementResult fallen = SettlementResolution.Resolve(state, context);
                     RuntimeCell moved = fallen.State.Cells.Single(c => c.ObstacleIndex == 0);
-                    Check(fallen.IsApplied && moved.Coordinate.Equals(C(9, 4)) && fallen.State.Obstacles[0].Durability == durability - 1 && !state.CellAt(C(9, 4)).ObstacleIndex.HasValue, "고철 낙하/본체·내구도/원본 독립 " + durability);
+                    Check(fallen.IsApplied && moved.Coordinate.Equals(C(8, 4)) && fallen.State.Obstacles[0].Durability == durability - 1 && !state.CellAt(C(8, 4)).ObstacleIndex.HasValue, "고철 낙하/본체·내구도/원본 독립 " + durability);
                     Hit(fallen.State, moved.Coordinate, fallen.TurnEffects);
                     Check(fallen.State.Obstacles[0].Durability == durability - 1 && !MissionProgressRules.Query(fallen.State, moved.Coordinate, fallen.TurnEffects).Any(), "이동 후 같은 턴 재피해·드론 후보 금지 " + durability);
                     Hit(fallen.State, moved.Coordinate, Context());
@@ -127,7 +127,7 @@ namespace Levels.Editor
             }
             foreach (int seed in Enumerable.Range(1, 12))
             {
-                LevelDefinition level = Make(); Place(level, C(9, 8), 2); Place(level, C(9, 9), 2);
+                LevelDefinition level = Make(); Place(level, C(8, 7), 2); Place(level, C(8, 8), 2);
                 Maintain(level, new[] { C(0, 0), C(0, 2), C(0, 4) }, 3, 6, 4);
                 LevelRuntimeState state = Build(level, seed);
                 Check(state.Supply.ScrapGenerated == 0 && state.LiveScrapCount == 2, "최초 고철 한도 제외 " + seed);

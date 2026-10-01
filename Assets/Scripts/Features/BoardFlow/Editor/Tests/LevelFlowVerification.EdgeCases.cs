@@ -26,13 +26,13 @@ namespace Levels.Editor
                 System.Collections.Generic.List<BoardCoordinate> sources = LevelFlowRules.Sources(level, destination);
                 if (sources.Count > 1) Ok(LevelFlowEditing.SetMerge(level, destination, sources.AsEnumerable().Reverse().ToArray()), "저장 검증 합류 " + destination);
             }
-            Ok(LevelFlowEditing.SetArrival(level, C(9, 3), false), "저장 검증 도착");
+            Ok(LevelFlowEditing.SetArrival(level, C(8, 3), false), "저장 검증 도착");
             Ok(LevelFlowEditing.SetWalls(level, new[] { new BoardEdge(C(7, 0), C(7, 1)) }, false), "저장 검증 벽");
             Check(!LevelDefinitionValidator.Validate(level).Any(), "완성 흐름 설정 구조 검사 통과");
             string snapshot = JsonUtility.ToJson(level);
             AssetDatabase.SaveAssetIfDirty(level);
             int undo = Undo.GetCurrentGroup();
-            Ok(LevelFlowEditing.SetArrival(level, C(9, 3), false), "같은 도착 설정");
+            Ok(LevelFlowEditing.SetArrival(level, C(8, 3), false), "같은 도착 설정");
             Check(!EditorUtility.IsDirty(level) && Undo.GetCurrentGroup() == undo && JsonUtility.ToJson(level) == snapshot, "무변경 조작 dirty·Undo 없음");
             int count = level.Flow.Merges[0].Sources.Count;
             Check(LevelFlowEditing.SetMerge(level, level.Flow.Merges[0].Coordinate, Enumerable.Repeat(C(4, 1), count).ToArray()) != null, "합류 공급원 중복 거절");
@@ -115,7 +115,7 @@ namespace Levels.Editor
             snapshot = JsonUtility.ToJson(level);
             Check(Has(LevelValidationCode.InvalidFlow) && Has(LevelValidationCode.InvalidPortal) && Has(LevelValidationCode.InvalidArrival) && Has(LevelValidationCode.InvalidWall) && Has(LevelValidationCode.InvalidWire), "원본 Inspector 복합 오류 분류");
             Check(JsonUtility.ToJson(level) == snapshot, "검사에서 오류 좌표·중복·미완성 원본 보존");
-            Ok(LevelFlowEditing.SetArrival(level, C(9, 9), false), "다른 정상 칸 편집");
+            Ok(LevelFlowEditing.SetArrival(level, C(8, 8), false), "다른 정상 칸 편집");
             Check(level.Flow.Paths.Count == 2 && level.Flow.Paths[0].Coordinate.Row == 20 && level.Flow.Arrivals.Contains(C(30, 30)), "정상 칸 편집 후 다른 오류 기록 보존");
             level = savedFlow;
             AssetDatabase.SaveAssetIfDirty(level);

@@ -59,7 +59,7 @@ namespace Levels.Editor
         }
 
         public static string AddTopSources(LevelDefinition level) => PlaceSources(level,
-            Enumerable.Range(0, 10).Select(column => new BoardCoordinate(0, column)).Where(cell => LevelFlowRules.Active(level, cell)));
+            Enumerable.Range(0, BoardDefinition.DefaultColumns).Select(column => new BoardCoordinate(0, column)).Where(cell => LevelFlowRules.Active(level, cell)));
 
         public static string PlaceRecovery(LevelDefinition level, IEnumerable<BoardCoordinate> coordinates, bool erase = false)
         {

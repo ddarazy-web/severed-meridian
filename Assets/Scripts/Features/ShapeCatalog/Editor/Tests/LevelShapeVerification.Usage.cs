@@ -1,3 +1,4 @@
+using Board;
 using System;
 using System.Collections;
 using System.IO;
@@ -28,7 +29,7 @@ namespace Levels.Editor
             var random = new System.Random(Guid.NewGuid().GetHashCode());
             using (SerializedObject edit = new SerializedObject(source))
             {
-                for (int i = 0; i < 100; i++) edit.FindProperty("board.cells").GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i < 10 || random.Next(2) == 0;
+                for (int i = 0; i < BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns; i++) edit.FindProperty("board.cells").GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i < BoardDefinition.DefaultColumns || random.Next(2) == 0;
                 edit.FindProperty("obstacles").arraySize = 2;
                 edit.ApplyModifiedPropertiesWithoutUndo();
             }

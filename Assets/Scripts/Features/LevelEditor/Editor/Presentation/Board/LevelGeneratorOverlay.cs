@@ -26,9 +26,9 @@ namespace Levels.Editor
         private Vector2 Point(BoardCoordinate vertex)
         {
             VisualElement first = parent.Q<Button>("initial-cell-0-0");
-            VisualElement last = parent.Q<Button>("initial-cell-9-9");
+            VisualElement last = parent.Q<Button>($"initial-cell-{state.Rows - 1}-{state.Columns - 1}");
             Vector2 a = this.WorldToLocal(first.worldBound.center), b = this.WorldToLocal(last.worldBound.center);
-            return a + new Vector2((vertex.Column - 0.5f) * (b.x - a.x) / 9, (vertex.Row - 0.5f) * (b.y - a.y) / 9);
+            return a + new Vector2((vertex.Column - 0.5f) * (b.x - a.x) / (state.Columns - 1), (vertex.Row - 0.5f) * (b.y - a.y) / (state.Rows - 1));
         }
         private void Draw(MeshGenerationContext context)
         {

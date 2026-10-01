@@ -68,7 +68,7 @@ namespace Levels
 
             if (board.Rows != BoardDefinition.DefaultRows || board.Columns != BoardDefinition.DefaultColumns)
                 issues.Add(new LevelValidationIssue(LevelValidationCode.UnsupportedBoardSize,
-                    "현재 단계에서는 10×10 보드만 지원합니다.", "board"));
+                    "현재 단계에서는 9×9 보드만 지원합니다.", "board"));
             if (board.Cells == null || board.Rows <= 0 || board.Columns <= 0 ||
                 board.Cells.Count != (long)board.Rows * board.Columns)
                 issues.Add(new LevelValidationIssue(LevelValidationCode.CellCountMismatch,

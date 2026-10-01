@@ -62,7 +62,7 @@ namespace Levels.Editor
             residual.ResolveAutomaticMatch(); MatchPattern pattern = MatchQuery.Find(residual.State).Single();
             TurnEffectContext next = (TurnEffectContext)Invoke(typeof(TurnEffectContext), "NextTurn", residual.TurnEffects, 2);
             Check((bool)Invoke(typeof(TurnEffectContext), "WasProcessed", next, pattern) && !next.HasDamagedWeb(C(0, 0)), "다음 턴 잔존 이력 유지/피해만 초기화");
-            Invoke(typeof(TurnEffectContext), "RecordArrival", next, C(9, 9), C(8, 8), 1, true);
+            Invoke(typeof(TurnEffectContext), "RecordArrival", next, C(8, 8), C(7, 7), 1, true);
             Check((bool)Invoke(typeof(TurnEffectContext), "WasProcessed", next, pattern), "무관한 칸 유입은 잔존 매칭 재처리 안 함");
             LevelObstacleEditing.Apply(closed, new PlacementBrush { Layer = PlacementLayer.Cover, Kind = (int)CoverKind.Web, Durability = 3 }, new[] { C(0, 0), C(0, 1), C(0, 2) });
             StartingBoardSearch invalidStart = new StartingBoardSearch(closed, 12345);
@@ -74,7 +74,7 @@ namespace Levels.Editor
             for (int seed = 0; seed < 8; seed++)
             {
                 BoardActionExecutor auto = (BoardActionExecutor)Invoke(typeof(CascadeVerification), "Automatic", null, line, seed);
-                Web(auto.State.CellAt(C(0, 1)), 2); Invoke(typeof(TurnEffectContext), "RecordArrival", auto.TurnEffects, C(9, 9), C(0, 1), 1, true);
+                Web(auto.State.CellAt(C(0, 1)), 2); Invoke(typeof(TurnEffectContext), "RecordArrival", auto.TurnEffects, C(8, 8), C(0, 1), 1, true);
                 CascadeStepResult result = auto.ResolveAutomaticMatch(); spawned.Add(result.Decisions[0].Spawn.Value);
                 Check(result.IsApplied && result.RandomAfter - result.RandomBefore == 1 && result.Decisions[0].Spawn.Value.Column != 3, "최단거리 동률만 난수1 " + seed);
             }
@@ -86,13 +86,13 @@ namespace Levels.Editor
                 LevelRuntimeState state = Build(definition);
                 foreach (RuntimeCell cell in state.Cells.Where(c => c.Content == RuntimeContent.Normal))
                 {
-                    if (cell.Coordinate.Equals(C(0, 0)) || cell.Coordinate.Equals(C(9, 9))) { Set(cell, "Color", RabbitColor.Type1); Web(cell, 2); Set(cell, "DustDurability", 1); }
+                    if (cell.Coordinate.Equals(C(0, 0)) || cell.Coordinate.Equals(C(8, 8))) { Set(cell, "Color", RabbitColor.Type1); Web(cell, 2); Set(cell, "DustDurability", 1); }
                     else { Set(cell, "Content", RuntimeContent.Empty); Set(cell, "Color", null); }
                 }
                 BoardActionExecutor executor = new BoardActionExecutor(state); BoardActionResult action = executor.Swap(C(4, 4), C(4, 5));
                 Check(action.IsApplied && action.RandomAfter == action.RandomBefore && executor.TurnEffects.Combination.Transformations.Count == 0 && executor.TurnEffects.Combination.CoveredTargets.Count == 2,
                     "묶인 색만 있는 자석 조합 허용/비변환/무난수 " + pair);
-                Check(executor.State.CellAt(C(0, 0)).CoverDurability == 1 && executor.State.CellAt(C(9, 9)).CoverDurability == 1 && executor.State.Missions.All(m => m.Progress == 0),
+                Check(executor.State.CellAt(C(0, 0)).CoverDurability == 1 && executor.State.CellAt(C(8, 8)).CoverDurability == 1 && executor.State.Missions.All(m => m.Progress == 0),
                     "묶인 대상만 덮개 피해/내용물·먼지·완료 집계 보존 " + pair);
             }
 
@@ -117,7 +117,7 @@ namespace Levels.Editor
 
             LevelDefinition ranges = Make(); Missions(ranges); LevelRuntimeState rangeState = Build(ranges);
             Set(rangeState.Missions[0], "Progress", 100); Set(rangeState.Missions[1], "Progress", 100);
-            Web(rangeState.CellAt(C(5, 5)), 1); Web(rangeState.CellAt(C(5, 6)), 2); Set(rangeState.CellAt(C(9, 9)), "DustDurability", 1);
+            Web(rangeState.CellAt(C(5, 5)), 1); Web(rangeState.CellAt(C(5, 6)), 2); Set(rangeState.CellAt(C(8, 8)), "DustDurability", 1);
             TurnEffectContext rangeContext = Context(); DroneTargetManager rangesManager = (DroneTargetManager)Invoke(typeof(TargetPowerVerification), "Manager", null, rangeState, rangeContext);
             Check(rangesManager.QueryArea(PowerArea.Horizontal).Any(t => t.Impacts.Count == 2) && rangesManager.QueryArea(PowerArea.Blast3).Any(t => t.Impacts.Count == 2),
                 "층 미션의 줄/3x3 직접 범위 기여 조회");

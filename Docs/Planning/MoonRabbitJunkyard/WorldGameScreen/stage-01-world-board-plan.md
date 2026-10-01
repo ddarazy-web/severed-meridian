@@ -1,5 +1,7 @@
 # 1단계 월드 보드 표시 Implementation Plan
 
+> 2026-10-01 변경: 현재 보드는 **9×9(81칸)**이다. 아래 10×10·100칸 계획과 검증 수치는 당시 기록으로 보존하며 9×9 검증 결과가 아니다. 현재 크기·표시·데이터 전환 기준은 [9×9 보드 결정](../../../Decisions/MoonRabbitJunkyard/2026-10-01-nine-by-nine-board.md)을 따른다.
+
 > **For agentic workers:** `superpowers:executing-plans`를 사용하여 아래 작업을 순서대로 수행한다. 이 문서는 하위 에이전트 실행을 요구하지 않는다.
 
 **Goal:** 기존 레벨을 Addressables 이미지로 월드 공간에 표시하는 독립 게임 씬을 완성한다.

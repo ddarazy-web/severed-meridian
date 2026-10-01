@@ -43,16 +43,16 @@ namespace Levels.Editor
                 LevelDefinition level = (LevelDefinition)Invoke(typeof(RecoveryVerification), "PlayFixture");
                 JsonUtility.FromJsonOverwrite("{\"moveCount\":" + moves + "}", level);
                 LevelRuntimeState raw = Build(level); BoardActionExecutor executor = new BoardActionExecutor(raw);
-                Check(executor.Activate(C(9, 0)).IsApplied, "회수 완료 행동 " + moves);
+                Check(executor.Activate(C(8, 0)).IsApplied, "회수 완료 행동 " + moves);
                 Finish(executor, true);
                 Check(executor.Outcome?.Kind == BoardOutcomeKind.Won && executor.State.Recoveries.Count == 2 && executor.Outcome.MovesRemaining == moves - 1, "모든 회수·정착 후 성공 우선 " + moves);
                 Check(executor.IsLastPang && executor.Phase == BoardActionPhase.WaitingForLastPang, "성공 확정과 라스트팡 단계 분리 " + moves);
                 BoardOutcome outcome = executor.Outcome; string original = Snapshot(outcome), board = Snapshot(executor.State);
-                Check(!executor.Activate(C(9, 0)).IsApplied && Snapshot(executor.State) == board, "성공 후 사용자 입력·난수 차단 " + moves);
+                Check(!executor.Activate(C(8, 0)).IsApplied && Snapshot(executor.State) == board, "성공 후 사용자 입력·난수 차단 " + moves);
                 Finish(executor);
                 Check(executor.Phase == BoardActionPhase.Stopped && ReferenceEquals(outcome, executor.Outcome) && Snapshot(outcome) == original && executor.LastPangWaves > 0, "라스트팡 실제 발동·종료·성공 기록 보존 " + moves);
                 Check(!executor.State.Cells.Any(c => !c.Cover.HasValue && c.Content >= RuntimeContent.Rocket && c.Content <= RuntimeContent.Magnet), "남은 노출 파워 모두 처리 " + moves);
-                BoardActionExecutor skip = new BoardActionExecutor(raw); skip.Activate(C(9, 0)); Finish(skip, true);
+                BoardActionExecutor skip = new BoardActionExecutor(raw); skip.Activate(C(8, 0)); Finish(skip, true);
                 string beforeSkip = Snapshot(skip.State);
                 Check(skip.SkipLastPang().IsApplied && skip.Outcome.Kind == BoardOutcomeKind.Won && Snapshot(skip.State) == beforeSkip && !skip.HasPendingCascade, "건너뛰기 성공·보드·난수 보존 " + moves);
                 BoardOutcome skipped = skip.Outcome;
@@ -60,9 +60,9 @@ namespace Levels.Editor
                 UnityEngine.Object.DestroyImmediate(level);
             }
             LevelDefinition lose = (LevelDefinition)Invoke(typeof(PowerEffectVerification), "Make");
-            Invoke(typeof(PowerEffectVerification), "Place", lose, C(9, 0), InitialBlockKind.Rocket, RocketDirection.Horizontal, RabbitColor.Type1);
+            Invoke(typeof(PowerEffectVerification), "Place", lose, C(8, 0), InitialBlockKind.Rocket, RocketDirection.Horizontal, RabbitColor.Type1);
             JsonUtility.FromJsonOverwrite("{\"moveCount\":1,\"missions\":[{\"kind\":0,\"color\":0,\"count\":100}]}", lose);
-            BoardActionExecutor lost = new BoardActionExecutor(Build(lose)); lost.Activate(C(9, 0)); Finish(lost);
+            BoardActionExecutor lost = new BoardActionExecutor(Build(lose)); lost.Activate(C(8, 0)); Finish(lost);
             Check(lost.Outcome?.Kind == BoardOutcomeKind.MovesExhausted && !lost.HasPendingCascade, "마지막 수 목표 미달성 패배");
             LevelRuntimeState emptyMissions = Build(lose);
             typeof(LevelRuntimeState).GetField("<Missions>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(emptyMissions, Array.AsReadOnly(Array.Empty<RuntimeMission>()));

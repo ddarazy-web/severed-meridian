@@ -22,7 +22,7 @@ namespace Levels.Editor
         private static LevelDefinition Make()
         {
             Dictionary<BoardCoordinate, int> colors = new Dictionary<BoardCoordinate, int>();
-            for (int row = 0; row < 10; row++) for (int column = 0; column < 10; column++) colors[C(row, column)] = (row * 2 + column) % 5;
+            for (int row = 0; row < BoardDefinition.DefaultRows; row++) for (int column = 0; column < BoardDefinition.DefaultColumns; column++) colors[C(row, column)] = (row * 2 + column) % 5;
             LevelDefinition level = (LevelDefinition)typeof(BoardActionVerification).GetMethod("Make", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { colors, 20 });
             Definitions.Add(level); return level;
         }
@@ -63,24 +63,24 @@ namespace Levels.Editor
         private static void DataChecks()
         {
             foreach (RocketDirection direction in new[] { RocketDirection.Horizontal, RocketDirection.Vertical })
-                foreach (BoardCoordinate origin in new[] { C(0, 0), C(4, 4), C(9, 9) })
+                foreach (BoardCoordinate origin in new[] { C(0, 0), C(4, 4), C(8, 8) })
                 {
                     LevelDefinition level = Make(); Place(level, origin, InitialBlockKind.Rocket, direction);
                     BoardActionExecutor executor = new BoardActionExecutor(Build(level));
                     string before = Snapshot(executor.State); int draws = executor.State.Random.DrawCount;
-                    BoardCoordinate[] expected = Enumerable.Range(0, 10).Select(i => direction == RocketDirection.Horizontal ? C(origin.Row, i) : C(i, origin.Column)).ToArray();
+                    BoardCoordinate[] expected = Enumerable.Range(0, BoardDefinition.DefaultColumns).Select(i => direction == RocketDirection.Horizontal ? C(origin.Row, i) : C(i, origin.Column)).ToArray();
                     Check(PowerEffectResolution.Range(executor.State, origin).SequenceEqual(expected) && Snapshot(executor.State) == before, "로켓 범위/읽기 전용 " + direction + origin);
                     BoardActionResult result = executor.Activate(origin);
-                    Check(result.IsApplied && result.Effects.Count(e => e.Response == DamageResponse.Remove) == 9 && expected.All(c => executor.State.CellAt(c).Content == RuntimeContent.Empty), "로켓 끝까지 제거 " + direction + origin);
+                    Check(result.IsApplied && result.Effects.Count(e => e.Response == DamageResponse.Remove) == BoardDefinition.DefaultColumns - 1 && expected.All(c => executor.State.CellAt(c).Content == RuntimeContent.Empty), "로켓 끝까지 제거 " + direction + origin);
                     Check(executor.State.Cells.Where(c => !expected.Contains(c.Coordinate)).All(c => c.Content == RuntimeContent.Normal), "로켓 범위 밖 보존 " + direction + origin);
                     Check(result.MovesAfter == 19 && result.RandomAfter == draws && executor.Phase == BoardActionPhase.WaitingForFall, "로켓 한 수/난수/낙하 대기 " + direction + origin);
                 }
-            foreach (BoardCoordinate origin in new[] { C(0, 0), C(0, 5), C(5, 5), C(9, 9) })
+            foreach (BoardCoordinate origin in new[] { C(0, 0), C(0, 5), C(5, 5), C(8, 8) })
             {
                 LevelDefinition level = Make(); Place(level, origin, InitialBlockKind.Bomb);
                 BoardActionExecutor executor = new BoardActionExecutor(Build(level));
-                BoardCoordinate[] expected = (from row in Enumerable.Range(Math.Max(0, origin.Row - 1), origin.Row == 0 || origin.Row == 9 ? 2 : 3)
-                    from column in Enumerable.Range(Math.Max(0, origin.Column - 1), origin.Column == 0 || origin.Column == 9 ? 2 : 3) select C(row, column)).ToArray();
+                BoardCoordinate[] expected = (from row in Enumerable.Range(Math.Max(0, origin.Row - 1), origin.Row == 0 || origin.Row == BoardDefinition.DefaultRows - 1 ? 2 : 3)
+                    from column in Enumerable.Range(Math.Max(0, origin.Column - 1), origin.Column == 0 || origin.Column == BoardDefinition.DefaultColumns - 1 ? 2 : 3) select C(row, column)).ToArray();
                 BoardActionResult result = executor.Activate(origin);
                 Check(result.IsApplied && expected.All(c => executor.State.CellAt(c).Content == RuntimeContent.Empty) &&
                     executor.State.Cells.Count(c => c.Content == RuntimeContent.Empty) == expected.Length, "폭탄 중앙/경계 정답 " + origin);
@@ -90,11 +90,11 @@ namespace Levels.Editor
                 LevelDefinition level = Make(); Place(level, C(4, 0), InitialBlockKind.Rocket); Crate(level, C(4, 4), durability); Crate(level, C(4, 7), 2);
                 LevelFlowEditing.SetWalls(level, new[] { new BoardEdge(C(4, 3), C(4, 4)) }, false);
                 LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Block, Erase = true }, new[] { C(4, 2) });
-                using (SerializedObject edit = new SerializedObject(level)) { edit.FindProperty("board.cells").GetArrayElementAtIndex(42).FindPropertyRelative("isActive").boolValue = false; edit.ApplyModifiedPropertiesWithoutUndo(); }
+                using (SerializedObject edit = new SerializedObject(level)) { edit.FindProperty("board.cells").GetArrayElementAtIndex(4 * BoardDefinition.DefaultColumns + 2).FindPropertyRelative("isActive").boolValue = false; edit.ApplyModifiedPropertiesWithoutUndo(); }
                 BoardActionExecutor executor = new BoardActionExecutor(Build(level));
                 BoardActionResult result = executor.Activate(C(4, 0));
                 Check(result.IsApplied && executor.State.Obstacles[0].Durability == durability - 1 && executor.State.Obstacles[1].Durability == 1, "상자 내구도/각 상자 독립 " + durability);
-                Check(executor.State.CellAt(C(4, 9)).Content == RuntimeContent.Empty && !executor.State.CellAt(C(4, 2)).IsActive, "벽/구멍/상자 관통 " + durability);
+                Check(executor.State.CellAt(C(4, 8)).Content == RuntimeContent.Empty && !executor.State.CellAt(C(4, 2)).IsActive, "벽/구멍/상자 관통 " + durability);
                 Check((executor.State.CellAt(C(4, 4)).Content == RuntimeContent.Empty) == (durability == 1) && executor.State.Obstacles[0].Definition.Durability == durability, "파괴/정의/인덱스 보존 " + durability);
             }
             ProtectionAndRollback(); AdjacentAndQueries(); Rejections(); GeneratedProtection(); SupplementalChecks();
@@ -117,10 +117,10 @@ namespace Levels.Editor
             }
             foreach (InitialBlockKind kind in new[] { InitialBlockKind.Drone, InitialBlockKind.Magnet })
             {
-                LevelDefinition level = ProtectionBoard(); Place(level, C(6, 9), kind);
+                LevelDefinition level = ProtectionBoard(); Place(level, C(6, 8), kind);
                 BoardActionExecutor executor = new BoardActionExecutor(Build(level));
                 BoardActionResult result = executor.Swap(C(3, 3), C(2, 3));
-                Check(result.IsApplied && result.Effects.Any(e => e.Target.Equals(C(6, 9)) && e.Response == DamageResponse.Activate), "14단계 드론/자석 피격 단독 연쇄 지원 " + kind);
+                Check(result.IsApplied && result.Effects.Any(e => e.Target.Equals(C(6, 8)) && e.Response == DamageResponse.Activate), "14단계 드론/자석 피격 단독 연쇄 지원 " + kind);
                 Check(Snapshot(new BoardActionExecutor(Build(level)).Swap(C(3, 3), C(2, 3))) == Snapshot(result), "지원된 연쇄 재실행 결정적 " + kind);
             }
         }
@@ -210,7 +210,7 @@ namespace Levels.Editor
             }
             LevelDefinition hole = Make(); Place(hole, C(3, 3), InitialBlockKind.Bomb);
             LevelObstacleEditing.Apply(hole, new PlacementBrush { Layer = PlacementLayer.Block, Erase = true }, new[] { C(2, 3) });
-            using (SerializedObject edit = new SerializedObject(hole)) { edit.FindProperty("board.cells").GetArrayElementAtIndex(23).FindPropertyRelative("isActive").boolValue = false; edit.ApplyModifiedPropertiesWithoutUndo(); }
+            using (SerializedObject edit = new SerializedObject(hole)) { edit.FindProperty("board.cells").GetArrayElementAtIndex(2 * BoardDefinition.DefaultColumns + 3).FindPropertyRelative("isActive").boolValue = false; edit.ApplyModifiedPropertiesWithoutUndo(); }
             LevelFlowEditing.SetWalls(hole, new[] { new BoardEdge(C(3, 3), C(3, 4)) }, false);
             BoardActionExecutor bomb = new BoardActionExecutor(Build(hole));
             BoardActionResult burst = bomb.Activate(C(3, 3));

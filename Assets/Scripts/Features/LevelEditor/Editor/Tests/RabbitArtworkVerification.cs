@@ -33,8 +33,8 @@ namespace Levels.Editor
         private static IEnumerator CaptureSteps()
         {
             visualLevel = ScriptableObject.CreateInstance<LevelDefinition>();
-            for (int row = 0; row < 10; row++)
-                for (int column = 0; column < 10; column++)
+            for (int row = 0; row < BoardDefinition.DefaultRows; row++)
+                for (int column = 0; column < BoardDefinition.DefaultColumns; column++)
                     LevelBoardEditing.Apply(visualLevel, LevelBrush.Fixed, (RabbitColor)((row * 2 + column) % 5), new[] { new BoardCoordinate(row, column) });
             LevelMissionEditing.Add(visualLevel);
             visualWindow = ScriptableObject.CreateInstance<LevelEditorWindow>();
@@ -44,16 +44,21 @@ namespace Levels.Editor
             using (NavigationSubmitEvent evt = NavigationSubmitEvent.GetPooled()) { evt.target = palette; palette.SendEvent(evt); }
             if (visualWindow.rootVisualElement.Q<LevelBoardView>().Color != RabbitColor.Type3)
                 throw new InvalidOperationException("그림 버튼의 실제 브러시 선택 실패");
+            while (LevelBoardArtwork.Rabbit(RabbitColor.Type1) == null) yield return null;
+            if (visualWindow.rootVisualElement.Q<LevelBoardView>().CellAt(new BoardCoordinate(0, 0))
+                .Q("board-content-art")?.style.backgroundImage.value.sprite == null)
+                throw new InvalidOperationException("캡처 대상 편집 보드 이미지가 아직 표시되지 않았습니다.");
             for (int i = 0; i < 10; i++) yield return null;
             Directory.CreateDirectory("Logs/BotAnalysisVerification");
-            MethodInfo capture = typeof(BotAnalysisVerification).GetMethod("CaptureAnalysis", BindingFlags.Static | BindingFlags.NonPublic);
-            capture.Invoke(null, new object[] { "rabbit-editor.png" });
+            visualWindow.titleContent = new GUIContent("Artwork Verification 9x9");
+            BotAnalysisVerification.CaptureWindow("rabbit-editor.png", "Artwork Verification 9x9");
             File.Copy("Logs/BotAnalysisVerification/rabbit-editor.png", "Logs/RabbitArtworkVerification/editor.png", true);
             visualWindow.SelectWorkspaceTab(2);
             LevelInitialStatePanel panel = visualWindow.ActiveSimulationPanel;
             typeof(LevelInitialStatePanel).GetMethod("Build", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(panel, null);
             for (int i = 0; i < 15; i++) yield return null;
-            capture.Invoke(null, new object[] { "rabbit-play.png" });
+            visualWindow.titleContent = new GUIContent("Artwork Verification 9x9");
+            BotAnalysisVerification.CaptureWindow("rabbit-play.png", "Artwork Verification 9x9");
             File.Copy("Logs/BotAnalysisVerification/rabbit-play.png", "Logs/RabbitArtworkVerification/play.png", true);
         }
 

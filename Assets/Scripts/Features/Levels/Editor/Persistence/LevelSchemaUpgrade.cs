@@ -50,6 +50,7 @@ namespace Levels.Editor
             Undo.IncrementCurrentGroup();
             Undo.SetCurrentGroupName("5단계 레벨 형식으로 전환");
             data.ApplyModifiedProperties();
+            level.OnAfterDeserialize();
             Undo.IncrementCurrentGroup();
             message = "버전 4로 전환했습니다. 생성구·미션을 명시적으로 설정하고 저장하세요.";
             return true;

@@ -9,8 +9,8 @@ namespace Levels.Editor
 {
     public sealed class LevelBoardView : VisualElement
     {
-        public const int CellSize = 40;
-        private readonly Label[] cells = new Label[100];
+        public const int CellSize = 44;
+        private readonly Label[] cells = new Label[BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns];
         private readonly VisualElement bodies = new VisualElement { name = "large-bodies", pickingMode = PickingMode.Ignore };
         private readonly VisualElement supplyMarks = new VisualElement { name = "supply-markers", pickingMode = PickingMode.Ignore };
         private readonly HashSet<BoardCoordinate> visited = new HashSet<BoardCoordinate>();
@@ -51,8 +51,8 @@ namespace Levels.Editor
         public LevelBoardView()
         {
             name = "level-board";
-            style.width = style.minWidth = CellSize * 10;
-            style.height = style.minHeight = CellSize * 10;
+            style.width = style.minWidth = CellSize * BoardDefinition.DefaultColumns;
+            style.height = style.minHeight = CellSize * BoardDefinition.DefaultRows;
             style.flexShrink = 0;
             style.flexDirection = FlexDirection.Row;
             style.flexWrap = Wrap.Wrap;
@@ -72,11 +72,11 @@ namespace Levels.Editor
             RegisterCallback<PointerDownEvent>(OnPointerDown);
             bodies.style.position = Position.Absolute;
             bodies.style.left = bodies.style.top = 0;
-            bodies.style.width = bodies.style.height = CellSize * 10;
+            bodies.style.width = bodies.style.height = CellSize * BoardDefinition.DefaultColumns;
             Add(bodies);
             supplyMarks.style.position = Position.Absolute;
             supplyMarks.style.left = supplyMarks.style.top = 0;
-            supplyMarks.style.width = supplyMarks.style.height = CellSize * 10;
+            supplyMarks.style.width = supplyMarks.style.height = CellSize * BoardDefinition.DefaultColumns;
             Add(supplyMarks);
             RegisterCallback<PointerMoveEvent>(OnPointerMove);
             RegisterCallback<PointerUpEvent>(OnPointerUp);
@@ -103,7 +103,7 @@ namespace Levels.Editor
             Redraw();
         }
 
-        public VisualElement CellAt(BoardCoordinate coordinate) => cells[coordinate.Row * 10 + coordinate.Column];
+        public VisualElement CellAt(BoardCoordinate coordinate) => cells[coordinate.Row * BoardDefinition.DefaultColumns + coordinate.Column];
 
         public void BeginMove(int index)
         {
@@ -235,7 +235,7 @@ namespace Levels.Editor
                 Vector2 delta = position - start;
                 // 격자 경계 통과 시점을 분할해 빠른 이동 중 지나간 모든 칸을 방문한다.
                 List<float> cuts = new List<float> { 0, 1 };
-                for (int boundary = 0; boundary <= 10; boundary++)
+                for (int boundary = 0; boundary <= BoardDefinition.DefaultColumns; boundary++)
                 {
                     float x = boundary * CellSize;
                     if (delta.x != 0)
@@ -264,7 +264,7 @@ namespace Levels.Editor
         private static bool TryCoordinate(Vector2 position, out BoardCoordinate coordinate)
         {
             coordinate = new BoardCoordinate(Mathf.FloorToInt(position.y / CellSize), Mathf.FloorToInt(position.x / CellSize));
-            return position.x >= 0 && position.y >= 0 && position.x < CellSize * 10 && position.y < CellSize * 10;
+            return position.x >= 0 && position.y >= 0 && position.x < CellSize * BoardDefinition.DefaultColumns && position.y < CellSize * BoardDefinition.DefaultRows;
         }
 
         private void Redraw()
@@ -282,7 +282,7 @@ namespace Levels.Editor
                 : LevelObstacleEditing.PlacementError(level, Placement, hover.Value);
             for (int i = 0; i < cells.Length; i++)
             {
-                BoardCoordinate coordinate = new BoardCoordinate(i / 10, i % 10);
+                BoardCoordinate coordinate = new BoardCoordinate(i / BoardDefinition.DefaultColumns, i % BoardDefinition.DefaultColumns);
                 Label cell = cells[i];
                 CellDefinition definition = default;
                 bool hasCell = level != null && level.Board != null && level.Board.TryGetCell(coordinate, out definition);
@@ -453,6 +453,11 @@ namespace Levels.Editor
                 if (portalTexture != null && showRabbit) cell.Q<VisualElement>("board-content-art").BringToFront();
                 VisualElement contentArt = cell.Q<VisualElement>("board-content-art");
                 contentArt.style.left = contentArt.style.right = contentArt.style.top = contentArt.style.bottom = portalTexture != null ? 9 : 0;
+                Sprite contentSprite = showRabbit ? rabbitTexture : null;
+                float contentScale = BoardArtworkLayout.ContentScale(contentSprite);
+                contentArt.style.scale = new Scale(Vector3.one * contentScale);
+                contentArt.style.translate = new Translate(Length.Percent(100 * contentScale * BoardArtworkLayout.ContentOffsetX(contentSprite)),
+                    Length.Percent(-100 * contentScale * BoardArtworkLayout.ContentOffsetY(contentSprite)));
                 SetArtworkLayer(cell, "board-cover-art", coverTexture);
                 if (coverTexture != null)
                 {
@@ -510,9 +515,10 @@ namespace Levels.Editor
                     label.text = "";
                     label.style.backgroundImage = new StyleBackground(bodyTexture);
                     label.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
-                    label.style.left = obstacle.Coordinate.Column * CellSize + 3;
-                    label.style.top = obstacle.Coordinate.Row * CellSize + 3;
-                    label.style.width = label.style.height = CellSize * 2 - 6;
+                    float inset = CellSize * (2 - BoardArtworkLayout.LargeObstacleSize) * 0.5f;
+                    label.style.left = obstacle.Coordinate.Column * CellSize + inset;
+                    label.style.top = obstacle.Coordinate.Row * CellSize + inset;
+                    label.style.width = label.style.height = CellSize * BoardArtworkLayout.LargeObstacleSize;
                 }
                 bodies.Add(label);
             }

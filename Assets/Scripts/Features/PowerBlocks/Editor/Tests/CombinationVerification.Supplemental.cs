@@ -42,7 +42,7 @@ namespace Levels.Editor
             foreach (int count in new[] { 0, 1 })
             {
                 LevelRuntimeState state = Build(Make(5));
-                foreach (RuntimeCell cell in state.Cells.Where(c => c.Content == RuntimeContent.Normal && (!c.Coordinate.Equals(C(9, 9)) || count == 0)))
+                foreach (RuntimeCell cell in state.Cells.Where(c => c.Content == RuntimeContent.Normal && (!c.Coordinate.Equals(C(8, 8)) || count == 0)))
                 { Set(cell, "Content", RuntimeContent.Empty); Set(cell, "Color", null); }
                 BoardActionExecutor executor = new BoardActionExecutor(state);
                 Check(executor.Swap(C(4, 4), C(4, 5)).IsApplied, "드론 조합 목표 부족 입력 " + count);
@@ -56,16 +56,16 @@ namespace Levels.Editor
                 // 단일색 대량 변환은 시작 보드 조건과 별개인 효과 단계 입력으로 구성한다.
                 BoardActionExecutor executor = new BoardActionExecutor(state); Set(executor, "Turn", 1);
                 BoardActionResult result = executor.Swap(C(4, 4), C(4, 5));
-                Check(result.IsApplied && executor.TurnEffects.Combination.Transformations.Count == 98 && executor.State.Missions[0].Progress == 98, "단일색 98개 일괄 변환/집계 " + pair);
-                Check(result.RandomAfter == (pair == 6 ? 98 : 0), "단일색 선택 난수 없음/방향만 난수 " + pair);
-                if (pair == 8) Check(executor.TurnEffects.Targeting.Count(r => r.Event == TargetingEvent.NoTarget) == 98, "선변환 완료 후 일반 대상 없는 드론98대 종료");
+                Check(result.IsApplied && executor.TurnEffects.Combination.Transformations.Count == BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns - 2 && executor.State.Missions[0].Progress == BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns - 2, "단일색 79개 일괄 변환/집계 " + pair);
+                Check(result.RandomAfter == (pair == 6 ? BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns - 2 : 0), "단일색 선택 난수 없음/방향만 난수 " + pair);
+                if (pair == 8) Check(executor.TurnEffects.Targeting.Count(r => r.Event == TargetingEvent.NoTarget) == BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns - 2, "선변환 완료 후 일반 대상 없는 드론79대 종료");
             }
             HashSet<RocketDirection> directions = new HashSet<RocketDirection>();
             for (int seed = 0; seed < 12; seed++)
             {
                 LevelRuntimeState state = Build(Make(6), seed);
                 foreach (RuntimeCell cell in state.Cells.Where(c => c.Content == RuntimeContent.Normal)) Set(cell, "Color", RabbitColor.Type1);
-                Set(state.CellAt(C(9, 9)), "Color", RabbitColor.Type2);
+                Set(state.CellAt(C(8, 8)), "Color", RabbitColor.Type2);
                 BoardActionExecutor executor = new BoardActionExecutor(state); Set(executor, "Turn", 1); executor.Swap(C(4, 4), C(4, 5));
                 PowerCombination combination = executor.TurnEffects.Combination; System.Random expected = new System.Random(seed);
                 RabbitColor color = (RabbitColor)expected.Next(2);
@@ -78,7 +78,7 @@ namespace Levels.Editor
 
             // 조준 칸을 남겨 둔 채 직접 범위의 미션 대상만 소실시킨다.
             LevelDefinition partial = Make(); JsonUtility.FromJsonOverwrite("{\"missions\":[{\"kind\":1,\"count\":2}]}", partial);
-            Invoke(typeof(PowerEffectVerification), "Crate", null, partial, C(5, 5), 1); Invoke(typeof(PowerEffectVerification), "Crate", null, partial, C(9, 9), 1);
+            Invoke(typeof(PowerEffectVerification), "Crate", null, partial, C(5, 5), 1); Invoke(typeof(PowerEffectVerification), "Crate", null, partial, C(8, 8), 1);
             LevelRuntimeState partialState = Build(partial); TurnEffectContext context = Context(); DroneTargetManager manager = Manager(partialState, context);
             int request = (int)Invoke(typeof(DroneTargetManager), "RequestArea", manager, C(0, 0), PowerArea.Horizontal);
             BoardCoordinate anchor = context.Targeting.Last().Target.Value;
@@ -98,10 +98,10 @@ namespace Levels.Editor
             Check(crates.State.Missions[0].Progress == 1 && crates.State.Obstacles[0].Durability == 0 && crates.State.Obstacles[1].Durability == 2, "전판 조합 완전 제거만 미션/다층 상자1피해");
 
             LevelDefinition gaps = (LevelDefinition)Invoke(typeof(BoardActionVerification), "Make", null,
-                new Dictionary<BoardCoordinate, int> { [C(0, 0)] = 0, [C(0, 1)] = 0, [C(0, 9)] = 1, [C(9, 1)] = 2, [C(9, 9)] = 3 }, 20);
+                new Dictionary<BoardCoordinate, int> { [C(0, 0)] = 0, [C(0, 1)] = 0, [C(0, 8)] = 1, [C(8, 1)] = 2, [C(8, 8)] = 3 }, 20);
             Place(gaps, C(0, 0), InitialBlockKind.Rocket); Place(gaps, C(0, 1), InitialBlockKind.Rocket);
             BoardActionExecutor holes = new BoardActionExecutor(Build(gaps)); BoardActionResult holeAction = holes.Swap(C(0, 0), C(0, 1));
-            Check(holeAction.IsApplied && holes.State.CellAt(C(0, 9)).Content == RuntimeContent.Empty && holes.State.CellAt(C(9, 1)).Content == RuntimeContent.Empty && holes.State.CellAt(C(9, 9)).Content == RuntimeContent.Normal,
+            Check(holeAction.IsApplied && holes.State.CellAt(C(0, 8)).Content == RuntimeContent.Empty && holes.State.CellAt(C(8, 1)).Content == RuntimeContent.Empty && holes.State.CellAt(C(8, 8)).Content == RuntimeContent.Normal,
                 "비활성 구간 관통/분리 구역 정확한 십자 범위");
 
             LevelDefinition last = Make(5); JsonUtility.FromJsonOverwrite("{\"moveCount\":1}", last);
@@ -110,7 +110,7 @@ namespace Levels.Editor
 
             // 공통 실행기의 실패 작업 사본을 검사한다. 실제 입력은 미지원 보드를 사전 거절한다.
             LevelDefinition failure = Make(9);
-            Invoke(typeof(PowerEffectVerification), "Crate", null, failure, C(9, 9), 1);
+            Invoke(typeof(PowerEffectVerification), "Crate", null, failure, C(8, 8), 1);
             LevelRuntimeState source = Build(failure); string original = Snapshot(source);
             LevelRuntimeState work = new BoardActionExecutor(source).State;
             typeof(RuntimeObstacle).GetField("<Definition>k__BackingField", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(work.Obstacles[0],

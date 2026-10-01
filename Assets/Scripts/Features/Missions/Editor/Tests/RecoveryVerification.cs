@@ -23,7 +23,7 @@ namespace Levels.Editor
         {
             LevelDefinition level = (LevelDefinition)Invoke(typeof(PowerEffectVerification), "Make");
             JsonUtility.FromJsonOverwrite("{\"missions\":[{\"kind\":" + (int)MissionKind.Recovery + ",\"count\":" + target + "}]}", level);
-            string error = LevelFlowEditing.SetArrival(level, C(9, 0), false);
+            string error = LevelFlowEditing.SetArrival(level, C(8, 0), false);
             if (error != null) throw new InvalidOperationException(error);
             return level;
         }
@@ -52,9 +52,9 @@ namespace Levels.Editor
         }
         private static void DataChecks()
         {
-            LevelDefinition initial = Make(1); Place(initial, C(9, 0));
+            LevelDefinition initial = Make(1); Place(initial, C(8, 0));
             LevelRuntimeState raw = Build(initial); BoardActionExecutor executor = new BoardActionExecutor(raw);
-            Check(raw.Recoveries.Count == 0 && raw.CellAt(C(9, 0)).Content == RuntimeContent.Recovery, "읽기 전용 초기 구성 보존");
+            Check(raw.Recoveries.Count == 0 && raw.CellAt(C(8, 0)).Content == RuntimeContent.Recovery, "읽기 전용 초기 구성 보존");
             Check(executor.State.Recoveries.Count == 1 && executor.State.Missions[0].Progress == 1 && executor.State.MovesRemaining == 20, "실행 초기 회수·미션·이동 수");
             SettlementResult initialized = executor.LastSettlement;
             Check(initialized.IsApplied && initialized.State.Recoveries.Count == 1, "초기 회수 후 정착 중복 없음");
@@ -71,7 +71,7 @@ namespace Levels.Editor
 
             foreach (int seed in Enumerable.Range(1, 12))
             {
-                LevelDefinition level = Make(2); Place(level, C(9, 8));
+                LevelDefinition level = Make(2); Place(level, C(8, 8));
                 BoardCoordinate[] sources = { C(0, 0), C(0, 2), C(0, 4) };
                 string error = LevelSupplyEditing.PlaceSources(level, sources);
                 if (error == null) error = LevelSupplyEditing.SetSourceProperty(level, new[] { 0, 1, 2 }, "mode", (int)SupplyMode.MaintainRecovery);
@@ -95,7 +95,7 @@ namespace Levels.Editor
             Empty(fixedState, fixedState.Cells.Select(c => c.Coordinate).ToArray());
             SettlementResult fixedResult = SettlementResolution.Resolve(fixedState);
             Check(fixedResult.IsApplied && fixedResult.State.Recoveries.Count == 3 && fixedResult.State.Missions[0].Progress == 2, "고정 목록 목표 초과도 순서대로 공급·집계 상한");
-            Check(fixedResult.State.Supply.Sources[0].ItemIndex == 2 && fixedResult.State.CellAt(C(9, 0)).Content == RuntimeContent.Bomb, "목록 소진 Stop·일반 파워 도착 유지");
+            Check(fixedResult.State.Supply.Sources[0].ItemIndex == 2 && fixedResult.State.CellAt(C(8, 0)).Content == RuntimeContent.Bomb, "목록 소진 Stop·일반 파워 도착 유지");
             UnityEngine.Object.DestroyImmediate(fixedLevel);
             TargetChecks();
         }

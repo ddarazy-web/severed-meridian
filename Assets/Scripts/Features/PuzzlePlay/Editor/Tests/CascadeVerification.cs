@@ -109,7 +109,7 @@ namespace Levels.Editor
             Check(!executor.HasPendingCascade && executor.CascadeRounds >= 1 && executor.Turn == 1 && executor.State.MovesRemaining == 2, "실제 연쇄 종료/추가 수 차감 없음");
             BoardCoordinate power = executor.State.Cells.First(c => c.Content == RuntimeContent.Rocket).Coordinate;
             Check(executor.TurnEffects.IsProtected(power) && executor.Phase == BoardActionPhase.Ready && executor.State.Cells.Any(c => c.IsActive && c.Content == RuntimeContent.Empty), "빈칸 보드 다음 수 허용/이전 파워 보호 유지");
-            string before = Context(executor); Check(!executor.Swap(C(0, 0), C(9, 9)).IsApplied && Context(executor) == before, "잘못된 다음 입력 문맥 보존");
+            string before = Context(executor); Check(!executor.Swap(C(0, 0), C(8, 8)).IsApplied && Context(executor) == before, "잘못된 다음 입력 문맥 보존");
             Check(executor.Activate(power).IsApplied && executor.Turn == 2 && executor.State.MovesRemaining == 1 && !executor.TurnEffects.IsProtected(power), "다음 유효 행동 보호 해제/수와 턴 1회 변경");
 
             foreach (RuntimeContent content in new[] { RuntimeContent.Empty, RuntimeContent.Drone, RuntimeContent.Rocket })

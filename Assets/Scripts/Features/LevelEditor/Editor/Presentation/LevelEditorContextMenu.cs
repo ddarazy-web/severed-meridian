@@ -13,7 +13,7 @@ namespace Levels.Editor
         {
             if (!LevelBoardEditing.CanEdit(level) || board.IsDragging) return;
             Vector2 point = board.WorldToLocal(evt.mousePosition);
-            if (point.x < 0 || point.y < 0 || point.x >= 400 || point.y >= 400) return;
+            if (point.x < 0 || point.y < 0 || point.x >= (LevelBoardView.CellSize * BoardDefinition.DefaultColumns) || point.y >= (LevelBoardView.CellSize * BoardDefinition.DefaultRows)) return;
             BoardCoordinate coordinate = new BoardCoordinate((int)(point.y / LevelBoardView.CellSize), (int)(point.x / LevelBoardView.CellSize));
             if (board.Brush == LevelBrush.SourceSelect || board.Brush == LevelBrush.Source || board.Brush == LevelBrush.SourceErase)
             {

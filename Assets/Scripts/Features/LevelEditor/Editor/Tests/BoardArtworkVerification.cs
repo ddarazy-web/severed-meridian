@@ -135,12 +135,12 @@ namespace Levels.Editor
                     Require(LevelBoardArtwork.Portal(pair, false) != null && LevelBoardArtwork.Portal(pair, true) != null, "포털 쌍 " + pair, results);
                 for (int frame = 0; frame < 4; frame++) Require(LevelBoardArtwork.ChargePulse(frame) != null, "충전 빛 프레임 " + frame, results);
                 LevelFlowEditing.SetPortal(level, new BoardCoordinate(6, 6), new BoardCoordinate(7, 7));
-                LevelFlowEditing.SetArrival(level, new BoardCoordinate(9, 9), false);
+                LevelFlowEditing.SetArrival(level, new BoardCoordinate(8, 7), false);
                 LevelFlowEditing.SetWalls(level, new[] { new BoardEdge(new BoardCoordinate(6, 0), new BoardCoordinate(6, 1)) }, false);
                 board.Display(level, null);
                 Require(board.CellAt(new BoardCoordinate(6, 6)).Q("board-portal-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Portal(0, false), "입구 보드 이미지", results);
                 Require(board.CellAt(new BoardCoordinate(7, 7)).Q("board-portal-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Portal(0, true), "출구 보드 이미지", results);
-                Require(board.CellAt(new BoardCoordinate(9, 9)).Q("board-arrival-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Arrival, "회수 도착 바닥", results);
+                Require(board.CellAt(new BoardCoordinate(8, 7)).Q("board-arrival-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Arrival, "회수 도착 바닥", results);
                 LevelFlowOverlay flow = new LevelFlowOverlay(); flow.Display(level, FlowTool.None);
                 Require(flow.Q("wall-art-0")?.style.backgroundImage.value.sprite != null && flow.Q("wall-art-0").pickingMode == PickingMode.Ignore, "벽 이미지와 입력 통과", results);
                 Require(LevelSupplyEditing.PlaceRecovery(level, new[] { new BoardCoordinate(8, 8) }) == null, "회수 부품 배치", results);
@@ -150,10 +150,10 @@ namespace Levels.Editor
                 Require(board.CellAt(new BoardCoordinate(8, 8)).Q("board-content-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Recovery, "회수 부품 보드 이미지", results);
                 Require(flow.Q("wire-art-0-0")?.style.backgroundImage.value.sprite != null && flow.Q("terminal-start-art-0")?.style.backgroundImage.value.sprite != null &&
                     flow.Q("charge-art-0")?.style.backgroundImage.value.sprite != null, "전선·단자·충전 미리보기 이미지", results);
-                LevelBoardEditing.Apply(level, LevelBrush.Deactivate, RabbitColor.Type1, new[] { new BoardCoordinate(8, 6) });
+                LevelBoardEditing.Apply(level, LevelBrush.Deactivate, RabbitColor.Type1, new[] { new BoardCoordinate(7, 6) });
                 board.Display(level, null);
-                Require(board.CellAt(new BoardCoordinate(8, 6)).Q("board-floor-art").style.display.value == DisplayStyle.None, "비활성 칸 바닥 숨김", results);
-                Require(LevelBoardArtwork.Floor(level, new BoardCoordinate(9, 7), 0)?.name.Contains("inner-top-left") == true, "구멍 주변 오목한 모서리", results);
+                Require(board.CellAt(new BoardCoordinate(7, 6)).Q("board-floor-art").style.display.value == DisplayStyle.None, "비활성 칸 바닥 숨김", results);
+                Require(LevelBoardArtwork.Floor(level, new BoardCoordinate(8, 7), 0)?.name.Contains("inner-top-left") == true, "구멍 주변 오목한 모서리", results);
                 before = JsonUtility.ToJson(level);
                 LevelEditorWindow window = ScriptableObject.CreateInstance<LevelEditorWindow>();
                 try

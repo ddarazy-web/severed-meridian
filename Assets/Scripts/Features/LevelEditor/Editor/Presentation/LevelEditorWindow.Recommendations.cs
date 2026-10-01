@@ -1,3 +1,4 @@
+using Board;
 using System;
 using System.IO;
 using System.Linq;
@@ -140,7 +141,7 @@ namespace Levels.Editor
             };
             refreshShapeUsage();
 
-            // 선택된 모양의 100칸 미리보기와 설명은 일치해야 하므로 같은 결과 객체에서 함께 그린다.
+            // 선택된 모양의 81칸 미리보기와 설명은 일치해야 하므로 같은 결과 객체에서 함께 그린다.
             void ShowDetail()
             {
                 detail.Clear();
@@ -164,13 +165,13 @@ namespace Levels.Editor
                 Label description = new Label($"등록 당시 레벨: {shape.SourceName} · 레벨 {shape.SourceLevelNumber}\n사용 칸 {shape.Cells.Count(active => active)}개 · 장애물 기록은 참고용입니다.");
                 description.style.whiteSpace = WhiteSpace.Normal; detail.Add(description);
                 VisualElement preview = new VisualElement { name = "shape-preview", tooltip = "색 칸은 사용할 칸, 어두운 칸은 비활성 칸입니다. 생성 후 칸을 더 편집할 수 있습니다." };
-                for (int r = 0; r < 10; r++)
+                for (int r = 0; r < BoardDefinition.DefaultRows; r++)
                 {
                     VisualElement row = new VisualElement(); row.style.flexDirection = FlexDirection.Row;
-                    for (int c = 0; c < 10; c++)
+                    for (int c = 0; c < BoardDefinition.DefaultColumns; c++)
                     {
                         VisualElement cell = new VisualElement(); cell.style.width = 14; cell.style.height = 14; cell.style.marginRight = 1; cell.style.marginBottom = 1;
-                        cell.style.backgroundColor = (Color)(shape.Cells[r*10+c] ? new Color32(92,184,168,255) : new Color32(55,59,65,255)); row.Add(cell);
+                        cell.style.backgroundColor = (Color)(shape.Cells[r*BoardDefinition.DefaultColumns+c] ? new Color32(92,184,168,255) : new Color32(55,59,65,255)); row.Add(cell);
                     }
                     preview.Add(row);
                 }

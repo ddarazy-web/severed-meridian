@@ -19,7 +19,7 @@ namespace Levels.Editor
             Check(port != null && Graph.panel.Pick(port.worldBound.center) == port, "통로 연결점 실제 적중 " + name);
             Send(port, EventType.MouseDown, port.worldBound.center);
         }
-        private static Vector2 PortalPoint(int row, int column) => Graph.LocalToWorld(new Vector2(column * 40 + 20, row * 40 + 20));
+        private static Vector2 PortalPoint(int row, int column) => Graph.LocalToWorld(new Vector2(column * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f, row * LevelBoardView.CellSize + LevelBoardView.CellSize / 2f));
         private static IEnumerator PortalUI()
         {
             Check(LevelFlowEditing.SetPortal(level, C(1, 1), null) == null, "기존 버튼/API 미연결 입구 생성");
@@ -30,7 +30,7 @@ namespace Levels.Editor
             string before = JsonUtility.ToJson(level);
             Check(LevelFlowEditing.PortalError(level, C(1, 1), C(2, 7)) == null && JsonUtility.ToJson(level) == before, "통로 미리보기 검증 원본 불변");
             PortalDown("portal-entrance-1-1"); yield return null;
-            Check(Graph.Query<VisualElement>().ToList().Count(e => e.name?.StartsWith("portal-candidate-") == true) == 99 && Graph.Q("portal-candidate-1-1") == null,
+            Check(Graph.Query<VisualElement>().ToList().Count(e => e.name?.StartsWith("portal-candidate-") == true) == 80 && Graph.Q("portal-candidate-1-1") == null,
                 "입구 드래그 시작 시 연결 가능 칸 전체 강조/자기 칸 제외");
             Send(Graph, EventType.MouseDrag, PortalPoint(2, 7)); yield return null; Capture("portal-forward-preview.png");
             Check(Graph.Q("portal-candidate-2-7").resolvedStyle.borderTopColor == Color.yellow && Graph.Q("portal-candidate-2-7").pickingMode == PickingMode.Ignore,

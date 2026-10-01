@@ -17,28 +17,9 @@ MonoBehaviour:
   moveCount: 20
   colors: 00000000010000000200000003000000
   board:
-    rows: 10
-    columns: 10
+    rows: 9
+    columns: 9
     cells:
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
-    - isActive: 1
     - isActive: 1
     - isActive: 1
     - isActive: 1
@@ -224,54 +205,6 @@ MonoBehaviour:
     fixedColor: 0
     rocketDirection: 0
   - coordinate:
-      row: 1
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 2
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 3
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 4
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 5
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 6
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 7
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 8
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
       row: 2
       column: 0
     kind: 0
@@ -310,54 +243,6 @@ MonoBehaviour:
   - coordinate:
       row: 8
       column: 0
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
-      column: 1
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
-      column: 2
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
-      column: 3
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
-      column: 4
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
-      column: 5
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
-      column: 6
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
-      column: 7
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
-      column: 8
     kind: 0
     fixedColor: 0
     rocketDirection: 0
@@ -693,24 +578,6 @@ MonoBehaviour:
     rocketDirection: 0
   - coordinate:
       row: 0
-      column: 0
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 0
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
-      column: 9
-    kind: 0
-    fixedColor: 0
-    rocketDirection: 0
-  - coordinate:
-      row: 9
       column: 0
     kind: 0
     fixedColor: 0
@@ -785,12 +652,6 @@ MonoBehaviour:
     - coordinate:
         row: 0
         column: 0
-      mode: 0
-      exhaustion: 0
-      items: []
-    - coordinate:
-        row: 0
-        column: 9
       mode: 0
       exhaustion: 0
       items: []

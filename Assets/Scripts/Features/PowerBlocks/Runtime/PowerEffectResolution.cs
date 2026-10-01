@@ -110,7 +110,7 @@ namespace Simulation
             foreach (MatchedBlockChange match in consumed.Reverse())
                 PushAdjacent(match.Coordinate, DamageCause.AdjacentMatch, match.OriginalColor, match.HitGroup);
             int events = 0;
-            // 10×10의 모든 파워가 전판을 타격해도 충분한 상한. 비정상 반복은 작업 사본 전체를 거절한다.
+            // 9×9의 모든 파워가 전판을 타격해도 충분한 상한. 비정상 반복은 작업 사본 전체를 거절한다.
             int limit = System.Math.Max(1024, work.Cells.Count * work.Cells.Count * 8);
             while (pending.Count > 0 || landings.Count > 0)
             {

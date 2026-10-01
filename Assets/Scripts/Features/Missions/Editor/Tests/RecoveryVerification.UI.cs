@@ -1,3 +1,4 @@
+using Board;
 using System;
 using System.Collections;
 using System.IO;
@@ -22,11 +23,11 @@ namespace Levels.Editor
         private static string Snapshot(object value) => (string)Invoke(typeof(LevelInitialStateVerification), "Snapshot", value);
         private static LevelDefinition PlayFixture()
         {
-            LevelDefinition level = Make(2); Place(level, C(8, 0));
-            string error = LevelFlowEditing.SetPath(level, Enumerable.Range(0, 10).Select(row => C(row, 0)).ToArray());
+            LevelDefinition level = Make(2); Place(level, C(7, 0));
+            string error = LevelFlowEditing.SetPath(level, Enumerable.Range(0, BoardDefinition.DefaultRows).Select(row => C(row, 0)).ToArray());
             if (error != null) throw new InvalidOperationException(error);
-            Invoke(typeof(PowerEffectVerification), "Place", level, C(9, 0), InitialBlockKind.Rocket, RocketDirection.Vertical, RabbitColor.Type1);
-            Invoke(typeof(PowerEffectVerification), "Place", level, C(7, 0), InitialBlockKind.Drone, RocketDirection.Horizontal, RabbitColor.Type1);
+            Invoke(typeof(PowerEffectVerification), "Place", level, C(8, 0), InitialBlockKind.Rocket, RocketDirection.Vertical, RabbitColor.Type1);
+            Invoke(typeof(PowerEffectVerification), "Place", level, C(6, 0), InitialBlockKind.Drone, RocketDirection.Horizontal, RabbitColor.Type1);
             Invoke(typeof(SettlementVerification), "Source", level, C(0, 0), SupplyExhaustion.Stop,
                 new[] { new SupplyItem(SupplyKind.Recovery), new SupplyItem(SupplyKind.Bomb) });
             return level;
@@ -44,7 +45,7 @@ namespace Levels.Editor
         private static string Replay(LevelDefinition level)
         {
             BoardActionExecutor executor = new BoardActionExecutor(Build(level));
-            BoardActionResult action = executor.Activate(C(9, 0));
+            BoardActionResult action = executor.Activate(C(8, 0));
             if (!action.IsApplied) throw new InvalidOperationException(action.Message);
             Finish(executor);
             if (executor.State.Recoveries.Count != 2 || executor.State.Missions[0].Progress != 2)
@@ -107,13 +108,13 @@ namespace Levels.Editor
             root.Q<ObjectField>("initial-level").value = fixture; Click("initial-build");
             for (int wait = 0; (window.IsSearching || window.CurrentState == null) && wait < 100; wait++) yield return null;
             string json = JsonUtility.ToJson(fixture), file = File.ReadAllText(AssetDatabase.GetAssetPath(fixture)), initial = Snapshot(window.CurrentState);
-            Check(root.Q<Button>("initial-cell-8-0").text.Contains("회수") && root.Q<Button>("initial-cell-9-0").text.Contains("도착"), "부품과 도착 바닥 보드 표시");
+            Check(root.Q<Button>("initial-cell-7-0").text.Contains("회수") && root.Q<Button>("initial-cell-8-0").text.Contains("도착"), "부품과 도착 바닥 보드 표시");
             Capture("initial-wide.png");
             BoardActionExecutor manual = new BoardActionExecutor(window.CurrentState);
             root.Q<Toggle>("execution-mode").value = true;
-            Click("initial-cell-9-0"); Click("execution-activate"); yield return null;
-            Check(window.Execution.LastApplied.IsApplied && window.Execution.State.CellAt(C(8, 0)).Content == RuntimeContent.Recovery, "실제 UI 로켓 관통·부품 불파괴");
-            manual.Activate(C(9, 0)); Finish(manual);
+            Click("initial-cell-8-0"); Click("execution-activate"); yield return null;
+            Check(window.Execution.LastApplied.IsApplied && window.Execution.State.CellAt(C(7, 0)).Content == RuntimeContent.Recovery, "실제 UI 로켓 관통·부품 불파괴");
+            manual.Activate(C(8, 0)); Finish(manual);
             Click("execution-settle"); yield return null;
             Check(window.Execution.State.Recoveries.Count == 2 && root.Q<Label>("initial-overview").text.Contains("회수 부품"), "실제 낙하·고정 공급·회수 기록");
             Capture("settled-wide.png");
@@ -130,7 +131,7 @@ namespace Levels.Editor
             Check(JsonUtility.ToJson(fixture) == json && File.ReadAllText(AssetDatabase.GetAssetPath(fixture)) == file && !EditorUtility.IsDirty(fixture) && Snapshot(window.CurrentState) == initial, "원본 JSON·파일·dirty·초기 사본 보존");
             Click("execution-reset"); yield return null;
             Check(window.Execution == null && Snapshot(window.CurrentState) == initial, "동일 시드 재시작·회수 및 커서 초기화");
-            root.Q<Toggle>("execution-mode").value = true; Click("initial-cell-9-0"); Click("execution-activate"); Click("execution-cascade");
+            root.Q<Toggle>("execution-mode").value = true; Click("initial-cell-8-0"); Click("execution-activate"); Click("execution-cascade");
             root.Q<ObjectField>("initial-level").value = null; yield return null;
             Check(window.Execution == null && !window.CascadeRunning, "레벨 전환시 연쇄 실행 해제");
             window.Owner.Close(); yield return null;

@@ -57,12 +57,12 @@ namespace GameScreen.Editor
                 UsePreviewOnly(preview);
                 await Ready(preview);
                 Check(preview.State.LevelNumber == 1, "MemoryPack 레벨 1 로드");
-                Check(preview.State.Cells.Count == 100, "10×10 상태 전달");
+                Check(preview.State.Cells.Count == BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns, "9×9 상태 전달");
                 bool bundled = UnityEngine.AddressableAssets.Addressables.ResourceLocators.Any(locator =>
                     locator.Locate("MoonRabbitBoard-Blocks", typeof(UnityEngine.U2D.SpriteAtlas), out IList<UnityEngine.ResourceManagement.ResourceLocations.IResourceLocation> locations) && locations.Any(location => location.ProviderId.Contains("BundledAssetProvider")));
                 Check(bundled, "실제 Addressables 번들에서 블록 아틀라스 로드");
                 PuzzleWorldBoard board = UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>();
-                Camera camera = UnityEngine.Object.FindFirstObjectByType<Camera>();
+                Camera camera = (Camera)typeof(PuzzleBoardPreview).GetField("boardCamera", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(preview);
                 await UniTask.DelayFrame(3);
                 File.WriteAllLines(Output + "renderers.txt", board.GetComponentsInChildren<SpriteRenderer>().Take(12).Select(item =>
                     item.name + " order=" + item.sortingOrder + " sprite=" + item.sprite?.name + " texture=" + item.sprite?.texture?.name + " shader=" + item.sharedMaterial.shader.name));
@@ -77,12 +77,12 @@ namespace GameScreen.Editor
                 art = new PuzzleArtwork();
                 await art.PrepareAsync(state, CancellationToken.None);
                 board.Draw(state, art);
-                Check(!board.transform.Find("Cell-9-0").gameObject.activeSelf, "비활성 칸 숨김");
+                Check(!board.transform.Find("Cell-" + (BoardDefinition.DefaultRows - 1) + "-0").gameObject.activeSelf, "비활성 칸 숨김");
                 Check(board.GetComponentsInChildren<SpriteRenderer>().Count(item => item.name.StartsWith("Obstacle-")) == state.Obstacles.Count,
                     "2×2 포함 장애물당 이미지 하나");
                 Transform large = board.transform.Find("Obstacle-" + state.Obstacles.First(item => item.Definition.Kind == ObstacleKind.Appliance).Definition.Id);
-                Check(Vector3.Distance(large.localPosition, new Vector3(-4, 0, 0)) < 0.001f, "2×2 장애물 중심 좌표");
-                Check(Mathf.Abs(large.GetComponent<SpriteRenderer>().bounds.size.x - 1.92f) < 0.01f, "2×2 장애물 크기");
+                Check(Vector3.Distance(large.localPosition, PuzzleWorldBoard.CellPosition(new BoardCoordinate(4, 0)) + new Vector3(0.5f, -0.5f, 0)) < 0.001f, "2×2 장애물 중심 좌표");
+                Check(Mathf.Abs(large.GetComponent<SpriteRenderer>().bounds.size.x - 2.16f) < 0.01f, "2×2 장애물 확대 크기");
                 Transform layered = board.transform.Find("Cell-1-0");
                 Check(layered.Find("Cover").GetComponent<SpriteRenderer>().sprite != null, "거미줄 실제 이미지");
                 Check(board.transform.Find("Cell-1-8/Cover").GetComponent<SpriteRenderer>().sprite != null, "곰팡이 실제 이미지");
@@ -172,7 +172,8 @@ namespace GameScreen.Editor
                 if (fixture != null) UnityEngine.Object.Destroy(fixture);
                 File.WriteAllLines(Output + "results.txt", results);
                 AddressableAssetSettingsDefaultObject.Settings.ActivePlayModeDataBuilderIndex = SessionState.GetInt(Key + ".PreviousBuilder", 0);
-                EditorApplication.Exit(results.Any(item => item.StartsWith("FAIL")) ? 1 : 0);
+                if (Application.isBatchMode) EditorApplication.Exit(results.Any(item => item.StartsWith("FAIL")) ? 1 : 0);
+                else EditorApplication.ExitPlaymode();
             }
         }
 
@@ -230,14 +231,14 @@ namespace GameScreen.Editor
             LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Cover, Kind = (int)CoverKind.Web, Durability = 2 }, new[] { new BoardCoordinate(1, 0) });
             LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Dust, Durability = 2 }, new[] { new BoardCoordinate(1, 0) });
             LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Cover, Kind = (int)CoverKind.Mold, Durability = 1 }, new[] { new BoardCoordinate(1, 8) });
-            LevelBoardEditing.Apply(level, LevelBrush.Deactivate, RabbitColor.Type1, new[] { new BoardCoordinate(9, 0) });
+            LevelBoardEditing.Apply(level, LevelBrush.Deactivate, RabbitColor.Type1, new[] { new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0) });
             LevelFlowEditing.SetPortal(level, new BoardCoordinate(6, 6), new BoardCoordinate(7, 7));
             LevelFlowEditing.SetMerge(level, new BoardCoordinate(7, 7), LevelFlowRules.Sources(level, new BoardCoordinate(7, 7)));
-            LevelFlowEditing.SetArrival(level, new BoardCoordinate(9, 9), false);
+            LevelFlowEditing.SetArrival(level, new BoardCoordinate(BoardDefinition.DefaultRows - 1, BoardDefinition.DefaultColumns - 1), false);
             LevelFlowEditing.SetWalls(level, new[] { new BoardEdge(new BoardCoordinate(6, 0), new BoardCoordinate(6, 1)),
                 new BoardEdge(new BoardCoordinate(7, 0), new BoardCoordinate(7, 1)),
-                new BoardEdge(new BoardCoordinate(8, 1), new BoardCoordinate(9, 1)) }, false);
-            LevelSupplyEditing.PlaceRecovery(level, new[] { new BoardCoordinate(8, 8) });
+                new BoardEdge(new BoardCoordinate(7, 1), new BoardCoordinate(8, 1)) }, false);
+            LevelSupplyEditing.PlaceRecovery(level, new[] { new BoardCoordinate(7, 8) });
             string error = LevelConnectionEditing.ConnectAuto(level, level.Obstacles[5].Id, level.Obstacles[4].Id, new BoardCoordinate(4, 4));
             if (error != null) throw new Exception(error);
             using (SerializedObject data = new SerializedObject(level))
@@ -266,7 +267,7 @@ namespace GameScreen.Editor
                 using (SerializedObject data = new SerializedObject(small))
                 {
                     SerializedProperty cells = data.FindProperty("board.cells");
-                    for (int i = 0; i < cells.arraySize; i++) cells.GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i / 10 < 2 && i % 10 < 2;
+                    for (int i = 0; i < cells.arraySize; i++) cells.GetArrayElementAtIndex(i).FindPropertyRelative("isActive").boolValue = i / BoardDefinition.DefaultColumns < 2 && i % BoardDefinition.DefaultColumns < 2;
                     data.ApplyModifiedPropertiesWithoutUndo();
                 }
                 LevelStateBuildResult built = LevelStateBuilder.Build(small, 1);
@@ -274,7 +275,7 @@ namespace GameScreen.Editor
                 board.Draw(built.State, art);
                 Set(preview, "State", built.State);
                 typeof(PuzzleBoardPreview).GetMethod("CenterCamera", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(preview, null);
-                Check(Vector3.Distance(camera.transform.position, new Vector3(-4, 4, -10)) < 0.001f, "작은 맵 활성 영역 중앙 정렬");
+                Check(Vector3.Distance(camera.transform.position, PuzzleWorldBoard.CellPosition(new BoardCoordinate(0, 0)) + new Vector3(0.5f, -0.5f, -10)) < 0.001f, "작은 맵 활성 영역 중앙 정렬");
                 Check(board.GetComponentsInChildren<PuzzleCellView>().Length == 4, "작은 맵 활성 칸만 표시");
                 Check(Mathf.Abs(board.transform.Find("Cell-0-0/Floor").GetComponent<SpriteRenderer>().bounds.size.x - 1) < 0.001f, "작은 맵도 셀 크기 유지");
             }
@@ -368,11 +369,17 @@ namespace GameScreen.Editor
             RenderTexture previous = RenderTexture.active;
             RenderTexture oldTarget = camera.targetTexture;
             float oldSize = camera.orthographicSize;
+            Rect oldRect = camera.rect;
+            float oldAspect = camera.aspect;
             Texture2D image = new Texture2D(width, height, TextureFormat.RGB24, false);
             try
             {
                 camera.targetTexture = target;
-                camera.orthographicSize = 5.7f / Mathf.Min(1, (float)width / height);
+                // UI용 부분 뷰포트 대신 검사 이미지 전체에 월드 보드를 캡처한다.
+                camera.rect = new Rect(0, 0, 1, 1);
+                camera.aspect = (float)width / height;
+                camera.orthographicSize = (PuzzleWorldBoard.HalfHeight + 0.7f) / Mathf.Min(1, (float)width / height);
+                Check(camera.pixelRect == new Rect(0, 0, width, height), "캡처 전체 뷰포트: " + file);
                 camera.Render(); RenderTexture.active = target;
                 image.ReadPixels(new Rect(0, 0, width, height), 0, 0); image.Apply();
                 File.WriteAllBytes(Output + file, image.EncodeToPNG());
@@ -382,6 +389,7 @@ namespace GameScreen.Editor
             finally
             {
                 camera.targetTexture = oldTarget; camera.orthographicSize = oldSize;
+                camera.rect = oldRect; camera.aspect = oldAspect;
                 RenderTexture.active = previous; RenderTexture.ReleaseTemporary(target); UnityEngine.Object.Destroy(image);
             }
         }

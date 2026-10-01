@@ -25,7 +25,7 @@ namespace Levels.Editor
         {
             LevelDefinition level = (LevelDefinition)Invoke(typeof(PowerEffectVerification), "Make");
             JsonUtility.FromJsonOverwrite("{\"missions\":[{\"kind\":0,\"color\":0,\"count\":100}]}", level);
-            Invoke(typeof(PowerEffectVerification), "Place", level, C(9, 9), InitialBlockKind.Rocket, RocketDirection.Horizontal, RabbitColor.Type1);
+            Invoke(typeof(PowerEffectVerification), "Place", level, C(8, 8), InitialBlockKind.Rocket, RocketDirection.Horizontal, RabbitColor.Type1);
             return level;
         }
         private static readonly StartBooster[] Selected = { StartBooster.Rocket, StartBooster.Bomb, StartBooster.Magnet };
@@ -152,7 +152,7 @@ namespace Levels.Editor
             Click("item-Hammer"); Click("execution-reset"); yield return null;
             Check(window.Execution == null && Selected.All(b => !root.Q<Toggle>("booster-" + b).value), "재시작시 아이템 선택·부스터 선택 초기화");
             LevelDefinition waitingLevel = PlayFixture();
-            Invoke(typeof(PowerEffectVerification), "Place", waitingLevel, C(9, 8), InitialBlockKind.Rocket, RocketDirection.Vertical, RabbitColor.Type1);
+            Invoke(typeof(PowerEffectVerification), "Place", waitingLevel, C(8, 8), InitialBlockKind.Rocket, RocketDirection.Vertical, RabbitColor.Type1);
             BoardCoordinate[] coveredCells = Build(waitingLevel).Cells.Where(c => c.Content == RuntimeContent.Normal).Select(c => c.Coordinate).ToArray();
             LevelObstacleEditing.Apply(waitingLevel, new PlacementBrush { Layer = PlacementLayer.Cover, Kind = (int)CoverKind.Web, Durability = 1 }, coveredCells);
             Check(LevelDefinitionValidator.Validate(waitingLevel).Count == 0 && new StartConditionReport(Build(waitingLevel)).IsSatisfied, "부스터 대기 UI 시험의 유효 교환·시작 조건");

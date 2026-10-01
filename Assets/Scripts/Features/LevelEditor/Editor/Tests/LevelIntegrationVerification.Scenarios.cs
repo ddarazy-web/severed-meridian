@@ -35,7 +35,7 @@ namespace Levels.Editor
             Click("validate-level"); yield return null;
             NavigateIssue("InvalidMission:"); yield return null;
             Check(window.rootVisualElement.Q("level-settings-page").resolvedStyle.display == DisplayStyle.Flex, "도착 바닥 누락 오류에서 레벨 설정 이동");
-            Menu("menu-flow", "도착 바닥"); FlowClick(9, 8); yield return null;
+            Menu("menu-flow", "도착 바닥"); FlowClick(8, 8); yield return null;
             Check(level.RecoveryParts.Count == 1 && level.Flow.Arrivals.Count == 1, "회수 대상·도착 바닥·미션 구성");
             for (int attempt = 0; attempt < 10 && LevelDefinitionValidator.Validate(level).Any(issue => issue.Code == LevelValidationCode.InvalidMerge); attempt++)
             {
@@ -109,7 +109,7 @@ namespace Levels.Editor
         private static void WirePoint(int row, int column)
         {
             VisualElement overlay = window.rootVisualElement.Q<LevelFlowOverlay>();
-            Vector2 position = overlay.LocalToWorld(new Vector2(column * 40, row * 40));
+            Vector2 position = overlay.LocalToWorld(new Vector2(column * LevelBoardView.CellSize, row * LevelBoardView.CellSize));
             Event input = new Event { type = EventType.MouseDown, button = 0, mousePosition = position };
             using (PointerDownEvent down = PointerDownEvent.GetPooled(input)) { down.target = overlay; overlay.SendEvent(down); }
             input.type = EventType.MouseUp;

@@ -42,8 +42,8 @@ namespace Levels.Editor
             string neighbor = Snapshot(state.CellAt(C(3, 8)));
             Set(state.Obstacles[0], "Charge", 2); Hit(state, C(4, 4), context);
             Check(state.Missions.All(m => m.Remaining == 0) && !state.Cells.Any(c => c.ObstacleIndex.HasValue), "남은 두 연결 대상 완충 제거/미션 합계");
-            Check(state.CellAt(C(4, 8)).DustDurability == 2 && Snapshot(state.CellAt(C(3, 8))) == neighbor, "간접 제거 먼지/주변 블록 보존");
-            Hit(state, C(4, 8), context); Check(state.Missions[0].Progress == 1, "파괴 후 대기 타격 미션 중복 없음");
+            Check(state.CellAt(C(4, 7)).DustDurability == 2 && Snapshot(state.CellAt(C(3, 8))) == neighbor, "간접 제거 먼지/주변 블록 보존");
+            Hit(state, C(4, 7), context); Check(state.Missions[0].Progress == 1, "파괴 후 대기 타격 미션 중복 없음");
             UnityEngine.Object.DestroyImmediate(level);
 
             foreach (PowerArea area in new[] { PowerArea.Point, PowerArea.Blast3 })

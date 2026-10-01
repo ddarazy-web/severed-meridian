@@ -24,6 +24,7 @@ namespace GameScreen
             // 기본 파워는 초기 배치에 없어도 매칭 결과로 생길 수 있다.
             string[] common = { "Blocks/", "PowerBlocks/", PuzzleArtworkPaths.Floor };
             foreach (string path in common) addresses.Add(BoardSpriteAtlas.AddressFor(path));
+            foreach (RuntimeMission mission in state.Missions) Add(PuzzleArtworkPaths.Mission(mission.Definition));
             // 초기판에 없어도 생성구에서 나올 수 있는 종류를 공급 정의에서 준비한다.
             if (state.Supply.Sources.Any(source => source.Mode == SupplyMode.MaintainScrap || source.Items.Any(item => item.Kind == SupplyKind.Scrap)))
                 Add("Obstacles/Scrap/");

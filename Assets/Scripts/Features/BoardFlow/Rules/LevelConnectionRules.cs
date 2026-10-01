@@ -58,7 +58,7 @@ namespace Levels
             HashSet<BoardCoordinate> visited = new HashSet<BoardCoordinate>();
             foreach (BoardCoordinate vertex in vertices)
             {
-                if (vertex.Row < 0 || vertex.Row > 10 || vertex.Column < 0 || vertex.Column > 10) return "전선 꼭짓점이 보드 밖입니다.";
+                if (vertex.Row < 0 || vertex.Row > BoardDefinition.DefaultRows || vertex.Column < 0 || vertex.Column > BoardDefinition.DefaultColumns) return "전선 꼭짓점이 보드 밖입니다.";
                 if (!visited.Add(vertex)) return "전선은 같은 꼭짓점을 반복할 수 없습니다.";
                 if (level.Obstacles.Any(body => Inside(body, vertex))) return "전선이 2×2 본체 내부를 지납니다.";
             }

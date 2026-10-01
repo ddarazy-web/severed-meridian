@@ -15,14 +15,44 @@ namespace GameScreen
         private readonly List<SpriteRenderer> bodies = new List<SpriteRenderer>();
         private readonly List<SpriteRenderer> decorations = new List<SpriteRenderer>();
         private int bodyCount, decorationCount;
-        public static Vector3 CellPosition(BoardCoordinate at) => new Vector3(at.Column - 4.5f, 4.5f - at.Row, 0);
-        public static Vector3 VertexPosition(BoardCoordinate at) => new Vector3(at.Column - 5, 5 - at.Row, 0);
+        private readonly Dictionary<BoardCoordinate, SpriteRenderer> occupants = new Dictionary<BoardCoordinate, SpriteRenderer>();
+        private SpriteRenderer preview;
+        private Vector3 previewOrigin;
+
+        public SpriteRenderer OccupantAt(BoardCoordinate at) => occupants.TryGetValue(at, out SpriteRenderer image) ? image : null;
+
+        public Vector3 OccupantOrigin(SpriteRenderer image) => image == preview ? previewOrigin : image.transform.localPosition;
+
+        public void Preview(BoardCoordinate at, Vector3 offset)
+        {
+            SpriteRenderer image = OccupantAt(at);
+            if (image != preview)
+            {
+                ClearPreview(); preview = image;
+                if (preview != null) previewOrigin = preview.transform.localPosition;
+            }
+            if (preview != null) preview.transform.localPosition = previewOrigin + preview.transform.parent.InverseTransformVector(transform.TransformVector(offset));
+        }
+
+        public void ClearPreview()
+        {
+            if (preview != null) preview.transform.localPosition = previewOrigin;
+            preview = null;
+        }
+
+        // 교환 재생기가 현재 표시 위치와 원점을 인수한 뒤 호출한다.
+        public void ReleasePreview() => preview = null;
+        public const float HalfWidth = BoardDefinition.DefaultColumns * 0.5f;
+        public const float HalfHeight = BoardDefinition.DefaultRows * 0.5f;
+        public static Vector3 CellPosition(BoardCoordinate at) => new Vector3(at.Column - HalfWidth + 0.5f, HalfHeight - 0.5f - at.Row, 0);
+        public static Vector3 VertexPosition(BoardCoordinate at) => new Vector3(at.Column - HalfWidth, HalfHeight - at.Row, 0);
 
         public void Configure(PuzzleCellView cell, SpriteRenderer obstacle, SpriteRenderer decoration)
         { cellPrefab = cell; obstaclePrefab = obstacle; decorationPrefab = decoration; }
 
         public void Draw(LevelRuntimeState state, PuzzleArtwork art)
         {
+            ClearPreview(); occupants.Clear();
             bodyCount = decorationCount = 0;
             while (cells.Count < state.Cells.Count) cells.Add(Instantiate(cellPrefab, transform));
             HashSet<int> drawn = new HashSet<int>();
@@ -37,13 +67,16 @@ namespace GameScreen
                 view.transform.localPosition = CellPosition(cell.Coordinate);
                 view.Draw(art.Get(PuzzleArtworkPaths.Floor), art.Get(PuzzleArtworkPaths.Dust(cell.DustDurability)),
                     art.Get(PuzzleArtworkPaths.Content(cell)), art.Get(PuzzleArtworkPaths.Cover(cell)));
+                if (cell.Content != RuntimeContent.Empty && cell.Content != RuntimeContent.Obstacle)
+                    occupants[cell.Coordinate] = view.ContentRenderer;
                 if (cell.Content != RuntimeContent.Obstacle || !cell.ObstacleIndex.HasValue || !drawn.Add(cell.ObstacleIndex.Value)) continue;
                 RuntimeObstacle body = state.Obstacles[cell.ObstacleIndex.Value];
                 int size = LevelPlacementRules.Size(body.Definition.Kind);
                 SpriteRenderer image = Take(bodies, obstaclePrefab, bodyCount++);
                 image.name = "Obstacle-" + body.Definition.Id;
-                image.transform.localPosition = CellPosition(body.Definition.Coordinate) + new Vector3((size - 1) * 0.5f, -(size - 1) * 0.5f, 0);
-                PuzzleCellView.Set(image, art.Get(PuzzleArtworkPaths.Obstacle(body)), size * 0.96f);
+                image.transform.localPosition = CellPosition(size == 1 ? cell.Coordinate : body.Definition.Coordinate) + new Vector3((size - 1) * 0.5f, -(size - 1) * 0.5f, 0);
+                    PuzzleCellView.Set(image, art.Get(PuzzleArtworkPaths.Obstacle(body)), size == 2 ? BoardArtworkLayout.LargeObstacleSize : 0.96f);
+                if (size == 1) occupants[cell.Coordinate] = image;
             }
             foreach (BoardEdge wall in state.Flow.Walls)
             {

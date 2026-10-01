@@ -9,3 +9,5 @@
 - [등록형 맵 모양 목록](MoonRabbitJunkyard/63_등록형맵모양목록_설계결정.md)
 - [29단계 평가 기준 결정 — ADR-29-01](MoonRabbitJunkyard/81_29단계_평가기준결정.md)
 
+
+- [9×9 보드 전환 — ADR-2026-10-01](MoonRabbitJunkyard/2026-10-01-nine-by-nine-board.md)

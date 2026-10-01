@@ -41,6 +41,14 @@ namespace Levels.Editor
                 atlas = new BoardSpriteAtlas(address);
                 atlases.Add(address, atlas);
             }
+            if (!EditorApplication.isPlaying)
+            {
+                // 창 복원 중에는 초기 씬이 아직 열리는 중일 수 있으므로 로드를 다음 에디터 갱신으로 미룬다.
+                UniTaskCompletionSource ready = new UniTaskCompletionSource();
+                void Resume() { EditorApplication.update -= Resume; ready.TrySetResult(); }
+                EditorApplication.update += Resume;
+                await ready.Task;
+            }
             await atlas.LoadAsync();
         }
 

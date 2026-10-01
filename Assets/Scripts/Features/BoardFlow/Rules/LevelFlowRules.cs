@@ -64,9 +64,9 @@ namespace Levels
         {
             Dictionary<BoardCoordinate, BoardCoordinate> graph = new Dictionary<BoardCoordinate, BoardCoordinate>();
             // 현재 에디터의 지원 크기만 검사한다. 잘못된 크기로 거대한 탐색을 시작하지 않는다.
-            if (level?.Board == null || level.Board.Rows != 10 || level.Board.Columns != 10) return graph;
-            for (int row = 0; row < 10; row++)
-                for (int column = 0; column < 10; column++)
+            if (level?.Board == null || level.Board.Rows != BoardDefinition.DefaultRows || level.Board.Columns != BoardDefinition.DefaultColumns) return graph;
+            for (int row = 0; row < BoardDefinition.DefaultRows; row++)
+                for (int column = 0; column < BoardDefinition.DefaultColumns; column++)
                 {
                     BoardCoordinate cell = new BoardCoordinate(row, column);
                     if (Next(level, cell, out BoardCoordinate next)) graph[cell] = next;

@@ -43,7 +43,7 @@ namespace Levels.Editor
             focusable = true;
             style.position = Position.Absolute;
             style.left = style.top = 0;
-            style.width = style.height = 400;
+            style.width = style.height = (LevelBoardView.CellSize * BoardDefinition.DefaultColumns);
             generateVisualContent += Draw;
             RegisterCallback<PointerDownEvent>(Down);
             RegisterCallback<PointerMoveEvent>(Move);
@@ -127,20 +127,20 @@ namespace Levels.Editor
 
         private static bool Cell(Vector2 point, out BoardCoordinate cell)
         {
-            cell = new BoardCoordinate(Mathf.FloorToInt(point.y / 40), Mathf.FloorToInt(point.x / 40));
-            return point.x >= 0 && point.y >= 0 && point.x < 400 && point.y < 400;
+            cell = new BoardCoordinate(Mathf.FloorToInt(point.y / LevelBoardView.CellSize), Mathf.FloorToInt(point.x / LevelBoardView.CellSize));
+            return point.x >= 0 && point.y >= 0 && point.x < (LevelBoardView.CellSize * BoardDefinition.DefaultColumns) && point.y < (LevelBoardView.CellSize * BoardDefinition.DefaultRows);
         }
 
-        private static BoardCoordinate Vertex(Vector2 point) => new BoardCoordinate(Mathf.Clamp(Mathf.RoundToInt(point.y / 40), 0, 10), Mathf.Clamp(Mathf.RoundToInt(point.x / 40), 0, 10));
+        private static BoardCoordinate Vertex(Vector2 point) => new BoardCoordinate(Mathf.Clamp(Mathf.RoundToInt(point.y / LevelBoardView.CellSize), 0, BoardDefinition.DefaultRows), Mathf.Clamp(Mathf.RoundToInt(point.x / LevelBoardView.CellSize), 0, BoardDefinition.DefaultColumns));
         private static bool Edge(Vector2 point, out BoardEdge edge)
         {
             edge = default;
             if (!Cell(point, out BoardCoordinate cell)) return false;
-            int column = Mathf.RoundToInt(point.x / 40), row = Mathf.RoundToInt(point.y / 40);
-            float dx = Mathf.Abs(point.x - column * 40), dy = Mathf.Abs(point.y - row * 40);
-            if (dx <= dy && column > 0 && column < 10 && dx <= 12)
+            int column = Mathf.RoundToInt(point.x / LevelBoardView.CellSize), row = Mathf.RoundToInt(point.y / LevelBoardView.CellSize);
+            float dx = Mathf.Abs(point.x - column * LevelBoardView.CellSize), dy = Mathf.Abs(point.y - row * LevelBoardView.CellSize);
+            if (dx <= dy && column > 0 && column < BoardDefinition.DefaultColumns && dx <= 12)
                 edge = new BoardEdge(new BoardCoordinate(cell.Row, column - 1), new BoardCoordinate(cell.Row, column));
-            else if (row > 0 && row < 10 && dy <= 12)
+            else if (row > 0 && row < BoardDefinition.DefaultRows && dy <= 12)
                 edge = new BoardEdge(new BoardCoordinate(row - 1, cell.Column), new BoardCoordinate(row, cell.Column));
             else return false;
             return true;
@@ -155,7 +155,7 @@ namespace Levels.Editor
             Vector2 point = this.WorldToLocal(evt.position);
             if (tool == FlowTool.Wire)
             {
-                if (point.x < 0 || point.y < 0 || point.x > 400 || point.y > 400) return;
+                if (point.x < 0 || point.y < 0 || point.x > (LevelBoardView.CellSize * BoardDefinition.DefaultColumns) || point.y > (LevelBoardView.CellSize * BoardDefinition.DefaultRows)) return;
                 AddDraft(Vertex(point));
                 return;
             }
@@ -252,8 +252,8 @@ namespace Levels.Editor
             Edited?.Invoke(error ?? "영역 설정을 적용했습니다. Undo 한 번으로 복구합니다.");
         }
 
-        private static Vector2 Point(BoardCoordinate cell, bool vertex = false) => new Vector2(cell.Column * 40 + (vertex ? 0 : 20), cell.Row * 40 + (vertex ? 0 : 20));
-        private static bool Visible(BoardCoordinate cell, bool vertex = false) => cell.Row >= 0 && cell.Column >= 0 && cell.Row < (vertex ? 11 : 10) && cell.Column < (vertex ? 11 : 10);
+        private static Vector2 Point(BoardCoordinate cell, bool vertex = false) => new Vector2(cell.Column * LevelBoardView.CellSize + (vertex ? 0 : LevelBoardView.CellSize / 2f), cell.Row * LevelBoardView.CellSize + (vertex ? 0 : LevelBoardView.CellSize / 2f));
+        private static bool Visible(BoardCoordinate cell, bool vertex = false) => cell.Row >= 0 && cell.Column >= 0 && cell.Row < (BoardDefinition.DefaultRows + (vertex ? 1 : 0)) && cell.Column < (BoardDefinition.DefaultColumns + (vertex ? 1 : 0));
         private static void Line(Painter2D painter, Vector2 a, Vector2 b, Color color, float width)
         {
             painter.strokeColor = color; painter.lineWidth = width;
@@ -276,8 +276,8 @@ namespace Levels.Editor
             bool flowPulse = ((int)(time / 3) % 2) == 0;
             float phase = (float)(time % 3 / 3);
             Color flowColor = new Color(0.4f, 0.88f, 1, flowPulse ? 0.85f : 0.45f);
-            for (int row = 0; row < 10; row++)
-                for (int column = 0; column < 10; column++)
+            for (int row = 0; row < BoardDefinition.DefaultRows; row++)
+                for (int column = 0; column < BoardDefinition.DefaultColumns; column++)
                 {
                     BoardCoordinate cell = new BoardCoordinate(row, column);
                     if (!LevelFlowRules.Active(level, cell)) continue;
@@ -375,8 +375,8 @@ namespace Levels.Editor
             if (!Visible(cell)) return;
             Label label = new Label(text) { pickingMode = PickingMode.Ignore };
             label.style.position = Position.Absolute;
-            label.style.left = cell.Column * 40 + 1;
-            label.style.top = cell.Row * 40 + offset;
+            label.style.left = cell.Column * LevelBoardView.CellSize + 1;
+            label.style.top = cell.Row * LevelBoardView.CellSize + offset;
             label.style.fontSize = 10;
             label.style.color = color;
             label.style.backgroundColor = new Color(0.08f, 0.1f, 0.12f, 0.8f);
