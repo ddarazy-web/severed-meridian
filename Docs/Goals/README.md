@@ -2,6 +2,9 @@
 
 [전체 문서 분류](../README.md)
 
+- [공통 Popup UI 프레임워크 목표·완료 조건](project-wide/2026-10-02-popup-framework-goal.md)
+- [팝업 프레임워크 1단계 목표·완료 조건](project-wide/popup-framework-stage-01-goal.md)
+
 ## 기존 규칙·에디터 개발 (1~33단계)
 
 - [1단계 개발 목표 — 레벨 데이터 기반](MoonRabbitJunkyard/Core/13_1단계_개발목표.md)

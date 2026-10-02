@@ -4,6 +4,8 @@
 
 ## 기능별 문서
 
+- [공통 팝업과 선택적 씬 복원 — ADR-2026-10-02-01](project-wide/2026-10-02-popup-framework.md)
+
 - [Match 통합 작업창](MoonRabbitJunkyard/61_Match통합작업창_설계결정.md)
 - [맵 모양 추천과 편집기 도움말](MoonRabbitJunkyard/62_맵모양추천과도움말_설계결정.md)
 - [등록형 맵 모양 목록](MoonRabbitJunkyard/63_등록형맵모양목록_설계결정.md)

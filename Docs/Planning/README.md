@@ -2,6 +2,9 @@
 
 [전체 문서 분류](../README.md)
 
+- [공통 Popup UI 프레임워크 3단계 구현 계획](project-wide/2026-10-02-popup-framework-plan.md)
+- [팝업 프레임워크 1단계 독립 계획](project-wide/popup-framework-stage-01-plan.md)
+
 ## 기존 규칙·에디터 개발 (1~33단계)
 
 - [1단계 작업 계획 — 레벨 데이터 기반](MoonRabbitJunkyard/Core/12_1단계_레벨데이터기반_작업계획.md)

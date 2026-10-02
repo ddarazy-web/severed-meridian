@@ -2,6 +2,8 @@
 
 [전체 문서 분류](../README.md)
 
+- [공통 팝업 프레임워크 사용 안내](project-wide/popup-framework-usage.md)
+
 ## 월드 게임 화면 (1~9단계)
 
 - [월드 보드 미리보기 사용 방법](MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-usage.md)
