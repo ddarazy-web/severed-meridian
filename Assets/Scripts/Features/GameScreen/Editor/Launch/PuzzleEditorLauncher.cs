@@ -36,6 +36,7 @@ namespace GameScreen.Editor
             SessionState.SetString(Key + "bytes", request.EncodedBytes);
             SessionState.SetInt(Key + "number", request.LevelNumber);
             SessionState.SetInt(Key + "seed", request.Seed);
+            SessionState.SetInt(Key + "source", (int)request.Source);
             SessionState.SetInt(Key + "owner", ownerWindowId);
             SessionState.SetString(Key + "message", "게임을 종료하고 편집으로 돌아왔습니다.");
             SessionState.SetFloat(Key + "requestedAt", (float)EditorApplication.timeSinceStartup);
@@ -62,6 +63,7 @@ namespace GameScreen.Editor
             try
             {
                 PuzzleGameSession session = scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<PuzzleGameSession>(true)).Single();
+                session.SetLevelAdvanceEnabled(SessionState.GetInt(Key + "source", (int)PuzzleEditorLevelSource.Asset) == (int)PuzzleEditorLevelSource.MemoryPack);
                 definition = LevelPackCodec.ReadLevel(Convert.FromBase64String(encoded), SessionState.GetInt(Key + "number", 0));
                 LevelDefinition owned = definition; definition = null;
                 session.InitializeAsync(owned, SessionState.GetInt(Key + "seed", 12345), CancellationToken.None).Forget(error =>
@@ -108,7 +110,7 @@ namespace GameScreen.Editor
             string previous = SessionState.GetString(Key + "previousScene", "");
             EditorSceneManager.playModeStartScene = previous == "" ? null : AssetDatabase.LoadAssetAtPath<SceneAsset>(previous);
             foreach (string field in new[] { "id", "bytes", "previousScene", "message" }) SessionState.EraseString(Key + field);
-            foreach (string field in new[] { "number", "seed", "owner" }) SessionState.EraseInt(Key + field);
+            foreach (string field in new[] { "number", "seed", "owner", "source" }) SessionState.EraseInt(Key + field);
             SessionState.EraseFloat(Key + "requestedAt");
             Finished?.Invoke(owner, message);
         }

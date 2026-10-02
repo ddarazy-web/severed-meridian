@@ -51,7 +51,7 @@ namespace GameScreen
         }
         private void TickProgress(float deltaTime)
         {
-            if (!ready || failed || IsPaused || IsRestarting) return;
+            if (!ready || failed || IsPaused || IsRestarting || IsChangingLevel) return;
             TickAudio(deltaTime);
             bool wasBusy = HasProgressFeedback;
             startRemaining = Mathf.Max(0, startRemaining - deltaTime);

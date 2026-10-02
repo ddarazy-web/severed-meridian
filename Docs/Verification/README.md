@@ -38,3 +38,4 @@
 - [10단계 효과음 실행·검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-10-progress.md)
 - [11단계 반복 플레이·성능 안정화 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-11-progress.md)
 - [12단계 화면·움직임 검수 기록 — 최종 회귀·리뷰 진행 중](MoonRabbitJunkyard/WorldGameScreen/stage-12-progress.md)
+- [13단계 다음 레벨 전환 검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-13-progress.md)

@@ -53,7 +53,7 @@ namespace GameScreen
 
         public async UniTask RestartAsync(CancellationToken token)
         {
-            if (initialBytes == null || IsRestarting || lifetime.IsCancellationRequested) return;
+            if (initialBytes == null || IsRestarting || IsChangingLevel || lifetime.IsCancellationRequested) return;
             IsRestarting = true; ready = false; IsPaused = false; failed = false;
             ClearProgress();
             ResetPresentation();

@@ -13,10 +13,11 @@ namespace GameScreen.Editor
         private readonly byte[] bytes;
         public int LevelNumber { get; }
         public int Seed { get; }
+        public PuzzleEditorLevelSource Source { get; }
         internal string EncodedBytes => Convert.ToBase64String(bytes);
 
-        private PuzzleEditorLaunchRequest(byte[] snapshot, int number, int seed)
-        { bytes = snapshot; LevelNumber = number; Seed = seed; }
+        private PuzzleEditorLaunchRequest(byte[] snapshot, int number, int seed, PuzzleEditorLevelSource source)
+        { bytes = snapshot; LevelNumber = number; Seed = seed; Source = source; }
 
         public static PuzzleEditorLaunchRequest Capture(LevelDefinition source, PuzzleEditorLevelSource mode, int seed)
         {
@@ -33,7 +34,7 @@ namespace GameScreen.Editor
             else throw new ArgumentOutOfRangeException(nameof(mode));
             LevelDefinition validation = LevelPackCodec.ReadLevel(snapshot, source.LevelNumber);
             UnityEngine.Object.DestroyImmediate(validation);
-            return new PuzzleEditorLaunchRequest(snapshot, source.LevelNumber, seed);
+            return new PuzzleEditorLaunchRequest(snapshot, source.LevelNumber, seed, mode);
         }
 
         public LevelDefinition CreateDefinition() => LevelPackCodec.ReadLevel(bytes, LevelNumber);

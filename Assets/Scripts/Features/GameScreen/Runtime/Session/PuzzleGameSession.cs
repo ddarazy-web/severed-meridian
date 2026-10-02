@@ -23,7 +23,7 @@ namespace GameScreen
         public LevelRuntimeState State => executor?.State;
         public BoardOutcome Outcome => executor?.Outcome;
         public BoardActionPhase Phase => executor?.Phase ?? BoardActionPhase.Stopped;
-        public bool CanAcceptInput => isActiveAndEnabled && ready && !failed && !IsPaused && !IsRestarting &&
+        public bool CanAcceptInput => isActiveAndEnabled && ready && !failed && !IsPaused && !IsRestarting && !IsChangingLevel &&
             !IsPresenting && !IsStartingFeedback && Phase == BoardActionPhase.Ready && Outcome == null;
         public string Message { get; private set; } = "레벨 로딩 중";
         public event Action Changed;

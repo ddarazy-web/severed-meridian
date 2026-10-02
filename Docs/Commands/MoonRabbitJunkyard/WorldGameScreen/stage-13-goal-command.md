@@ -1,12 +1,14 @@
 # 13단계 — 복사용 목표 명령문
 
-코드 블록의 복사 버튼을 사용한다. 이 파일 작성 자체는 Goal 생성이나 구현 실행이 아니다.
+상태: 2026-10-02 해당 단계 완료. 아래 명령문은 재감사에 사용하며 이미 완료된 구현을 중복 실행하지 않는다. 코드 블록의 복사 버튼을 사용할 수 있다.
 
 ```text
 ServeredMeridian 프로젝트만 대상으로 작업해.
 
 Docs/Planning/MoonRabbitJunkyard/WorldGameScreen/stage-13-level-transition-plan.md와
 Docs/Goals/MoonRabbitJunkyard/WorldGameScreen/stage-13-level-transition-goal.md를 읽어.
+
+현재 13단계 목표와 완료 기록이 실제 증거로 완료라면 보존 감사만 하고, 목표를 중복 생성하거나 구현을 반복하지 마.
 
 먼저 12단계의 현재 목표·완료 조건·Logs/Stage12/final-review.md를 감사해.
 현재12단계는 복원 수정·17개 회귀·추가InsetUI67PASS와10개 조건 감사를 완료했어. 현재 근거와 목표 상태를 확인하고 이미 완료한 작업은 반복하지 마. 실제 미완료/회귀가 재현되면12단계를 먼저 처리하고 유효한 기존 증거·무관 작업을 보존해. 과거 PASS/Exit0만으로 현재 완료를 단정하지 마.

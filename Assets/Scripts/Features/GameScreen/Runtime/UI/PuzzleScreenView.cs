@@ -55,10 +55,16 @@ namespace GameScreen
             { input.CancelGesture(); input.CancelItemSelection(); description.gameObject.SetActive(false); session.SetPaused(true); });
             cancel.onClick.RemoveAllListeners(); cancel.onClick.AddListener(input.CancelItemSelection);
             description.onClick.RemoveAllListeners(); description.onClick.AddListener(() => { description.gameObject.SetActive(false); Refresh(); });
-            pause.Bind(() => session.SetPaused(false), Retry); result.Bind(Retry); Refresh();
+            pause.Bind(() => session.SetPaused(false), Retry); result.Bind(Retry, NextLevel); Refresh();
         }
         private void Retry()
-        { input.CancelGesture(); input.CancelItemSelection(); description.gameObject.SetActive(false); session.RestartAsync(CancellationToken.None).Forget(Debug.LogException); }
+        { if (session.IsChangingLevel) return; input.CancelGesture(); input.CancelItemSelection(); description.gameObject.SetActive(false); session.RestartAsync(CancellationToken.None).Forget(Debug.LogException); }
+        private void NextLevel()
+        {
+            if (!session.CanAdvanceLevel) return;
+            input.CancelGesture(); input.CancelItemSelection(); description.gameObject.SetActive(false);
+            session.AdvanceLevelAsync(CancellationToken.None).Forget(Debug.LogException);
+        }
         private void Refresh()
         {
             if (session == null) return;
@@ -69,17 +75,21 @@ namespace GameScreen
                 : session.IsReady ? "시험용 아이템 · 수량 무제한" : session.Message);
             cancel.gameObject.SetActive(selected);
             message.rectTransform.offsetMax = new Vector2(selected ? -75 : 0, 0);
-            pauseButton.interactable = session.IsReady && !session.IsRestarting && (session.Outcome == null || session.IsPresenting || session.HasProgressFeedback);
+            pauseButton.interactable = session.IsReady && !session.IsRestarting && !session.IsChangingLevel && (session.Outcome == null || session.IsPresenting || session.HasProgressFeedback);
             pause.gameObject.SetActive(session.IsPaused);
             bool ended = session.ResultReady;
-            input.SetUIBlocked(ended || session.IsPaused || description.gameObject.activeSelf);
+            input.SetUIBlocked(ended || session.IsChangingLevel || session.IsPaused || description.gameObject.activeSelf);
             if (ended)
             {
+                bool won = session.Outcome.Kind == BoardOutcomeKind.Won;
+                string body = "남은 이동 " + session.State.MovesRemaining + "\n" + session.Message;
+                if (won && !session.LevelAdvanceEnabled)
+                    body += "\n다음 레벨은 MemoryPack 모드에서 이어서 플레이할 수 있습니다";
+                result.SetTransition(won && session.LevelAdvanceEnabled, session.CanAdvanceLevel, session.IsChangingLevel, body);
                 if (shownOutcome != session.Outcome)
                 {
                     shownOutcome = session.Outcome;
-                    bool won = session.Outcome.Kind == BoardOutcomeKind.Won;
-                    result.Show(won ? "정리 완료!" : "다시 도전해요", "남은 이동 " + session.State.MovesRemaining + "\n" + session.Message);
+                    result.Show(won ? "정리 완료!" : "다시 도전해요", body);
                     session.PlayResultFeedback();
                 }
             }

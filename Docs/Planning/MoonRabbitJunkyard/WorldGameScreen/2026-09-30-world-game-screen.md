@@ -84,11 +84,11 @@ uGUI로 이동 수, 미션, 아이템, 일시정지, 결과 화면을 기능별 
 
 실제 Game View에서 네 해상도·플레이/일시정지/승리/실패·안전 영역 화면을 목업과 비교하고, 최신 블록/아이템의 식별성과 드론/낙하/타격/수집의 움직임을 관찰한다. 재현된 표시 결함만 최소 수정한다. 실제 청취 여부·실기기 미검증은 자동 검사와 구분한다. 빌드·새 진행/저장 기능은 추가하지 않는다.
 
-## 13단계 — 승리 후 다음 레벨 연결 (계획)
+## 13단계 — 승리 후 다음 레벨 연결
 
-상태: 계획 작성·구현 미착수. 착수 때12단계 완료 근거와 현재 목표 상태를 먼저 감사한다. 기존 Game View 복원 오류는12단계에서 해결했다. [4개 작업 계획](stage-13-level-transition-plan.md) · [목표·12개 완료 조건](../../../Goals/MoonRabbitJunkyard/WorldGameScreen/stage-13-level-transition-goal.md) · [복사용 목표 명령문](../../../Commands/MoonRabbitJunkyard/WorldGameScreen/stage-13-goal-command.md).
+상태: 완료. 단일 독립 리뷰의2개 Important를 RED→GREEN으로 수정한 뒤 영향12개·필수7개·재현3개와 보존 gate·12개 완료 조건을 감사했다. 12단계 완료 근거를 현재 파일로 감사한 뒤 착수했다. [4개 작업 계획](stage-13-level-transition-plan.md) · [목표·12개 완료 조건](../../../Goals/MoonRabbitJunkyard/WorldGameScreen/stage-13-level-transition-goal.md) · [복사용 목표 명령문](../../../Commands/MoonRabbitJunkyard/WorldGameScreen/stage-13-goal-command.md).
 
-기존 에디터 레벨 선택을 유지하고 MemoryPack 승리 후 다음 번호로 이동한다. 데이터·시작 보드·아틀라스 준비 성공 시에만 교체하며 실패하면 기존 승리/Retry를 유지한다. Asset 실행은 미저장 사본 테스트를 유지한다. 저장·해금·메인 화면은 별도 단계로 둔다. 다음 레벨 연결은 제안 범위이며 현재 공통 제외 기준은 1~12단계에 적용된다.
+기존 에디터 레벨 선택을 유지하고 MemoryPack 승리 후 다음 번호로 이동한다. 데이터·시작 보드·아틀라스 준비 성공 시에만 교체하며 실패하면 기존 승리/Retry를 유지한다. Asset 실행은 미저장 사본 테스트를 유지한다. 저장·해금·메인 화면은 별도 단계로 둔다. 현재 결과 버튼과 에디터 소스 연결을 적용했다. 준비 실패/취소의 기존 Retry 보존과 네 해상도 화면을 검사했다. [실행 기록](../../../Verification/MoonRabbitJunkyard/WorldGameScreen/stage-13-progress.md)과 [사용 안내](../../../Guides/MoonRabbitJunkyard/WorldGameScreen/stage-13-level-transition-usage.md)에 최종 상태를 남긴다.
 
 ## 공통 범위
 
