@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PopupUI
 {
-    public sealed class PopupService
+    public sealed partial class PopupService
     {
         internal sealed class Instance
         {
@@ -12,6 +12,7 @@ namespace PopupUI
             internal PopupCatalog.Entry Entry;
             internal PopupView View;
             internal GameObject Selection;
+            internal bool RestorePrepared;
         }
         private static long nextHandle;
         private readonly Dictionary<string, PopupCatalog.Entry> definitions = new Dictionary<string, PopupCatalog.Entry>(StringComparer.Ordinal);
@@ -38,13 +39,19 @@ namespace PopupUI
             host = value;
         }
         internal void Detach(PopupHost value)
-        { if (host != value) return; host = null; CloseAll(); }
+        {
+            if (host != value) return;
+            if (pendingExit != null) { pendingExit.Consume(); pendingExit = null; }
+            host = null;
+            // 복원 후보와 캡처 중인 목록은 각 트랜잭션의 종료 경로가 정리한다.
+            if (!restoring && !capturing) CloseAll();
+        }
         public PopupView GetView(PopupHandle handle)
         { foreach (Instance instance in instances) if (instance.Handle == handle) return instance.View; return null; }
 
         public PopupHandle Open(string id, PopupState state)
         {
-            if (applying) throw new InvalidOperationException("내용 적용 중에는 팝업 목록을 변경할 수 없습니다.");
+            if (applying || pendingExit != null) throw new InvalidOperationException("내용 적용 또는 이동 준비 중에는 팝업 목록을 변경할 수 없습니다.");
             if (host == null || !host.isActiveAndEnabled) throw new InvalidOperationException("활성 팝업 표시 영역을 먼저 연결하세요.");
             if (id == null || !definitions.TryGetValue(id, out PopupCatalog.Entry entry))
                 throw new InvalidOperationException("등록되지 않은 팝업: " + id);
@@ -95,26 +102,32 @@ namespace PopupUI
         }
         public bool Close(PopupHandle handle)
         {
-            if (applying) throw new InvalidOperationException("내용 적용 중에는 팝업 목록을 변경할 수 없습니다.");
+            if (applying || pendingExit != null) throw new InvalidOperationException("내용 적용 또는 이동 준비 중에는 팝업 목록을 변경할 수 없습니다.");
             for (int index = 0; index < instances.Count; index++)
             {
                 if (instances[index].Handle != handle) continue;
-                PopupView view = instances[index].View;
+                Instance closed = instances[index];
                 instances.RemoveAt(index);
-                view.gameObject.SetActive(false); DestroyObject(view.gameObject);
+                ReleaseView(closed);
                 Notify(); return true;
             }
             return false;
         }
         public void CloseAll()
         {
-            if (applying) throw new InvalidOperationException("내용 적용 중에는 팝업 목록을 변경할 수 없습니다.");
+            if (applying || pendingExit != null) throw new InvalidOperationException("내용 적용 또는 이동 준비 중에는 팝업 목록을 변경할 수 없습니다.");
             Instance[] closed = instances.ToArray(); instances.Clear();
             foreach (Instance instance in closed)
-                if (instance.View != null) { instance.View.gameObject.SetActive(false); DestroyObject(instance.View.gameObject); }
+                ReleaseView(instance);
             Notify();
         }
         private void Notify() { if (host != null) host.Refresh(); Changed?.Invoke(); }
+        private static void ReleaseView(Instance instance)
+        {
+            if (instance.View == null) return;
+            try { if (instance.RestorePrepared) instance.View.ReleaseRestore(); }
+            finally { instance.View.gameObject.SetActive(false); DestroyObject(instance.View.gameObject); }
+        }
         private static void DestroyObject(UnityEngine.Object value)
         { if (Application.isPlaying) UnityEngine.Object.Destroy(value); else UnityEngine.Object.DestroyImmediate(value); }
     }

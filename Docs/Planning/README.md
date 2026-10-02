@@ -2,6 +2,9 @@
 
 [전체 문서 분류](../README.md)
 
+- [팝업 프레임워크 3단계 — 관리 도구와 게임 팝업 전환](project-wide/popup-framework-stage-03-plan.md)
+- [팝업 프레임워크 2단계 — 선택적 씬 복원 계획](project-wide/popup-framework-stage-02-plan.md)
+
 - [공통 Popup UI 프레임워크 3단계 구현 계획](project-wide/2026-10-02-popup-framework-plan.md)
 - [팝업 프레임워크 1단계 독립 계획](project-wide/popup-framework-stage-01-plan.md)
 

@@ -75,3 +75,63 @@ ApplyBlocked/ApplyPaused와 상태 필드는 호출 기능에서 구현하는 �
 
 가상 Keyboard/Mouse/Touchscreen은 Editor의 실제 EventSystem 경로를 검사한다. 물리 Android 뒤로가기/터치와 동시에 사용되는 복수 물리 입력 장치의 품질을 입증하는 검사는 아니다. 플레이어/Addressables 콘텐츠 빌드는 실행하지 않는다.
 
+
+## 2단계 — 필요한 이동에서만 상태 복원
+
+상태: 2단계 구현·검증 완료. 3단계의 실제 게임 연결·관리 도구는 아직 없다. [2단계 검증 기록](../../Verification/project-wide/popup-framework-stage-02.md)을 따른다.
+
+서비스는 이동 호출 기능이 앱 실행 중 소유한다. 기존 서비스/catalog를 유지하고 씬의 Canvas/EventSystem/PopupHost/팝업 객체는 새로 만든다. 게임 세션을 프레임워크가 유지하는 것은 아니다. 게임의 논리 sessionKey는 원래 게임에 돌아온 경우만 동일하게 제공하고 재시작/다음 레벨/새 게임은 새 값을 사용한다.
+
+호출 순서:
+
+```csharp
+// 아래 이동 준비/차단 함수는 호출 기능에서 제공하는 예시다.
+PopupExitTicket ticket = null;
+SetTransitionInputBlocked(true);
+try
+{
+    ticket = service.BeginSceneExit(preserve: true);
+    await PrepareDestinationKeepingSourceAliveAsync();
+    service.CommitSceneExit(ticket);
+    await FinishSourceUnloadAsync();
+}
+catch
+{
+    if (ticket != null && ticket.IsPending) service.RollbackSceneExit(ticket);
+    throw;
+}
+finally
+{
+    // 캡처/이동/확정/취소/언로드 실패에도 이번 이동 차단만 해제한다.
+    SetTransitionInputBlocked(false);
+}
+
+// 목적지에 머무는 동안 이동 차단을 유지하지 않는다.
+// 이후 원래 씬으로 돌아와 새 Host와 현재 연결이 준비된 별도 시점
+newHost.Attach(service, sameContext);
+PopupRestoreResult result = service.Restore(newHost, sameContext);
+```
+
+PrepareDestinationKeepingSourceAliveAsync/FinishSourceUnloadAsync/SetTransitionInputBlocked는 실제 API가 아닌 호출 기능 예시다. 차단 함수는 이번 이동 이유만 추가/제거하고 다른 차단 이유를 보존한다. Commit 전에 원래 Host가 살아 있어야 한다. 목적지 준비 성공 후 Commit하고 원래 씬을 언로드하는 Additive/준비 단계 순서를 사용한다. 단일 씬 로드로 원래 Host를 먼저 파괴하면 pending ticket은 무효화되며 뒤늦은 Commit으로 보관할 수 없다. ticket.IsPending은 읽기 전용 상태이며 소비/Host 종료 후 false다. Commit 후 언로드가 실패해도 Rollback하지 않고 확정된 보관을 유지하며 호출 기능이 이동 오류를 처리한다.
+
+이동 대기 중 Open/Close/CloseAll은 거부한다. 호출 기능은 보드 입력과 팝업 EventSystem 입력도 별도로 막고 실패 시 원래 입력 정책으로 복귀한다. 프레임워크는 자동 이동/전역 입력 차단 이유/게임 정지를 대신 소유하지 않는다.
+
+일반 캡처 예외는 기존 표시/보관을 유지하며 다음 Begin을 시도할 수 있다. 캡처 콜백 중 Host가 실제 종료된 경우에는 캡처를 중단하고 그 Host의 뷰/연결/요청을 정리한다. 종료된 Host의 표시를 보존하거나 중단된 캡처를 확정하지 않는다.
+
+preserve=false도 Begin→성공 Commit/실패 Rollback을 따른다. Commit에서 해당 씬의 오래된 보관을 폐기하고 Rollback은 이전 보관까지 보존한다. 빈 캡처 Commit도 이전 묶음을 지운다. 소비된/다른 서비스/ticket Host 종료 이후 Commit·Rollback은 거부한다. 소비된 ticket의 Owner/Host/항목 참조는 해제된다.
+
+Restore는 현재 service에 같은 context로 Attach한 활성 빈 Host에서 호출한다. None은 해당 씬의 보관 없음, ContextMismatch는 같은 sceneKey의 feature/session 불일치와 폐기, Restored는 새 핸들 목록/성공 소비, Failed는 Error/빈 Handles다. 이미 열린 Host에 복원하려 하면 Failed이며 기존 목록을 보존한다. 성공 후 목록을 닫아 빈 Host에서 재호출하면 None이다. 다른 씬에서 요청한 None은 원래 씬의 묶음을 지우지 않는다.
+
+실패한 복원은 후보와 현재 연결을 정리하고 보관 값은 유지한다. 오류 원인을 고친 뒤 Restore를 명시 재호출하거나 Discard(exactContext)로 그 문맥만 버린다. 자동 재시도와 닫힌 팝업 재생성은 없다.
+
+뷰 확장:
+
+- CaptureState/Copy는 값만 깊게 복사한다. 입력값/탭/선택/스크롤은 해당 PopupState에 직접 정의한다.
+- CaptureFocusKey/ResolveFocusKey는 기본 sibling-index 경로를 사용한다. 동적 구조가 바뀌는 뷰는 의미 있는 키를 재정의한다. 누락/비활성 선택은 유효 기본 선택으로 돌아간다.
+- PrepareRestore(context)는 비활성 후보의 새 데이터/핸들 바인딩 후 현재 기능에 연결한다. 이전 delegate/Unity 객체를 보관 상태에 넣지 않는다.
+- ReleaseRestore()는 준비 중 실패한 후보에도 호출된다. 부분 연결도 해제하고 반복 호출에 안전하며 예외를 던지지 않게 구현한다. 활성 뷰의 OnDestroy에서도 같은 해제를 호출할 수 있다.
+- ApplyState/PrepareRestore/OnEnable은 표현·연결만 담당한다. 구매·재시작·Next·보상·결과음은 명시적 행동에서만 호출하며 복원으로 재실행하지 않는다.
+
+비활성 후보에서는 OnDestroy만으로 해제를 보장할 수 없으므로 명시 해제를 제공한다. [Unity 6000.3 OnDestroy 문서](https://docs.unity.com/en-us/engine/6000.3/script-reference/unityengine/monobehaviour/ondestroy)
+
+검사 진입점 RunRestorationData/RunRestorationScene은 소유한 검사 프로세스 전용이며 EditorApplication.Exit를 호출한다. 물리 Android/복수 물리 장치는 미검증이다. 실제 게임 팝업 전환과 화면 이동 호출부 연결은 3단계에서 수행한다.

@@ -20,6 +20,8 @@ namespace PopupUI.Editor
         static PopupFrameworkVerification()
         {
             EditorApplication.playModeStateChanged += state => {
+                if (state == PlayModeStateChange.EnteredPlayMode && SessionState.GetBool("PopupFramework.Restoration", false))
+                { SessionState.EraseBool("PopupFramework.Restoration"); RestorationSceneAsync().Forget(Debug.LogException); }
                 if (state == PlayModeStateChange.EnteredPlayMode && SessionState.GetBool(PlayKey, false))
                 { SessionState.EraseBool(PlayKey); InputAsync().Forget(Debug.LogException); }
             };

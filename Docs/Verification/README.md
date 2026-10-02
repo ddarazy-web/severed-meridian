@@ -2,6 +2,7 @@
 
 [전체 문서 분류](../README.md)
 
+- [팝업 프레임워크 2단계 검증 기록](project-wide/popup-framework-stage-02.md)
 - [팝업 프레임워크 1단계 검증 기록](project-wide/popup-framework-stage-01.md)
 
 ## 기존 규칙·에디터 개발 (1~33단계)

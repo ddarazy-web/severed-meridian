@@ -10,7 +10,7 @@
 
 **Spec:** [승인한 설계](../../Systems/project-wide/2026-10-02-popup-framework-design.md). [ADR](../../Decisions/project-wide/2026-10-02-popup-framework.md) · [완료 조건](../../Goals/project-wide/2026-10-02-popup-framework-goal.md).
 
-상태: 2026-10-02 1단계 구현·검증 완료, 2~3단계 미착수. 월드 게임 화면 14단계 번호를 임의 부여하지 않으며 공통 시스템의 독립 3단계로 관리한다.
+상태 갱신: 2026-10-03 · 1~2단계 구현·검증 완료, 3단계 문서 준비·구현 미착수. 월드 게임 화면 14단계 번호를 임의 부여하지 않으며 공통 시스템의 독립 3단계로 관리한다.
 
 ## Global Constraints
 
@@ -87,19 +87,23 @@ Open은 현재 직접 프리팹 생성 방식에 따라 동기 처리한다. 초
 
 ## 2단계 — 필요한 이동의 상태 보관과 복원
 
+2단계 실행 시 [독립 계획](popup-framework-stage-02-plan.md)과 [독립 목표](../../Goals/project-wide/popup-framework-stage-02-goal.md)를 우선 적용한다. 세부 ticket/포커스/새 연결 계약과 완료 조건은 독립 문서에 정의했다.
+
 **Files:** 파일 지도 단계 2. **Consumes:** 단계 1 계약과 값 복사. **Produces:** SceneExit/Restore/Discard 계약과 복원 결과.
 
-- [ ] 단계 1 완료 근거를 현재 코드와 대조한다. 실제 미완료만 처리하고 완료 구현을 반복하지 않는다.
-- [ ] `RunRestorationScene`에 소유한 임시 두 씬으로 A→B→C를 캡처하고 실제 SceneManager 왕복을 구성한다. 텍스트/입력/선택/탭/스크롤 값과 순서, 새 핸들·새 세션 연결·명령 호출 0을 검사한다.
-- [ ] preserve=false, Restorable=false B 제외 후 A/C, 다른 scene/feature/session, 같은 레벨의 새 게임 문맥에서 복원 없음, 성공 후 재복원 None을 검사한다.
-- [ ] 원본 상태 변경 후 저장 값 불변, 보관하지 않은 이동의 오래된 snapshot 폐기, 이동 rollback 시 기존 순서/입력 유지, 중복 commit/rollback 무효를 검사한다.
-- [ ] 후보 두 번째 뷰의 ApplyState 예외에서 생성 후보 0·입력 누출 0·snapshot 재시도 가능, 씬 종료 후 늦은 콜백 0을 검사하고 실제 실패 근거를 저장한다.
-- [ ] SnapshotStore와 ticket을 구현한다. Begin은 캡처만 하며 기존 표시를 즉시 파괴하지 않는다. Commit에서 표시 해제/보관 확정, Rollback에서 이전 표시 유지와 임시 데이터 폐기. 한 host당 이동 ticket 하나로 중복 요청을 거부한다.
-- [ ] Restore는 비활성 후보를 생성/연결한 뒤 한 번 적용한다. 아직 다른 팝업이 열린 host에는 복원을 거부해 기존 순서를 보존한다. 문맥 mismatch 폐기, 실패 후보 정리, 성공 데이터 소비를 구현한다.
-- [ ] 같은 검사를 통과시키고 단계 1 영향 검사를 실행한다. 임시 씬/에셋/메타를 정리하고 사용자 씬/빌드 설정은 보존한다.
-- [ ] `Docs/Verification/project-wide/popup-framework-stage-02.md`와 사용 안내에 호출 예제·게임 문맥 책임·실패/재시도 정책을 기록한다.
+- [x] 단계 1 완료 근거를 현재 코드와 대조한다. 실제 미완료만 처리하고 완료 구현을 반복하지 않는다.
+- [x] `RunRestorationScene`에 소유한 임시 두 씬으로 A→B→C를 캡처하고 실제 SceneManager 왕복을 구성한다. 텍스트/입력/선택/탭/스크롤 값과 순서, 새 핸들·새 세션 연결·명령 호출 0을 검사한다.
+- [x] preserve=false, Restorable=false B 제외 후 A/C, 다른 scene/feature/session, 같은 레벨의 새 게임 문맥에서 복원 없음, 성공 후 재복원 None을 검사한다.
+- [x] 원본 상태 변경 후 저장 값 불변, 보관하지 않은 이동의 오래된 snapshot 폐기, 이동 rollback 시 기존 순서/입력 유지, 중복 commit/rollback 무효를 검사한다.
+- [x] 후보 두 번째 뷰의 ApplyState 예외에서 생성 후보 0·입력 누출 0·snapshot 재시도 가능, 씬 종료 후 늦은 콜백 0을 검사하고 실제 실패 근거를 저장한다.
+- [x] SnapshotStore와 ticket을 구현한다. Begin은 캡처만 하며 기존 표시를 즉시 파괴하지 않는다. Commit에서 표시 해제/보관 확정, Rollback에서 이전 표시 유지와 임시 데이터 폐기. 한 host당 이동 ticket 하나로 중복 요청을 거부한다.
+- [x] Restore는 비활성 후보를 생성/연결한 뒤 한 번 적용한다. 아직 다른 팝업이 열린 host에는 복원을 거부해 기존 순서를 보존한다. 문맥 mismatch 폐기, 실패 후보 정리, 성공 데이터 소비를 구현한다.
+- [x] 같은 검사를 통과시키고 단계 1 영향 검사를 실행한다. 임시 씬/에셋/메타를 정리하고 사용자 씬/빌드 설정은 보존한다.
+- [x] `Docs/Verification/project-wide/popup-framework-stage-02.md`와 사용 안내에 호출 예제·게임 문맥 책임·실패/재시도 정책을 기록한다.
 
 ## 3단계 — 관리 도구와 기존 세 팝업 전환
+
+3단계 실행 시 [독립 계획](popup-framework-stage-03-plan.md)과 [독립 목표](../../Goals/project-wide/popup-framework-stage-03-goal.md)를 우선 적용한다. 2단계 리뷰 처리와 최종 완료 감사가 선행 조건이다. [복사용 명령문](../../Commands/project-wide/popup-framework-stage-03-command.md)은 그 조건 확인부터 포함한다.
 
 **Files:** 파일 지도 단계 3 및 기존 수정 대상/프리팹. **Consumes:** 단계 1~2 전체 계약. **Produces:** 실제 게임 연결·카탈로그·템플릿·관리 창.
 

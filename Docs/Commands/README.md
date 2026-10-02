@@ -2,6 +2,9 @@
 
 [전체 문서 분류](../README.md)
 
+- [팝업 프레임워크 3단계 복사용 목표 명령문](project-wide/popup-framework-stage-03-command.md)
+- [팝업 프레임워크 2단계 복사용 목표 명령문](project-wide/popup-framework-stage-02-command.md)
+
 - [공통 Popup UI 프레임워크 단계별 복사용 명령문](project-wide/2026-10-02-popup-framework-command.md)
 - [팝업 프레임워크 1단계 복사용 목표 명령문](project-wide/popup-framework-stage-01-command.md)
 
