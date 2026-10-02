@@ -269,6 +269,7 @@ MonoBehaviour:
   moves: {fileID: 129455829589139455}
   missionPrefab: {fileID: 8316751347003281746, guid: eb7bd803bc2e66f4fa68b5bfc492c778, type: 3}
   missionRoot: {fileID: 8056283364984749416}
+  collectionPrefab: {fileID: 7110834664594491201, guid: 982d0634f15ab9844a1b4fee6a21faba, type: 3}
 --- !u!1 &8242254412874460356
 GameObject:
   m_ObjectHideFlags: 0

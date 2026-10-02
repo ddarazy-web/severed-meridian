@@ -15,7 +15,7 @@ namespace Simulation
             if (cell.Cover != CoverKind.Web || context.HasDamagedWeb(cell.Coordinate)) return;
             context.RegisterWeb(cell.Coordinate);
             if (--cell.CoverDurability == 0)
-            { cell.Cover = null; MissionProgressRules.Complete(state, MissionKind.Web); }
+            { cell.Cover = null; MissionProgressRules.Complete(state, MissionKind.Web, cell.Coordinate); }
         }
     }
 
@@ -29,7 +29,7 @@ namespace Simulation
         {
             if (!CanDamage(cell, context)) return;
             context.RegisterDust(cell.Coordinate);
-            if (--cell.DustDurability == 0) MissionProgressRules.Complete(state, MissionKind.Dust);
+            if (--cell.DustDurability == 0) MissionProgressRules.Complete(state, MissionKind.Dust, cell.Coordinate);
         }
     }
 }

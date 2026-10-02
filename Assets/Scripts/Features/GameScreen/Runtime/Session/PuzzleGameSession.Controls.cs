@@ -23,8 +23,10 @@ namespace GameScreen
 
         public bool SetPaused(bool paused)
         {
-            if (!ready || failed || IsRestarting || (Phase == BoardActionPhase.Stopped && !IsPresenting)) return false;
+            if (!ready || failed || IsRestarting || (Phase == BoardActionPhase.Stopped && !IsPresenting && !HasProgressFeedback)) return false;
             IsPaused = paused;
+            audioPlayback?.SetPaused(paused);
+            if (!paused) PlayResultFeedback();
             Changed?.Invoke();
             return true;
         }
@@ -37,11 +39,12 @@ namespace GameScreen
             if (!CanUseItems) return false;
             CapturePresentation();
             ItemUseResult result = executor.UseItem(item, first, second);
+            ObserveMoves();
             Message = result.Message;
             if (result.IsApplied && item != BoardItem.Shuffle)
             {
                 if (item == BoardItem.Swap && first.HasValue && second.HasValue)
-                { presentationSnapshot.Swap(first.Value, second.Value); SwapPresentationState(first.Value, second.Value); }
+                { EmitAudio(PuzzleFeedbackCueKind.Swap); presentationSnapshot.Swap(first.Value, second.Value); SwapPresentationState(first.Value, second.Value); }
                 BeginEffects(result.Changes, result.Effects, result.PowerTrace);
             }
             else { ResetPresentation(); if (result.IsApplied) Draw(); else Changed?.Invoke(); }
@@ -52,6 +55,7 @@ namespace GameScreen
         {
             if (initialBytes == null || IsRestarting || lifetime.IsCancellationRequested) return;
             IsRestarting = true; ready = false; IsPaused = false; failed = false;
+            ClearProgress();
             ResetPresentation();
             Message = "다시 시작하는 중"; Changed?.Invoke();
             LevelDefinition definition = null;

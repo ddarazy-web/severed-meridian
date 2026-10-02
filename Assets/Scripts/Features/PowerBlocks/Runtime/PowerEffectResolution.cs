@@ -74,7 +74,7 @@ namespace Simulation
             if (work.Missions.Any(m => !MissionProgressRules.Supports(m.Definition.Kind)))
             { error = "미지원 미션 포함"; return false; }
             MatchedBlockChange[] consumed = matches.ToArray();
-            foreach (MatchedBlockChange match in consumed.Where(m => m.IsConsumed)) MissionProgressRules.ConsumeColor(work, match.OriginalColor);
+            foreach (MatchedBlockChange match in consumed.Where(m => m.IsConsumed)) MissionProgressRules.ConsumeColor(work, match.OriginalColor, match.Coordinate);
             DroneTargetManager targets = new DroneTargetManager(work, context);
             // 라스트팡은 같은 결과 목록에 여러 파워를 누적하므로 표시 기록도 함께 누적한다.
             PowerPresentationTrace trace = records.Count > 0 && context.PowerTrace != null ? context.PowerTrace : new PowerPresentationTrace(combination);
@@ -197,7 +197,7 @@ namespace Simulation
                 { if (cell.Cover == CoverKind.Mold) MoldRules.Remove(work, cell, context); else WebRules.Apply(work, cell, context); }
                 if (reaction.Response == DamageResponse.Remove)
                 {
-                    MissionProgressRules.ConsumeColor(work, originalColor);
+                    MissionProgressRules.ConsumeColor(work, originalColor, hit.target);
                     if (hit.cause != DamageCause.Hammer) DustRules.ConsumeNormal(work, cell, context);
                     if (hit.magnet) PushAdjacent(hit.target, DamageCause.MagnetAdjacent, originalColor, hit.hit);
                 }

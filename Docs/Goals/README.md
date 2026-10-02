@@ -38,7 +38,7 @@
 - [32단계 개발 목표 — 시험 기록 관리](MoonRabbitJunkyard/Core/92_32단계_개발목표.md)
 - [33단계 개발 목표 — 메뉴 통합 후 사용 흐름 검수](MoonRabbitJunkyard/Core/95_33단계_개발목표.md)
 
-## 월드 게임 화면 (1~8단계)
+## 월드 게임 화면 (1~13단계)
 
 - [1단계 목표 — 월드 보드 표시](MoonRabbitJunkyard/WorldGameScreen/stage-01-world-board-goal.md)
 - [2단계 실제 게임 플레이 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-02-gameplay-goal.md)
@@ -48,3 +48,8 @@
 - [6단계 스와이프·교환 연출 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-06-swipe-swap-goal.md)
 - [7단계 제거·낙하·채움 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-07-settlement-goal.md)
 - [8단계 파워·장애물 상세 연출 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-08-power-effects-goal.md)
+- [9단계 미션 수집·진행·승패 피드백 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-09-progress-feedback-goal.md)
+- [10단계 소리 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-10-audio-goal.md)
+- [11단계 반복 플레이·성능 안정화 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-11-stability-goal.md)
+- [12단계 실제 게임 화면·연출 품질 검수 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-12-presentation-goal.md)
+- [13단계 승리 후 다음 레벨 연결 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-13-level-transition-goal.md)

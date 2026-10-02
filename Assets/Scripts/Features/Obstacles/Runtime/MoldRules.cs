@@ -31,7 +31,7 @@ namespace Simulation
         internal static void Remove(LevelRuntimeState state, RuntimeCell cell, TurnEffectContext context)
         {
             cell.Cover = null; cell.CoverDurability = 0; context.RemovedMold = true;
-            MissionProgressRules.Complete(state, MissionKind.Mold);
+            MissionProgressRules.Complete(state, MissionKind.Mold, cell.Coordinate);
         }
 
         // 종료 단계의 작업 사본에서만 호출한다. 같은 턴 기록이 있으면 난수도 다시 쓰지 않는다.

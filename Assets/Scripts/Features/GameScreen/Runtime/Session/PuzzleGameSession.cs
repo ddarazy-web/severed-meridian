@@ -24,7 +24,7 @@ namespace GameScreen
         public BoardOutcome Outcome => executor?.Outcome;
         public BoardActionPhase Phase => executor?.Phase ?? BoardActionPhase.Stopped;
         public bool CanAcceptInput => isActiveAndEnabled && ready && !failed && !IsPaused && !IsRestarting &&
-            !IsPresenting && Phase == BoardActionPhase.Ready && Outcome == null;
+            !IsPresenting && !IsStartingFeedback && Phase == BoardActionPhase.Ready && Outcome == null;
         public string Message { get; private set; } = "레벨 로딩 중";
         public event Action Changed;
 
@@ -82,12 +82,14 @@ namespace GameScreen
             token.ThrowIfCancellationRequested();
             if (search.Status != StartingBoardStatus.Success) throw new InvalidOperationException(search.Message);
             executor = new BoardActionExecutor(search.State);
+            InitializeProgress();
             artwork = new PuzzleArtwork();
             await artwork.PrepareAsync(State, token);
             token.ThrowIfCancellationRequested();
             board.Draw(State, artwork);
             CenterCamera();
             ready = true;
+            BeginStartFeedback();
             Message = "블록을 선택하거나 드래그하세요"; Changed?.Invoke();
         }
 
@@ -96,6 +98,7 @@ namespace GameScreen
             if (!CanAcceptInput) return false;
             CapturePresentation();
             BoardActionResult result = executor.Activate(at);
+            ObserveMoves();
             Message = result.Message;
             if (result.IsApplied) BeginEffects(result.Changes, result.Effects, result.PowerTrace);
             else { ResetPresentation(); Changed?.Invoke(); }
@@ -105,22 +108,26 @@ namespace GameScreen
         private void Update()
         {
             if (boardCamera != null && !HasScreenLayout) boardCamera.orthographicSize = (PuzzleWorldBoard.HalfHeight + 0.7f) / Mathf.Min(1, boardCamera.aspect);
-            if (IsPresenting) { AdvancePresentation(Time.deltaTime); return; }
-            Advance();
+            // 이 프레임에 새로 예약한 수집은 다음 보드 표시 시간부터 진행한다.
+            TickProgress(Time.deltaTime);
+            if (IsPresenting) AdvancePresentation(Time.deltaTime); else Advance();
         }
 
         private void Advance()
         {
-            if (!ready || failed || IsPaused || IsRestarting || IsPresenting || !executor.HasPendingCascade) return;
+            if (!ready || failed || IsPaused || IsRestarting || IsPresenting || IsStartingFeedback || !executor.HasPendingCascade) return;
             try
             {
                 CapturePresentation();
                 int recoveryBefore = State.Recoveries.Count;
                 CascadeStepResult step = executor.AdvanceCascade();
+                ObserveCascadeStep(step);
                 Message = step.Message;
                 if (step.Settlement != null && step.Settlement.IsApplied)
                 {
                     settlementPlayback.Begin(presentationSnapshot, board, step.Settlement, artwork, recoveryBefore, fallSeconds, supplySeconds, landingSeconds);
+                    foreach (float time in settlementPlayback.LandingTimes) ScheduleAudio(PuzzleFeedbackCueKind.Landing, time);
+                    ProgressFeedback.Schedule(State, record => record.Source.HasValue ? settlementPlayback.CollectionTime(record.Source.Value) : null);
                     if (!IsPresenting) { ResetPresentation(); Draw(); } else Changed?.Invoke();
                 }
                 else if (step.Reason == CascadeStepReason.Shuffled) { ResetPresentation(); Draw(); }
@@ -138,6 +145,7 @@ namespace GameScreen
         private void Fail(string message)
         {
             failed = true; ready = false; Message = message;
+            ClearProgress();
             ResetPresentation();
             artwork?.Dispose();
             if (this != null && !lifetime.IsCancellationRequested) Changed?.Invoke();
@@ -160,6 +168,7 @@ namespace GameScreen
         private void OnDestroy()
         {
             ready = false;
+            ClearProgress();
             ResetPresentation();
             lifetime.Cancel(); artwork?.Dispose(); lifetime.Dispose();
             Changed = null;

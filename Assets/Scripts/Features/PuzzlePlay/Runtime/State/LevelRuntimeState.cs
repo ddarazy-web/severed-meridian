@@ -152,6 +152,9 @@ namespace Simulation
         public RuntimeSupply Supply { get; }
         public SimulationRandom Random { get; }
         private readonly List<RecoveryRecord> recoveries = new List<RecoveryRecord>();
+        private readonly List<MissionProgressRecord> missionProgressRecords = new List<MissionProgressRecord>();
+        public ReadOnlyCollection<MissionProgressRecord> MissionProgressRecords => missionProgressRecords.AsReadOnly();
+        internal void RecordMissionProgress(MissionProgressRecord record) => missionProgressRecords.Add(record);
         public ReadOnlyCollection<RecoveryRecord> Recoveries => recoveries.AsReadOnly();
         internal void RecordRecovery(RecoveryRecord record) => recoveries.Add(record);
 
@@ -184,6 +187,7 @@ namespace Simulation
             Missions = Array.AsReadOnly(source.Missions.Select(mission => mission.Copy()).ToArray());
             Connections = source.Connections; Flow = source.Flow; Supply = new RuntimeSupply(source.Supply); Random = source.Random.Copy();
             recoveries.AddRange(source.recoveries);
+            missionProgressRecords.AddRange(source.missionProgressRecords);
         }
 
         /// <summary>

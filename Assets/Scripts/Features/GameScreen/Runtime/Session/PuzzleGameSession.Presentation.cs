@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Board;
 using Cysharp.Threading.Tasks;
@@ -36,6 +37,7 @@ namespace GameScreen
             Vector3 direction = PuzzleWorldBoard.CellPosition(second) - PuzzleWorldBoard.CellPosition(first);
             Vector3 worldDelta = board.transform.TransformVector(direction);
             BoardActionResult result = executor.Swap(first, second);
+            ObserveMoves();
             pendingSwap = result;
             Message = result.Message;
             bool returns = !result.IsApplied && candidate.Reason == ActionReason.NoNewMatch;
@@ -50,6 +52,8 @@ namespace GameScreen
                 b, bOrigin,
                 b != null ? b.transform.parent.InverseTransformVector(-worldDelta) : Vector3.zero,
                 swapSeconds, returns, rejected);
+            if (result.IsApplied) EmitAudio(PuzzleFeedbackCueKind.Swap);
+            else if (returns) ScheduleAudio(PuzzleFeedbackCueKind.InvalidSwap, swapSeconds);
             Changed?.Invoke();
             return result.IsApplied;
         }
@@ -116,6 +120,8 @@ namespace GameScreen
                 if (effectLoad != load) return;
                 presentationSnapshot?.Restore(); presentationSnapshot = null;
                 powerPlayback = playback; powerPlayback.Begin(board);
+                ScheduleProgress(timeline);
+                foreach (PuzzleFeedbackCue cue in playback.AudioCues) ScheduleAudio(cue.Kind, cue.Time);
                 preparingEffects = false; Changed?.Invoke();
             }
             catch (OperationCanceledException) { playback.Reset(); }
@@ -132,6 +138,8 @@ namespace GameScreen
             try
             {
                 removalPlayback.Begin(presentationSnapshot, State, artwork, changes, removalSeconds);
+                if (changes.Any(change => change.IsConsumed)) ScheduleAudio(PuzzleFeedbackCueKind.Match, removalSeconds);
+                ProgressFeedback.Schedule(State, record => record.Source.HasValue && changes.Any(change => change.IsConsumed && change.Coordinate.Equals(record.Source.Value)) ? removalSeconds : (float?)null);
                 if (!IsPresenting) { ResetPresentation(); Draw(); } else Changed?.Invoke();
             }
             catch (Exception error) { Fail("제거 연출 중단: " + error.Message); }

@@ -49,6 +49,8 @@ MonoBehaviour:
   seed: 12345
   board: {fileID: 0}
   boardCamera: {fileID: 0}
+  audioPrefab: {fileID: 2835754834723324057, guid: 367d3f9e30ca3f141b901546eebfc178, type: 3}
+  soundEnabled: 1
 --- !u!114 &2936886132248689141
 MonoBehaviour:
   m_ObjectHideFlags: 0

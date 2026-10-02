@@ -71,6 +71,8 @@ namespace GameScreen.Editor
                     new[] { Enum.ToObject(mode, 1), (object)width, height, "Stage04 " + width + "x" + height }, null);
                 group.GetType().GetMethod("AddCustomSize").Invoke(group, new[] { value });
                 index = builtIn + custom;
+                if (SessionState.GetString("StageFour.SizeSnapshot", "") != "")
+                    SessionState.SetString("StageFour.CreatedSizes", SessionState.GetString("StageFour.CreatedSizes", "") + index + "," + width + "," + height + ";");
             }
             Type viewType = assembly.GetType("UnityEditor.GameView");
             EditorWindow view = EditorWindow.GetWindow(viewType);
@@ -80,31 +82,71 @@ namespace GameScreen.Editor
 
         internal static void RememberSize()
         {
-            Type type = typeof(EditorWindow).Assembly.GetType("UnityEditor.GameView");
+            Assembly assembly = typeof(EditorWindow).Assembly;
+            Type type = assembly.GetType("UnityEditor.GameView");
             var view = EditorWindow.GetWindow(type);
-            SessionState.SetInt("StageFour.PreviousSize", (int)type.GetProperty("selectedSizeIndex", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).GetValue(view));
+            Type sizesType = assembly.GetType("UnityEditor.GameViewSizes");
+            object sizes = sizesType.GetProperty("instance", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy).GetValue(null);
+            object groupType = sizesType.GetProperty("currentGroupType").GetValue(sizes);
+            object group = sizesType.GetMethod("GetGroup").Invoke(sizes, new[] { groupType });
+            int count = (int)group.GetType().GetMethod("GetBuiltinCount").Invoke(group, null) + (int)group.GetType().GetMethod("GetCustomCount").Invoke(group, null);
+            string[] entries = new string[count];
+            for (int index = 0; index < count; index++)
+            {
+                object value = group.GetType().GetMethod("GetGameViewSize").Invoke(group, new object[] { index });
+                entries[index] = value.GetType().GetProperty("width").GetValue(value) + ":" + value.GetType().GetProperty("height").GetValue(value)
+                    + ":" + value.GetType().GetProperty("sizeType").GetValue(value) + ":" + value.GetType().GetProperty("baseText").GetValue(value);
+            }
+            SessionState.SetString("StageFour.SizeSnapshot", JsonUtility.ToJson(new SizeSnapshot
+            {
+                Selected = (int)type.GetProperty("selectedSizeIndex", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).GetValue(view),
+                Group = Convert.ToInt32(groupType), Entries = entries
+            }));
+            SessionState.SetString("StageFour.CreatedSizes", "");
         }
+
+        [Serializable] private sealed class SizeSnapshot { public int Selected; public int Group; public string[] Entries; }
 
         internal static void RestoreSize()
         {
+            string saved = SessionState.GetString("StageFour.SizeSnapshot", "");
+            if (saved == "") return;
+            SizeSnapshot snapshot = JsonUtility.FromJson<SizeSnapshot>(saved);
             Assembly assembly = typeof(EditorWindow).Assembly;
             Type sizesType = assembly.GetType("UnityEditor.GameViewSizes");
             object sizes = sizesType.GetProperty("instance", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy).GetValue(null);
-            object group = sizesType.GetMethod("GetGroup").Invoke(sizes, new[] { sizesType.GetProperty("currentGroupType").GetValue(sizes) });
+            object groupType = sizesType.GetProperty("currentGroupType").GetValue(sizes);
+            if (Convert.ToInt32(groupType) != snapshot.Group) throw new InvalidOperationException("Game View 크기 그룹이 검사 중 변경되었습니다.");
+            object group = sizesType.GetMethod("GetGroup").Invoke(sizes, new[] { groupType });
             int builtIn = (int)group.GetType().GetMethod("GetBuiltinCount").Invoke(group, null);
-            int custom = (int)group.GetType().GetMethod("GetCustomCount").Invoke(group, null);
-            int previous = SessionState.GetInt("StageFour.PreviousSize", 0);
-            for (int i = custom - 1; i >= 0; i--)
+            // 기본 항목을 포함한 인덱스로 이번 실행에서 추가한 크기만 역순 제거한다.
+            foreach (string entry in SessionState.GetString("StageFour.CreatedSizes", "").Split(';').Where(entry => entry != "").Reverse())
             {
-                object value = group.GetType().GetMethod("GetGameViewSize").Invoke(group, new object[] { builtIn + i });
+                int[] fields = entry.Split(',').Select(int.Parse).ToArray();
+                int count = builtIn + (int)group.GetType().GetMethod("GetCustomCount").Invoke(group, null);
+                if (fields[0] < builtIn || fields[0] >= count) throw new InvalidOperationException("검사 소유 Game View 크기 인덱스가 변경되었습니다.");
+                object value = group.GetType().GetMethod("GetGameViewSize").Invoke(group, new object[] { fields[0] });
                 string label = (string)value.GetType().GetProperty("baseText").GetValue(value);
-                if (!label.StartsWith("Stage04 ", StringComparison.Ordinal)) continue;
-                if (previous == builtIn + i) previous = 0; else if (previous > builtIn + i) previous--;
-                group.GetType().GetMethod("RemoveCustomSize").Invoke(group, new object[] { i });
+                if (label != "Stage04 " + fields[1] + "x" + fields[2] || (int)value.GetType().GetProperty("width").GetValue(value) != fields[1]
+                    || (int)value.GetType().GetProperty("height").GetValue(value) != fields[2])
+                    throw new InvalidOperationException("검사 소유 Game View 크기가 다른 항목으로 바뀌었습니다.");
+                group.GetType().GetMethod("RemoveCustomSize").Invoke(group, new object[] { fields[0] });
             }
             Type type = assembly.GetType("UnityEditor.GameView");
-            type.GetProperty("selectedSizeIndex", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SetValue(EditorWindow.GetWindow(type), previous);
-            SessionState.EraseInt("StageFour.PreviousSize");
+            EditorWindow view = EditorWindow.GetWindow(type);
+            PropertyInfo selected = type.GetProperty("selectedSizeIndex", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            selected.SetValue(view, snapshot.Selected);
+            int remaining = builtIn + (int)group.GetType().GetMethod("GetCustomCount").Invoke(group, null);
+            string[] restored = new string[remaining];
+            for (int index = 0; index < remaining; index++)
+            {
+                object value = group.GetType().GetMethod("GetGameViewSize").Invoke(group, new object[] { index });
+                restored[index] = value.GetType().GetProperty("width").GetValue(value) + ":" + value.GetType().GetProperty("height").GetValue(value)
+                    + ":" + value.GetType().GetProperty("sizeType").GetValue(value) + ":" + value.GetType().GetProperty("baseText").GetValue(value);
+            }
+            if ((int)selected.GetValue(view) != snapshot.Selected || !snapshot.Entries.SequenceEqual(restored))
+                throw new InvalidOperationException("Game View 선택/크기 목록 복원이 일치하지 않습니다.");
+            SessionState.EraseString("StageFour.SizeSnapshot"); SessionState.EraseString("StageFour.CreatedSizes");
         }
     }
 }

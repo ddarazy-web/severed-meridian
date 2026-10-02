@@ -147,10 +147,10 @@ namespace GameScreen.Editor
                 LevelDefinition won = (LevelDefinition)Invoke(typeof(RecoveryVerification), "PlayFixture");
                 JsonUtility.FromJsonOverwrite("{\"moveCount\":3}", won);
                 await Fixture(won); Check(session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)), "승리 fixture 발동");
-                for (int i = 0; i < 1000 && session.Outcome == null; i++) InvokeInstance(session, "Advance");
+                await ProgressUntil(session, () => session.Outcome != null);
                 Check(session.Outcome?.Kind == BoardOutcomeKind.Won && session.Phase != BoardActionPhase.Stopped, "승리 확정/라스트팡 분리");
                 Check(!result.gameObject.activeSelf, "라스트팡 전 결과 팝업 금지");
-                for (int i = 0; i < 1000 && session.Phase != BoardActionPhase.Stopped; i++) InvokeInstance(session, "Advance");
+                await ProgressUntil(session, () => session.ResultReady);
                 Check(result.gameObject.activeSelf && !session.CanAcceptInput, "라스트팡 완료 후 결과/입력 차단");
                 Check(result.Find("Panel/Title").GetComponent<UnityEngine.UI.Text>().text == "정리 완료!", "승리 제목");
                 await Capture("won");
@@ -160,7 +160,7 @@ namespace GameScreen.Editor
                 Invoke(typeof(PowerEffectVerification), "Place", lost, new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0), InitialBlockKind.Rocket, RocketDirection.Horizontal, RabbitColor.Type1);
                 JsonUtility.FromJsonOverwrite("{\"moveCount\":1,\"missions\":[{\"kind\":0,\"color\":0,\"count\":100}]}", lost);
                 await Fixture(lost); session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0));
-                for (int i = 0; i < 1000 && session.Phase != BoardActionPhase.Stopped; i++) InvokeInstance(session, "Advance");
+                await ProgressUntil(session, () => session.ResultReady);
                 Check(session.Outcome?.Kind == BoardOutcomeKind.MovesExhausted && result.gameObject.activeSelf, "이동 소진 결과 팝업");
                 await Capture("lost");
                 Click("PuzzleResultPopup/Panel/Primary"); await Ready(session);
@@ -178,11 +178,12 @@ namespace GameScreen.Editor
 
                 async UniTask Fixture(LevelDefinition definition)
                 {
+                    session.enabled = false; InvokeInstance(session, "ClearProgress"); InvokeInstance(session, "ResetPresentation");
                     LevelRuntimeState state = LevelStateBuilder.Build(definition, 12345).State;
                     PuzzleArtwork art = new PuzzleArtwork(); await art.PrepareAsync(state, CancellationToken.None);
                     ((PuzzleArtwork)Get(session, "artwork")).Dispose(); Set(session, "artwork", art);
                     Set(session, "executor", new BoardActionExecutor(state));
-                    InvokeInstance(session, "Draw"); UnityEngine.Object.Destroy(definition);
+                    InvokeInstance(session, "InitializeProgress"); session.enabled = true; InvokeInstance(session, "Draw"); UnityEngine.Object.Destroy(definition);
                 }
                 void Click(string path)
                 {
@@ -201,6 +202,24 @@ namespace GameScreen.Editor
         }
         private static async UniTask Ready(PuzzleGameSession session)
         { for (int i = 0; i < 1800 && !session.CanAcceptInput && !session.HasFailed; i++) await UniTask.Yield(); if (!session.CanAcceptInput) throw new Exception(session.Message); }
+        private static async UniTask ProgressUntil(PuzzleGameSession session, Func<bool> complete)
+        {
+            float previous = Time.timeScale; bool enabled = session.enabled; Time.timeScale = 0; session.enabled = false;
+            try
+            {
+                for (int frame = 0; frame < 20000 && !complete() && !session.HasFailed; frame++)
+                {
+                    float deadline = Time.realtimeSinceStartup + 20;
+                    while ((bool)Get(session, "preparingEffects") && Time.realtimeSinceStartup < deadline) await UniTask.Yield();
+                    if ((bool)Get(session, "preparingEffects")) throw new Exception("실제 UI 파워 준비 timeout");
+                    InvokeInstance(session, "TickProgress", .02f);
+                    if (session.IsPresenting) InvokeInstance(session, "AdvancePresentation", .02f); else InvokeInstance(session, "Advance");
+                    await UniTask.Yield();
+                }
+                Check(complete() && !session.HasFailed, "실제 UI 표시·수집·결과 경계 완료");
+            }
+            finally { Time.timeScale = previous; session.enabled = enabled; }
+        }
         private static async UniTask Capture(string name)
         { await UniTask.Yield(); ScreenCapture.CaptureScreenshot(PuzzleUIStateVerification.Output + name + ".png"); await UniTask.Delay(250); }
         private static Rect Bounds(RectTransform rect)

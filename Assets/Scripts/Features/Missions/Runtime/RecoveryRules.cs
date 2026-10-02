@@ -61,7 +61,7 @@ namespace Simulation
                 RuntimeCell cell = state.CellAt(coordinate);
                 if (cell.Content != RuntimeContent.Recovery) continue;
                 cell.Content = RuntimeContent.Empty; cell.Color = null; cell.RocketDirection = null; cell.ObstacleIndex = null;
-                MissionProgressRules.Complete(state, MissionKind.Recovery);
+                MissionProgressRules.Complete(state, MissionKind.Recovery, coordinate);
                 state.RecordRecovery(new RecoveryRecord(coordinate, turn, batch)); count++;
             }
             return count;

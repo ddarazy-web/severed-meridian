@@ -42,7 +42,7 @@ namespace GameScreen.Editor
                 InputSystem.settings = settings;
                 mouse = InputSystem.AddDevice<Mouse>();
                 PuzzleGameSession session = UnityEngine.Object.FindFirstObjectByType<PuzzleGameSession>();
-                for (int i = 0; i < 1800 && !session.IsReady && !session.HasFailed; i++) await UniTask.Yield();
+                for (int i = 0; i < 1800 && !session.CanAcceptInput && !session.HasFailed; i++) await UniTask.Yield();
                 Check(session.CanAcceptInput, "실제 게임 씬 준비");
                 PuzzleBoardInput input = session.GetComponent<PuzzleBoardInput>();
                 PuzzleWorldBoard board = UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>();
@@ -52,6 +52,7 @@ namespace GameScreen.Editor
                 foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(450, 800) })
                 {
                     await session.RestartAsync(CancellationToken.None);
+                    Call(session, "TickProgress", .7f);
                     PuzzleUIRenderVerification.SetSize(size.x, size.y);
                     for (int i = 0; i < 15; i++) await UniTask.Yield();
                     Time.timeScale = 0;
@@ -68,10 +69,10 @@ namespace GameScreen.Editor
                     await Shot("scene-" + size.x + "-preview");
                     InputSystem.QueueStateEvent(mouse, new MouseState { position = Vector2.Lerp(from, to, .3f), buttons = 1 }); InputSystem.Update(); Call(input, "Update");
                     Check(session.IsPresenting && session.State.MovesRemaining == before - 1, "게임 화면 놓기 전 교환 " + size);
-                    Check(moves.text == before.ToString(), "HUD 교환 전 이동 수 유지 " + size);
+                    Check(moves.text == (before - 1).ToString() && session.MovesPulse > 0, "유효 교환 실제 이동 소비 즉시 HUD 반영·강조 " + size);
                     Tick(session, .075f); await Shot("scene-" + size.x + "-mid");
                     session.SetPaused(true); Tick(session, 1);
-                    Check(moves.text == before.ToString() && session.IsPresenting, "정지 UI 통지에도 HUD 조기 갱신 없음 " + size);
+                    Check(moves.text == (before - 1).ToString() && session.IsPresenting && session.MovesPulse > 0, "pause 중 이동 수·강조·교환 표시 유지 " + size);
                     session.SetPaused(false); Tick(session, .075f);
                     await FinishPresentation(session);
                     Check(!session.IsPresenting && moves.text == (before - 1).ToString(), "HUD 교환·제거 완료 후 갱신 " + size);
@@ -81,6 +82,7 @@ namespace GameScreen.Editor
                     await Shot("scene-" + size.x + "-end");
                     session.enabled = true;
                     await session.RestartAsync(CancellationToken.None);
+                    Call(session, "TickProgress", .7f);
                     ActionCandidate invalid = session.State.Cells.Where(c => c.IsActive)
                         .SelectMany(c => new[] { new BoardCoordinate(c.Coordinate.Row, c.Coordinate.Column + 1), new BoardCoordinate(c.Coordinate.Row + 1, c.Coordinate.Column) }
                             .Select(next => ActionQuery.Swap(session.State, c.Coordinate, next)))
@@ -104,6 +106,7 @@ namespace GameScreen.Editor
                 }
                 Time.timeScale = scale;
                 await session.RestartAsync(CancellationToken.None);
+                    Call(session, "TickProgress", .7f);
                 Check(session.CanAcceptInput, "화면 검사 후 재시작 잠금 없음");
                 ActionCandidate leaving = ActionQuery.Find(session.State).First(c => c.Second.HasValue);
                 session.TrySwap(leaving.First, leaving.Second.Value); Tick(session, .075f);
@@ -112,7 +115,7 @@ namespace GameScreen.Editor
                     new UnityEngine.SceneManagement.LoadSceneParameters(UnityEngine.SceneManagement.LoadSceneMode.Single));
                 await UniTask.Yield();
                 session = UnityEngine.Object.FindFirstObjectByType<PuzzleGameSession>();
-                for (int i = 0; i < 1800 && !session.IsReady && !session.HasFailed; i++) await UniTask.Yield();
+                for (int i = 0; i < 1800 && !session.CanAcceptInput && !session.HasFailed; i++) await UniTask.Yield();
                 Check(oldSession == null && UnityEngine.Object.FindObjectsByType<PuzzleGameSession>(FindObjectsSortMode.None).Length == 1, "교환 중 실제 씬 재진입 단일 세션");
                 Check(session.CanAcceptInput && !session.IsPresenting, "씬 재진입 이전 연출/잠금 없음");
             }

@@ -30,7 +30,7 @@ namespace GameScreen.Editor
             try
             {
                 PuzzleGameSession session = UnityEngine.Object.FindFirstObjectByType<PuzzleGameSession>();
-                for (int frame = 0; frame < 1800 && !session.IsReady && !session.HasFailed; frame++) await UniTask.Yield();
+                for (int frame = 0; frame < 1800 && !session.CanAcceptInput && !session.HasFailed; frame++) await UniTask.Yield();
                 Check(session.CanAcceptInput, "실제 씬 MemoryPack 준비");
                 PuzzleWorldBoard board = UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>();
                 PuzzleScreenView screen = UnityEngine.Object.FindFirstObjectByType<PuzzleScreenView>();
@@ -38,6 +38,7 @@ namespace GameScreen.Editor
                 foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(450, 800) })
                 {
                     await session.RestartAsync(CancellationToken.None);
+                    Call(session, "TickProgress", .7f);
                     PuzzleUIRenderVerification.SetSize(size.x, size.y);
                     for (int frame = 0; frame < 15; frame++) await UniTask.Yield();
                     Time.timeScale = 0;
@@ -51,7 +52,7 @@ namespace GameScreen.Editor
                     Tick(session, .075f); await Shot("scene-" + size.x + "-swap-mid");
                     Tick(session, .075f); await WaitForEffectResourcesAsync(session); Tick(session, .06f);
                     Check(session.IsPresenting, "실제 씬 제거 재생 " + size);
-                    Check(moves.text == movesBefore.ToString(), "제거 완료 전 HUD 조기 갱신 없음 " + size);
+                    Check(moves.text == (movesBefore - 1).ToString(), "제거 중 실제 소비한 이동 수 HUD 유지 " + size);
                     await Shot("scene-" + size.x + "-remove-mid");
                     await FinishCurrentEffectsAsync(session);
                     Check(moves.text == (movesBefore - 1).ToString(), "제거 완료 후 HUD 반영 " + size);
@@ -97,6 +98,7 @@ namespace GameScreen.Editor
                 await VerifyAutomaticCascadeAsync(session, board);
                 await VerifyOutcomesAsync(session, board, screen);
                 await session.RestartAsync(CancellationToken.None);
+                    Call(session, "TickProgress", .7f);
                 string initial = Snapshot(session.State);
                 int objects = board.GetComponentsInChildren<Transform>(true).Length;
                 for (int repeat = 0; repeat < 5; repeat++)
@@ -106,6 +108,7 @@ namespace GameScreen.Editor
                     Tick(session, .15f); await FinishCurrentEffectsAsync(session); Call(session, "Advance"); Tick(session, .04f);
                     Check(session.IsPresenting && !session.CanUseItems, "낙하 중 다시하기 시작 " + repeat);
                     await session.RestartAsync(CancellationToken.None);
+                    Call(session, "TickProgress", .7f);
                     Check(session.CanAcceptInput && !session.IsPresenting && Snapshot(session.State) == initial, "낙하 다시하기 상태·잠금 복원 " + repeat);
                     Check(board.GetComponentsInChildren<Transform>(true).Length == objects, "낙하 다시하기 객체 누적 없음 " + repeat);
                     Check(!board.GetComponentsInChildren<SpriteRenderer>().Any(image => image.name == "Supply-playback") &&
@@ -119,7 +122,7 @@ namespace GameScreen.Editor
                     new UnityEngine.SceneManagement.LoadSceneParameters(UnityEngine.SceneManagement.LoadSceneMode.Single));
                 await UniTask.Yield();
                 session = UnityEngine.Object.FindFirstObjectByType<PuzzleGameSession>();
-                for (int frame = 0; frame < 1800 && !session.IsReady && !session.HasFailed; frame++) await UniTask.Yield();
+                for (int frame = 0; frame < 1800 && !session.CanAcceptInput && !session.HasFailed; frame++) await UniTask.Yield();
                 Check(oldSession == null && UnityEngine.Object.FindObjectsByType<PuzzleGameSession>(FindObjectsSortMode.None).Length == 1, "낙하 중 씬 재진입 단일 세션");
                 Check(session.CanAcceptInput && !session.IsPresenting, "씬 재진입 이전 표시 잠금 없음");
             }

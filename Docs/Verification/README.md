@@ -14,7 +14,7 @@
 - [32단계 구현·검증 진행 기록](MoonRabbitJunkyard/Core/93_32단계_검증진행기록.md)
 - [33단계 검증 진행 기록](MoonRabbitJunkyard/Core/96_33단계_검증진행기록.md)
 
-## 월드 게임 화면 (1~8단계)
+## 월드 게임 화면 (1~12단계)
 
 - [3기 이하 드론 느린 상승·대기·돌파](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-lift-hold.md)
 - [3기 이하 드론 표적 근처 선회](MoonRabbitJunkyard/WorldGameScreen/2026-10-01-drone-near-target.md)
@@ -34,3 +34,7 @@
 - [6단계 스와이프·교환 연출 검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-06-progress.md)
 - [7단계 제거·낙하·채움 검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-07-progress.md)
 - [8단계 파워·장애물 상세 연출 검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-08-progress.md)
+- [9단계 미션 수집·진행·승패 표시 검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-09-progress.md)
+- [10단계 효과음 실행·검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-10-progress.md)
+- [11단계 반복 플레이·성능 안정화 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-11-progress.md)
+- [12단계 화면·움직임 검수 기록 — 최종 회귀·리뷰 진행 중](MoonRabbitJunkyard/WorldGameScreen/stage-12-progress.md)

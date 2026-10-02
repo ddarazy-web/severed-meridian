@@ -57,7 +57,7 @@ namespace Simulation
             if (!GeneratorRules.Alive(state, index)) return;
             RuntimeObstacle body = state.Obstacles[index];
             if (body.Definition.Kind != ObstacleKind.Generator)
-            { body.Durability = 0; MissionProgressRules.Complete(state, Mission(body.Definition.Kind)); }
+            { body.Durability = 0; MissionProgressRules.Complete(state, Mission(body.Definition.Kind), body.Definition.Coordinate, index); }
             foreach (RuntimeCell occupied in state.Cells.Where(c => c.ObstacleIndex == index))
             { occupied.Content = RuntimeContent.Empty; occupied.Color = null; occupied.RocketDirection = null; occupied.ObstacleIndex = null; }
         }

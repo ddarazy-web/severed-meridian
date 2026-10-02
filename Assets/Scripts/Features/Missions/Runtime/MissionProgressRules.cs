@@ -7,6 +7,17 @@ using Levels;
 
 namespace Simulation
 {
+    // 실제 진행이 증가한 결정만 보존한다. 예측 기여량이나 저장 데이터가 아니다.
+    public sealed class MissionProgressRecord
+    {
+        public int MissionIndex { get; }
+        public int Amount { get; }
+        public BoardCoordinate? Source { get; }
+        public int? BodyIndex { get; }
+        internal MissionProgressRecord(int missionIndex, int amount, BoardCoordinate? source, int? bodyIndex)
+        { MissionIndex = missionIndex; Amount = amount; Source = source; BodyIndex = bodyIndex; }
+    }
+
     public sealed class MissionContribution
     {
         public int MissionIndex { get; }
@@ -102,19 +113,35 @@ namespace Simulation
             return result.AsReadOnly();
         }
 
-        internal static void ConsumeColor(LevelRuntimeState state, RabbitColor? color)
+        internal static void ConsumeColor(LevelRuntimeState state, RabbitColor? color, BoardCoordinate? source = null)
         {
             if (!color.HasValue) return;
-            foreach (RuntimeMission mission in state.Missions)
+            for (int index = 0; index < state.Missions.Count; index++)
+            {
+                RuntimeMission mission = state.Missions[index];
                 if (mission.Definition.Kind == MissionKind.Color && mission.Definition.Color == color)
+                {
+                    int before = mission.Progress;
                     mission.Progress = Math.Min(mission.Target, mission.Progress + 1);
+                    if (mission.Progress > before)
+                        state.RecordMissionProgress(new MissionProgressRecord(index, mission.Progress - before, source, null));
+                }
+            }
         }
 
-        internal static void Complete(LevelRuntimeState state, MissionKind kind)
+        internal static void Complete(LevelRuntimeState state, MissionKind kind, BoardCoordinate? source = null, int? bodyIndex = null)
         {
-            foreach (RuntimeMission mission in state.Missions)
+            for (int index = 0; index < state.Missions.Count; index++)
+            {
+                RuntimeMission mission = state.Missions[index];
                 if (mission.Definition.Kind == kind)
+                {
+                    int before = mission.Progress;
                     mission.Progress = Math.Min(mission.Target, mission.Progress + 1);
+                    if (mission.Progress > before)
+                        state.RecordMissionProgress(new MissionProgressRecord(index, mission.Progress - before, source, bodyIndex));
+                }
+            }
         }
     }
 

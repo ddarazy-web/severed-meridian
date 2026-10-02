@@ -17,9 +17,11 @@ namespace GameScreen
         [SerializeField] private UnityEngine.UI.Button pauseButton, cancel, description;
         [SerializeField] private UnityEngine.UI.Text level, message, descriptionText;
         [SerializeField] private RectTransform selection;
+        private BoardOutcome shownOutcome;
         public void SetSelectionView(RectTransform rect) => selection = rect;
         private void LateUpdate()
         {
+            if (hud != null && session != null) hud.Frame(session);
             if (selection == null || session == null || input == null) return;
             Vector3? position = input.SelectedWorldPosition;
             selection.gameObject.SetActive(position.HasValue && session.CanAcceptInput);
@@ -63,20 +65,25 @@ namespace GameScreen
             hud.Refresh(session); layout.RefreshIfNeeded(); items.Refresh(session, input);
             level.text = session.State == null ? "달토끼 고물상" : "LEVEL " + session.State.LevelNumber;
             bool selected = input.SelectedItem.HasValue;
-            message.text = input.SelectionMessage ?? (selected ? (input.SelectedItem == BoardItem.Hammer ? "제거할 칸을 고르세요" : input.Selected.HasValue ? "인접한 두 번째 칸을 고르세요" : "바꿀 두 칸을 고르세요")
+            message.text = input.SelectionMessage ?? session.FeedbackStatus ?? (selected ? (input.SelectedItem == BoardItem.Hammer ? "제거할 칸을 고르세요" : input.Selected.HasValue ? "인접한 두 번째 칸을 고르세요" : "바꿀 두 칸을 고르세요")
                 : session.IsReady ? "시험용 아이템 · 수량 무제한" : session.Message);
             cancel.gameObject.SetActive(selected);
             message.rectTransform.offsetMax = new Vector2(selected ? -75 : 0, 0);
-            pauseButton.interactable = session.IsReady && !session.IsRestarting && (session.Outcome == null || session.IsPresenting);
+            pauseButton.interactable = session.IsReady && !session.IsRestarting && (session.Outcome == null || session.IsPresenting || session.HasProgressFeedback);
             pause.gameObject.SetActive(session.IsPaused);
-            bool ended = session.Outcome != null && session.Phase == BoardActionPhase.Stopped && !session.IsRestarting && !session.IsPresenting;
+            bool ended = session.ResultReady;
             input.SetUIBlocked(ended || session.IsPaused || description.gameObject.activeSelf);
             if (ended)
             {
-                bool won = session.Outcome.Kind == BoardOutcomeKind.Won;
-                result.Show(won ? "정리 완료!" : "다시 도전해요", "남은 이동 " + session.State.MovesRemaining + "\n" + session.Message);
+                if (shownOutcome != session.Outcome)
+                {
+                    shownOutcome = session.Outcome;
+                    bool won = session.Outcome.Kind == BoardOutcomeKind.Won;
+                    result.Show(won ? "정리 완료!" : "다시 도전해요", "남은 이동 " + session.State.MovesRemaining + "\n" + session.Message);
+                    session.PlayResultFeedback();
+                }
             }
-            else result.gameObject.SetActive(false);
+            else { shownOutcome = null; result.gameObject.SetActive(false); }
         }
     }
 }

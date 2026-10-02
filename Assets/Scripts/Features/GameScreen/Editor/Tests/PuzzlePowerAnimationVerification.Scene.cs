@@ -31,7 +31,7 @@ namespace GameScreen.Editor
             {
                 PuzzleGameSession session = UnityEngine.Object.FindFirstObjectByType<PuzzleGameSession>();
                 float deadline = Time.realtimeSinceStartup + 30;
-                while (!session.IsReady && !session.HasFailed && Time.realtimeSinceStartup < deadline) await UniTask.Yield();
+                while (!session.CanAcceptInput && !session.HasFailed && Time.realtimeSinceStartup < deadline) await UniTask.Yield();
                 Check(session.CanAcceptInput, "실제 게임 씬 MemoryPack 시작");
                 string original = SceneSnapshot(session.State);
                 PuzzleWorldBoard board = UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>();
@@ -89,7 +89,7 @@ namespace GameScreen.Editor
                         Vector3.Distance(PuzzleWorldBoard.CellPosition(flight.Record.Origin), PuzzleWorldBoard.CellPosition(flight.Record.Center)) * .045f, .18f, .38f) + .01f;
                     SceneCall(session, "AdvancePresentation", captureTime - .14f);
                     await PowerShot("scene-power-" + fixture + "-contact");
-                    for (int frame = 0; frame < 20000 && (session.IsPresenting || executor.HasPendingCascade); frame++)
+                    for (int frame = 0; frame < 20000 && (session.IsPresenting || executor.HasPendingCascade || session.HasProgressFeedback); frame++)
                     {
                         await AwaitSceneEffects(session);
                         if (session.IsPresenting)
@@ -103,12 +103,15 @@ namespace GameScreen.Editor
                     Check(!session.HasFailed && !session.IsPresenting && !executor.HasPendingCascade && !direct.HasPendingCascade,
                         "실제 씬 파워·연쇄 종료 " + fixture);
                     Check(SceneSnapshot(session.State) == SceneSnapshot(direct.State), "보드·난수·이동·공급·미션·회수 동등 " + fixture);
+                    Check(session.State.Missions.Select((mission, index) => session.DisplayedMissionProgress(index) == mission.Progress).All(value => value),
+                        "4파워·10조합 최종 표시 진행과 실제 미션 일치 " + fixture);
                     Check(session.Phase == direct.Phase && SceneSnapshot(session.Outcome) == SceneSnapshot(direct.Outcome), "Phase·승패 동등 " + fixture);
                     Check(board.GetComponentsInChildren<SpriteRenderer>().All(image => image.name != "Effect-playback"), "실제 씬 효과 잔상 없음 " + fixture);
                     UnityEngine.Object.Destroy(level); level = null;
                 }
                 session.enabled = true;
                 await session.RestartAsync(CancellationToken.None);
+                SceneCall(session, "TickProgress", .7f);
                 Check(SceneSnapshot(session.State) == original && session.CanAcceptInput, "파워 fixture 이후 원래 MemoryPack 다시하기");
                 int warmObjects = board.GetComponentsInChildren<Transform>(true).Length;
                 for (int repeat = 0; repeat < 5; repeat++)
@@ -119,6 +122,7 @@ namespace GameScreen.Editor
                     // 일부 회차는 로드 완료 전에, 나머지는 효과 중간에 취소한다.
                     if (repeat % 2 != 0) { await AwaitSceneEffects(session); SceneCall(session, "AdvancePresentation", .06f); }
                     await session.RestartAsync(CancellationToken.None);
+                    SceneCall(session, "TickProgress", .7f);
                     for (int frame = 0; frame < 5; frame++) await UniTask.Yield();
                     Check(SceneSnapshot(session.State) == original && session.CanAcceptInput && !session.IsPresenting && !session.HasFailed,
                         "효과 로드/재생 취소 후 상태·잠금 복원 " + repeat);
@@ -150,9 +154,18 @@ namespace GameScreen.Editor
             await UniTask.Delay(150, ignoreTimeScale: true);
         }
         private static void SceneCall(object target, string name, params object[] args)
-            => target.GetType().GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(target, args);
+        {
+            // 수동 검사도 런타임 Update와 같은 순서로 표시 시간을 진행한다.
+            if (target is PuzzleGameSession && (name == "AdvancePresentation" || name == "Advance"))
+                target.GetType().GetMethod("TickProgress", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(target,
+                    new object[] { name == "AdvancePresentation" ? (float)args[0] : .02f });
+            target.GetType().GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(target, args);
+        }
         private static void SceneSet(object target, string name, object value)
-            => target.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(target, value);
+        {
+            target.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(target, value);
+            if (target is PuzzleGameSession && name == "executor") SceneCall(target, "InitializeProgress");
+        }
         private static string SceneSnapshot(object state)
             => (string)typeof(LevelInitialStateVerification).GetMethod("Snapshot", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new[] { state });
     }

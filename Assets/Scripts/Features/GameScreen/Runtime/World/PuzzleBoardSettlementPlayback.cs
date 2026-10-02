@@ -26,9 +26,12 @@ namespace GameScreen
         }
 
         private readonly List<Track> tracks = new List<Track>();
+        private readonly Dictionary<BoardCoordinate, float> collectionTimes = new Dictionary<BoardCoordinate, float>();
+        internal float? CollectionTime(BoardCoordinate coordinate) => collectionTimes.TryGetValue(coordinate, out float time) ? time : (float?)null;
         private PuzzleBoardSnapshot snapshot;
         private float elapsed, duration, landingSeconds;
         internal bool IsPlaying { get; private set; }
+        internal IEnumerable<float> LandingTimes => tracks.Select(track => track.Ends).Distinct();
 
         internal void Begin(PuzzleBoardSnapshot before, PuzzleWorldBoard world, SettlementResult result, PuzzleArtwork artwork,
             int recoveryBefore, float moveTime, float supplyTime, float landingTime)
@@ -94,8 +97,8 @@ namespace GameScreen
                     if (snapshot.Images.TryGetValue(record.Coordinate, out PuzzleBoardSnapshot.Image image))
                     {
                         if (owners.TryGetValue(image, out Track track))
-                        { track.Collected = true; vacantAt[record.Coordinate] = track.Ends; }
-                        else { image.Hide(); vacantAt[record.Coordinate] = 0; }
+                        { track.Collected = true; vacantAt[record.Coordinate] = track.Ends; collectionTimes[record.Coordinate] = track.Ends; }
+                        else { image.Hide(); vacantAt[record.Coordinate] = 0; collectionTimes[record.Coordinate] = 0; }
                         snapshot.Images.Remove(record.Coordinate);
                     }
             }
@@ -144,6 +147,7 @@ namespace GameScreen
         {
             snapshot?.Restore(); snapshot = null;
             tracks.Clear(); IsPlaying = false; elapsed = 0; duration = 0;
+            collectionTimes.Clear();
         }
     }
 }

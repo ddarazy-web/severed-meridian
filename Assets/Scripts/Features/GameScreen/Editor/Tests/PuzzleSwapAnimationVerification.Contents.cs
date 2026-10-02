@@ -108,6 +108,7 @@ namespace GameScreen.Editor
             try
             {
                 await session.InitializeAsync(1, 12345, CancellationToken.None);
+                Call(session, "TickProgress", .7f);
                 Check(session.CanAcceptInput, "재시작 검사 실제 팩 준비");
                 string initial = Snapshot(session.State);
                 int count = board.GetComponentsInChildren<SpriteRenderer>(true).Length;
@@ -117,6 +118,7 @@ namespace GameScreen.Editor
                     Check(session.TrySwap(action.First, action.Second.Value), "재시작 직전 교환 " + i);
                     Tick(session, .075f);
                     await session.RestartAsync(CancellationToken.None);
+                    Call(session, "TickProgress", .7f);
                     Check(session.CanAcceptInput && !session.IsPresenting && Snapshot(session.State) == initial, "재생 중 다시하기 상태/잠금 복원 " + i);
                     Check(board.GetComponentsInChildren<SpriteRenderer>(true).Length == count, "표시 객체 누적 없음 " + i);
                     Check(session.State.Cells.Where(c => c.Content == RuntimeContent.Normal).All(cell =>

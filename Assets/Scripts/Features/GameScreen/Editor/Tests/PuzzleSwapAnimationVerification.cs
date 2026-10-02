@@ -140,8 +140,18 @@ namespace GameScreen.Editor
             }
         }
 
-        private static void Set(object target, string field, object value) => target.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(target, value);
-        private static void Call(object target, string method, params object[] args) => target.GetType().GetMethod(method, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(target, args);
+        private static void Set(object target, string field, object value)
+        {
+            target.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(target, value);
+            if (target is PuzzleGameSession && field == "executor") Call(target, "InitializeProgress");
+        }
+        private static void Call(object target, string method, params object[] args)
+        {
+            if (target is PuzzleGameSession && (method == "AdvancePresentation" || method == "Advance"))
+                target.GetType().GetMethod("TickProgress", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(target,
+                    new object[] { method == "AdvancePresentation" ? (float)args[0] : .02f });
+            target.GetType().GetMethod(method, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(target, args);
+        }
         private static void Tick(PuzzleGameSession session, float seconds) => Call(session, "AdvancePresentation", seconds);
         private static async UniTask FinishPresentation(PuzzleGameSession session)
         {
