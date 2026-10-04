@@ -84,3 +84,5 @@
 - [요소 프레임워크 EF-11 계획](MoonRabbitJunkyard/ElementFramework/stage-11-pool-baseline-plan.md)
 
 - [요소 프레임워크 EF-12 계획](MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-plan.md)
+
+- [EF-13 — 영구 정의 ID·기존 장애물 매핑 계획](MoonRabbitJunkyard/ElementFramework/stage-13-element-id-plan.md)

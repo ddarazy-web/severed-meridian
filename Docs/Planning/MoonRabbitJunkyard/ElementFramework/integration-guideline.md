@@ -1,6 +1,6 @@
 # 퍼즐 요소 확장·드론 수정 — 통합 개발 가이드라인
 
-상태: **EF-01/02/03/04/05/06/07/08/09/10/11 기준 확보 완료**, 구조 전환 구현 미착수. 현재 준비 단계는 **EF-12**이다.
+상태: **EF-01/02/03/04/05/06/07/08/09/10/11/12 기준 확보 완료**, 구조 전환 구현 미착수. 현재 준비 단계는 **EF-13**이다.
 
 연결: [설계](../../../Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [전체 완료 조건](../../../Goals/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md) · [기존 7개 구간 참고안](2026-10-04-refactor-plan.md) · [EF-01 계획](stage-01-obstacle-baseline-plan.md) · [EF-01 목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-01-obstacle-baseline-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-01-command.md)
 
@@ -116,4 +116,7 @@ C는 B와 관련 기준 검사 확보 뒤 시작한다. D의 선택 정책은 �
 - 완료 단계 문서: [EF-11 계획](stage-11-pool-baseline-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-11-pool-baseline-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-11-command.md). 풀 동작 기준만 확보하고 공용 풀/봇 전환은 분리한다.
 
 - 완료: [EF-11 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-11-progress.md), 82 PASS/0 FAIL·객체 관찰44건·해제 관찰2건. Draw/Reset 책임·실제 풀 재사용/취소/해제 확인, 생산 변경 없음.
-- 다음 실행: [EF-12 계획](stage-12-bot-observation-baseline-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-12-command.md). 봇 공개 관찰/숨은 정보 경계만 확보하고 전략/전체 플레이는 분리한다.
+- 완료 단계 문서: [EF-12 계획](stage-12-bot-observation-baseline-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-12-command.md). 봇 공개 관찰/숨은 정보 경계만 확보하고 전략/전체 플레이는 분리한다.
+
+- 완료: [EF-12 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-12-progress.md), 추가102+기존32 PASS/0 FAIL·실제 관찰26건. 공개 계약·숨은 정보 쌍·스냅샷/난수 보존 확인, 생산 변경 없음.
+- 다음 실행: [EF-13 계획](stage-13-element-id-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-13-element-id-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-13-command.md). 큰 구간 B의 ID/기존 장애물6종 매핑만 도입하며 기존 소비자/저장/카탈로그 전환은 분리한다.

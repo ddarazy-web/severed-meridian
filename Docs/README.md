@@ -60,3 +60,5 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 - [요소 프레임워크 EF-10 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-10-progress.md) · [EF-11 다음 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-11-pool-baseline-plan.md)
 
 - [요소 프레임워크 EF-11 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-11-progress.md) · [EF-12 다음 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-plan.md)
+
+- [요소 프레임워크 EF-12 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-12-progress.md), 134 PASS/0 FAIL·관찰26건. 다음 [EF-13 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-13-element-id-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-13-element-id-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-13-command.md). 큰 구간 B의 첫 ID 매핑 구현 준비, 아직 구현 미착수.

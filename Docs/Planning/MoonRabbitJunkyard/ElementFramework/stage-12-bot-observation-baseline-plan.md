@@ -1,6 +1,6 @@
 # EF-12 — 봇 공개 관찰·숨은 정보 차단 기준 확보 계획
 
-상태: 준비 완료, 미실행.
+상태: 완료. 추가102 PASS+기존32 PASS, 각각 종료0. [검증 기록](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-12-progress.md).
 
 연결: [가이드라인](integration-guideline.md) · [EF-11 결과](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-11-progress.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-goal.md).
 

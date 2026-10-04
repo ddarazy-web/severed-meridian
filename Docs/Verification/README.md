@@ -64,3 +64,5 @@
 - [요소 프레임워크 EF-10 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-10-progress.md)
 
 - [요소 프레임워크 EF-11 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-11-progress.md)
+
+- [EF-12 — 봇 공개 관찰 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-12-progress.md)

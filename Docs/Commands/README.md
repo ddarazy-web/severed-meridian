@@ -45,3 +45,5 @@
 - [요소 프레임워크 EF-11 명령문](MoonRabbitJunkyard/ElementFramework/stage-11-command.md)
 
 - [요소 프레임워크 EF-12 명령문](MoonRabbitJunkyard/ElementFramework/stage-12-command.md)
+
+- [EF-13 복사용 목표 명령문](MoonRabbitJunkyard/ElementFramework/stage-13-command.md)
