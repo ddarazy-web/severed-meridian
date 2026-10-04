@@ -19,9 +19,13 @@ namespace GameScreen
         private BoardCoordinate pressed;
         private Vector3 start;
         private bool uiBlocked;
+        private bool screenBlocked, popupBlocked;
+        public bool IsUIBlocked => uiBlocked || screenBlocked || popupBlocked;
         private bool committed;
         public void SetUIBlocked(bool blocked)
         { uiBlocked = blocked; if (blocked) CancelGesture(); }
+        public void SetScreenUIBlocked(bool blocked) { screenBlocked = blocked; if (blocked) CancelGesture(); }
+        public void SetPopupUIBlocked(bool blocked) { popupBlocked = blocked; if (blocked) CancelGesture(); }
         public BoardCoordinate? Selected { get; private set; }
         public BoardItem? SelectedItem { get; private set; }
         public string SelectionMessage { get; private set; }
@@ -31,7 +35,7 @@ namespace GameScreen
 
         public void SelectItem(BoardItem item)
         {
-            if (session == null || !session.CanUseItems) return;
+            if (session == null || IsUIBlocked || !session.CanUseItems) return;
             CancelGesture();
             SelectionMessage = null;
             if (item == BoardItem.Shuffle)
@@ -78,7 +82,7 @@ namespace GameScreen
         private void Update()
         {
             if (session == null) { CancelGesture(); return; }
-            if ((!session.CanAcceptInput || uiBlocked) && !committed) CancelGesture();
+            if ((!session.CanAcceptInput || IsUIBlocked) && !committed) CancelGesture();
             bool touchFrame = false;
             foreach (EnhancedTouch touch in EnhancedTouch.activeTouches)
             {
@@ -102,7 +106,7 @@ namespace GameScreen
 
         private void BeginPointer(int id, Vector2 position)
         {
-            if (pointer.HasValue || !session.CanAcceptInput || uiBlocked) return;
+            if (pointer.HasValue || !session.CanAcceptInput || IsUIBlocked) return;
             if (EventSystem.current != null)
             {
                 uiHits.Clear();
@@ -120,7 +124,7 @@ namespace GameScreen
         private void UpdatePointer(int id, Vector2 position)
         {
             if (pointer != id || committed) return;
-            if (!session.CanAcceptInput || uiBlocked || !TryLocalPoint(position, out Vector3 end))
+            if (!session.CanAcceptInput || IsUIBlocked || !TryLocalPoint(position, out Vector3 end))
             { CancelGesture(); return; }
             if (EventSystem.current != null)
             {

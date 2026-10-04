@@ -39,13 +39,16 @@ namespace Levels.Editor
                 LevelDefinition level = Make(); Obstacle(level, ObstacleKind.Appliance, 9, C(4, 4)); SetMission(level, ObstacleKind.Appliance);
                 BoardCoordinate[] cells = separate ? new[] { C(3, 4), C(3, 5), C(3, 6), C(4, 3), C(5, 3), C(6, 3) } : new[] { C(3, 2), C(3, 3), C(3, 4), C(4, 3), C(5, 3) };
                 for (int i = 0; i < cells.Length; i++) Place(level, cells[i], InitialBlockKind.FixedNormal, color: separate && i >= 3 ? RabbitColor.Type2 : RabbitColor.Type1);
-                LevelRuntimeState state = Build(level); TurnEffectContext context = Context(); List<EffectRecord> effects = Matches(state, context, cells, cells[0]);
+                LevelRuntimeState state = Build(level); string matchBefore = Snapshot(state); TurnEffectContext context = Context(); List<EffectRecord> effects = Matches(state, context, cells, cells[0]);
                 Check(state.Obstacles[0].Durability == (separate ? 5 : 7), "별개 동시 매칭/같은 매칭 중복 접촉 " + separate);
                 Check(effects.Where(e => e.Response == DamageResponse.Damage).Select(e => e.HitGroup).Distinct().Count() == (separate ? 2 : 1), "매칭별 타격 식별 " + separate);
+                ObserveBaseline("match-overlap-" + separate, level, matchBefore, state, context, effects, "Matches · separate=" + separate);
                 TurnEffectContext copy = (TurnEffectContext)Invoke(typeof(TurnEffectContext), "Copy", context);
                 EffectRecord prior = effects.First(e => e.Response == DamageResponse.Damage);
                 Check(DamageReaction.Evaluate(state, prior.Target, DamageCause.Power, prior.Source, copy, null, prior.HitGroup).Response == DamageResponse.AlreadyDamaged, "사본에 칸별 타격 이력 보존 " + separate);
-                Hit(state, prior.Target, copy); Check(state.Obstacles[0].Durability == (separate ? 4 : 6), "같은 수 후속 별도 타격 허용 " + separate);
+                string repeatBefore = Snapshot(state); List<EffectRecord> repeatEffects = Hit(state, prior.Target, copy);
+                Check(state.Obstacles[0].Durability == (separate ? 4 : 6), "같은 수 후속 별도 타격 허용 " + separate);
+                ObserveBaseline("match-followup-" + separate, level, repeatBefore, state, copy, repeatEffects, "same turn · copied context · new Hit after duplicate query=AlreadyDamaged");
             }
             foreach (bool wall in new[] { false, true })
             {

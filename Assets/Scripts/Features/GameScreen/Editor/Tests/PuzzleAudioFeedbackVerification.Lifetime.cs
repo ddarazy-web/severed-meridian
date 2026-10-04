@@ -46,12 +46,18 @@ namespace GameScreen.Editor
                     Invoke(session, "TickProgress", .7f);
                 }
                 player.Play(PuzzleFeedbackCueKind.Bomb);
+                object priorState = session.State;
+                string priorLogical = session.LogicalSessionId;
+                heard.Clear(); session.enabled = true;
                 using (CancellationTokenSource cancellation = new CancellationTokenSource())
                 {
                     cancellation.Cancel(); await session.RestartAsync(cancellation.Token);
                 }
-                Check(!session.IsReady && !session.IsRestarting && player.ActiveVoices == 0 && schedule.PendingCount == 0 &&
-                    player.GetComponentsInChildren<AudioSource>().All(source => source.clip == null), "준비 취소 이전 재생·예약·음성 클립 참조 정리");
+                session.enabled = false;
+                Check(session.IsReady && !session.IsRestarting && ReferenceEquals(session.State, priorState) && session.LogicalSessionId == priorLogical &&
+                    player.ActiveVoices == 1 && schedule.PendingCount == 0 && heard.Count == 0 &&
+                    player.GetComponentsInChildren<AudioSource>().Count(source => source.clip != null) == 1,
+                    "준비 취소 기존 플레이·문맥·유효 음성 보존 소리 재실행0");
                 session.enabled = true; await session.RestartAsync(CancellationToken.None); session.enabled = false;
                 Invoke(session, "TickProgress", .7f); player.Play(PuzzleFeedbackCueKind.Bomb);
                 Invoke(session, "Fail", "Stage10 의도한 표시 오류");

@@ -228,6 +228,7 @@ GameObject:
   - component: {fileID: 6112622454509076316}
   - component: {fileID: 7747098366426909743}
   - component: {fileID: 7920973344424861108}
+  - component: {fileID: 2405846464868417614}
   m_Layer: 0
   m_Name: PuzzleResultPopup
   m_TagString: Untagged
@@ -305,10 +306,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ecfdcba4ea881542bd7e51be3f5701d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameScreen.PuzzleResultView
+  defaultSelection: {fileID: 200806493780564402}
   title: {fileID: 5517046455905130271}
   detail: {fileID: 1042235880251468466}
   retry: {fileID: 4435628106141003984}
   nextLevel: {fileID: 517494113846583286}
+--- !u!225 &2405846464868417614
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4647963215431557379}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &4735926880259941479
 GameObject:
   m_ObjectHideFlags: 0

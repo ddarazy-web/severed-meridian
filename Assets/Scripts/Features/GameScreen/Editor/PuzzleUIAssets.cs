@@ -19,6 +19,25 @@ namespace GameScreen.Editor
         private static readonly Color Navy = new Color32(40, 54, 79, 255);
         private static readonly Color Cream = new Color32(255, 244, 217, 255);
         private static readonly Color Yellow = new Color32(245, 200, 90, 255);
+        private static string saveFolder = Folder;
+        public static GameObject GeneratePrefabs(string outputFolder)
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Play 종료 후 생성하세요.");
+            if (!Path.GetFullPath(outputFolder).StartsWith(Path.GetFullPath("Assets/Prefabs/UI") + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("UI 프리팹 폴더 아래에서만 생성할 수 있습니다.");
+            string previousFolder = saveFolder; saveFolder = outputFolder;
+            try
+            {
+                Directory.CreateDirectory(outputFolder); AssetDatabase.Refresh();
+                font = AssetDatabase.LoadAssetAtPath<Font>("Assets/Fonts/MoonRabbitUI-Regular.ttf"); rounded = Sprite("rounded-panel");
+                GameObject mission = CreateMission(); GameObject hud = CreateHud(mission.GetComponent<PuzzleMissionView>());
+                GameObject items = CreateItems(); GameObject pause = CreatePopup(true), result = CreatePopup(false);
+                CreateScreen(hud, items, pause, result);
+                PuzzleLevelTransitionAssets.ApplyToPrefab(outputFolder + "/PuzzleResultPopup.prefab");
+                PuzzlePopupAssets.ApplyToPrefabs(outputFolder, outputFolder == Folder ? PuzzlePopupAssets.CatalogPath : outputFolder + "/PopupCatalog.asset");
+                return AssetDatabase.LoadAssetAtPath<GameObject>(outputFolder + "/PuzzleScreen.prefab");
+            }
+            finally { saveFolder = previousFolder; }
+        }
 
         [MenuItem("Tools/Match/목업 UI 프리팹 연결")]
         public static void Generate()
@@ -35,13 +54,7 @@ namespace GameScreen.Editor
                 if (path.Contains("rounded-panel")) importer.spriteBorder = new Vector4(20, 20, 20, 20);
                 importer.SaveAndReimport();
             }
-            font = AssetDatabase.LoadAssetAtPath<Font>("Assets/Fonts/MoonRabbitUI-Regular.ttf");
-            rounded = Sprite("rounded-panel");
-            GameObject mission = CreateMission();
-            GameObject hud = CreateHud(mission.GetComponent<PuzzleMissionView>());
-            GameObject items = CreateItems();
-            GameObject pause = CreatePopup(true), result = CreatePopup(false);
-            GameObject screen = CreateScreen(hud, items, pause, result);
+            GameObject screen = GeneratePrefabs(Folder);
             PuzzleGameAssets.GenerateGameplay();
             existing = SceneManager.GetSceneByPath(PuzzleGameAssets.ScenePath);
             bool opened = !existing.IsValid() || !existing.isLoaded;
@@ -189,7 +202,7 @@ namespace GameScreen.Editor
         private static GameObject Instance(GameObject prefab, Transform parent)
             => (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
         private static GameObject Save(GameObject root)
-        { GameObject asset = PrefabUtility.SaveAsPrefabAsset(root, Folder + "/" + root.name + ".prefab"); UnityEngine.Object.DestroyImmediate(root); return asset; }
+        { GameObject asset = PrefabUtility.SaveAsPrefabAsset(root, saveFolder + "/" + root.name + ".prefab"); UnityEngine.Object.DestroyImmediate(root); return asset; }
         private static Sprite Sprite(string name) => AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Textures/UI/Puzzle/" + name + ".png");
         private static RectTransform Rect(string name, Transform parent)
         { RectTransform rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>(); rect.SetParent(parent, false); return rect; }

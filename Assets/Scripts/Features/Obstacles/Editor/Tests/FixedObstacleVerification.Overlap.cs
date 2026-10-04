@@ -36,6 +36,7 @@ namespace Levels.Editor
                     try
                     {
                         Obstacle(level, ObstacleKind.Appliance, test.Item6, test.Item4);
+                        SetMission(level, ObstacleKind.Appliance);
                         if (test.Item2 < 0) Place(level, test.Item3, test.Item2 == -3 ? InitialBlockKind.Bomb : InitialBlockKind.Rocket,
                             test.Item2 == -2 ? RocketDirection.Vertical : RocketDirection.Horizontal);
                         LevelRuntimeState before = Build(level); string original = Snapshot(before);
@@ -53,12 +54,16 @@ namespace Levels.Editor
                         Check(Snapshot(before) == original, "원본 상태 보존 " + test.Item1);
                         Check(executor.State.Cells.Count(cell => cell.ObstacleIndex == body) == (test.Item5 == test.Item6 ? 0 : 4),
                             "하나의 2x2 본체 유지 또는 전체 제거 " + test.Item1);
+                        Check(executor.State.Missions[0].Progress == (test.Item5 == test.Item6 ? 1 : 0), "2x2 제거 미션 단일 집계 " + test.Item1);
+                        ObserveBaseline("area-" + test.Item1, level, original, executor.State, executor.TurnEffects, action.Effects,
+                            test.Item2 < 0 ? "Activate " + test.Item3 : "Swap (4,4) (4,5) · pair=" + test.Item2);
                     }
                     finally { UnityEngine.Object.DestroyImmediate(level); }
                 }
             }
             catch (Exception error) { Results.Add("FAIL " + error); exit = 1; }
             File.WriteAllLines(Evidence + "/overlap-results.txt", Results);
+            if (recordingBaseline) File.WriteAllLines(Evidence + "/baseline-observations.jsonl", BaselineRows);
             if (Application.isBatchMode) EditorApplication.Exit(exit);
         }
     }

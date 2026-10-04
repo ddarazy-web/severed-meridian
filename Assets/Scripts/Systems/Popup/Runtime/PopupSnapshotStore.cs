@@ -22,6 +22,13 @@ namespace PopupUI
             snapshots[context.SceneKey] = new Snapshot { Context = context, Items = items };
         }
         internal bool TryGet(string scene, out Snapshot snapshot) => snapshots.TryGetValue(scene, out snapshot);
+        internal PopupStoredInfo[] Inspect()
+        {
+            List<PopupStoredInfo> values = new List<PopupStoredInfo>();
+            foreach (Snapshot snapshot in snapshots.Values)
+                values.Add(new PopupStoredInfo(snapshot.Context, snapshot.Items.Length));
+            return values.ToArray();
+        }
         internal void RemoveScene(string scene) { snapshots.Remove(scene); }
         internal void Discard(PopupContext context)
         { if (TryGet(context.SceneKey, out Snapshot snapshot) && snapshot.Context.Equals(context)) snapshots.Remove(context.SceneKey); }

@@ -4,6 +4,7 @@
 
 ## 기능별 문서
 
+- [퍼즐 요소 정의와 공통 행동 — 확장 구조 설계안](MoonRabbitJunkyard/2026-10-04-element-framework-design.md)
 - [공통 Popup UI 프레임워크 설계 — 설계 승인·구현 계획 검토 대기](project-wide/2026-10-02-popup-framework-design.md)
 
 - [25단계 공개 관찰 경계 — 구현 감사 기록](MoonRabbitJunkyard/67_25단계_공개관찰경계.md)

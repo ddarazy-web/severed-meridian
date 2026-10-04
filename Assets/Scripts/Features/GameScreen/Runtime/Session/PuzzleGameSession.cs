@@ -89,6 +89,7 @@ namespace GameScreen
             board.Draw(State, artwork);
             CenterCamera();
             ready = true;
+            LogicalSessionId = Guid.NewGuid().ToString("N");
             BeginStartFeedback();
             Message = "블록을 선택하거나 드래그하세요"; Changed?.Invoke();
         }

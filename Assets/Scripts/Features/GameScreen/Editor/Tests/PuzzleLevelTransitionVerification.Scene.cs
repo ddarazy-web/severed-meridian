@@ -92,6 +92,7 @@ namespace GameScreen.Editor
                 Check(next.gameObject.activeInHierarchy && next.interactable && retry.interactable, "실제 승리 팝업 다음·Retry 활성");
                 await CapturePopups("victory");
                 object state = session.State, outcome = session.Outcome;
+                string logicalSession = session.LogicalSessionId;
                 FieldInfo bytesField = typeof(PuzzleGameSession).GetField("initialBytes", BindingFlags.NonPublic | BindingFlags.Instance);
                 byte[] bytes = (byte[])bytesField.GetValue(session);
                 int number = session.State.LevelNumber;
@@ -106,11 +107,13 @@ namespace GameScreen.Editor
                     ReferenceEquals(session.Outcome, outcome) && ReferenceEquals(bytesField.GetValue(session), bytes) && session.State.LevelNumber == number,
                     "누락 실패 후 승리·전체 상태·번호·bytes 기준 보존");
                 Check(session.Message.Contains("다음 레벨을 불러올 수 없습니다"), "누락 실패 진단 전달");
+                Check(session.LogicalSessionId == logicalSession, "Next 준비 실패 기존 논리 문맥 보존");
                 Check(detail.text.Contains("다음 레벨을 불러올 수 없습니다") && next.interactable && retry.interactable, "실제 실패 팝업 갱신·재시도 활성");
                 await CapturePopups("error");
                 using CancellationTokenSource cancellation = new CancellationTokenSource();
                 cancellation.Cancel();
                 Check(!await session.AdvanceLevelAsync(cancellation.Token) && session.ResultReady && ReferenceEquals(session.State, state), "사전 취소 기존 승리 보존");
+                Check(session.LogicalSessionId == logicalSession, "Next 사전 취소 기존 논리 문맥 보존");
                 await SuccessChecks(session);
             }
             catch (Exception error) { results.Add("FAIL " + error); exit = 1; }

@@ -1,12 +1,18 @@
 # 공통 팝업 프레임워크 사용 안내
 
-상태: 2026-10-02 1단계 구현·검증 완료. 씬 복원·관리 창·기존 게임 팝업 전환은 아직 제공하지 않는다.
+상태: 2026-10-03 공통 서비스·복원·관리/생성 도구와 게임 세 팝업 연결 구현. 리뷰 수정 후 최종22회 회귀와 완료 감사를 마쳤다.
 
 [1단계 계획](../../Planning/project-wide/popup-framework-stage-01-plan.md) · [완료 조건](../../Goals/project-wide/popup-framework-stage-01-goal.md) · [검증 기록](../../Verification/project-wide/popup-framework-stage-01.md)
 
 ## 구성과 시작
 
-코드는 `Assets/Scripts/Systems/Popup/Runtime/`, 기본 프리팹은 `Assets/Prefabs/UI/Popup/`에 있다. `PopupHost.prefab`은 Canvas/Scaler/Raycaster/Host를, `PopupTemplate.prefab`은 배경·패널·기본 선택·닫기 버튼을 제공한다. 기존 게임 화면은 이번 단계에서 연결하지 않았다.
+Editor 도구는 `Tools/Popup/관리`, `Tools/Popup/등록 검사`, `Tools/Popup/템플릿 생성`에서 연다. 관리 창에서 catalog를 선택해 등록 목록을 편집하면 Undo/Redo를 사용할 수 있다. 저장은 `검사 후 카탈로그 저장` 버튼에서 명시적으로 수행하며 오류 등록은 저장을 거부한다. 등록 검사 메뉴는 Project에서 선택한 catalog의 항목별 진단을 Console에 표시한다. Unity가 보완한 저장 파일의 CanvasGroup 누락은 프리팹을 확인하고 다시 저장해 해결한다.
+
+관리 창의 실행 Host를 선택하면 아래→위 목록·Top·핸들·정책·보관 문맥·이동 준비를 조회한다. Play Mode에서는 catalog 편집/저장을 막고 선택한 Host만 시험 열기/핸들 닫기할 수 있다. 이동 준비 중에는 시험 변경을 거부한다. 초기 상태가 필수인 종류는 게임의 실제 호출부에서 시험한다. 창을 닫아도 팝업 목록을 닫거나 원본 catalog를 저장하지 않는다.
+
+템플릿 창에 기능 이름·팝업 이름·등록 ID를 입력한다. 이름은 ASCII C# 식별자이며 예약어/경로 이탈/Windows 장치 디렉터리 이름은 거부한다. `Assets/Scripts/Features/<기능>/Runtime/UI/<이름>State.cs`, `<이름>View.cs`를 만들고 실제 컴파일이 끝나면 `Assets/Prefabs/UI/<기능>/<이름>.prefab`을 연결한다. 출력 파일 또는 메타가 이미 있으면 전부 생성 전에 거부하며 덮어쓰지 않는다. 컴파일 실패는 Failed로 표시하고 프리팹을 만들지 않는다. 생성 완료 후 관리 창의 catalog에 입력했던 ID와 생성 프리팹을 직접 등록하고 검사·저장한다. 생성만으로 원본 catalog는 변경하지 않는다.
+
+코드는 `Assets/Scripts/Systems/Popup/Runtime/`, 기본 프리팹은 `Assets/Prefabs/UI/Popup/`에 있다. `PopupHost.prefab`은 Canvas/Scaler/Raycaster/Host를, `PopupTemplate.prefab`은 배경·패널·기본 선택·닫기 버튼을 제공한다. 기존 게임 화면은 아래 3단계의 카탈로그/Binding 연결을 사용한다.
 
 씬에는 InputSystemUIInputModule이 연결된 EventSystem을 하나 둔다. 프리팹을 직접 참조해 표시 영역을 생성하고 catalog를 연결한다. 종류는 PopupCatalog의 Inspector Entries 또는 Configure로 등록한다. 같은 종류의 ID를 중복 등록하거나 프리팹을 누락하면 서비스 생성이 거부된다.
 
@@ -19,7 +25,7 @@ PopupHandle confirm = service.Open("confirm", null);
 service.Close(notice); // 중간 항목만 제거하며 confirm은 유지한다.
 ```
 
-기능 소유자가 scene/feature/session 값을 제공한다. 현재 단계는 이 값을 비교 가능한 계약으로 제공할 뿐 보관/복원을 구현하지 않는다. 화면 크기/안전 영역이 바뀌면 ApplySafeArea를 다시 호출한다. 호스트 배경 입력 차단은 전체 영역을 덮고 팝업 내용은 안전 영역에 표시한다.
+기능 소유자가 scene/feature/session 값을 제공한다. 보관/복원은 아래 2단계 API로 명시 호출하며 게임 연결은 3단계 절차를 따른다. 화면 크기/안전 영역이 바뀌면 ApplySafeArea를 다시 호출한다. 호스트 배경 입력 차단은 전체 영역을 덮고 팝업 내용은 안전 영역에 표시한다.
 
 ## 종류별 정책
 
@@ -78,7 +84,7 @@ ApplyBlocked/ApplyPaused와 상태 필드는 호출 기능에서 구현하는 �
 
 ## 2단계 — 필요한 이동에서만 상태 복원
 
-상태: 2단계 구현·검증 완료. 3단계의 실제 게임 연결·관리 도구는 아직 없다. [2단계 검증 기록](../../Verification/project-wide/popup-framework-stage-02.md)을 따른다.
+상태: 2단계 구현·검증 완료. 3단계의 실제 게임 연결·관리 도구는 구현됐으며 전체 최종 검증/감사는 완료했다. [2단계 검증 기록](../../Verification/project-wide/popup-framework-stage-02.md)과 [3단계 진행 기록](../../Verification/project-wide/popup-framework-stage-03.md)을 따른다.
 
 서비스는 이동 호출 기능이 앱 실행 중 소유한다. 기존 서비스/catalog를 유지하고 씬의 Canvas/EventSystem/PopupHost/팝업 객체는 새로 만든다. 게임 세션을 프레임워크가 유지하는 것은 아니다. 게임의 논리 sessionKey는 원래 게임에 돌아온 경우만 동일하게 제공하고 재시작/다음 레벨/새 게임은 새 값을 사용한다.
 
@@ -134,4 +140,30 @@ Restore는 현재 service에 같은 context로 Attach한 활성 빈 Host에서 �
 
 비활성 후보에서는 OnDestroy만으로 해제를 보장할 수 없으므로 명시 해제를 제공한다. [Unity 6000.3 OnDestroy 문서](https://docs.unity.com/en-us/engine/6000.3/script-reference/unityengine/monobehaviour/ondestroy)
 
-검사 진입점 RunRestorationData/RunRestorationScene은 소유한 검사 프로세스 전용이며 EditorApplication.Exit를 호출한다. 물리 Android/복수 물리 장치는 미검증이다. 실제 게임 팝업 전환과 화면 이동 호출부 연결은 3단계에서 수행한다.
+검사 진입점 RunRestorationData/RunRestorationScene은 소유한 검사 프로세스 전용이며 EditorApplication.Exit를 호출한다. 물리 Android/복수 물리 장치는 미검증이다.
+
+## 3단계 — 현재 게임 연결
+
+`PuzzleScreen` 프리팹의 `PuzzlePopupBinding`이 카탈로그와 SafeArea 아래 `PopupHost`를 연결한다. 세 종류는 `puzzle.pause`, `puzzle.result`, `puzzle.description`이며 중복 인스턴스를 허용하지 않는다. pause만 정지 요청을 가진다. pause/description은 취소로 닫히고 result는 취소로 닫히지 않는다. Screen의 Refresh는 기존 결과를 갱신하며 중첩 순서를 바꾸지 않는다.
+
+게임 화면에서 설명은 `binding.OpenDescription(text)`, 일시정지는 `binding.OpenPause()`로 연다. 허용되지 않는 게임 상태에서 OpenPause는 거부되므로 일반 UI는 기존 pause 버튼의 활성 정책을 따른다. 결과는 게임 Outcome과 표시/수집 완료에 따라 Binding이 표시한다. View에는 값 State만 저장하고 게임 객체나 콜백을 보관하지 않는다.
+
+게임 외부 정지는 `session.SetPaused(...)`, 외부 입력 차단은 `input.SetUIBlocked(...)`의 기존 소유권을 유지한다. 팝업 정지/차단과 Screen의 결과·로딩 차단은 별도 요청으로 합성한다. 외부 코드는 팝업 요청 해제 API로 자신의 정지를 해제하지 않는다. Retry 후보는 자신의 pausing popup 때문에 대기하지 않으며 외부 정지와 백그라운드는 보존한다.
+
+재시작/Next는 후보 데이터·보드·이미지 준비와 표시가 성공했을 때만 새 `LogicalSessionId`를 확정한다. 실패/취소는 기존 플레이·이미지·문맥을 유지하고 기존 결과 버튼을 복구한다. 성공 시 이전 문맥의 열린 팝업과 보관을 폐기한다.
+
+일반 게임 진행은 자동 보관/복원하지 않는다. 필요한 호출 기능이 위 2단계 이동 계약으로 service를 보관한 뒤 같은 scene/feature/session 문맥의 새 Host에 Attach한다. 현재 Screen/Binding을 현재 게임과 입력에 Configure한 다음 `service.Restore(host, sameContext)`를 명시 호출한다. Binding은 이 경우 `host.Service`를 채택하고 보관이 있으면 Restore 전 새 결과를 만들지 않는다. 게임 세션 유지·왕복 게임 기능·디스크 저장은 이 프레임워크의 기능이 아니다.
+
+복원은 현재 부모 Binding의 PrepareRestore로 버튼을 연결하며 Retry/Next/보상/결과음을 실행하지 않는다. Binding이 없는 후보는 Failed로 정리되고 보관은 남아 재시도할 수 있다. 새 Binding을 구성한 뒤 오류 원인을 고쳐 명시 Restore를 다시 호출한다.
+
+기존 프리팹 생성의 `PuzzleUIAssets.GeneratePrefabs(folder)`와 `PuzzleLevelTransitionAssets.ApplyToPrefab(path)`는 씬을 저장하지 않는 진입점이다. 전체 Generate는 기존 씬 연결 작업을 포함하므로 팝업 프리팹만 갱신할 때 대신 호출하지 않는다. `PuzzlePopupAssets.Apply()`는 지정 팝업과 화면의 공통 연결을 적용한다. 검증 전용 RunScene/RunRestart/RunResult/RunRestore/RunDesign/RunGenerators는 소유 검사 프로세스에서만 호출한다.
+
+## 추가 등록과 재실행 주의점
+
+`Tools/Popup/템플릿 생성`은 ASCII C# 식별자를 사용한다. 기능 이름과 팝업 이름 모두 Windows 예약 장치 이름(CON/PRN/AUX/NUL/COM1~9/LPT1~9)을 대소문자와 관계없이 거부한다. 이름/경로/출력 충돌은 파일 생성 전에 검사한다. 거부된 요청의 진단은 이전 생성 성공 표시로 덮지 않고 다음 실제 요청 진행이 바뀔 때 갱신한다. 실제 컴파일 오류는 생성 소스를 남겨 수정할 수 있게 하며 프리팹 완료로 표시하지 않는다.
+
+게임 팝업 연결을 재실행하면 도구가 소유한 pause/result/description 세 ID의 프리팹과 고정 정책을 갱신한다. 관리 창에서 추가한 다른 ID와 프리팹/정책은 보존한다. 기존 full UI 생성기는 이전과 같이 팩토리의 시각 구성을 재생성하므로 커스텀 시각 편집이 있는 프리팹에는 그 동작 범위를 확인한다.
+
+복원 전에는 현재 Screen/Binding을 게임 세션·입력에 Configure하고 활성 Host가 같은 service/context를 소유해야 한다. 컴포넌트가 존재해도 미구성/비활성이거나 다른 Host/문맥이면 PrepareRestore에서 거부한다. 실패한 후보는 정리하고 snapshot은 유지하므로 연결을 준비한 뒤 명시적으로 다시 Restore한다. 설명도 현재 게임 연결을 확인한다.
+
+같은 Binding/세션의 반복 Configure는 기존 연결을 Refresh한다. 다른 catalog/Host로 바꾸려면 먼저 Release한 뒤 필요한 연결 인자를 지정해 Configure한다. Binding 컴포넌트 자체를 비활성화했다가 다시 켜는 호출자는 현재 게임/입력으로 다시 구성한다. Screen 전체 비활성화/재활성화는 기존 Screen의 Bind 흐름을 사용한다. 자동 게임 영속화나 자동 복원은 제공하지 않는다.

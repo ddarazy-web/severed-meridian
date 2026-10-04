@@ -681,6 +681,7 @@ GameObject:
   - component: {fileID: 7744300879223051988}
   - component: {fileID: 6777171920524619436}
   - component: {fileID: 5297260765933582859}
+  - component: {fileID: 1721714738421809162}
   m_Layer: 0
   m_Name: PuzzlePausePopup
   m_TagString: Untagged
@@ -758,5 +759,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d60c9c81635cc0646a6248e3e7e66841, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameScreen.PuzzlePauseView
+  defaultSelection: {fileID: 1846016913758693313}
   resume: {fileID: 4881579500675304115}
   retry: {fileID: 6068159507974819439}
+--- !u!225 &1721714738421809162
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8580365506775699386}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

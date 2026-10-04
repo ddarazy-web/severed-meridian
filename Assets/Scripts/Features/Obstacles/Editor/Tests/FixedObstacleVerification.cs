@@ -74,26 +74,43 @@ namespace Levels.Editor
                     Check(!ActionQuery.Swap(state, C(4, 4), C(4, 3)).IsAllowed && !MovementQuery.Find(state).Any(m => m.Source.Equals(C(4, 4)) && m.IsAllowed), "고정 교환/이동 금지 " + kind + durability);
                     Check(MissionProgressRules.Query(state, C(4, 4), context).Single().Damage == 1 && Snapshot(state) == before, "피해/미션 조회 무변경 " + kind + durability);
                     foreach (RuntimeCell cell in state.Cells.Where(c => c.ObstacleIndex == 0)) Set(cell, "DustDurability", 2);
-                    Hit(state, C(4, 4), context);
+                    string damageBefore = Snapshot(state);
+                    List<EffectRecord> directEffects = Hit(state, C(4, 4), context);
                     Check(state.Obstacles[0].Durability == durability - 1 && state.Missions[0].Progress == (durability == 1 ? 1 : 0), "직접 피해/본체 미션 " + kind + durability);
                     Check(state.Cells.Count(c => c.ObstacleIndex == 0) == (durability == 1 ? 0 : kind == ObstacleKind.Appliance ? 4 : 1) && state.CellAt(C(4, 4)).DustDurability == 2, "동시 점유/전체 제거/먼지 보존 " + kind + durability);
+                    ObserveBaseline("direct-" + kind + "-" + durability, level, damageBefore, state, context, directEffects, "Hit (4,4) · Power · dust=2");
                     if (durability > 1)
                     {
-                        Hit(state, C(4, 4), context);
+                        string repeatBefore = Snapshot(state);
+                        List<EffectRecord> repeatEffects = Hit(state, C(4, 4), context);
                         Check(state.Obstacles[0].Durability == durability - (kind == ObstacleKind.Appliance ? 2 : 1), "턴 제한/폐가전 별도 반복 " + kind + durability);
+                        ObserveBaseline("repeat-" + kind + "-" + durability, level, repeatBefore, state, context, repeatEffects, "same turn · separate Hit (4,4)");
                         if (kind != ObstacleKind.Appliance)
-                        { Hit(state, C(4, 4), (TurnEffectContext)Invoke(typeof(TurnEffectContext), "NextTurn", context, 2)); Check(state.Obstacles[0].Durability == durability - 2, "다음 수 재피해 " + kind + durability); }
+                        {
+                            TurnEffectContext next = (TurnEffectContext)Invoke(typeof(TurnEffectContext), "NextTurn", context, 2);
+                            string nextBefore = Snapshot(state); List<EffectRecord> nextEffects = Hit(state, C(4, 4), next);
+                            Check(state.Obstacles[0].Durability == durability - 2, "다음 수 재피해 " + kind + durability);
+                            ObserveBaseline("next-turn-" + kind + "-" + durability, level, nextBefore, state, next, nextEffects, "next turn · Hit (4,4)");
+                        }
                     }
                     Check(SettlementResolution.Resolve(state).IsApplied, "정착 지원 " + kind + durability);
                 }
             foreach (RabbitColor color in Enum.GetValues(typeof(RabbitColor)))
             {
                 LevelDefinition level = Make(); Obstacle(level, ObstacleKind.ColorLock, 3, C(4, 4), color); LevelRuntimeState state = Build(level);
-                Check(DamageReaction.Evaluate(state, C(4, 4), DamageCause.AdjacentMatch, C(4, 3), Context(), color).Response == DamageResponse.Damage &&
-                    DamageReaction.Evaluate(state, C(4, 4), DamageCause.AdjacentMatch, C(4, 3), Context(), (RabbitColor)(((int)color + 1) % 5)).Response == DamageResponse.None, "자물쇠 원래 색 일치/불일치 " + color);
+                TurnEffectContext queryContext = Context(); string queryBefore = Snapshot(state);
+                DamageResponse matched = DamageReaction.Evaluate(state, C(4, 4), DamageCause.AdjacentMatch, C(4, 3), queryContext, color).Response;
+                DamageResponse mismatched = DamageReaction.Evaluate(state, C(4, 4), DamageCause.AdjacentMatch, C(4, 3), queryContext, (RabbitColor)(((int)color + 1) % 5)).Response;
+                Check(matched == DamageResponse.Damage && mismatched == DamageResponse.None, "자물쇠 원래 색 일치/불일치 " + color);
+                Check(Snapshot(state) == queryBefore && queryContext.LastHit == 0, "색 제한 조회 무변경 " + color);
+                ObserveBaseline("color-query-" + color, level, queryBefore, state, queryContext, Array.Empty<EffectRecord>(), "AdjacentMatch (4,3)->(4,4) · color=" + (int)color + " · mismatchColor=" + (((int)color + 1) % 5) + " · matched=" + matched + " · mismatched=" + mismatched);
             }
             LevelDefinition safeLevel = Make(); Obstacle(safeLevel, ObstacleKind.Safe, 5, C(4, 4));
-            Check(DamageReaction.Evaluate(Build(safeLevel), C(4, 4), DamageCause.AdjacentMatch, C(4, 3), Context()).Response == DamageResponse.None, "금고 일반 인접 무피해");
+            LevelRuntimeState safeState = Build(safeLevel); TurnEffectContext safeContext = Context(); string safeBefore = Snapshot(safeState);
+            DamageResponse safeResponse = DamageReaction.Evaluate(safeState, C(4, 4), DamageCause.AdjacentMatch, C(4, 3), safeContext).Response;
+            Check(safeResponse == DamageResponse.None, "금고 일반 인접 무피해");
+            Check(Snapshot(safeState) == safeBefore, "캡슐 인접 조회 무변경");
+            ObserveBaseline("capsule-adjacent", safeLevel, safeBefore, safeState, safeContext, Array.Empty<EffectRecord>(), "AdjacentMatch (4,3)->(4,4) · response=" + safeResponse);
             PowerChecks();
         }
         private static void PowerChecks()

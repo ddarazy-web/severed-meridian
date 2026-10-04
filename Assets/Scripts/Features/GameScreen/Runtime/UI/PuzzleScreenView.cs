@@ -1,5 +1,3 @@
-using System.Threading;
-using Cysharp.Threading.Tasks;
 using Simulation;
 using UnityEngine;
 
@@ -17,7 +15,10 @@ namespace GameScreen
         [SerializeField] private UnityEngine.UI.Button pauseButton, cancel, description;
         [SerializeField] private UnityEngine.UI.Text level, message, descriptionText;
         [SerializeField] private RectTransform selection;
-        private BoardOutcome shownOutcome;
+        private PuzzlePopupBinding popupBinding;
+        private UnityEngine.Events.UnityAction onPause, onCancel;
+        private System.Action<string> onDescribe;
+        private int bindRevision;
         public void SetSelectionView(RectTransform rect) => selection = rect;
         private void LateUpdate()
         {
@@ -43,27 +44,32 @@ namespace GameScreen
             if (isActiveAndEnabled) Bind();
         }
         private void OnEnable() { if (session != null && input != null) Bind(); }
-        private void OnDisable() { Unsubscribe(); if (input != null) input.SetUIBlocked(false); }
+        private void OnDisable() { Unsubscribe(); popupBinding?.Release(); if (input != null) input.SetScreenUIBlocked(false); }
         private void Unsubscribe()
-        { if (session != null) session.Changed -= Refresh; if (input != null) input.SelectionChanged -= Refresh; }
+        {
+            bindRevision++;
+            if (session != null) session.Changed -= Refresh; if (input != null) input.SelectionChanged -= Refresh;
+            if (pauseButton != null && onPause != null) pauseButton.onClick.RemoveListener(onPause);
+            if (cancel != null && onCancel != null) cancel.onClick.RemoveListener(onCancel);
+            if (hud != null && hud.Describe == onDescribe) hud.Describe = null;
+            onPause = onCancel = null; onDescribe = null;
+        }
         private void Bind()
         {
             Unsubscribe(); session.Changed += Refresh; input.SelectionChanged += Refresh;
             layout.Bind(session, input); items.Bind(input);
-            hud.Describe = text => { input.CancelGesture(); input.CancelItemSelection(); descriptionText.text = text + "\n\n눌러서 닫기"; description.gameObject.SetActive(true); input.SetUIBlocked(true); };
-            pauseButton.onClick.RemoveAllListeners(); pauseButton.onClick.AddListener(() =>
-            { input.CancelGesture(); input.CancelItemSelection(); description.gameObject.SetActive(false); session.SetPaused(true); });
-            cancel.onClick.RemoveAllListeners(); cancel.onClick.AddListener(input.CancelItemSelection);
-            description.onClick.RemoveAllListeners(); description.onClick.AddListener(() => { description.gameObject.SetActive(false); Refresh(); });
-            pause.Bind(() => session.SetPaused(false), Retry); result.Bind(Retry, NextLevel); Refresh();
+            popupBinding = GetComponent<PuzzlePopupBinding>();
+            if (popupBinding != null) popupBinding.Configure(session, input, null, null);
+            int revision = bindRevision;
+            onDescribe = text => { if (isActiveAndEnabled && revision == bindRevision && popupBinding != null && popupBinding.Service != null) popupBinding.OpenDescription(text); }; hud.Describe = onDescribe;
+            onPause = () => { if (isActiveAndEnabled && revision == bindRevision && popupBinding != null && popupBinding.Service != null) popupBinding.OpenPause(); }; pauseButton.onClick.AddListener(onPause);
+            onCancel = () => { if (isActiveAndEnabled && revision == bindRevision) input.CancelItemSelection(); }; cancel.onClick.AddListener(onCancel); Refresh();
         }
         private void Retry()
-        { if (session.IsChangingLevel) return; input.CancelGesture(); input.CancelItemSelection(); description.gameObject.SetActive(false); session.RestartAsync(CancellationToken.None).Forget(Debug.LogException); }
+        { popupBinding?.Retry(); }
         private void NextLevel()
         {
-            if (!session.CanAdvanceLevel) return;
-            input.CancelGesture(); input.CancelItemSelection(); description.gameObject.SetActive(false);
-            session.AdvanceLevelAsync(CancellationToken.None).Forget(Debug.LogException);
+            popupBinding?.NextLevel();
         }
         private void Refresh()
         {
@@ -76,24 +82,8 @@ namespace GameScreen
             cancel.gameObject.SetActive(selected);
             message.rectTransform.offsetMax = new Vector2(selected ? -75 : 0, 0);
             pauseButton.interactable = session.IsReady && !session.IsRestarting && !session.IsChangingLevel && (session.Outcome == null || session.IsPresenting || session.HasProgressFeedback);
-            pause.gameObject.SetActive(session.IsPaused);
-            bool ended = session.ResultReady;
-            input.SetUIBlocked(ended || session.IsChangingLevel || session.IsPaused || description.gameObject.activeSelf);
-            if (ended)
-            {
-                bool won = session.Outcome.Kind == BoardOutcomeKind.Won;
-                string body = "남은 이동 " + session.State.MovesRemaining + "\n" + session.Message;
-                if (won && !session.LevelAdvanceEnabled)
-                    body += "\n다음 레벨은 MemoryPack 모드에서 이어서 플레이할 수 있습니다";
-                result.SetTransition(won && session.LevelAdvanceEnabled, session.CanAdvanceLevel, session.IsChangingLevel, body);
-                if (shownOutcome != session.Outcome)
-                {
-                    shownOutcome = session.Outcome;
-                    result.Show(won ? "정리 완료!" : "다시 도전해요", body);
-                    session.PlayResultFeedback();
-                }
-            }
-            else { shownOutcome = null; result.gameObject.SetActive(false); }
+            input.SetScreenUIBlocked(session.ResultReady || session.IsChangingLevel || session.IsRestarting || session.IsPaused || !session.IsReady);
+            popupBinding?.Refresh();
         }
     }
 }

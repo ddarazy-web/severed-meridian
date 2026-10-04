@@ -9,6 +9,7 @@ using Cysharp.Threading.Tasks;
 using Levels;
 using Levels.Editor;
 using Simulation;
+using PopupUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -46,7 +47,7 @@ namespace GameScreen.Editor
                 PuzzleWorldBoard board = UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>();
                 PuzzleBoardInput input = session.GetComponent<PuzzleBoardInput>();
                 Transform safe = screen.transform.Find("SafeArea");
-                Transform pause = safe.Find("PuzzlePausePopup"), result = safe.Find("PuzzleResultPopup");
+                PuzzlePopupBinding binding = screen.GetComponent<PuzzlePopupBinding>();
                 string initial = Snapshot(session.State);
                 Check(safe.Find("PuzzleHUD/Moves/Number").GetComponent<UnityEngine.UI.Text>().text == session.State.MovesRemaining.ToString(), "HUD 실제 이동 수");
                 Check(safe.GetComponentsInChildren<PuzzleMissionView>().Length == session.State.Missions.Count, "HUD 실제 미션 수");
@@ -83,11 +84,11 @@ namespace GameScreen.Editor
                 PuzzleUIRenderVerification.SetSize(1280, 720);
                 for (int frame = 0; frame < 8; frame++) await UniTask.Yield();
                 Click("PuzzleHUD/Missions/PuzzleMission(Clone)/Target");
-                Check(safe.Find("MissionDescription").gameObject.activeSelf, "미션 설명 열기");
+                Check(Popup(PuzzlePopupBinding.DescriptionId) != null, "미션 설명 열기");
                 string before = Snapshot(session.State);
                 BoardCoordinate target = session.State.Cells.First(c => session.CanSelectItemTarget(BoardItem.Hammer, c.Coordinate)).Coordinate;
                 Tap(target); Check(Snapshot(session.State) == before && !input.Selected.HasValue, "설명 팝업 보드 입력 차단");
-                Click("MissionDescription"); Check(!safe.Find("MissionDescription").gameObject.activeSelf, "미션 설명 닫기");
+                Click("MissionDescription"); Check(Popup(PuzzlePopupBinding.DescriptionId) == null, "미션 설명 닫기");
                 Click("PuzzleItemBar/hammer"); Check(input.SelectedItem == BoardItem.Hammer, "망치 버튼 선택");
                 Click("PuzzleItemBar/hammer"); Check(!input.SelectedItem.HasValue && Snapshot(session.State) == before, "동일 아이템 다시 눌러 취소");
                 Click("PuzzleItemBar/hammer");
@@ -96,7 +97,7 @@ namespace GameScreen.Editor
                 Click("PuzzleItemBar/hammer"); int moves = session.State.MovesRemaining;
                 Tap(target); Check(!input.SelectedItem.HasValue && session.State.MovesRemaining == moves, "망치 적용/이동 수 유지");
                 Click("Pause");
-                Check(session.IsPaused && pause.gameObject.activeSelf, "연쇄 도중 pause 버튼");
+                Check(session.IsPaused && Popup(PuzzlePopupBinding.PauseId) != null, "연쇄 도중 pause 버튼");
                 before = Snapshot(session.State);
                 for (int i = 0; i < 10; i++) await UniTask.Yield();
                 Check(before == Snapshot(session.State), "pause 10프레임 동결");
@@ -105,7 +106,7 @@ namespace GameScreen.Editor
                 for (int i = 0; i < 12; i++) await UniTask.Yield();
                 Check(session.IsPaused && before == Snapshot(session.State), "회전 후 pause/보드/난수 유지");
                 Click("PuzzlePausePopup/Panel/Primary"); await Ready(session);
-                Check(!session.IsPaused && !pause.gameObject.activeSelf, "재개 버튼");
+                Check(!session.IsPaused && Popup(PuzzlePopupBinding.PauseId) == null, "재개 버튼");
                 Click("Pause"); Click("PuzzlePausePopup/Panel/Retry"); await Ready(session);
                 Check(initial == Snapshot(session.State), "pause 다시하기 원래 입력/시드");
 
@@ -149,10 +150,10 @@ namespace GameScreen.Editor
                 await Fixture(won); Check(session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)), "승리 fixture 발동");
                 await ProgressUntil(session, () => session.Outcome != null);
                 Check(session.Outcome?.Kind == BoardOutcomeKind.Won && session.Phase != BoardActionPhase.Stopped, "승리 확정/라스트팡 분리");
-                Check(!result.gameObject.activeSelf, "라스트팡 전 결과 팝업 금지");
+                Check(Popup(PuzzlePopupBinding.ResultId) == null, "라스트팡 전 결과 팝업 금지");
                 await ProgressUntil(session, () => session.ResultReady);
-                Check(result.gameObject.activeSelf && !session.CanAcceptInput, "라스트팡 완료 후 결과/입력 차단");
-                Check(result.Find("Panel/Title").GetComponent<UnityEngine.UI.Text>().text == "정리 완료!", "승리 제목");
+                Check(Popup(PuzzlePopupBinding.ResultId) != null && !session.CanAcceptInput, "라스트팡 완료 후 결과/입력 차단");
+                Check(Popup(PuzzlePopupBinding.ResultId).Find("Panel/Title").GetComponent<UnityEngine.UI.Text>().text == "정리 완료!", "승리 제목");
                 await Capture("won");
                 Click("PuzzleResultPopup/Panel/Primary"); await Ready(session); Check(initial == Snapshot(session.State), "결과 다시하기");
 
@@ -161,7 +162,7 @@ namespace GameScreen.Editor
                 JsonUtility.FromJsonOverwrite("{\"moveCount\":1,\"missions\":[{\"kind\":0,\"color\":0,\"count\":100}]}", lost);
                 await Fixture(lost); session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0));
                 await ProgressUntil(session, () => session.ResultReady);
-                Check(session.Outcome?.Kind == BoardOutcomeKind.MovesExhausted && result.gameObject.activeSelf, "이동 소진 결과 팝업");
+                Check(session.Outcome?.Kind == BoardOutcomeKind.MovesExhausted && Popup(PuzzlePopupBinding.ResultId) != null, "이동 소진 결과 팝업");
                 await Capture("lost");
                 Click("PuzzleResultPopup/Panel/Primary"); await Ready(session);
                 Check(screen.GetComponentsInChildren<PuzzleMissionView>(true).Length <= 4, "반복 판 전환 미션 뷰 재사용");
@@ -187,9 +188,19 @@ namespace GameScreen.Editor
                 }
                 void Click(string path)
                 {
-                    var button = safe.Find(path)?.GetComponent<UnityEngine.UI.Button>();
+                    int slash = path.IndexOf('/');
+                    string prefix = slash < 0 ? path : path.Substring(0, slash);
+                    string id = prefix == "MissionDescription" ? PuzzlePopupBinding.DescriptionId : prefix == "PuzzlePausePopup" ? PuzzlePopupBinding.PauseId : prefix == "PuzzleResultPopup" ? PuzzlePopupBinding.ResultId : null;
+                    Transform target = id == null ? safe.Find(path) : slash < 0 ? Popup(id) : Popup(id)?.Find(path.Substring(slash + 1));
+                    var button = target?.GetComponent<UnityEngine.UI.Button>();
                     if (button == null || !button.isActiveAndEnabled || !button.interactable) throw new Exception("버튼 사용 불가 " + path);
                     ExecuteEvents.Execute(button.gameObject, new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left }, ExecuteEvents.pointerClickHandler);
+                }
+                Transform Popup(string id)
+                {
+                    foreach (PopupInspectionItem item in binding.Service.Inspect().Items)
+                        if (item.Id == id) return binding.Service.GetView(item.Handle).transform;
+                    return null;
                 }
                 void Tap(BoardCoordinate at)
                 {

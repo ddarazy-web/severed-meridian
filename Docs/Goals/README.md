@@ -2,7 +2,11 @@
 
 [전체 문서 분류](../README.md)
 
-- [팝업 프레임워크 3단계 목표·완료 조건](project-wide/popup-framework-stage-03-goal.md)
+- [퍼즐 요소 확장 구조 리팩토링 — 목표·완료 조건](MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md)
+- [EF-01 — 고정 장애물 피해 기준 확보 목표](MoonRabbitJunkyard/ElementFramework/stage-01-obstacle-baseline-goal.md)
+- [EF-02 — 드론 선택·예약·효과 타임라인 기준 확보 목표](MoonRabbitJunkyard/ElementFramework/stage-02-drone-baseline-goal.md)
+- [EF-03 — 거미줄·먼지 피해 기준 확보 목표](MoonRabbitJunkyard/ElementFramework/stage-03-layer-baseline-goal.md)
+- [팝업 프레임워크 3단계 목표·12개 완료 조건](project-wide/popup-framework-stage-03-goal.md)
 - [팝업 프레임워크 2단계 목표·완료 조건](project-wide/popup-framework-stage-02-goal.md)
 
 - [공통 Popup UI 프레임워크 목표·완료 조건](project-wide/2026-10-02-popup-framework-goal.md)
@@ -59,3 +63,21 @@
 - [11단계 반복 플레이·성능 안정화 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-11-stability-goal.md)
 - [12단계 실제 게임 화면·연출 품질 검수 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-12-presentation-goal.md)
 - [13단계 승리 후 다음 레벨 연결 — 목표 및 완료 조건](MoonRabbitJunkyard/WorldGameScreen/stage-13-level-transition-goal.md)
+
+- [요소 프레임워크 EF-04 완료](MoonRabbitJunkyard/ElementFramework/stage-04-generator-baseline-goal.md)
+
+- [요소 프레임워크 EF-05 완료](MoonRabbitJunkyard/ElementFramework/stage-05-mold-baseline-goal.md)
+
+- [요소 프레임워크 EF-06 완료](MoonRabbitJunkyard/ElementFramework/stage-06-scrap-baseline-goal.md)
+
+- [요소 프레임워크 EF-07 완료](MoonRabbitJunkyard/ElementFramework/stage-07-recovery-baseline-goal.md)
+
+- [요소 프레임워크 EF-08 완료](MoonRabbitJunkyard/ElementFramework/stage-08-storage-baseline-goal.md)
+
+- [요소 프레임워크 EF-09 완료](MoonRabbitJunkyard/ElementFramework/stage-09-artwork-baseline-goal.md)
+
+- [요소 프레임워크 EF-10 완료](MoonRabbitJunkyard/ElementFramework/stage-10-resource-baseline-goal.md)
+
+- [요소 프레임워크 EF-11 목표](MoonRabbitJunkyard/ElementFramework/stage-11-pool-baseline-goal.md)
+
+- [요소 프레임워크 EF-12 목표](MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-goal.md)

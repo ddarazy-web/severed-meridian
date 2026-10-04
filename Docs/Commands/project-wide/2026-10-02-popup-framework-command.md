@@ -37,6 +37,8 @@ Docs/Goals/project-wide/2026-10-02-popup-framework-goal.md를 읽어. 1단계 �
 
 ## 3단계 — 도구·추가 패턴·기존 전환
 
+[최신 3단계 마무리 명령문](popup-framework-stage-03-command.md)을 우선 사용한다. 아래 명령은 최초 계획 이력이며 구현을 반복 실행하는 지시가 아니다.
+
 ```text
 ServeredMeridian만 대상으로 공통 팝업 프레임워크 3단계를 목표로 설정하고 진행해.
 Docs/Systems/project-wide/2026-10-02-popup-framework-design.md,
@@ -49,4 +51,3 @@ Docs/Goals/project-wide/2026-10-02-popup-framework-goal.md를 읽어. 1~2단계 
 조건 9~12와 전체 조건별 증거를 Logs/PopupFramework와 Docs/Verification/project-wide/popup-framework-stage-03.md에 남기고 Docs/Guides/project-wide/popup-framework-usage.md를 작성해. 미검증 실기기 입력은 명시해.
 빌드·커밋·푸시·사용자 Unity 종료·자동 씬 저장·새 패키지/asmdef/DI·게임 진행 저장은 하지 마. 사용자 변경·레벨·규칙·이미지·GUID를 보존해. 모두 입증한 뒤 목표를 완료하고 다음 목표를 자동 시작하지 마.
 ```
-

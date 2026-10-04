@@ -18,6 +18,7 @@
 
 ## 기능별 문서
 
+- [고물탑 화면 목업 사용 안내](MoonRabbitJunkyard/junk-tower-mockup.md)
 - [여러 레벨 시험과 요청 패키지 설치](MoonRabbitJunkyard/90_여러레벨시험과패키지설치.md)
 - [10단계 효과음 사용 안내](MoonRabbitJunkyard/WorldGameScreen/stage-10-audio-usage.md)
 - [11단계 반복 플레이·성능 안정화 사용 안내](MoonRabbitJunkyard/WorldGameScreen/stage-11-stability-usage.md)

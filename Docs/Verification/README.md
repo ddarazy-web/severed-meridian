@@ -2,6 +2,10 @@
 
 [전체 문서 분류](../README.md)
 
+- [요소 확장 EF-01 — 고정 장애물 피해 기준 확보 완료](MoonRabbitJunkyard/ElementFramework/stage-01-progress.md)
+- [요소 확장 EF-02 — 드론 선택·예약·효과 타임라인 기준 확보 완료](MoonRabbitJunkyard/ElementFramework/stage-02-progress.md)
+
+- [팝업 프레임워크 3단계 진행·검증 기록 — 진행 중](project-wide/popup-framework-stage-03.md)
 - [팝업 프레임워크 2단계 검증 기록](project-wide/popup-framework-stage-02.md)
 - [팝업 프레임워크 1단계 검증 기록](project-wide/popup-framework-stage-01.md)
 
@@ -42,3 +46,21 @@
 - [11단계 반복 플레이·성능 안정화 실행 기록](MoonRabbitJunkyard/WorldGameScreen/stage-11-progress.md)
 - [12단계 화면·움직임 검수 기록 — 최종 회귀·리뷰 진행 중](MoonRabbitJunkyard/WorldGameScreen/stage-12-progress.md)
 - [13단계 다음 레벨 전환 검증 기록](MoonRabbitJunkyard/WorldGameScreen/stage-13-progress.md)
+
+- [요소 프레임워크 EF-03 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-03-progress.md)
+
+- [요소 프레임워크 EF-04 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-04-progress.md)
+
+- [요소 프레임워크 EF-05 완료·예외 원복 검증](MoonRabbitJunkyard/ElementFramework/stage-05-progress.md)
+
+- [요소 프레임워크 EF-06 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-06-progress.md)
+
+- [요소 프레임워크 EF-07 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-07-progress.md)
+
+- [요소 프레임워크 EF-08 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-08-progress.md)
+
+- [요소 프레임워크 EF-09 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-09-progress.md)
+
+- [요소 프레임워크 EF-10 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-10-progress.md)
+
+- [요소 프레임워크 EF-11 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-11-progress.md)

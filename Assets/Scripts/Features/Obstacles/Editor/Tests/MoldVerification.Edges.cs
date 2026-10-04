@@ -51,7 +51,7 @@ namespace Levels.Editor
                 LevelDefinition isolated=(LevelDefinition)Invoke(typeof(BoardActionVerification),"Make",null,new System.Collections.Generic.Dictionary<BoardCoordinate,int>{[C(0,0)]=0,[C(0,1)]=1},20);Mold(isolated,C(0,0));
                 BoardActionExecutor noActions=new BoardActionExecutor(Build(isolated)); Set(noActions,"Phase",BoardActionPhase.WaitingForAutomaticMatch);Set(noActions,"TurnEffects",Context());Set(noActions,"Turn",1);
                 CascadeStepResult ending=noActions.ResolveAutomaticMatch();
-                Check(ending.Reason==CascadeStepReason.NeedsShuffle && noActions.TurnEffects.MoldSpread.Reason==MoldSpreadReason.Spread && noActions.State.Cells.Count(c=>c.Cover==CoverKind.Mold)==2,"확산 결과로 행동 없음 판정/재배치 필요 유지");
+                Check(ending.Reason==CascadeStepReason.Blocked && noActions.Outcome.Kind==BoardOutcomeKind.Blocked && noActions.TurnEffects.MoldSpread.Reason==MoldSpreadReason.Spread && noActions.State.Cells.Count(c=>c.Cover==CoverKind.Mold)==2,"확산 결과로 자동 재배치 불가/진행 불가 종료");
                 LevelDefinition fall=(LevelDefinition)Invoke(typeof(BoardActionVerification),"Make",null,new System.Collections.Generic.Dictionary<BoardCoordinate,int>{[C(0,0)]=2,[C(1,0)]=1,[C(2,0)]=0},20);Mold(fall,C(0,0));
                 LevelRuntimeState falling=Build(fall); foreach(RuntimeCell c in falling.Cells.Where(c=>c.IsActive && c.Coordinate.Row>0)){Set(c,"Content",RuntimeContent.Empty);Set(c,"Color",null);}
                 Check(SettlementResolution.Resolve(falling).State.CellAt(C(0,0)).Cover==CoverKind.Mold,"정착 중 곰팡이 고정");Hit(falling,C(0,0),Context());

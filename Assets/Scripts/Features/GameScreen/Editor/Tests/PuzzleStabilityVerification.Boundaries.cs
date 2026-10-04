@@ -187,7 +187,8 @@ namespace GameScreen.Editor
                             JsonUtility.FromJsonOverwrite("{\"moveCount\":1}", level);
                             typeof(PuzzleGameSession).GetField("initialBytes", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                                 .SetValue(session, Levels.LevelPackCodec.Encode(new[] { level }));
-                            await session.RestartAsync(CancellationToken.None); Invoke(session, "TickProgress", .7f); heard.Clear();
+                            session.enabled = true; await session.RestartAsync(CancellationToken.None); session.enabled = false;
+                            Invoke(session, "TickProgress", .7f); heard.Clear();
                         }
                         BoardActionExecutor direct = BeginFixture(session, won ? 3 : 0);
                         for (int frame = 0; frame < 20000 && session.Outcome == null; frame++) await Step(session, .02f);
@@ -205,7 +206,7 @@ namespace GameScreen.Editor
                         await Finish(session, direct);
                         PuzzleScreenView screen = UnityEngine.Object.FindFirstObjectByType<PuzzleScreenView>();
                         Check(session.ResultReady && session.Outcome.Kind == (won ? BoardOutcomeKind.Won : BoardOutcomeKind.MovesExhausted) &&
-                            ReferenceEquals(Field(screen, "shownOutcome"), session.Outcome), "백그라운드에서 실제 결과 Refresh 완료 " + won + "/" + paused);
+                            ReferenceEquals(Field(screen.GetComponent<PuzzlePopupBinding>(), "shownOutcome"), session.Outcome), "백그라운드에서 실제 결과 Refresh 완료 " + won + "/" + paused);
                         Check(heard.All(kind => kind != PuzzleFeedbackCueKind.Win && kind != PuzzleFeedbackCueKind.Lose), "백그라운드 결과음 0회");
                         Invoke(session, "OnApplicationPause", false);
                         PuzzleFeedbackCueKind expected = won ? PuzzleFeedbackCueKind.Win : PuzzleFeedbackCueKind.Lose;
@@ -227,7 +228,7 @@ namespace GameScreen.Editor
                 {
                     string initial = Snapshot(session.State); BeginFixture(session, 2); await Step(session, .02f);
                     Check(session.IsPresenting, "다시하기 직전 실제 드론 표시 중 " + repeat);
-                    await session.RestartAsync(CancellationToken.None); Invoke(session, "TickProgress", .7f); session.enabled = true;
+                    session.enabled = true; await session.RestartAsync(CancellationToken.None); Invoke(session, "TickProgress", .7f);
                     Check(session.CanAcceptInput && Snapshot(session.State) == initial && !session.IsPresenting && !session.HasProgressFeedback &&
                         session.AudioPlayback.ActiveVoices == 0 && ((PuzzleFeedbackSchedule)Field(session, "audioSchedule")).PendingCount == 0,
                         "실제 표시 중 다시하기5회 이전 보드·소리·수집 잔류 없음 " + repeat);
@@ -256,19 +257,24 @@ namespace GameScreen.Editor
                     UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>().Draw(session.State, old);
                     session.enabled = true; Check(session.TryActivate(new BoardCoordinate(4, 4)), "미로드 효과 실제 파워 실행 " + mode); session.enabled = false;
                     Check((bool)Field(session, "preparingEffects") && (int)Field(old, "pending") > 0, "실제 효과 로드 pending 전제 " + mode);
-                    if (mode == 0) await session.RestartAsync(CancellationToken.None);
+                    object previousState = session.State; string previousLogical = session.LogicalSessionId;
+                    if (mode == 0) { session.enabled = true; await session.RestartAsync(CancellationToken.None); session.enabled = false; }
                     else if (mode == 1)
                     {
                         using CancellationTokenSource cancelled = new CancellationTokenSource(); cancelled.Cancel();
-                        await session.RestartAsync(cancelled.Token);
+                        session.enabled = true; await session.RestartAsync(cancelled.Token); session.enabled = false;
                     }
                     else Invoke(session, "Fail", "Stage11 의도한 실제 pending 중 오류 경계");
                     float deadline = Time.realtimeSinceStartup + 20;
                     while ((int)Field(old, "pending") > 0 && Time.realtimeSinceStartup < deadline) await UniTask.Yield();
-                    Check((int)Field(old, "pending") == 0 && old.AtlasCount == 0 && !(bool)Field(session, "preparingEffects") &&
-                        ((PuzzleFeedbackSchedule)Field(session, "audioSchedule")).PendingCount == 0 && heard.All(kind => kind == PuzzleFeedbackCueKind.Start) && heard.Count == (mode == 0 ? 1 : 0),
-                        "pending 중 재시작/취소/오류 늦은 파워·예약·아틀라스 잔류 없음 " + mode);
-                    if (mode != 0) await session.RestartAsync(CancellationToken.None);
+                    if (mode == 1)
+                        Check((int)Field(old, "pending") == 0 && old.AtlasCount > 0 && ReferenceEquals(Field(session, "artwork"), old) &&
+                            ReferenceEquals(session.State, previousState) && session.LogicalSessionId == previousLogical && session.IsReady && heard.Count == 0,
+                            "pending 효과 중 Retry 취소 기존 플레이·연출 자원·문맥 보존 소리 재실행0");
+                    else Check((int)Field(old, "pending") == 0 && old.AtlasCount == 0 && !(bool)Field(session, "preparingEffects") &&
+                            ((PuzzleFeedbackSchedule)Field(session, "audioSchedule")).PendingCount == 0 && heard.All(kind => kind == PuzzleFeedbackCueKind.Start) && heard.Count == (mode == 0 ? 1 : 0),
+                            "pending 중 재시작/오류 늦은 파워·예약·아틀라스 잔류 없음 " + mode);
+                    if (mode != 0) { session.enabled = true; await session.RestartAsync(CancellationToken.None); session.enabled = false; }
                     Invoke(session, "TickProgress", .7f); session.enabled = true;
                     Check(session.CanAcceptInput && session.AudioPlayback.SourceCount == 8 && session.AudioPlayback.ClipCount == 14, "pending 경계 후 새 게임 입력·풀 정상 " + mode);
                     session.enabled = false;

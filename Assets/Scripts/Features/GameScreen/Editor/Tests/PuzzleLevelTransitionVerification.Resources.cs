@@ -72,6 +72,7 @@ namespace GameScreen.Editor
                 StartingBoardSearch expected = new StartingBoardSearch(level, seed);
                 while (!expected.IsDone) expected.Advance(128);
                 PuzzleResultView popup = UnityEngine.Object.FindFirstObjectByType<PuzzleResultView>();
+                string previousLogicalSession = session.LogicalSessionId;
                 UnityEngine.UI.Button next = (UnityEngine.UI.Button)typeof(PuzzleResultView).GetField("nextLevel", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(popup);
                 PointerEventData pointer = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left };
                 ExecuteEvents.Execute(next.gameObject, pointer, ExecuteEvents.pointerClickHandler);
@@ -88,6 +89,8 @@ namespace GameScreen.Editor
                 float transitionDeadline = Time.realtimeSinceStartup + 45;
                 while (session.IsChangingLevel && Time.realtimeSinceStartup < transitionDeadline) await UniTask.Yield();
                 Check(session.State.LevelNumber == 2 && !session.HasFailed, "검사 소유 팩 실제 버튼 Addressables 성공·중복 클릭 전환1회");
+                Check(session.LogicalSessionId != previousLogicalSession && !string.IsNullOrEmpty(session.LogicalSessionId),
+                    "Next 성공에만 새 논리 문맥 확정");
                 Check(session.State.LevelNumber == 2 && session.Outcome == null && session.IsStartingFeedback && !session.IsChangingLevel,
                     "새 번호·승리 해제·시작 피드백 전환");
                 session.AudioPlayback.Played -= Played;

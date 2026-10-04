@@ -15,6 +15,7 @@ namespace PopupUI
         private bool inputBlocked, pauseRequested;
         private int requestRevision;
         public PopupContext Context { get; private set; }
+        public PopupService Service => service;
         public event Action<bool> InputBlockChanged;
         public event Action<bool> PauseRequestChanged;
         internal Transform Surface => surface == null ? transform : surface;

@@ -36,6 +36,7 @@ namespace Simulation
                 AbortExecution("유효한 미션이 없습니다.");
                 return RecordEnding(CascadeStepReason.Aborted, Outcome.Message, before);
             }
+            LevelRuntimeState previousState = State; TurnEffectContext previousContext = TurnEffects;
             LevelRuntimeState work = new LevelRuntimeState(State);
             TurnEffectContext context = TurnEffects.Copy();
             MoldSpreadRecord spread = MoldRules.FinishTurn(work, context);
@@ -53,25 +54,41 @@ namespace Simulation
                 Phase = BoardActionPhase.Stopped;
                 return RecordEnding(CascadeStepReason.MovesExhausted, Outcome.Message + " · " + spread.Message, before);
             }
-            PlacePendingBoosters();
-            if (ActionQuery.Find(State).Count > 0)
+            StartBooster[] previousBoosters = pendingBoosters.ToArray();
+            int previousPlacementCount = boosterPlacements.Count;
+            BoardActionPhase previousPhase = Phase; BoardOutcome previousOutcome = Outcome;
+            ShuffleResult previousShuffle = LastShuffle;
+            try
             {
-                Phase = BoardActionPhase.Ready;
-                return RecordEnding(CascadeStepReason.Stable, "연쇄 완료 · 다음 행동 대기 · " + spread.Message, before);
+                PlacePendingBoosters();
+                if (ActionQuery.Find(State).Count > 0)
+                {
+                    Phase = BoardActionPhase.Ready;
+                    return RecordEnding(CascadeStepReason.Stable, "연쇄 완료 · 다음 행동 대기 · " + spread.Message, before);
+                }
+                LastShuffle = ShuffleResolution.Resolve(State);
+                if (LastShuffle.Reason == ShuffleReason.Applied)
+                {
+                    State = LastShuffle.State;
+                    TurnEffects.ResetAfterShuffle();
+                    Phase = BoardActionPhase.Ready;
+                    return RecordEnding(CascadeStepReason.Shuffled, "자동 재배치 완료 · 시도 " + LastShuffle.Attempts, before);
+                }
+                if (LastShuffle.Reason == ShuffleReason.Impossible)
+                    Outcome = new BoardOutcome(BoardOutcomeKind.Blocked, "진행 불가 · 무료 재도전", State, Turn);
+                else AbortExecution("재배치 탐색 한도 · 패배 아님 · 시도 " + LastShuffle.Attempts);
+                Phase = BoardActionPhase.Stopped;
+                return RecordEnding(Outcome.Kind == BoardOutcomeKind.Blocked ? CascadeStepReason.Blocked : CascadeStepReason.Aborted, Outcome.Message, before);
             }
-            LastShuffle = ShuffleResolution.Resolve(State);
-            if (LastShuffle.Reason == ShuffleReason.Applied)
+            catch
             {
-                State = LastShuffle.State;
-                TurnEffects.ResetAfterShuffle();
-                Phase = BoardActionPhase.Ready;
-                return RecordEnding(CascadeStepReason.Shuffled, "자동 재배치 완료 · 시도 " + LastShuffle.Attempts, before);
+                // 다음 행동 조회/재배치 실패는 번식·난수와 대기 부스터까지 원복한다.
+                State = previousState; TurnEffects = previousContext;
+                Phase = previousPhase; Outcome = previousOutcome; LastShuffle = previousShuffle;
+                pendingBoosters.Clear(); pendingBoosters.AddRange(previousBoosters);
+                boosterPlacements.RemoveRange(previousPlacementCount, boosterPlacements.Count - previousPlacementCount);
+                throw;
             }
-            if (LastShuffle.Reason == ShuffleReason.Impossible)
-                Outcome = new BoardOutcome(BoardOutcomeKind.Blocked, "진행 불가 · 무료 재도전", State, Turn);
-            else AbortExecution("재배치 탐색 한도 · 패배 아님 · 시도 " + LastShuffle.Attempts);
-            Phase = BoardActionPhase.Stopped;
-            return RecordEnding(Outcome.Kind == BoardOutcomeKind.Blocked ? CascadeStepReason.Blocked : CascadeStepReason.Aborted, Outcome.Message, before);
         }
 
         private CascadeStepResult RecordEnding(CascadeStepReason reason, string message, int before, IEnumerable<EffectRecord> effects = null)

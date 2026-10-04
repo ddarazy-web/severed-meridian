@@ -92,6 +92,7 @@ namespace GameScreen
                 ClearProgress(); ResetPresentation();
                 executor = candidateExecutor; artwork = candidateArtwork; candidateArtwork = null;
                 initialBytes = candidateBytes; levelNumber = nextNumber;
+                LogicalSessionId = Guid.NewGuid().ToString("N");
                 previousArtwork?.Dispose();
                 InitializeProgress(); CenterCamera();
                 Message = "블록을 선택하거나 드래그하세요";

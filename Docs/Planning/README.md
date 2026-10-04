@@ -2,7 +2,12 @@
 
 [전체 문서 분류](../README.md)
 
-- [팝업 프레임워크 3단계 — 관리 도구와 게임 팝업 전환](project-wide/popup-framework-stage-03-plan.md)
+- [퍼즐 요소 확장 구조 리팩토링 — 7단계 계획](MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-plan.md)
+- [요소 확장·드론 수정 — 통합 개발 가이드라인](MoonRabbitJunkyard/ElementFramework/integration-guideline.md)
+- [EF-01 — 고정 장애물 피해 기준 확보 계획](MoonRabbitJunkyard/ElementFramework/stage-01-obstacle-baseline-plan.md)
+- [EF-02 — 드론 선택·예약·효과 타임라인 기준 확보 계획](MoonRabbitJunkyard/ElementFramework/stage-02-drone-baseline-plan.md)
+- [EF-03 — 거미줄·먼지 피해 기준 확보 계획](MoonRabbitJunkyard/ElementFramework/stage-03-layer-baseline-plan.md)
+- [팝업 프레임워크 3단계 — 관리 도구·게임 연결·최종 검수](project-wide/popup-framework-stage-03-plan.md)
 - [팝업 프레임워크 2단계 — 선택적 씬 복원 계획](project-wide/popup-framework-stage-02-plan.md)
 
 - [공통 Popup UI 프레임워크 3단계 구현 계획](project-wide/2026-10-02-popup-framework-plan.md)
@@ -61,3 +66,21 @@
 - [11단계 반복 플레이·성능 안정화 계획](MoonRabbitJunkyard/WorldGameScreen/stage-11-stability-plan.md)
 - [12단계 실제 게임 화면·연출 품질 검수 계획](MoonRabbitJunkyard/WorldGameScreen/stage-12-presentation-plan.md)
 - [13단계 승리 후 다음 레벨 연결 계획](MoonRabbitJunkyard/WorldGameScreen/stage-13-level-transition-plan.md)
+
+- [요소 프레임워크 EF-04 완료](MoonRabbitJunkyard/ElementFramework/stage-04-generator-baseline-plan.md)
+
+- [요소 프레임워크 EF-05 완료](MoonRabbitJunkyard/ElementFramework/stage-05-mold-baseline-plan.md)
+
+- [요소 프레임워크 EF-06 완료](MoonRabbitJunkyard/ElementFramework/stage-06-scrap-baseline-plan.md)
+
+- [요소 프레임워크 EF-07 완료](MoonRabbitJunkyard/ElementFramework/stage-07-recovery-baseline-plan.md)
+
+- [요소 프레임워크 EF-08 완료](MoonRabbitJunkyard/ElementFramework/stage-08-storage-baseline-plan.md)
+
+- [요소 프레임워크 EF-09 완료](MoonRabbitJunkyard/ElementFramework/stage-09-artwork-baseline-plan.md)
+
+- [요소 프레임워크 EF-10 완료](MoonRabbitJunkyard/ElementFramework/stage-10-resource-baseline-plan.md)
+
+- [요소 프레임워크 EF-11 계획](MoonRabbitJunkyard/ElementFramework/stage-11-pool-baseline-plan.md)
+
+- [요소 프레임워크 EF-12 계획](MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-plan.md)

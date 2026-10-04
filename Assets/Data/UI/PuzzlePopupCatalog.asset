@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b0f2f74b2b4ad2a8ef3be7b6ebb757, type: 3}
+  m_Name: PuzzlePopupCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::PopupUI.PopupCatalog
+  entries:
+  - Id: puzzle.pause
+    Prefab: {fileID: 5297260765933582859, guid: 0f8d655a66adb434e987323f0c45d4a1, type: 3}
+    AllowMultiple: 0
+    PauseGameplay: 1
+    CloseOnCancel: 1
+    Restorable: 1
+  - Id: puzzle.result
+    Prefab: {fileID: 7920973344424861108, guid: 9b3003707f243a145a36a8eb0f5f03dc, type: 3}
+    AllowMultiple: 0
+    PauseGameplay: 0
+    CloseOnCancel: 0
+    Restorable: 1
+  - Id: puzzle.description
+    Prefab: {fileID: 8296756874361169033, guid: d10e0ded584201e448d63effccf5a997, type: 3}
+    AllowMultiple: 0
+    PauseGameplay: 0
+    CloseOnCancel: 1
+    Restorable: 1

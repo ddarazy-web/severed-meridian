@@ -24,11 +24,16 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 - 현재 보드 기준: [9×9(81칸) 전환 결정](Decisions/MoonRabbitJunkyard/2026-10-01-nine-by-nine-board.md). 과거 10×10 검증 기록은 당시 조건으로 보존한다.
 
 - [게임 기획서](Contents/MoonRabbitJunkyard/기획서.md)
+- [고물탑 쌓기 기획서](Contents/MoonRabbitJunkyard/12_고물탑쌓기.md) — 퍼즐 이외의 별 소비·고물 수집·탑 성장 콘텐츠. 핵심 규칙 정리, 구현 미착수.
+- [레벨 튜토리얼 기획서](Contents/MoonRabbitJunkyard/13_레벨튜토리얼.md) — 레벨 데이터·단계 편집·자동 진행과 에디터 시험의 15개 결정 정리, 구현 미착수.
+- [퍼즐 요소 확장 구조 설계안](Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [7단계 전환 계획](Planning/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-plan.md) · [목표·완료 조건](Goals/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md) — 수백 종류 확장을 위한 리팩토링 제안, 구현 미착수.
+- [요소 확장·드론 수정 통합 개발 가이드라인](Planning/MoonRabbitJunkyard/ElementFramework/integration-guideline.md) — EF-01~09 기준 확보 완료. [EF-09 검증](Verification/MoonRabbitJunkyard/ElementFramework/stage-09-progress.md) 추가1615 PASS/0 FAIL·기존 파워 검사 통과. 다음 [EF-10 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-10-resource-baseline-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-10-resource-baseline-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-10-command.md) 준비. 구조 전환·새 드론 비행 미구현.
 - [월드 게임 화면 전체 단계 계획](Planning/MoonRabbitJunkyard/WorldGameScreen/2026-09-30-world-game-screen.md)
 - 완료된 3단계: [계획](Planning/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-plan.md) · [목표·완료 조건](Goals/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-goal.md) · [목표 명령어](Commands/MoonRabbitJunkyard/WorldGameScreen/stage-03-goal-command.md)
 - [3단계 진행·검증 기록](Verification/MoonRabbitJunkyard/WorldGameScreen/stage-03-progress.md) · [에디터 게임 실행 안내](Guides/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-usage.md)
 - [2단계 진행·검증 기록](Verification/MoonRabbitJunkyard/WorldGameScreen/stage-02-progress.md) · [게임 실행 안내](Guides/MoonRabbitJunkyard/WorldGameScreen/stage-02-gameplay-usage.md)
 - [HTML 사용 매뉴얼](MoonRabbitJunkyard/Manual/index.html) · [게임 화면 목업](MoonRabbitJunkyard/Mockups/puzzle-screen.html)
+- [고물탑 화면 목업](MoonRabbitJunkyard/Mockups/junk-tower.html) · [목업 사용 안내](Guides/MoonRabbitJunkyard/junk-tower-mockup.md)
 
 - 완료된 4단계 (2026-10-01): [계획](Planning/MoonRabbitJunkyard/WorldGameScreen/stage-04-mockup-ui-plan.md) · [목표·완료 조건](Goals/MoonRabbitJunkyard/WorldGameScreen/stage-04-mockup-ui-goal.md) · [목표 명령어](Commands/MoonRabbitJunkyard/WorldGameScreen/stage-04-goal-command.md)
 
@@ -51,3 +56,7 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 - 프로젝트 공통 설계·계획은 기존 규칙대로 `Decisions/project-wide`, `Planning/project-wide`를 사용한다. 아직 문서가 없는 분류에 빈 폴더를 미리 만들지 않는다.
 
 문서 위치가 변경되었으므로 이전 대화의 경로 대신 이 목차 또는 새 목표 명령문을 사용한다.
+
+- [요소 프레임워크 EF-10 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-10-progress.md) · [EF-11 다음 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-11-pool-baseline-plan.md)
+
+- [요소 프레임워크 EF-11 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-11-progress.md) · [EF-12 다음 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-plan.md)

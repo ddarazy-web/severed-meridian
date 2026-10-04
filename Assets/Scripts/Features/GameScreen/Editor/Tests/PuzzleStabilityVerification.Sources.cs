@@ -57,7 +57,7 @@ namespace GameScreen.Editor
                     Check(session.ResultReady && session.Outcome != null && session.Phase == BoardActionPhase.Stopped, mode + " 원본 판 실제 승패·라스트팡·수집 종료 " + session.Outcome?.Kind);
                     Check(heard.Count(kind => kind == PuzzleFeedbackCueKind.Win || kind == PuzzleFeedbackCueKind.Lose) == 1, mode + " 원본 판 실제 결과음 한 번");
                     BoardOutcomeKind outcome = session.Outcome.Kind;
-                    await session.RestartAsync(CancellationToken.None); Invoke(session, "TickProgress", .7f); session.enabled = true;
+                    session.enabled = true; await session.RestartAsync(CancellationToken.None); Invoke(session, "TickProgress", .7f);
                     Check(session.CanAcceptInput && session.Outcome == null && !Busy(session) && Snapshot(session.State) == initial, mode + " 원본 판 종료 뒤 같은 데이터/시드 다시하기");
                     Check(JsonUtility.ToJson(source) == original, mode + " 원본 판 종료·다시하기 에셋 불변");
                     records.Add(mode + ",12345," + turns + "," + outcome + ",Stopped,True,True");
