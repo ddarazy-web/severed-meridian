@@ -66,3 +66,13 @@
 - [요소 프레임워크 EF-11 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-11-progress.md)
 
 - [EF-12 — 봇 공개 관찰 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-12-progress.md)
+
+- [EF-13 — 정의 ID·기존 장애물 매핑 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-13-progress.md)
+
+- [EF-14 — 정의·카탈로그 조회 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-14-progress.md)
+
+- [EF-15 — 나무상자 배치 수치 연결 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-15-progress.md)
+
+- [EF-16 — 내구도형 배치 수치 연결 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-16-progress.md)
+
+- [EF-17 — 발전기 배치 수치 연결 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-17-progress.md)

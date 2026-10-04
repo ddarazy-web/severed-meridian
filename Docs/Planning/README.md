@@ -86,3 +86,13 @@
 - [요소 프레임워크 EF-12 계획](MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-plan.md)
 
 - [EF-13 — 영구 정의 ID·기존 장애물 매핑 계획](MoonRabbitJunkyard/ElementFramework/stage-13-element-id-plan.md)
+
+- [EF-14 — 읽기 전용 정의·카탈로그 조회 계획](MoonRabbitJunkyard/ElementFramework/stage-14-catalog-plan.md)
+
+- [EF-15 — 나무상자 배치 수치 정의 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-15-crate-placement-plan.md)
+
+- [EF-16 — 나머지 내구도형 배치 수치 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-16-durable-placement-plan.md)
+
+- [EF-17 — 발전기 배치 크기·충전 수치 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-17-generator-placement-plan.md)
+
+- [EF-18 — 나무상자 피해 원인 정책 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-18-crate-damage-policy-plan.md)

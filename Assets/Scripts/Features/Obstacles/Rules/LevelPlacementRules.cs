@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Board;
+using Elements;
 
 namespace Levels
 {
@@ -10,8 +11,13 @@ namespace Levels
     // 저장 목록만 원본으로 사용한다. 조회 결과와 2×2 점유는 별도로 직렬화하지 않는다.
     public static class LevelPlacementRules
     {
-        public static int Size(ObstacleKind kind) =>
-            kind == ObstacleKind.Appliance || kind == ObstacleKind.Generator ? 2 : 1;
+        public static int Size(ObstacleKind kind) => kind switch
+        {
+            ObstacleKind.Generator => LegacyElementDefinitions.Get(kind).RequireChargePlacement().Size,
+            ObstacleKind.Crate or ObstacleKind.Scrap or ObstacleKind.Safe or ObstacleKind.ColorLock or ObstacleKind.Appliance =>
+                LegacyElementDefinitions.Get(kind).RequirePlacement().Size,
+            _ => 1
+        };
 
         public static IEnumerable<BoardCoordinate> Footprint(BoardCoordinate origin, int size)
         {
@@ -27,11 +33,8 @@ namespace Levels
 
         public static int MaxDurability(ObstacleKind kind) => kind switch
         {
-            ObstacleKind.Crate => 6,
-            ObstacleKind.Scrap => 5,
-            ObstacleKind.Safe => 5,
-            ObstacleKind.ColorLock => 3,
-            ObstacleKind.Appliance => 9,
+            ObstacleKind.Crate or ObstacleKind.Scrap or ObstacleKind.Safe or ObstacleKind.ColorLock or ObstacleKind.Appliance =>
+                LegacyElementDefinitions.Get(kind).RequirePlacement().MaxDurability,
             _ => 0
         };
 
@@ -132,7 +135,11 @@ namespace Levels
         {
             if (!Enum.IsDefined(typeof(ObstacleKind), kind)) return "정의되지 않은 장애물입니다.";
             if (kind == ObstacleKind.Generator)
-                return charge >= 3 && charge <= 5 ? null : "필요 충전량은 3~5입니다.";
+            {
+                ElementChargePlacementProfile profile = LegacyElementDefinitions.Get(kind).RequireChargePlacement();
+                return charge >= profile.MinRequiredCharge && charge <= profile.MaxRequiredCharge ? null :
+                    $"필요 충전량은 {profile.MinRequiredCharge}~{profile.MaxRequiredCharge}입니다.";
+            }
             if (durability < 1 || durability > MaxDurability(kind)) return $"내구도는 1~{MaxDurability(kind)}입니다.";
             if (kind == ObstacleKind.ColorLock &&
                 (!Enum.IsDefined(typeof(RabbitColor), color) || level.Colors == null || !level.Colors.Contains(color)))

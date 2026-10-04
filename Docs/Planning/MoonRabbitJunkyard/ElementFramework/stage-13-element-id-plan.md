@@ -1,6 +1,6 @@
 # EF-13 — 영구 정의 ID·기존 장애물 매핑 계획
 
-상태: 준비 완료, 미실행. 큰 구간 B의 첫 작은 구현 단계.
+상태: 완료. 새49+봇32+장애물142+발전기246 PASS/0 FAIL, 각각 종료0. [검증 기록](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-13-progress.md). 큰 구간 B의 첫 작은 구현 단계.
 
 연결: [통합 가이드라인](integration-guideline.md) · [설계](../../../Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [EF-12 결과](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-12-progress.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-13-element-id-goal.md).
 
@@ -18,7 +18,7 @@ ElementId는 Unity Object/표시명/GUID/배치 Id와 독립된 불변 값이다
 
 LegacyElementMap은 기존 ObstacleKind6종만 영구 ID로 연결한다. enum 숫자와 배치의 인스턴스 Id는 보존한다. 미지원 enum(-1/999 등)은 입력 값을 포함한 오류로 거절하며 기본 상자 대체를 하지 않는다. 역변환·모든 카테고리 통합·동적 플러그인 등록은 요구하지 않는다.
 
-첫 매핑안은 다음과 같다. 이는 아직 배포된 ID가 아니며 구현 착수 시 실제 콘텐츠 의미와 확인한다. 이후 사용된 ID는 다른 종류에 재사용하지 않는다.
+확인·구현한 매핑은 다음과 같다. 기존 아트의 RecoveryCapsule/MetalRodBox 의미와 일치한다. 아직 저장/배포 소비자를 전환하지 않았으며 사용된 ID는 다른 종류에 재사용하지 않는다.
 
 | 기존 종류 | 영구 정의 ID |
 | --- | --- |
@@ -42,3 +42,5 @@ Safe/Appliance라는 구형 enum 이름을 현재 회수캡슐/금속기둥 상�
 ## 제외·중단 기준
 
 정의 ScriptableObject/카탈로그/행동 등록/피해·미션/봇 DTO 전환/드론 수정/UI/MVVM/표현·풀/원본 변환·팩 재생성은 제외한다. 빌드·재패킹·이미지·임의 커밋·사용자 Unity 종료·씬 저장 금지. 기존 예외 원복과 EF-09/11 차이는 보존한다. 필수 실패를 기록하고 실패를 숨기는 production 수정이나 목표 축소를 하지 않는다. 저장 ID 계약 전체를 확정하는 단계는 이후 별도로 다룬다.
+
+실행 결정: readonly struct/IsValid/Value, default.Value·ToString 거절 및 안전한 default 동등성/해시0. Get(ObstacleKind)만 추가했고 기존 소비자는 연결하지 않았다. Reflection 검사로 타입 부재 RED를 먼저 실행했다.

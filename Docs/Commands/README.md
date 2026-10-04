@@ -47,3 +47,13 @@
 - [요소 프레임워크 EF-12 명령문](MoonRabbitJunkyard/ElementFramework/stage-12-command.md)
 
 - [EF-13 복사용 목표 명령문](MoonRabbitJunkyard/ElementFramework/stage-13-command.md)
+
+- [EF-14 복사용 목표 명령문](MoonRabbitJunkyard/ElementFramework/stage-14-command.md)
+
+- [EF-15 복사용 목표 명령문](MoonRabbitJunkyard/ElementFramework/stage-15-command.md)
+
+- [EF-16 — 나머지 내구도형 배치 수치 연결 복사용 명령문](MoonRabbitJunkyard/ElementFramework/stage-16-command.md)
+
+- [EF-17 — 발전기 배치 크기·충전 수치 연결 복사용 명령문](MoonRabbitJunkyard/ElementFramework/stage-17-command.md)
+
+- [EF-18 — 나무상자 피해 원인 정책 연결 복사용 명령문](MoonRabbitJunkyard/ElementFramework/stage-18-command.md)

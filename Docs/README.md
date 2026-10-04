@@ -62,3 +62,13 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 - [요소 프레임워크 EF-11 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-11-progress.md) · [EF-12 다음 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-12-bot-observation-baseline-plan.md)
 
 - [요소 프레임워크 EF-12 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-12-progress.md), 134 PASS/0 FAIL·관찰26건. 다음 [EF-13 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-13-element-id-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-13-element-id-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-13-command.md). 큰 구간 B의 첫 ID 매핑 구현 준비, 아직 구현 미착수.
+
+- [요소 프레임워크 EF-13 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-13-progress.md), 469 PASS/0 FAIL·ID/오류 기록24건. 다음 [EF-14 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-14-catalog-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-14-catalog-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-14-command.md). 정의 ID/6종 매핑 구현, 기존 소비자 전환 미착수.
+
+- [요소 프레임워크 EF-14 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-14-progress.md), 1619 PASS/0 FAIL·기록1026건. 다음 [EF-15 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-15-crate-placement-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-15-crate-placement-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-15-command.md). 메모리 카탈로그 구현, 대표1종 소비자 연결 준비.
+
+- [EF-15 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-15-progress.md), 1837 PASS/0 FAIL·전후 동일31건. 다음 [EF-16 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-16-durable-placement-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-16-durable-placement-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-16-command.md). 상자 배치 수치 연결 완료, 나머지 내구도형4종 연결 준비.
+
+- [EF-16 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-16-progress.md), 2479 PASS/0 FAIL·전후 동일97건. 다음 [EF-17 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-17-generator-placement-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-17-generator-placement-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-17-command.md). 내구도형5종 배치 수치 연결 완료, 발전기 배치 수치 연결 준비.
+
+- [EF-17 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-17-progress.md), 2624 PASS/0 FAIL·전후 동일100건. 다음 [EF-18 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-18-crate-damage-policy-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-18-crate-damage-policy-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-18-command.md). 기존6종 배치 정의 연결 완료, 상자 피해 원인 조회 연결 준비.
