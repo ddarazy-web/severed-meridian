@@ -76,3 +76,13 @@
 - [EF-16 — 내구도형 배치 수치 연결 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-16-progress.md)
 
 - [EF-17 — 발전기 배치 수치 연결 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-17-progress.md)
+
+- [EF-18 — 상자 피해 원인 조회 연결 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-18-progress.md)
+
+- [EF-19 — 고철 피해 원인 조회 연결 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-19-progress.md)
+
+- [EF-20 — 캡슐 피해 원인 조회 연결 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-20-progress.md)
+
+- [EF-21 — 색 자물쇠 피해 원인 허용 정책 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-21-progress.md)
+
+- [EF-22 — 금속기둥 상자 피해 원인 허용 조회 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-22-progress.md)

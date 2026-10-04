@@ -1,6 +1,6 @@
 # 퍼즐 요소 확장·드론 수정 — 통합 개발 가이드라인
 
-상태: **EF-01/02/03/04/05/06/07/08/09/10/11/12 기준 확보 완료**, **EF-13 ID·매핑 / EF-14 불변 메모리 정의·카탈로그 구현 완료**, **EF-15/16/17 기존6종 배치 수치 연결 완료**. 피해/행동·다른 소비자 전환은 미착수. 현재 준비 단계는 **EF-18**이다.
+상태: EF-01~17 기준/정의/배치 수치 연결과 EF-18~22 내구도형5종 허용 원인 조회 연결 완료. 실행/저장/드론 전환은 미착수. 현재 준비 단계는 EF-23다.
 
 연결: [설계](../../../Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [전체 완료 조건](../../../Goals/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md) · [기존 7개 구간 참고안](2026-10-04-refactor-plan.md) · [EF-01 계획](stage-01-obstacle-baseline-plan.md) · [EF-01 목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-01-obstacle-baseline-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-01-command.md)
 
@@ -134,4 +134,19 @@ C는 B와 관련 기준 검사 확보 뒤 시작한다. D의 선택 정책은 �
 - 완료 단계 문서: [EF-17 계획](stage-17-generator-placement-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-17-generator-placement-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-17-command.md). 발전기 배치 크기/충전 허용 수치만 연결하며 실행 행동/저장은 분리한다.
 
 - 완료: [EF-17 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-17-progress.md), 새144+기존2480=2624 PASS/0 FAIL·전후 동일100건/최종110건. 발전기 배치 크기/충전 범위 연결, 보호1820개 중 승인5개 변경·나머지1815개 동일.
-- 다음 실행: [EF-18 계획](stage-18-crate-damage-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-18-crate-damage-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-18-command.md). 상자 피해 원인 허용 조회만 연결하며 적용/턴 집계/미션/예약은 유지한다.
+- 완료 단계 문서: [EF-18 계획](stage-18-crate-damage-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-18-crate-damage-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-18-command.md). 상자 피해 원인 허용 조회만 연결하며 적용/턴 집계/미션/예약은 유지한다.
+
+- 완료: [EF-18 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-18-progress.md), 새696+기존2721=3417 PASS/0 FAIL·전후 동일559건. 상자 허용 원인 조회만 연결, 보호1824개 중 기존 소스4개 변경·나머지1820개 동일.
+- 완료 단계 문서: [EF-19 계획](stage-19-scrap-damage-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-19-scrap-damage-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-19-command.md). 고철1종 허용 조회만 연결하며 고정/공급·적용/미션/예약은 유지한다.
+
+- 완료: [EF-19 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-19-progress.md), 새960+기존3417=4377 PASS/0 FAIL·전후 동일688건. 고철 허용 원인 조회만 연결, 보호1828개 중 기존 생산 파일2개 변경·나머지1826개 동일.
+- 완료 단계 문서: [EF-20 계획](stage-20-capsule-damage-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-20-capsule-damage-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-20-command.md). 캡슐1종 허용 조회만 연결하며 미정의 원인 거절/실제 피해·미션·연결 철거는 유지한다.
+
+- 완료: [EF-20 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-20-progress.md), 새592+기존4377=4969 PASS/0 FAIL·전후 동일484건. 캡슐 허용 원인 조회만 연결, 보호1830개 중 기존 생산 파일2개 변경·나머지1828개 동일.
+- 완료 단계 문서: [EF-21 계획](stage-21-color-lock-damage-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-21-color-lock-damage-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-21-command.md). 색 자물쇠1종 허용 조회만 연결하며 색 조건/null·미정의 원인·실행 의미는 유지한다.
+
+- 완료: [EF-21 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-21-progress.md), 새4452+기존4969=9421 PASS/0 FAIL·전후 동일2782건. 보호1832개 중 생산2개 변경·나머지1830개 동일.
+- 완료 단계 문서: [EF-22 계획](stage-22-appliance-damage-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-22-appliance-damage-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-22-command.md). 금속기둥 허용 조회만 연결하며 칸/hit 집계·실행 의미를 보존한다.
+
+- 완료: [EF-22 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-22-progress.md), 새5085+기존9421=14506 PASS/0 FAIL·전후 동일3040건. 보호1834개 중 생산2줄 변경·나머지1832개 동일.
+- 다음 실행: [EF-23 계획](stage-23-generator-reaction-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-23-generator-reaction-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-23-command.md). 발전기 허용 조회만 연결하며 충전/외부 자석 예외·실행 의미를 보존한다.

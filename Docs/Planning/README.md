@@ -96,3 +96,13 @@
 - [EF-17 — 발전기 배치 크기·충전 수치 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-17-generator-placement-plan.md)
 
 - [EF-18 — 나무상자 피해 원인 정책 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-18-crate-damage-policy-plan.md)
+
+- [EF-19 — 고철 뭉치 피해 원인 정책 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-19-scrap-damage-policy-plan.md)
+
+- [EF-20 — 고물 회수 캡슐 피해 원인 정책 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-20-capsule-damage-policy-plan.md)
+
+- [EF-21 — 색 자물쇠 피해 원인 정책 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-21-color-lock-damage-policy-plan.md)
+
+- [EF-22 — 금속기둥 상자 피해 원인 허용 정책 계획](MoonRabbitJunkyard/ElementFramework/stage-22-appliance-damage-policy-plan.md)
+
+- [EF-23 — 발전기 반응 원인 허용 조회 계획](MoonRabbitJunkyard/ElementFramework/stage-23-generator-reaction-policy-plan.md)

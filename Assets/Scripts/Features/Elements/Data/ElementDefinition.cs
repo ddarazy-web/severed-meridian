@@ -9,6 +9,7 @@ namespace Elements
         public string DisplayName { get; }
         public ElementPlacementProfile Placement { get; }
         public ElementChargePlacementProfile ChargePlacement { get; }
+        public ElementDamageSourcePolicy DamageSourcePolicy { get; }
 
         /// <param name="id">유효한 영구 정의 ID.</param><param name="displayName">조회 키와 독립된 표시명 원문.</param>
         public ElementDefinition(ElementId id, string displayName)
@@ -23,6 +24,13 @@ namespace Elements
         /// <param name="placement">내구도형 배치 수치. 해당하지 않는 정의는 null.</param>
         /// <param name="chargePlacement">충전형 배치 수치. 해당하지 않는 정의는 null.</param>
         public ElementDefinition(ElementId id, string displayName, ElementPlacementProfile placement, ElementChargePlacementProfile chargePlacement)
+            : this(id, displayName, placement, chargePlacement, null) { }
+
+        /// <param name="id">유효한 영구 정의 ID.</param><param name="displayName">조회 키와 독립된 표시명 원문.</param>
+        /// <param name="placement">내구도형 배치 수치. 해당하지 않는 정의는 null.</param>
+        /// <param name="chargePlacement">충전형 배치 수치. 해당하지 않는 정의는 null.</param>
+        /// <param name="damageSourcePolicy">피해 원인 허용 값. 해당하지 않는 정의는 null.</param>
+        public ElementDefinition(ElementId id, string displayName, ElementPlacementProfile placement, ElementChargePlacementProfile chargePlacement, ElementDamageSourcePolicy damageSourcePolicy)
         {
             if (!id.IsValid) throw new ArgumentException("정의 ID가 초기화되지 않았습니다.", nameof(id));
             if (string.IsNullOrWhiteSpace(displayName)) throw new ArgumentException($"요소 '{id.Value}'의 표시명은 빈 값일 수 없습니다.", nameof(displayName));
@@ -30,6 +38,7 @@ namespace Elements
             DisplayName = displayName;
             Placement = placement;
             ChargePlacement = chargePlacement;
+            DamageSourcePolicy = damageSourcePolicy;
         }
 
         /// <returns>배치 수치. 누락은 정의 ID를 포함한 오류로 거절한다.</returns>
@@ -39,5 +48,9 @@ namespace Elements
         /// <returns>충전형 배치 수치. 누락은 정의 ID를 포함한 오류로 거절한다.</returns>
         public ElementChargePlacementProfile RequireChargePlacement() => ChargePlacement ??
             throw new InvalidOperationException($"요소 '{Id.Value}'의 충전 배치 프로필이 없습니다.");
+
+        /// <returns>피해 원인 정책. 누락은 정의 ID를 포함한 오류로 거절한다.</returns>
+        public ElementDamageSourcePolicy RequireDamageSourcePolicy() => DamageSourcePolicy ??
+            throw new InvalidOperationException($"요소 '{Id.Value}'의 피해 원인 정책이 없습니다.");
     }
 }

@@ -7,11 +7,11 @@ namespace Elements
     {
         private static readonly ElementCatalog Catalog = new ElementCatalog(new[]
         {
-            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.Crate), "나무상자", new ElementPlacementProfile(1, 6)),
-            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.Scrap), "고철 뭉치", new ElementPlacementProfile(1, 5)),
-            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.Safe), "고물 회수 캡슐", new ElementPlacementProfile(1, 5)),
-            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.ColorLock), "색깔 자물쇠", new ElementPlacementProfile(1, 3)),
-            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.Appliance), "금속기둥 상자", new ElementPlacementProfile(2, 9)),
+            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.Crate), "나무상자", new ElementPlacementProfile(1, 6), null, new ElementDamageSourcePolicy(true, true, false, true)),
+            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.Scrap), "고철 뭉치", new ElementPlacementProfile(1, 5), null, new ElementDamageSourcePolicy(true, true, false, true)),
+            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.Safe), "고물 회수 캡슐", new ElementPlacementProfile(1, 5), null, new ElementDamageSourcePolicy(false, true, false, true)),
+            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.ColorLock), "색깔 자물쇠", new ElementPlacementProfile(1, 3), null, new ElementDamageSourcePolicy(true, true, true, true)),
+            new ElementDefinition(LegacyElementMap.Get(ObstacleKind.Appliance), "금속기둥 상자", new ElementPlacementProfile(2, 9), null, new ElementDamageSourcePolicy(true, true, false, true)),
             new ElementDefinition(LegacyElementMap.Get(ObstacleKind.Generator), "고장 난 발전기", null, new ElementChargePlacementProfile(2, 3, 5))
         });
 

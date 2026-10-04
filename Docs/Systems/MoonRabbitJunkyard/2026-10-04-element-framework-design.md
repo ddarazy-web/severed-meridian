@@ -1,6 +1,6 @@
 # 퍼즐 요소 정의와 공통 행동 구조 — 리팩토링 설계안
 
-- 상태: 설계·계획 제안. EF-13 영구 ID·기존6종 매핑과 EF-14 불변 메모리 ID/표시명·카탈로그 기본 조회 구현·검증 완료. EF-15/16 내구도형5종 Size·MaxDurability와 EF-17 별도 발전기 Size/배치 충전 프로필 연결 검증 완료. 다른 소비자·행동/저장 전환은 미착수, 기존 동작 유지.
+- 상태: 설계·계획 제안. EF-13 영구 ID·기존6종 매핑과 EF-14 불변 메모리 ID/표시명·카탈로그 기본 조회 구현·검증 완료. EF-15/16 내구도형5종 Size·MaxDurability와 EF-17 별도 발전기 Size/배치 충전 프로필 연결 검증 완료. EF-18 상자·EF-19 고철·EF-20 캡슐·EF-21 색 자물쇠·EF-22 금속기둥 상자 피해 원인 허용 조회 연결도 검증 완료. 다른 실행·저장 전환은 미착수, 기존 동작 유지.
 - 범위: 블록·파워 블록·장애물·덮개·바닥·장치의 종류 확장과 공통 규칙 재사용.
 - 연결: [전환 계획](../../Planning/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-plan.md) · [목표·완료 조건](../../Goals/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md) · [튜토리얼 기획](../../Contents/MoonRabbitJunkyard/13_레벨튜토리얼.md)
 

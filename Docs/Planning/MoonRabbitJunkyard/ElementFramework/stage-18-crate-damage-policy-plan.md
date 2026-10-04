@@ -1,6 +1,6 @@
 # EF-18 — 나무상자 피해 원인 허용 정책 연결 계획
 
-상태: 준비 완료, 미실행. 큰 구간 C의 첫 읽기 전용 피해 정책 연결.
+상태: 완료. 큰 구간 C의 첫 읽기 전용 피해 정책 연결. 실측은 EF-18 결과 보고서 참조.
 
 연결: [가이드라인](integration-guideline.md) · [설계](../../../Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [EF-17 결과](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-17-progress.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-18-crate-damage-policy-goal.md).
 

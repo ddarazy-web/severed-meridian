@@ -1,4 +1,5 @@
 using System.Linq;
+using Elements;
 using Levels;
 
 namespace Simulation
@@ -22,6 +23,13 @@ namespace Simulation
             ObstacleKind kind = body.Definition.Kind;
             if (!Supports(kind)) return new DamageReaction(DamageResponse.Unsupported, "장애물 반응 미지원");
             if (kind == ObstacleKind.Generator) return GeneratorRules.Query(state, index, context);
+            if (kind == ObstacleKind.Crate || kind == ObstacleKind.Scrap || kind == ObstacleKind.Safe || kind == ObstacleKind.ColorLock || kind == ObstacleKind.Appliance)
+            {
+                ElementDamageSourcePolicy policy = LegacyElementDefinitions.Get(kind).RequireDamageSourcePolicy();
+                // 미정의 원인 값의 기존 조회 의미는 유지하며 네 원인만 정책에 연결한다.
+                if (cause >= DamageCause.AdjacentMatch && cause <= DamageCause.Hammer && !policy.Allows(cause))
+                    return new DamageReaction(DamageResponse.None, "인접 피해 대상 아님");
+            }
             if (cause != DamageCause.Power && cause != DamageCause.Hammer)
             {
                 if (kind == ObstacleKind.Safe || (cause == DamageCause.MagnetAdjacent && kind != ObstacleKind.ColorLock))
