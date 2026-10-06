@@ -182,8 +182,8 @@ namespace Levels.Editor
                 case FlowTool.Arrival: error = LevelFlowEditing.SetArrival(level, cell, false); break;
                 case FlowTool.ArrivalErase: error = LevelFlowEditing.SetArrival(level, cell, true); break;
                 case FlowTool.Connect:
-                    int target = LevelPlacementRules.Find(level, PlacementLayer.Obstacle, cell);
-                    error = target >= 0 ? LevelConnectionEditing.Add(level, GeneratorId, level.Obstacles[target].Id) : "연결할 장애물을 선택하세요."; break;
+                    int target = LevelConnectionRules.FindAt(level, cell);
+                    error = target >= 0 ? LevelConnectionEditing.Add(level, GeneratorId, LevelConnectionRules.Body(level, target).Id) : "연결할 장애물을 선택하세요."; break;
             }
             source = JsonUtility.ToJson(level);
             Edited?.Invoke(error ?? "설정을 적용했습니다.");
@@ -365,8 +365,8 @@ namespace Levels.Editor
             {
                 LevelConnectionDefinition connection = level.Connections[i];
                 int generator = LevelConnectionRules.Find(level, connection.GeneratorId), target = LevelConnectionRules.Find(level, connection.TargetId);
-                if (generator >= 0) AddLabel(level.Obstacles[generator].Coordinate, "◆" + (i + 1), WireColor(i), i * 12);
-                if (target >= 0) AddLabel(level.Obstacles[target].Coordinate, "◆" + (i + 1), WireColor(i));
+                if (generator >= 0) AddLabel(LevelConnectionRules.Body(level, generator).Coordinate, "◆" + (i + 1), WireColor(i), i * 12);
+                if (target >= 0) AddLabel(LevelConnectionRules.Body(level, target).Coordinate, "◆" + (i + 1), WireColor(i));
             }
         }
 

@@ -86,3 +86,30 @@
 - [EF-21 — 색 자물쇠 피해 원인 허용 정책 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-21-progress.md)
 
 - [EF-22 — 금속기둥 상자 피해 원인 허용 조회 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-22-progress.md)
+
+- [EF-23 — 발전기 반응 원인 허용 조회 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-23-progress.md)
+
+- [EF-24 — 색 일치 조회 정책 검증 완료](MoonRabbitJunkyard/ElementFramework/stage-24-progress.md)
+
+- [EF-25 — 내구도형 집계 조회 연결 결과](MoonRabbitJunkyard/ElementFramework/stage-25-progress.md)
+
+- [EF-26 — 예약 피해량 조회 연결 결과](MoonRabbitJunkyard/ElementFramework/stage-26-progress.md)
+
+- [EF-27 — 실제 타격 기록 집계 연결 결과](MoonRabbitJunkyard/ElementFramework/stage-27-progress.md)
+
+- [EF-28 — 내구도형 제거 미션 정의 연결 결과](MoonRabbitJunkyard/ElementFramework/stage-28-progress.md)
+
+- [EF-29 — 최초 장애물 미션 수량 정의 연결 결과](MoonRabbitJunkyard/ElementFramework/stage-29-progress.md)
+
+- [EF-30 — 회수캡슐 일반 인접 정책 연결 검증](MoonRabbitJunkyard/ElementFramework/stage-30-progress.md),324210 PASS/0 FAIL
+
+- [EF-31 — 회수캡슐 자석 인접 정책 연결 검증](MoonRabbitJunkyard/ElementFramework/stage-31-progress.md),373376 PASS/0 FAIL
+
+
+- [EF-32 — 내구도형 자석 정책 연결 검증](MoonRabbitJunkyard/ElementFramework/stage-32-progress.md),427683 PASS/0 FAIL
+
+- [EF-33 — 반응 행동 키·조회 등록표 연결 검증](MoonRabbitJunkyard/ElementFramework/stage-33-progress.md),480736 PASS/0 FAIL
+
+- [큰 구간2 — 드론 정책·상승/호버/돌진 완료 검증](MoonRabbitJunkyard/ElementFramework/phase-02-progress.md),688965 PASS/0 FAIL.
+
+- [큰 구간3 — 정의 ID 저장·제작/편집 통합 완료 검증](MoonRabbitJunkyard/ElementFramework/phase-03-progress.md),54종690245 PASS/0 FAIL.

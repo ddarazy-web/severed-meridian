@@ -175,7 +175,7 @@ namespace Levels.Editor
             batchProgress.value = 100f * record.finished / record.Total;
             batchProgress.title = $"{state} · 정상 완료 {record.finished}/{record.Total}판";
             string current = batchSession?.Current == null ? "" : $"\n현재 {record.Recorded + 1}판 · {(batchSession.Current.Strategy == BotStrategyKind.Basic ? "기본" : "계획")} · {batchSession.Current.Message}";
-            string changed = level == null || LevelStateBuilder.Fingerprint(level) != record.fingerprint ? "\n현재 편집 내용과 다른 저장 사본의 시험입니다." : "";
+            string changed = !LevelEditorInputIdentity.Matches(level, record.fingerprint) ? "\n현재 편집 내용과 다른 저장 사본의 시험입니다." : "";
             string versions = BotBatchStore.SameVersions(record) ? "" : "\n현재 규칙 버전과 다른 과거 결과입니다.";
             batchSummary.text = $"기본 {record.basicFinished}/{record.seeds.Length} · 계획 {record.planningFinished}/{record.seeds.Length}\n" +
                 $"성공 {record.won} · 이동 소진 {record.exhausted} · 막힘 {record.blocked} · 오류 {record.errors} · 중단 {record.stopped} · 미실행 {record.Unrun}" +

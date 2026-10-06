@@ -22,17 +22,32 @@ namespace GameScreen.Editor
             Directory.CreateDirectory(Output); SessionState.SetBool(PlayKey + ".Scene", true);
             EditorSceneManager.OpenScene(PuzzleGameAssets.ScenePath); EditorApplication.EnterPlaymode();
         }
+        public static void RunElementScene()
+        {
+            if (EditorSceneManager.GetActiveScene().isDirty) throw new InvalidOperationException("미저장 씬 보존");
+            LevelDefinition selected = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<LevelDefinition>("Assets/Data/Levels/Level_01.asset"));
+            try
+            {
+                Elements.Editor.LevelElementMigration.Apply(selected);
+                PuzzleEditorLaunchRequest request = PuzzleEditorLaunchRequest.Capture(selected, PuzzleEditorLevelSource.Asset, 12345);
+                Directory.CreateDirectory(Output); SessionState.SetBool(PlayKey + ".Scene", true); SessionState.SetBool(PlayKey + ".Elements", true);
+                PuzzleEditorLauncher.Launch(request, 0);
+            }
+            finally { Undo.ClearUndo(selected); UnityEngine.Object.DestroyImmediate(selected); }
+        }
 
         private static async UniTask PowerSceneAsync()
         {
             results.Clear(); int exit = 0; float previousTime = Time.timeScale;
             LevelDefinition level = null;
+            bool elements = SessionState.GetBool(PlayKey + ".Elements", false); SessionState.EraseBool(PlayKey + ".Elements");
             try
             {
                 PuzzleGameSession session = UnityEngine.Object.FindFirstObjectByType<PuzzleGameSession>();
                 float deadline = Time.realtimeSinceStartup + 30;
                 while (!session.CanAcceptInput && !session.HasFailed && Time.realtimeSinceStartup < deadline) await UniTask.Yield();
                 Check(session.CanAcceptInput, "실제 게임 씬 MemoryPack 시작");
+                if (elements) Check(session.State.SchemaVersion == 5, "편집기 선택 레벨의 팩2 요청으로 실제 게임 씬 진입");
                 string original = SceneSnapshot(session.State);
                 PuzzleWorldBoard board = UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>();
                 PuzzleScreenView screen = UnityEngine.Object.FindFirstObjectByType<PuzzleScreenView>();
@@ -54,6 +69,7 @@ namespace GameScreen.Editor
                         LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Block, Erase = true }, new[] { obstacle });
                         LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Obstacle, Kind = (int)ObstacleKind.Crate, Durability = 3 }, new[] { obstacle });
                     }
+                    if (elements) Elements.Editor.LevelElementMigration.Apply(level);
                     LevelRuntimeState initial = LevelStateBuilder.Build(level, 12345).State;
                     BoardActionExecutor direct = new BoardActionExecutor(initial), executor = new BoardActionExecutor(initial);
                     SceneCall(session, "ResetPresentation"); SceneSet(session, "executor", executor);
@@ -107,7 +123,7 @@ namespace GameScreen.Editor
                         "4파워·10조합 최종 표시 진행과 실제 미션 일치 " + fixture);
                     Check(session.Phase == direct.Phase && SceneSnapshot(session.Outcome) == SceneSnapshot(direct.Outcome), "Phase·승패 동등 " + fixture);
                     Check(board.GetComponentsInChildren<SpriteRenderer>().All(image => image.name != "Effect-playback"), "실제 씬 효과 잔상 없음 " + fixture);
-                    UnityEngine.Object.Destroy(level); level = null;
+                    Undo.ClearUndo(level); UnityEngine.Object.Destroy(level); level = null;
                 }
                 session.enabled = true;
                 await session.RestartAsync(CancellationToken.None);

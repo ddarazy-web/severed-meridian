@@ -12,9 +12,17 @@ namespace Simulation
 
     public sealed class RuntimeCell
     {
+        private RuntimeContent content;
+        internal Elements.ElementDefinition ContentElement { get; set; }
+        internal Elements.ElementDefinition CoverElement { get; set; }
+        internal Elements.ElementDefinition DustElement { get; set; }
         public BoardCoordinate Coordinate { get; }
         public bool IsActive { get; }
-        public RuntimeContent Content { get; internal set; }
+        public RuntimeContent Content
+        {
+            get => content;
+            internal set { content = value; ContentElement = null; }
+        }
         public RabbitColor? Color { get; internal set; }
         public RocketDirection? RocketDirection { get; internal set; }
         public int? ObstacleIndex { get; internal set; }
@@ -28,10 +36,13 @@ namespace Simulation
 
     public sealed class RuntimeObstacle
     {
+        private readonly Elements.ElementDefinition element;
+        public Elements.ElementDefinition Element => element ?? Elements.LegacyElementDefinitions.Get(Definition.Kind);
         public ObstaclePlacementDefinition Definition { get; }
         public int Durability { get; internal set; }
         public int Charge { get; internal set; }
-        internal RuntimeObstacle(ObstaclePlacementDefinition definition) { Definition = definition; Durability = definition.Durability; }
+        internal RuntimeObstacle(ObstaclePlacementDefinition definition, Elements.ElementDefinition element = null)
+        { Definition = definition; Durability = definition.Durability; this.element = element; }
         internal RuntimeObstacle Copy() => (RuntimeObstacle)MemberwiseClone();
     }
 
@@ -66,6 +77,8 @@ namespace Simulation
 
     public sealed class RuntimeSource
     {
+        internal ReadOnlyCollection<Elements.ElementDefinition> ItemDefinitions { get; set; }
+        internal Elements.ElementDefinition RandomDefinition { get; set; }
         public BoardCoordinate Coordinate { get; }
         public SupplyMode Mode { get; }
         public SupplyExhaustion Exhaustion { get; }
@@ -79,6 +92,10 @@ namespace Simulation
             Items = Array.AsReadOnly(source.Items.ToArray());
         }
         internal RuntimeSource Copy() => (RuntimeSource)MemberwiseClone();
+        internal bool HasFixed(SupplyKind kind, Elements.ElementCatalog catalog) => Mode == SupplyMode.Fixed &&
+            (ItemDefinitions == null ? Items.Any(item => item.Kind == kind) : ItemDefinitions.Any(definition =>
+                Elements.ElementSupplyBehaviorRegistry.Mission(definition, catalog) ==
+                (kind == SupplyKind.Scrap ? MissionKind.Scrap : MissionKind.Recovery)));
         internal RuntimeSource(BoardCoordinate coordinate)
         { Coordinate = coordinate; Mode = SupplyMode.Random; Exhaustion = SupplyExhaustion.Random; Items = Array.AsReadOnly(Array.Empty<SupplyItem>()); }
     }
@@ -109,6 +126,8 @@ namespace Simulation
 
     public sealed class RuntimeSupply
     {
+        internal Elements.ElementDefinition ScrapDefinition { get; set; }
+        internal Elements.ElementDefinition RecoveryDefinition { get; set; }
         public ReadOnlyCollection<RuntimeSource> Sources { get; }
         public int ScrapTarget { get; }
         public int ScrapLimit { get; }
@@ -124,6 +143,7 @@ namespace Simulation
         }
         internal RuntimeSupply(RuntimeSupply source)
         {
+            ScrapDefinition = source.ScrapDefinition; RecoveryDefinition = source.RecoveryDefinition;
             Sources = Array.AsReadOnly(source.Sources.Select(item => item.Copy()).ToArray());
             ScrapTarget = source.ScrapTarget; ScrapLimit = source.ScrapLimit; ScrapDurability = source.ScrapDurability;
             RecoveryTarget = source.RecoveryTarget; ScrapGenerated = source.ScrapGenerated;
@@ -134,6 +154,7 @@ namespace Simulation
 
     public sealed class LevelRuntimeState
     {
+        internal Elements.ElementCatalog ElementCatalog { get; set; } = Elements.LegacyElementDefinitions.DefaultCatalog;
         private readonly List<RuntimeObstacle> obstacleBodies;
         public int SchemaVersion { get; }
         public int LevelNumber { get; }
@@ -158,19 +179,21 @@ namespace Simulation
         public ReadOnlyCollection<RecoveryRecord> Recoveries => recoveries.AsReadOnly();
         internal void RecordRecovery(RecoveryRecord record) => recoveries.Add(record);
 
-        internal LevelRuntimeState(LevelDefinition level, int seed, string fingerprint)
+        internal LevelRuntimeState(LevelDefinition level, int seed, string fingerprint,
+            IReadOnlyDictionary<string, Elements.ElementDefinition> selected = null, int? sourceSchema = null)
         {
-            SchemaVersion = level.SchemaVersion; LevelNumber = level.LevelNumber;
+            SchemaVersion = sourceSchema ?? level.SchemaVersion; LevelNumber = level.LevelNumber;
             InitialMoves = MovesRemaining = level.MoveCount; DefinitionFingerprint = fingerprint;
             Rows = level.Board.Rows; Columns = level.Board.Columns;
             Colors = Array.AsReadOnly(level.Colors.ToArray()); InitialBlocks = Array.AsReadOnly(level.InitialBlocks.ToArray());
             Cells = Array.AsReadOnly(Enumerable.Range(0, Rows * Columns)
                 .Select(index => new RuntimeCell(new BoardCoordinate(index / Columns, index % Columns), level.Board.Cells[index].IsActive)).ToArray());
-            obstacleBodies = level.Obstacles.Select(definition => new RuntimeObstacle(definition)).ToList();
+            obstacleBodies = level.Obstacles.Select(definition => new RuntimeObstacle(definition,
+                selected != null && selected.TryGetValue(definition.Id, out Elements.ElementDefinition element) ? element : null)).ToList();
             Obstacles = obstacleBodies.AsReadOnly();
             Missions = Array.AsReadOnly(level.Missions.Select(definition => new RuntimeMission(definition)).ToArray());
             foreach (RuntimeMission mission in Missions)
-                if (mission.Definition.Kind == MissionKind.Mold) mission.Target = level.Covers.Count(cover => cover.Kind == CoverKind.Mold);
+                if (mission.Definition.Kind == MissionKind.Mold) mission.Target = (int)LevelMissionRules.Supply(level, mission.Definition).Initial;
             Connections = Array.AsReadOnly(level.Connections.Select(connection => new RuntimeConnection(connection)).ToArray());
             Flow = new RuntimeFlow(level.Flow); Supply = new RuntimeSupply(level.Supply); Random = new SimulationRandom(seed);
         }
@@ -178,6 +201,7 @@ namespace Simulation
         // 불변 정의/흐름은 공유하고, 변경 가능한 셀·본체·미션·공급 커서·난수는 독립 복사한다.
         internal LevelRuntimeState(LevelRuntimeState source)
         {
+            ElementCatalog = source.ElementCatalog;
             SchemaVersion = source.SchemaVersion; LevelNumber = source.LevelNumber;
             InitialMoves = source.InitialMoves; MovesRemaining = source.MovesRemaining; DefinitionFingerprint = source.DefinitionFingerprint;
             Rows = source.Rows; Columns = source.Columns; Colors = source.Colors; InitialBlocks = source.InitialBlocks;
@@ -203,7 +227,7 @@ namespace Simulation
             IEnumerable<RuntimeObstacle> bodies, IEnumerable<RuntimeMission> missions, RuntimeFlow flow,
             RuntimeSupply supply, IEnumerable<RuntimeConnection> connections, int seed)
         {
-            SchemaVersion = LevelDefinition.CurrentSchemaVersion; LevelNumber = 1;
+            SchemaVersion = LevelDefinition.LegacySchemaVersion; LevelNumber = 1;
             Rows = rows; Columns = columns; InitialMoves = MovesRemaining = moves;
             DefinitionFingerprint = "value-snapshot";
             Colors = Array.AsReadOnly((RabbitColor[])Enum.GetValues(typeof(RabbitColor)));
@@ -217,11 +241,23 @@ namespace Simulation
 
         // 제거된 본체도 남겨 같은 턴의 피해 기록과 새 공급 본체가 충돌하지 않게 한다.
         internal void SupplyScrap(RuntimeCell cell, int durability)
+            => Elements.ElementSupplyBehaviorRegistry.Apply(Elements.LegacyElementDefinitions.GetSupply(SupplyKind.Scrap), this, cell,
+                new SupplyItem(SupplyKind.Scrap, durability: durability));
+
+        internal void SupplyObstacle(RuntimeCell cell, ObstacleKind kind, int durability, string idPrefix)
+            => SupplyObstacle(cell, Elements.LegacyElementDefinitions.Get(kind), durability, idPrefix);
+
+        internal void SupplyObstacle(RuntimeCell cell, Elements.ElementDefinition definition, int durability, string idPrefix, RabbitColor color = RabbitColor.Type1)
         {
+            if (definition.RequirePlacement().Size != 1)
+                throw new InvalidOperationException("공급 본체는 한 칸이어야 합니다.");
+            if (durability < 1 || durability > definition.RequirePlacement().MaxDurability)
+                throw new InvalidOperationException($"공급 본체 '{definition.Id.Value}'의 내구도가 정의 범위를 벗어났습니다.");
+            ObstacleKind kind = Elements.ElementLevelLayout.ViewKind(definition);
             cell.Content = RuntimeContent.Obstacle; cell.Color = null; cell.RocketDirection = null;
             cell.ObstacleIndex = obstacleBodies.Count;
             obstacleBodies.Add(new RuntimeObstacle(new ObstaclePlacementDefinition(
-                "supply-scrap-" + cell.ObstacleIndex.Value, cell.Coordinate, ObstacleKind.Scrap, durability)));
+                idPrefix + cell.ObstacleIndex.Value, cell.Coordinate, kind, durability, color), definition));
         }
 
         public int LiveScrapCount => Cells.Count(cell => cell.Content == RuntimeContent.Obstacle && cell.ObstacleIndex.HasValue &&

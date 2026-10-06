@@ -138,7 +138,9 @@ namespace Simulation
             {
                 RuntimeCell a = work.CellAt(first), b = work.CellAt(second);
                 // 점유자만 이동하고 바닥/중력과 좌표는 유지한다. 조합 중심은 두 번째 입력 칸이다.
+                Elements.ElementDefinition firstElement = a.ContentElement, secondElement = b.ContentElement;
                 (a.Content, b.Content) = (b.Content, a.Content);
+                a.ContentElement = secondElement; b.ContentElement = firstElement;
                 (a.Color, b.Color) = (b.Color, a.Color);
                 (a.RocketDirection, b.RocketDirection) = (b.RocketDirection, a.RocketDirection);
                 (a.ObstacleIndex, b.ObstacleIndex) = (b.ObstacleIndex, a.ObstacleIndex);

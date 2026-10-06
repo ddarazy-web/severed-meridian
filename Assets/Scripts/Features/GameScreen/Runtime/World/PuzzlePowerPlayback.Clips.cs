@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Collections.Generic;
 using Board;
 using Levels;
 using Simulation;
@@ -33,16 +32,12 @@ namespace GameScreen
                     Vector3 position = PuzzleWorldBoard.CellPosition(transformation.Coordinate);
                     AddEffect("Magnet", "magnet-transform", position, position, 0, .35f, 1.2f);
                 }
-            // 표시 전용 난수는 규칙 난수와 Unity 전역 난수를 소비하지 않는다. 표적은 이미 확정된 기록만 사용한다.
-            var choreography = new System.Random(System.Guid.NewGuid().GetHashCode());
-            Vector3 orbitCenter = new Vector3((float)choreography.NextDouble() * .24f - .12f, (float)choreography.NextDouble() * .24f - .12f, 0);
-            float[] ringPhases = Enumerable.Range(0, 4).Select(_ => (float)choreography.NextDouble() * Mathf.PI * 2).ToArray();
-            float spin = choreography.Next(2) == 0 ? -1 : 1;
-            bool gentleLift = timeline.Attacks.Count(attack => attack.Record.IsFlight) <= 3 &&
-                timeline.Combination?.Kind != PowerCombinationKind.RocketDrone &&
-                timeline.Combination?.Kind != PowerCombinationKind.BombDrone &&
-                timeline.Combination?.Kind != PowerCombinationKind.MagnetDrone;
-            List<(int ring, int place, float start, float end)> orbitSlots = new List<(int, int, float, float)>();
+            foreach (DroneFlightMotion flight in timeline.Flights)
+                foreach (DroneFlightMotion.Phase phase in flight.Phases)
+                    clips.Add(new Clip { Label = phase.Kind == DroneFlightPhaseKind.Dash ? "Drone-flight" : "Drone-hover",
+                        Paths = new[] { "PowerBlocks/collection-drone-rotor-4frames-v1" },
+                        Start = phase.Start, End = phase.End, From = phase.From, To = phase.To,
+                        Size = .92f, Sheet = true, DronePhase = phase });
             foreach (PuzzleEffectTimeline.Attack attack in timeline.Attacks)
             {
                 PowerAttackRecord record = attack.Record;
@@ -51,51 +46,7 @@ namespace GameScreen
                 float start = attack.Start;
                 if (record.IsFlight)
                 {
-                    float flight = Mathf.Clamp(Vector3.Distance(origin, center) * .045f, .18f, .38f);
-                    float hoverStart = timeline.Attacks.Where(prior => !prior.Record.IsFlight && prior.Record.Origin.Equals(record.Origin))
-                        .Select(prior => prior.Start).DefaultIfEmpty(0).Min();
-                    var siblings = timeline.Attacks.Where(candidate => candidate.Record.IsFlight && candidate.Record.Origin.Equals(record.Origin)).ToList();
-                    int lane = siblings.IndexOf(attack);
-                    Vector3 departure;
-                    if (gentleLift)
-                    {
-                        // 소수 드론은 생성점에서 천천히 떠오른 뒤 대기한다. 세 드론은 좌우로 나누어 본체를 분리한다.
-                        departure = origin + new Vector3(lane - (siblings.Count - 1) * .5f, .65f, 0);
-                        clips.Add(new Clip { Label = "Drone-hover", Paths = new[] { "PowerBlocks/collection-drone-rotor-4frames-v1" },
-                            Start = hoverStart, End = start, From = origin, To = departure, Size = .92f, Sheet = true, LiftOnly = true });
-                    }
-                    else
-                    {
-                        // 큰 원을 화면 안에 유지한다. 같은 원에서는 위상 간격과 각속도를 공유해 추월·겹침을 막는다.
-                        var available = new List<(int ring, int place)>();
-                        for (int ring = 1; ring <= 4; ring++)
-                        {
-                            int places = Mathf.FloorToInt(Mathf.PI / Mathf.Asin(.96f / (2 * ring)));
-                            for (int place = 0; place < places; place++)
-                                if (!orbitSlots.Any(slot => slot.ring == ring && slot.place == place && hoverStart < slot.end && slot.start < start))
-                                    available.Add((ring, place));
-                        }
-                        var chosen = available[choreography.Next(available.Count)];
-                        float orbitRadius = chosen.ring;
-                        int ringPlaces = Mathf.FloorToInt(Mathf.PI / Mathf.Asin(.96f / (2 * orbitRadius)));
-                        float orbitPhase = ringPhases[chosen.ring - 1] + chosen.place * Mathf.PI * 2 / ringPlaces;
-                        float orbitPeriod = 1.3f + orbitRadius * .25f;
-                        float orbitDirection = chosen.ring % 2 == 0 ? spin : -spin;
-                        Vector3 laneOffset = orbitCenter - origin;
-                        orbitSlots.Add((chosen.ring, chosen.place, hoverStart, start));
-                        if (start > hoverStart)
-                            clips.Add(new Clip { Label = "Drone-hover", Paths = new[] { "PowerBlocks/collection-drone-rotor-4frames-v1" },
-                                Start = hoverStart, End = start, From = origin, To = center, LaneOffset = laneOffset, Size = .92f, Sheet = true,
-                                OrbitRadius = orbitRadius, OrbitPhase = orbitPhase, OrbitPeriod = orbitPeriod, OrbitDirection = orbitDirection });
-                        departure = DroneOrbitPosition(origin, laneOffset, start - hoverStart, start, orbitRadius, orbitPhase, orbitPeriod, orbitDirection);
-                    }
-                    Vector3 headingToTarget = (center - departure).normalized;
-                    Vector3 perpendicular = new Vector3(-headingToTarget.y, headingToTarget.x, 0);
-                    float bend = Mathf.Clamp(Vector3.Distance(departure, center) * .18f, .35f, .85f) * (lane % 2 == 0 ? 1 : -1);
-                    clips.Add(new Clip { Label = "Drone-flight", Paths = new[] { "PowerBlocks/collection-drone-rotor-4frames-v1" },
-                        Start = start, End = start + flight, From = departure, To = center, Size = .92f, Sheet = true,
-                        Control1 = departure + headingToTarget * .25f + perpendicular * bend,
-                        Control2 = center - headingToTarget * .35f + perpendicular * bend * .6f });
+                    float flight = attack.FlightDuration;
                     AddEffect("Drone", "drone-impact", center, center, start + flight, .2f, 1.3f);
                     start += flight;
                 }

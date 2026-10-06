@@ -16,8 +16,10 @@ namespace Levels.Editor
         public RocketDirection Direction;
         public bool Erase;
         public bool ReplaceExisting;
+        public string DefinitionId;
+        public int DefinitionSize;
 
-        public int Size => Layer == PlacementLayer.Obstacle && !Erase ? LevelPlacementRules.Size((ObstacleKind)Kind) : 1;
+        public int Size => DefinitionSize > 0 && !Erase ? DefinitionSize : Layer == PlacementLayer.Obstacle && !Erase ? LevelPlacementRules.Size((ObstacleKind)Kind) : 1;
     }
 
     public sealed class PlacementEditResult
@@ -39,6 +41,8 @@ namespace Levels.Editor
 
         public static string PlacementError(LevelDefinition level, PlacementBrush brush, BoardCoordinate coordinate)
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
+                return Elements.Editor.ElementPlacementEditing.PlacementError(level, brush, coordinate);
             if (!LevelBoardEditing.CanEdit(level)) return "저장 형식 또는 보드·배치 목록을 확인하세요.";
             int index = LevelPlacementRules.Find(level, brush.Layer, coordinate);
             if (index == -2) return "중복 배치: 기존 Inspector 목록에서 수정하세요.";
@@ -98,13 +102,15 @@ namespace Levels.Editor
                     if (!brush.ReplaceExisting && index >= 0 && (int)level.Covers[index].Kind != brush.Kind) return "다른 덮개입니다. 더블클릭으로 교체하세요.";
                     return LevelPlacementRules.CoverSpaceError(level, coordinate);
                 case PlacementLayer.Dust:
-                    return brush.Durability >= 1 && brush.Durability <= 3 ? null : "먼지 내구도는 1~3입니다.";
+                    return LevelPlacementRules.DustValueError(brush.Durability);
                 default: return "편집 층 오류입니다.";
             }
         }
 
         public static PlacementEditResult Apply(LevelDefinition level, PlacementBrush brush, IEnumerable<BoardCoordinate> coordinates)
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
+                return Elements.Editor.ElementPlacementEditing.Apply(level, brush, coordinates);
             PlacementEditResult result = new PlacementEditResult();
             BoardCoordinate[] targets = coordinates.Distinct().ToArray();
             if (!LevelBoardEditing.CanEdit(level) || ((brush.Size == 2 || brush.ReplaceExisting) && targets.Length != 1))
@@ -227,6 +233,8 @@ namespace Levels.Editor
 
         public static bool Move(LevelDefinition level, int index, BoardCoordinate destination, out string message)
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
+                return Elements.Editor.ElementPlacementEditing.Move(level, index, destination, out message);
             message = "이동할 2×2 본체가 없습니다.";
             if (!LevelBoardEditing.CanEdit(level) || index < 0 || index >= level.Obstacles.Count ||
                 LevelPlacementRules.Size(level.Obstacles[index].Kind) != 2) return false;

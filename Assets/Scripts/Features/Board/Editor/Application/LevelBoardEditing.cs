@@ -15,10 +15,11 @@ namespace Levels.Editor
         /// <returns>현재 형식의 9×9 배열에 안전하게 접근할 수 있으면 true.</returns>
         public static bool CanEdit(LevelDefinition level)
         {
-            return level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion &&
+            return level != null && (level.SchemaVersion == LevelDefinition.LegacySchemaVersion || level.SchemaVersion == LevelDefinition.CurrentSchemaVersion) &&
                 level.Board != null && level.Board.Rows == BoardDefinition.DefaultRows && level.Board.Columns == BoardDefinition.DefaultColumns &&
-                level.Board.Cells != null && level.Board.Cells.Count == (BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns) && level.InitialBlocks != null &&
-                level.Obstacles != null && level.Covers != null && level.Dust != null;
+                level.Board.Cells != null && level.Board.Cells.Count == (BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns) &&
+                (level.SchemaVersion == LevelDefinition.CurrentSchemaVersion ? level.Elements != null :
+                    level.InitialBlocks != null && level.Obstacles != null && level.Covers != null && level.Dust != null);
         }
 
         /// <summary>해당 칸의 초기 블록을 찾는다. 중복 데이터는 임의로 하나만 선택하지 않는다.</summary>
@@ -52,6 +53,13 @@ namespace Levels.Editor
         {
             if (!CanEdit(level) || brush == LevelBrush.Select)
                 return 0;
+            if (level.SchemaVersion == LevelDefinition.CurrentSchemaVersion &&
+                (brush == LevelBrush.Fixed || brush == LevelBrush.Random || brush == LevelBrush.Erase))
+                return Elements.Editor.ElementPlacementEditing.Apply(level, new PlacementBrush
+                {
+                    Layer = PlacementLayer.Block, Kind = brush == LevelBrush.Fixed ? (int)InitialBlockKind.FixedNormal : (int)InitialBlockKind.RandomNormal,
+                    Color = color, Erase = brush == LevelBrush.Erase
+                }, coordinates).Changed;
             if (brush == LevelBrush.Fixed && (level.Colors == null || !level.Colors.Contains(color) ||
                 !Enum.IsDefined(typeof(RabbitColor), color)))
                 return 0;

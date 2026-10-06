@@ -100,7 +100,7 @@ namespace Elements.Editor
                     string output = string.Join(";", input.Obstacles.OrderBy(body => body.Kind).Select(body => body.Kind + "=" + Value(get(body.Kind))));
                     Check(output == "Crate=obstacle.crate.wood;Generator=obstacle.generator", "인스턴스 이력 독립 매핑 " + input.name);
                     Check(Snapshot(built.State) == before && JsonUtility.ToJson(input) == original && global == JsonUtility.ToJson(UnityEngine.Random.state), "매핑 조회 원본/상태/난수 보존 " + input.name);
-                    Check(packed.SequenceEqual(LevelPackCodec.Encode(new[] { input })) && LevelPackCodec.FormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50, "기존 메모리 팩 바이트/버전/50구간 유지 " + input.name);
+                    Check(packed.SequenceEqual(LevelPackCodec.Encode(new[] { input })) && LevelPackCodec.LegacyFormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50, "기존 메모리 팩 바이트/버전/50구간 유지 " + input.name);
                     Check(GeneratorRules.ActiveConnections(built.State).Count == 1 && input.Obstacles.All(body => body.Id != Value(get(body.Kind))), "기존 인스턴스 연결 유지·정의 ID와 분리 " + input.name);
                     Values.Add(JsonUtility.ToJson(new Entry { name = input.name, input = original, output = output + " | runtime=" + before + " | memoryPackBytes=" + packed.Length }));
                 }

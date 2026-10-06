@@ -25,6 +25,9 @@ namespace Levels.Editor
         private Label operation;
         private BoardCoordinate? selected;
         private bool refreshQueued;
+        private Elements.Editor.ElementCatalogViewModel elementCatalogModel;
+        private Elements.Editor.ElementCatalogView elementCatalogView;
+        private LevelDefinition catalogOwner;
 
         public LevelDefinition CurrentLevel => level;
 
@@ -51,6 +54,8 @@ namespace Levels.Editor
 
         private void OnDisable()
         {
+            elementCatalogView?.Dispose(); elementCatalogView = null;
+            elementCatalogModel?.Dispose(); elementCatalogModel = null; catalogOwner = null;
             recordManagement?.Dispose(); recordManagement = null;
             playPanel?.Dispose(); diagnosticPanel?.Dispose(); analysisPanel?.Dispose(); multiPanel?.Dispose();
             board?.CancelStroke();
@@ -225,6 +230,8 @@ namespace Levels.Editor
         {
             if (level == target && data != null) return;
             board?.CancelStroke();
+            elementCatalogView?.Dispose(); elementCatalogView = null;
+            elementCatalogModel?.Dispose(); elementCatalogModel = null; catalogOwner = null;
             properties?.Unbind();
             data?.Dispose();
             data = null;
@@ -301,6 +308,7 @@ namespace Levels.Editor
             refreshQueued = false;
             properties.Unbind();
             properties.Clear();
+            elementCatalogView?.Dispose(); elementCatalogView = null;
             tools.Clear();
             data?.Dispose();
             data = null;
@@ -326,7 +334,7 @@ namespace Levels.Editor
             BuildToolPanel(editable);
             if (!editable)
                 properties.Add(new HelpBox("저장 형식·보드 구조 오류로 칠할 수 없습니다. 검사 후 기존 Inspector에서 원본을 확인하세요.", HelpBoxMessageType.Warning));
-            if (level.SchemaVersion >= 1 && level.SchemaVersion < LevelDefinition.CurrentSchemaVersion)
+            if (level.SchemaVersion >= 1 && level.SchemaVersion < LevelDefinition.LegacySchemaVersion)
             {
                 properties.Add(new HelpBox("이전 버전: 읽기 전용입니다. 편집하려면 명시적으로 전환하세요.", HelpBoxMessageType.Info));
                 properties.Add(new Button(() =>
@@ -343,7 +351,7 @@ namespace Levels.Editor
             foreach (string fieldName in new[] { "levelNumber", "moveCount", "colors" })
             {
                 PropertyField field = new PropertyField(data.FindProperty(fieldName), fieldName == "levelNumber" ? "레벨 번호" : fieldName == "moveCount" ? "이동 횟수" : "사용 종류");
-                field.SetEnabled(level.SchemaVersion == LevelDefinition.CurrentSchemaVersion);
+                field.SetEnabled((level.SchemaVersion == LevelDefinition.LegacySchemaVersion || level.SchemaVersion == LevelDefinition.CurrentSchemaVersion));
                 properties.Add(field);
             }
             BuildMissionSettings();
@@ -399,7 +407,7 @@ namespace Levels.Editor
             selectedProperties.Add(new Label($"{coordinate.Row + 1}행 {coordinate.Column + 1}열 · {LayerNames[(int)board.Layer]}")
                 { tooltip = "선택 " + coordinate + " / 편집 층: " + LayerNames[(int)board.Layer] });
             if (!LevelBoardEditing.CanEdit(level)) return;
-            if (board.Layer == PlacementLayer.Block && LevelSupplyRules.HasRecovery(level, coordinate))
+            if (level.SchemaVersion == LevelDefinition.LegacySchemaVersion && board.Layer == PlacementLayer.Block && LevelSupplyRules.HasRecovery(level, coordinate))
             {
                 selectedProperties.Add(new Label("회수 부품 · 도착 바닥으로 회수"));
                 selectedProperties.Add(SupplyButton("회수 부품 삭제", "delete-recovery", () => LevelSupplyEditing.PlaceRecovery(level, new[] { coordinate }, true)));
@@ -410,6 +418,11 @@ namespace Levels.Editor
             active.RegisterValueChangedCallback(evt => ApplyStroke(evt.newValue ? LevelBrush.Activate : LevelBrush.Deactivate,
                 RabbitColor.Type1, new[] { coordinate }));
             selectedProperties.Add(active);
+            if (level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
+            {
+                BuildElementProperties(coordinate);
+                return;
+            }
             if (board.Layer != PlacementLayer.Block)
             {
                 BuildPlacementProperties(coordinate);

@@ -86,7 +86,9 @@ namespace Simulation
             {
                 HashSet<string> previous = new HashSet<string>(MatchQuery.Find(State).Select(pattern => pattern.Key));
                 RuntimeCell left = work.CellAt(first.Value), right = work.CellAt(second.Value);
+                Elements.ElementDefinition leftElement = left.ContentElement, rightElement = right.ContentElement;
                 (left.Content, right.Content) = (right.Content, left.Content);
+                left.ContentElement = rightElement; right.ContentElement = leftElement;
                 (left.Color, right.Color) = (right.Color, left.Color);
                 (left.RocketDirection, right.RocketDirection) = (right.RocketDirection, left.RocketDirection);
                 (left.ObstacleIndex, right.ObstacleIndex) = (right.ObstacleIndex, left.ObstacleIndex);

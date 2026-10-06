@@ -106,3 +106,32 @@
 - [EF-22 — 금속기둥 상자 피해 원인 허용 정책 계획](MoonRabbitJunkyard/ElementFramework/stage-22-appliance-damage-policy-plan.md)
 
 - [EF-23 — 발전기 반응 원인 허용 조회 계획](MoonRabbitJunkyard/ElementFramework/stage-23-generator-reaction-policy-plan.md)
+
+- [EF-24 — 색 자물쇠 색 일치 조회 정책 계획](MoonRabbitJunkyard/ElementFramework/stage-24-color-match-policy-plan.md)
+
+- [EF-25 — 내구도형 피해 집계 조회 정책 계획](MoonRabbitJunkyard/ElementFramework/stage-25-damage-aggregation-query-plan.md)
+
+- [EF-26 — 예약 피해량 조회 연결](MoonRabbitJunkyard/ElementFramework/stage-26-reserved-damage-query-plan.md)
+
+- [EF-27 — 실제 타격 기록 집계 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-27-damage-record-policy-plan.md)
+
+- [EF-28 — 내구도형 제거 미션 정의 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-28-removal-mission-plan.md)
+
+- [EF-29 — 최초 장애물 미션 수량 정의 연결 계획](MoonRabbitJunkyard/ElementFramework/stage-29-initial-mission-supply-plan.md)
+
+- [EF-30 — 회수캡슐 일반 인접 정책 계획](MoonRabbitJunkyard/ElementFramework/stage-30-capsule-adjacent-policy-plan.md)
+
+- [EF-31 — 회수캡슐 자석 인접 정책 계획](MoonRabbitJunkyard/ElementFramework/stage-31-capsule-magnet-policy-plan.md)
+
+- [EF-32 — 상자·고철·금속기둥 자석 정책 계획](MoonRabbitJunkyard/ElementFramework/stage-32-durable-magnet-policy-plan.md)
+
+
+- [EF-33 — 반응 행동 키·조회 등록표 계획](MoonRabbitJunkyard/ElementFramework/stage-33-reaction-behavior-plan.md)
+
+- [EF-34 — 반응 행동 등록과 실제 적용 위임 계획](MoonRabbitJunkyard/ElementFramework/stage-34-reaction-apply-plan.md)
+
+- [큰 구간2 — 드론 목표 선택과 상승·호버·돌진 계획](MoonRabbitJunkyard/ElementFramework/phase-02-drone-target-flight-plan.md)
+
+- [큰 구간3 — 정의 ID 저장과 레벨 제작 도구 계획](MoonRabbitJunkyard/ElementFramework/phase-03-storage-authoring-plan.md)
+
+- [큰 구간4 — 공통 표현·리소스·풀과 화면 경계 계획](MoonRabbitJunkyard/ElementFramework/phase-04-presentation-resources-plan.md)

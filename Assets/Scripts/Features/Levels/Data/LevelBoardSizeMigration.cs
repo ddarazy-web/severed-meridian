@@ -8,7 +8,7 @@ namespace Levels
     {
         internal static void Crop(PackedLevel data)
         {
-            if (data == null || data.SchemaVersion != LevelDefinition.CurrentSchemaVersion ||
+            if (data == null || data.SchemaVersion != LevelDefinition.LegacySchemaVersion ||
                 data.Board == null || !data.Board.CropLegacyBoard()) return;
             BoardDefinition board = data.Board;
             data.InitialBlocks?.RemoveAll(item => !board.Contains(item.Coordinate));

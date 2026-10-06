@@ -27,10 +27,10 @@ namespace Levels.Editor
             var issues = LevelDefinitionValidator.Validate(level);
             if (issues.Count != 0) throw new ArgumentException(string.Join("\n", issues));
             this.store = store;
-            source = ScriptableObject.CreateInstance<LevelDefinition>(); source.hideFlags = HideFlags.HideAndDontSave;
+            source = LevelPackCodec.Copy(level); source.hideFlags = HideFlags.HideAndDontSave;
             try
             {
-                string json = JsonUtility.ToJson(level); JsonUtility.FromJsonOverwrite(json, source);
+                string json = JsonUtility.ToJson(source);
                 Record = new BotMoveBalanceRecord { id = Guid.NewGuid().ToString("N"), sourceName = level.name,
                     definitionJson = json, fingerprint = LevelStateBuilder.Fingerprint(level),
                     engineVersion = BotMoveRecommendations.ExecutionVersion, rulesVersion = BotMoveRecommendations.Version,

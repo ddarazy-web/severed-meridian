@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Elements;
+using Elements.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,10 +19,17 @@ namespace Levels.Editor
             Foldout maintenance = new Foldout { text = "공급 유지 · 레벨 공통", value = maintenanceExpanded, name = "supply-maintenance" };
             maintenance.RegisterValueChangedCallback(evt => maintenanceExpanded = evt.newValue);
             properties.Add(maintenance);
-            AddNumber(maintenance, "고철 유지", "supply.scrapTarget", level.Supply.ScrapTarget);
-            AddNumber(maintenance, "추가 한도", "supply.scrapLimit", level.Supply.ScrapLimit);
-            AddNumber(maintenance, "고철 내구도", "supply.scrapDurability", level.Supply.ScrapDurability);
-            AddNumber(maintenance, "부품 유지", "supply.recoveryTarget", level.Supply.RecoveryTarget);
+            bool elements = level.SchemaVersion == LevelDefinition.CurrentSchemaVersion;
+            string supplyPath = elements ? "elementSupply." : "supply.";
+            AddNumber(maintenance, "고철 유지", supplyPath + "scrapTarget", elements ? level.ElementSupply.scrapTarget : level.Supply.ScrapTarget);
+            AddNumber(maintenance, "추가 한도", supplyPath + "scrapLimit", elements ? level.ElementSupply.scrapLimit : level.Supply.ScrapLimit);
+            AddNumber(maintenance, "고철 내구도", supplyPath + "scrapDurability", elements ? level.ElementSupply.scrapDurability : level.Supply.ScrapDurability);
+            AddNumber(maintenance, "부품 유지", supplyPath + "recoveryTarget", elements ? level.ElementSupply.recoveryTarget : level.Supply.RecoveryTarget);
+            if (elements)
+            {
+                AddDefinition("고철 공급 정의", "scrapDefinitionId", level.ElementSupply.scrapDefinitionId, ElementSupplyBehavior.Obstacle);
+                AddDefinition("회수 공급 정의", "recoveryDefinitionId", level.ElementSupply.recoveryDefinitionId, ElementSupplyBehavior.Recovery);
+            }
             maintenance.Add(new Label("한도는 생성구들이 공유합니다. 회수 추가량은 남은 미션 목표를 따릅니다."));
             Foldout missions = new Foldout { text = $"미션 · {level.Missions.Count}/4", value = true, name = "mission-settings" };
             properties.Add(missions);
@@ -69,6 +78,7 @@ namespace Levels.Editor
             void Edit(Func<string> action) { if (SupplyViewCurrent(owner, snapshot)) SupplyAction(action); }
             void Set(string path, int value) => Edit(() =>
             {
+                if (elements) return ElementSupplyEditing.SetMaintenanceProperty(level, path.Substring(supplyPath.Length), value);
                 if (value < 0 || (path == "supply.scrapDurability" && (value < 1 || value > 5))) return "유지 수량·한도는 0 이상, 고철 내구도는 1~5입니다.";
                 using SerializedObject edit = new SerializedObject(level); edit.FindProperty(path).intValue = value;
                 LevelObstacleEditing.Commit(edit, "공급·미션 설정"); return null;
@@ -77,6 +87,20 @@ namespace Levels.Editor
             {
                 IntegerField field = new IntegerField(label) { value = value, isDelayed = true, name = name ?? path.Replace('.', '-') };
                 field.RegisterValueChangedCallback(evt => Set(path, evt.newValue)); parent.Add(field);
+            }
+            void AddDefinition(string label, string field, string id, ElementSupplyBehavior behavior)
+            {
+                List<ElementDefinition> definitions = level.CreateElementCatalog().Definitions.Where(value => value.Supply?.Behavior == behavior).OrderBy(value => value.Id.Value).ToList();
+                List<string> names = definitions.Select(value => value.DisplayName + " [" + value.Id.Value + "]").ToList();
+                int current = definitions.FindIndex(value => value.Id.Value == id);
+                if (current < 0) { names.Insert(0, "정의 오류 [" + id + "]"); }
+                if (names.Count == 0) return;
+                PopupField<string> input = new PopupField<string>(label, names, Math.Max(0, current)) { name = "maintenance-" + field };
+                input.RegisterValueChangedCallback(evt =>
+                {
+                    int index = names.IndexOf(evt.newValue) - (current < 0 ? 1 : 0);
+                    if (index >= 0) Edit(() => ElementSupplyEditing.SetMaintenanceDefinition(level, field, definitions[index].Id));
+                }); maintenance.Add(input);
             }
         }
     }

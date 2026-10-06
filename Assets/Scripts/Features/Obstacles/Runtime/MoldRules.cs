@@ -29,13 +29,24 @@ namespace Simulation
     internal static class MoldRules
     {
         internal static void Remove(LevelRuntimeState state, RuntimeCell cell, TurnEffectContext context)
+            => Elements.ElementLayerBehaviorRegistry.Apply(cell.CoverElement ?? Elements.LegacyElementDefinitions.Get(CoverKind.Mold), state, cell, context);
+
+        internal static void RemoveDefinition(Elements.ElementDefinition definition, LevelRuntimeState state, RuntimeCell cell, TurnEffectContext context)
         {
-            cell.Cover = null; cell.CoverDurability = 0; context.RemovedMold = true;
-            MissionProgressRules.Complete(state, MissionKind.Mold, cell.Coordinate);
+            cell.Cover = null; cell.CoverElement = null; cell.CoverDurability = 0; context.RemovedMold = true;
+            MissionProgressRules.Complete(state, definition.RequireLayer().Mission, cell.Coordinate);
         }
 
         // 종료 단계의 작업 사본에서만 호출한다. 같은 턴 기록이 있으면 난수도 다시 쓰지 않는다.
         internal static MoldSpreadRecord FinishTurn(LevelRuntimeState state, TurnEffectContext context)
+        {
+            RuntimeCell origin = state.Cells.FirstOrDefault(cell => cell.IsActive && cell.Cover == CoverKind.Mold &&
+                (cell.CoverElement == null || cell.CoverElement.Turn != null));
+            Elements.ElementDefinition definition = origin?.CoverElement ?? Elements.LegacyElementDefinitions.Get(CoverKind.Mold);
+            return Elements.ElementTurnBehaviorRegistry.Finish(definition, CoverKind.Mold, state, context);
+        }
+
+        internal static MoldSpreadRecord FinishTurnDefinition(Elements.ElementDefinition definition, CoverKind cover, LevelRuntimeState state, TurnEffectContext context)
         {
             if (context.MoldSpread != null) return context.MoldSpread;
             int before = state.Random.DrawCount;
@@ -44,7 +55,8 @@ namespace Simulation
             if (!context.ConsumesMove) return Record(MoldSpreadReason.NoTurn);
             if (state.Missions.Count > 0 && state.Missions.All(m => m.Remaining == 0)) return Record(MoldSpreadReason.MissionsComplete);
             if (context.RemovedMold) return Record(MoldSpreadReason.RemovedThisTurn);
-            RuntimeCell[] molds = state.Cells.Where(c => c.IsActive && c.Cover == CoverKind.Mold).ToArray();
+            RuntimeCell[] molds = state.Cells.Where(c => c.IsActive && c.Cover == cover &&
+                (c.CoverElement == null || c.CoverElement.Turn != null)).ToArray();
             if (molds.Length == 0) return Record(MoldSpreadReason.NoMold);
             RuntimeCell[] candidates = state.Cells.Where(c => c.IsActive && !c.Cover.HasValue &&
                 c.Content >= RuntimeContent.Normal && c.Content <= RuntimeContent.Magnet &&
@@ -53,9 +65,13 @@ namespace Simulation
                 .OrderBy(c => c.Coordinate.Row).ThenBy(c => c.Coordinate.Column).ToArray();
             if (candidates.Length == 0) return Record(MoldSpreadReason.NoCandidate);
             RuntimeCell selected = candidates[candidates.Length == 1 ? 0 : state.Random.Next(candidates.Length)];
-            selected.Cover = CoverKind.Mold; selected.CoverDurability = 1;
+            RuntimeCell origin = molds.First(mold => new BoardEdge(mold.Coordinate, selected.Coordinate).IsAdjacent &&
+                !state.Flow.Walls.Contains(new BoardEdge(mold.Coordinate, selected.Coordinate)));
+            Elements.ElementDefinition spreading = origin.CoverElement ?? definition;
+            selected.Cover = cover; selected.CoverElement = spreading;
+            selected.CoverDurability = spreading.RequireTurn().InitialDurability;
             foreach (RuntimeMission mission in state.Missions)
-                if (mission.Definition.Kind == MissionKind.Mold) mission.Target++;
+                if (mission.Definition.Kind == spreading.RequireLayer().Mission) mission.Target++;
             return Record(MoldSpreadReason.Spread, candidates.Length, selected.Coordinate);
         }
     }

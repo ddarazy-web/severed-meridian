@@ -48,6 +48,7 @@ namespace Simulation
                 RuntimeCell cell = candidates[index]; candidates.RemoveAt(index);
                 StartBooster booster = pendingBoosters[0]; pendingBoosters.RemoveAt(0);
                 cell.Content = booster switch { StartBooster.Rocket => RuntimeContent.Rocket, StartBooster.Bomb => RuntimeContent.Bomb, _ => RuntimeContent.Magnet };
+                cell.ContentElement = Elements.LegacyElementDefinitions.GetContent(cell.Content, State.ElementCatalog);
                 cell.Color = null;
                 cell.RocketDirection = booster == StartBooster.Rocket ? (State.Random.Next(2) == 0 ? RocketDirection.Horizontal : RocketDirection.Vertical) : (RocketDirection?)null;
                 boosterPlacements.Add(new BoosterPlacement(booster, cell, Turn, before, State.Random.DrawCount));

@@ -83,6 +83,7 @@ namespace Simulation
                     RabbitColor original = cell.Color.Value;
                     DustRules.ConsumeNormal(work, cell, context);
                     cell.Content = low; cell.Color = null;
+                    cell.ContentElement = Elements.LegacyElementDefinitions.GetContent(low, work.ElementCatalog);
                     cell.RocketDirection = low == RuntimeContent.Rocket ? (RocketDirection?)work.Random.Next(2) : null;
                     MissionProgressRules.ConsumeColor(work, original, cell.Coordinate);
                     transformations.Add(new PowerTransformation(cell, original));

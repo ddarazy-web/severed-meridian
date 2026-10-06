@@ -1,12 +1,12 @@
 # 퍼즐 요소 확장·드론 수정 — 통합 개발 가이드라인
 
-상태: EF-01~17 기준/정의/배치 수치 연결과 EF-18~22 내구도형5종 허용 원인 조회 연결 완료. 실행/저장/드론 전환은 미착수. 현재 준비 단계는 EF-23다.
+상태: 큰 구간1~3 완료. 3단계는 최종54종690245 PASS/0 FAIL·전량 논리 비교·원본/과거 증거 보존 감사와4단계 문서 인계를 마쳤다. 큰 구간4~5 구현은 미착수다. EF-01~37 이력은 아래 과거 기록으로 유지하며 EF-38 준비안은5구간 체계로 대체했다.
 
 연결: [설계](../../../Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [전체 완료 조건](../../../Goals/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md) · [기존 7개 구간 참고안](2026-10-04-refactor-plan.md) · [EF-01 계획](stage-01-obstacle-baseline-plan.md) · [EF-01 목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-01-obstacle-baseline-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-01-command.md)
 
 ## 1. 운영 방식
 
-전체 구조는 아래 7개 큰 구간으로 관리한다. **큰 구간 하나를 한 번의 목표로 실행하지 않는다.** 독립적으로 검증하고 되돌릴 수 있는 작은 작업을 EF-01, EF-02처럼 순서대로 실행한다. 큰 구간 번호와 실행 단계 번호를 구분한다.
+2026-10-05 사용자 결정으로 남은 작업은 5개 큰 구간으로 관리한다. 큰 구간 하나에 계획·목표·실행문을 두고, 내부에서는 완결된 기능 묶음으로 구현·관련 검증을 진행한다. ID 등록이나 조건 하나를 별도 실행 단계로 나누지 않는다. EF-01~37은 과거 기록으로 보존하며 새 큰 구간 번호와 구분한다.
 
 현재 단계와 바로 다음 단계만 상세화한다. 미래 단계의 클래스·메서드·파일 계약을 미리 고정하지 않는다. 현재 단계 완료와 실제 검증 결과를 바탕으로 다음 계획·목표·명령문을 작성한다. 다음 단계 문서를 만드는 것과 다음 단계 구현을 시작하는 것은 구분하며, 완료 보고 후 다음 실행문으로 이어 간다.
 
@@ -25,23 +25,19 @@
 
 드론 비행은 의도적인 동작 변경이다. 기존 선회 경로와 화면 일치를 요구하지 않는다. 목표 선택 결과·피해·미션·규칙 난수는 구조 전환의 보존 대상이다. 시간 변경으로 타격 순서가 달라지는 경우 공통 효과 실행 순서와 정합성을 따로 검증하고 결과 차이를 숨기지 않는다.
 
-## 3. 큰 구간과 분할 방향
+## 3. 남은 5개 큰 구간
 
-아래는 진행 순서의 큰 틀이다. 하위 작업은 분할 후보이며 상세 계획을 미리 만든 목록이 아니다.
+| 구간 | 완료 결과 |
+| --- | --- |
+| 1. 요소 정의와 공통 규칙 | 장애물·덮개·바닥·번식·공급의 정의와 실제 반응/적용/미션 연결 |
+| 2. 드론 목표 선택과 비행 | 필요한 정책만 조회·후보 공유/예약·모든 드론 상승/호버/돌진·무효 목표 재선정 |
+| 3. 저장과 제작 도구 | 정의 ID 저장·선택 변환·MemoryPack·카탈로그 제작·MVVM 시범/Undo |
+| 4. 표현과 리소스 | 공통 표현 조회·필요 리소스 로드·풀·HUD·봇 공개 관찰 |
+| 5. 확장 검증과 정리 | 데이터 콘텐츠 확장·500개 카탈로그·통합 회귀·검증된 중복 정리 |
 
-| 큰 구간 | 결과 | 작은 실행 단계로 나눌 부분 |
-| --- | --- | --- |
-| A. 현재 기준 확보 | 재현 가능한 동작·데이터 기준 | EF-01 고정 장애물 피해; 이후 드론 선택/효과 순서; 나머지 층·발전기·공급; 저장·표현·봇 경계 |
-| B. 정의 기반 도입 | 기존 콘텐츠와 새 정의를 연결 | ID/카탈로그 조회; 구형 종류 어댑터; 대표 한 종류 연결. 런타임 전체 교체는 별도 |
-| C. 공통 규칙 전환 | 종류 대신 행동으로 조회·적용 | 단순 장애물 한 계열; 2×2/덮개; 발전기/번식; 미션/공급을 각각 검증 가능한 단위로 이관 |
-| D. 드론 목표·비행 | 필요한 정책만 검색하고 새 비행 사용 | 활성 정책 연결; 후보 공유/병합·예약; 무효화/재선정 계약; 모든 드론 상승·호버·돌진; 돌진 중 중단·재돌진 |
-| E. 저장·제작 도구 | 정의 기반 레벨 제작·왕복 | 메모리 변환 미리보기; 백업/선택 적용; 팩 버전/50레벨 왕복; 카탈로그 목록; MVVM 시범/Undo |
-| F. 표현·리소스·관찰 | 같은 정의를 모든 보드에서 사용 | 표현 조회 통일; 리소스 준비 집합; 풀 초기화/취소; HUD 표시 상태; 봇 공개 관찰 |
-| G. 확장 검증·정리 | 실제 제작성과 통합 동작 입증 | 데이터만으로 새 종류 3개; 500개 카탈로그; 전체 회귀/원본 복원; 확인된 중복 분기 정리·인수인계 |
+기존 A/B의 기준·정의 도입과 C의 완료분은 유지한다. 새1은 C의 남은 범위이고 새2~5는 기존 D~G에 대응한다. 한 구간 내부의 체크포인트마다 다음 단계 문서나 전체 회귀를 반복하지 않는다. 변경 중에는 관련 검사를, 최종 상태에서는 전체 회귀를 수행하며 실패 영향이 넓을 때만 근거에 따라 확대한다.
 
-C는 B와 관련 기준 검사 확보 뒤 시작한다. D의 선택 정책은 공통 반응/미션 조회 경계가 준비된 뒤 연결한다. 비행의 중단·재선정은 효과 타임라인의 상태 소유권을 먼저 확정한다. E는 B의 저장 계약이 안정된 뒤 시작할 수 있고 C/D와 한 목표에서 혼합하지 않는다. F는 관련 정의·실행 계약, G는 실제 전환된 기능의 검증 결과에 의존한다. 필요하면 현재 결과를 근거로 구간 순서를 바꾸되 변경 이유와 의존성을 기록한다.
-
-구형 연결 경계를 통해 단계 사이에도 기존 게임과 에디터가 동작해야 한다. 저장과 런타임을 같은 날 전면 교체해야 하는 구조라면 먼저 더 작은 연결 경계를 만든다. 기존 7단계 참고안에 적힌 파일명과 이관 순서는 이 가이드라인 및 승인된 현재 단계 계획을 우선해 조정한다.
+완료: [1단계 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-01-progress.md) · [2단계 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-02-progress.md) · [3단계 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-03-progress.md). 다음: [4단계 계획](phase-04-presentation-resources-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/phase-04-presentation-resources-goal.md) · [전체 복사용 실행문](../../../Commands/MoonRabbitJunkyard/ElementFramework/phase-04-command.md). 4~5단계 구현과5단계 상세 문서는 아직 시작하지 않는다. 아래 EF 이력은 과거 기록이며 최신 실행 범위는4단계 계획을 우선한다.
 
 ## 4. 단계 시작·진행·종료
 
@@ -60,7 +56,7 @@ C는 B와 관련 기준 검사 확보 뒤 시작한다. D의 선택 정책은 �
 
 ### 종료와 다음 단계 준비
 
-실제 검사 결과와 최종 변경 범위를 확인하고 현재 계획·목표 체크박스를 갱신한다. 단계별 검증 기록은 `Docs/Verification/MoonRabbitJunkyard/ElementFramework/stage-NN-progress.md`에 저장한다. 실행 결과가 없는 검사 항목은 통과로 표시하지 않는다.
+실제 검사 결과와 최종 변경 범위를 확인하고 현재 계획·목표 체크박스를 갱신한다. 큰 구간의 검증 기록은 `Docs/Verification/MoonRabbitJunkyard/ElementFramework/phase-NN-progress.md`에 저장한다. 기존 EF의 stage-NN 기록은 보존한다. 실행 결과가 없는 검사 항목은 통과로 표시하지 않는다.
 
 **모든 단계의 완료 보고에는 다음 항목을 포함한다.**
 
@@ -68,7 +64,7 @@ C는 B와 관련 기준 검사 확보 뒤 시작한다. D의 선택 정책은 �
 - 수행한 검사와 결과/증거 경로, 수행하지 못한 검사와 이유.
 - 남은 문제, 이번 요구에 따른 의도적 차이, 계획 변경 사항.
 - 다음 단계의 목적·범위·이전 단계 의존성과 새 계획/목표 링크.
-- 다음 단계 실행 명령문 전체를 복사 가능한 코드 블록으로 제시하고 `Docs/Commands/MoonRabbitJunkyard/ElementFramework/stage-NN-command.md`에도 저장한다.
+- 다음 단계 실행 명령문 전체를 복사 가능한 코드 블록으로 제시하고 `Docs/Commands/MoonRabbitJunkyard/ElementFramework/phase-NN-command.md`에도 저장한다.
 
 완료 조건을 충족하지 못한 상태에서는 다음 단계 준비와 착수를 완료처럼 보고하지 않는다. 미충족 항목과 재개 명령문을 제공한다. 독립된 다른 작업으로 이동하려면 그 근거와 의존성을 명시한다. 다음 구현은 사용자의 다음 실행 지시로 시작하며 매 작은 변경마다 재승인을 요구하지 않는다.
 
@@ -83,7 +79,7 @@ C는 B와 관련 기준 검사 확보 뒤 시작한다. D의 선택 정책은 �
 - 새 패키지·전면 MVVM·새 asmdef·전체 코드 이동·이미지 재생성은 필수 범위가 아니다. 필요성이 입증되면 해당 단계에서 판단한다.
 - 튜토리얼 구현, 고물탑 구현, 상세 매뉴얼은 별도 작업이다. 요소 정의 전환 시 관련 데이터 손실만 방지하며 이번 목표에 구현을 포함하지 않는다.
 
-## 6. 현재 인계
+## 6. 과거 EF 인계 기록
 
 - 완료: [EF-01 고정 장애물 피해 기준](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-01-progress.md), 244 PASS/0 FAIL, 실제 관찰 60건. 런타임 전환·새 드론 비행은 미구현이다.
 - 완료: [EF-02 드론 선택·예약·효과 타임라인 기준](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-02-progress.md), 352 PASS/0 FAIL, 실제 관찰 16건. 새 드론 비행은 미구현이다.
@@ -149,4 +145,51 @@ C는 B와 관련 기준 검사 확보 뒤 시작한다. D의 선택 정책은 �
 - 완료 단계 문서: [EF-22 계획](stage-22-appliance-damage-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-22-appliance-damage-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-22-command.md). 금속기둥 허용 조회만 연결하며 칸/hit 집계·실행 의미를 보존한다.
 
 - 완료: [EF-22 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-22-progress.md), 새5085+기존9421=14506 PASS/0 FAIL·전후 동일3040건. 보호1834개 중 생산2줄 변경·나머지1832개 동일.
-- 다음 실행: [EF-23 계획](stage-23-generator-reaction-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-23-generator-reaction-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-23-command.md). 발전기 허용 조회만 연결하며 충전/외부 자석 예외·실행 의미를 보존한다.
+- 완료 단계 문서: [EF-23 계획](stage-23-generator-reaction-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-23-generator-reaction-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-23-command.md). 발전기 허용 조회만 연결하며 충전/외부 자석 예외·실행 의미를 보존한다.
+
+- 완료: [EF-23 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-23-progress.md), 새24489+기존14506=38995 PASS/0 FAIL·전후 동일8745건. 발전기 허용 조회와 위임 순서만 연결, 생산2파일 최소 변경·원본/GUID 보존.
+- 완료 단계 문서: [EF-24 계획](stage-24-color-match-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-24-color-match-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-24-command.md). 색 자물쇠 색 비교 한 조건만 정의로 연결한다.
+
+- 완료: [EF-24 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-24-progress.md), 새20861+기존38995=59856 PASS/0 FAIL·전후 동일8447건. 색 비교 한 조건만 정의 조회로 연결, EF-23 미커밋/원본/GUID 보존.
+- 완료 단계 문서: [EF-25 계획](stage-25-damage-aggregation-query-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-25-damage-aggregation-query-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-25-command.md). 내구도형5종의 본체별/칸별 집계 조회 한 책임만 묶어 연결한다.
+
+- 완료: [EF-25 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-25-progress.md), 새75264+기존59856=135120 PASS/0 FAIL·전후 동일38340행. 5종 집계 조회만 정의 연결, EF-23~24/원본/GUID 보존.
+- 완료 단계 문서: [EF-26 계획](stage-26-reserved-damage-query-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-26-reserved-damage-query-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-26-command.md). 예약 피해량 조회의 집계 단위만 기존 정책으로 연결한다.
+
+- 완료: [EF-26 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-26-progress.md), 새7793+기존135120=142913 PASS/0 FAIL·전후4540행 전체 바이트 동일. ReservedDamage 한 메서드만 연결, 보호1948개 중1947개 동일.
+- 완료 단계 문서: [EF-27 계획](stage-27-damage-record-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-27-damage-record-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-27-command.md). Apply의 본체/칸 기록 선택만 기존 정책으로 연결한다.
+
+- 완료: [EF-27 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-27-progress.md), 새42279+기존142913=185192 PASS/0 FAIL·전후13009행 전체 바이트 동일. Apply 기록 선택만 연결, 보호1950개 중1949개 동일.
+- 완료 단계 문서: [EF-28 계획](stage-28-removal-mission-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-28-removal-mission-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-28-command.md). 내구도형 제거 미션 종류 한 책임만 정의로 연결한다.
+
+- 완료: [EF-28 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-28-progress.md),새43431+기존185192=228623 PASS/0 FAIL·전후13475행 전체 바이트 동일. 제거 미션 매핑만 연결,보호1952개 중1948개 동일.
+- 다음 실행: [EF-29 계획](stage-29-initial-mission-supply-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-29-initial-mission-supply-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-29-command.md). 최초 배치 본체의 미션 수량 매칭만 기존 정의로 연결한다.
+
+- 완료: [EF-29 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-29-progress.md), 새47201+기존228623=275824 PASS/0 FAIL·전후14558행 전체 바이트 동일. 최초 본체 수량 매칭만 연결, 보호1956개 중1953개 동일·과거3504개/출력37개 보존.
+- 완료 단계 문서: [EF-30 계획](stage-30-capsule-adjacent-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-30-capsule-adjacent-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-30-command.md). 회수캡슐 일반 인접의 잔여 종류 거부만 전환하며 자석 경로는 분리해 보존했다. 완료 결과는 아래 EF-30 검증 기록을 따른다.
+
+- 완료: [EF-30 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-30-progress.md), 새48386+기존275824=324210 PASS/0 FAIL·전후15023행 전체 바이트 동일. Safe 일반 인접 조건 한 줄만 연결, 보호1958개 중1957개 동일·과거3905개/출력39개 보존.
+- 완료 단계 문서: [EF-31 계획](stage-31-capsule-magnet-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-31-capsule-magnet-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-31-command.md). 회수캡슐 자석 인접의 전단/내부 잔여 거부만 연결한다. 기본false와 다른 종류는 유지했다. 완료 결과는 아래 EF-31 검증 기록을 따른다.
+
+- 완료: [EF-31 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-31-progress.md), 새49166+기존324210=373376 PASS/0 FAIL·최종24종 별도 Editor 종료0·전후16139행 전체 바이트 동일. Safe 자석 두 제한만 연결, 보호1960개 중1958개 동일·과거4159개/출력41개 보존.
+- 다음 실행: [EF-32 계획](stage-32-durable-magnet-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-32-durable-magnet-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-32-command.md). 같은 내구도 피해 경로의Crate/Scrap/Appliance 자석 제한을 한 책임으로 묶는다. 기본false와 본체/칸 집계·Safe/ColorLock/Generator 경로는 유지한다. EF-32 구현은 미착수다.
+
+- 완료: [EF-32 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-32-progress.md),427683 PASS/0 FAIL·25종 별도 Editor 종료0. 전후18142행 전체 동일·원본1962개와 과거4440개 보존 감사 통과.
+- 다음 준비: [EF-33 계획](stage-33-reaction-behavior-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-33-reaction-behavior-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-33-command.md). 키·등록표·실제 조회 선택을 한 책임으로 연결하며 구현은 미착수다.
+
+- 완료: [EF-33 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-33-progress.md),480736 PASS/0 FAIL·26종 별도 Editor 종료0. 전체 실행18142행 동일·과거4794 변경0·부가 정의 스냅샷5개 복구 근거 보존.
+- 다음 준비: [EF-34 계획](stage-34-reaction-apply-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-34-reaction-apply-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-34-command.md). 조회/적용 등록 짝과 실제 공통 효과의 적용 위임을 함께 연결한다. 기존 적용·제거 알고리즘과 상태/기록 소유권은 유지한다. EF-34 구현은 미착수다.
+
+- 완료: [EF-34 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-34-progress.md),534031 PASS/0 FAIL·27종 별도 Editor 종료0. 전체18182행/188팩 동일·기존59출력 복원·과거5134개 보존 감사 통과.
+- 다음 준비: [EF-35 계획](stage-35-durability-apply-policy-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-35-durability-apply-policy-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-35-command.md). 등록 내구도 조회/적용의 집계 정책 전달을 연결하고 기존 직접 Apply 호환 경계를 보존한다. 구현은 미착수다.
+
+- 완료: [EF-35 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-35-progress.md),584906 PASS/0 FAIL·28종 실제 종료0. 전체18182행/188팩 동일·63출력 원문 복원·보호1972/WIP98/과거5544/입력37 예상 밖 변경0.
+- 완료 단계 문서: [EF-36 계획](stage-36-scrap-supply-mission-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-36-scrap-supply-mission-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-36-command.md). 고철 고정/유지 공급 미션 대상 선택 연결 완료. 아래 최종 결과를 따른다.
+
+- 완료: [EF-36 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-36-progress.md),636061 PASS/0 FAIL·29종 실제 종료0. 정상18182행/188팩 동일·67출력 복원·보호1974/WIP104/과거5964/입력37 예상 밖 변경0.
+- 다음 준비: [EF-37 계획](stage-37-scrap-maintain-durability-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-37-scrap-maintain-durability-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-37-command.md). 유지 공급의 내구도 상한 검증만 기존 배치 정의로 연결한다. 구현은 미착수다.
+
+- 완료: [EF-37 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-37-progress.md),687011 PASS/0 FAIL·30종 실제 종료0. 정상18182행/188팩 동일·71출력 복원·보호1976/WIP110/과거6448/입력38 예상 밖 변경0.
+- 다음 준비: [EF-38 계획](stage-38-web-catalog-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-38-web-catalog-goal.md) · [명령문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-38-command.md). 기존 거미줄 ID·읽기 전용 정의 등록만 수행하며 덮개 실행/검증 소비는 분리한다. EF38 구현은 미착수다.
+
+- 큰 구간1 완료: [검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-01-progress.md). 다음 큰 구간2 준비: [계획](phase-02-drone-target-flight-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/phase-02-drone-target-flight-goal.md) · [실행문](../../../Commands/MoonRabbitJunkyard/ElementFramework/phase-02-command.md). 구간2 구현과 그래픽 검증을 진행했으며 전체 회귀/완료 감사/다음 구간 인계는 진행 중이다.

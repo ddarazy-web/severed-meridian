@@ -1,6 +1,6 @@
 # EF-23 — 발전기 반응 원인 허용 조회 연결 계획
 
-상태: 준비 완료, 미실행. EF-22 이후 큰 구간 C의 마지막 기존 장애물 허용 원인 조회 연결.
+상태: 완료. 별도 Editor16종 종료0/필수FAIL0, 실제8745행 전후 동일. EF-22 이후 큰 구간 C의 마지막 기존 장애물 허용 원인 조회 연결.
 
 연결: [가이드](integration-guideline.md) · [설계](../../../Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [EF-22 결과](../../../Verification/MoonRabbitJunkyard/ElementFramework/stage-22-progress.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-23-generator-reaction-policy-goal.md).
 

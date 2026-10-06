@@ -1,4 +1,5 @@
 using Levels;
+using Elements;
 
 namespace Simulation
 {
@@ -6,16 +7,23 @@ namespace Simulation
     internal static class WebRules
     {
         internal static DamageReaction Query(RuntimeCell cell, TurnEffectContext context)
+            => ElementLayerBehaviorRegistry.Query(cell.CoverElement ?? LegacyElementDefinitions.Get(CoverKind.Web), cell, context);
+
+        internal static DamageReaction QueryDefinition(ElementDefinition definition, RuntimeCell cell, TurnEffectContext context)
             => context?.HasDamagedWeb(cell.Coordinate) == true ?
                 new DamageReaction(DamageResponse.AlreadyDamaged, "거미줄 턴 피해 완료 · 내용물 보존") :
-                new DamageReaction(DamageResponse.CoverDamage, "거미줄 1피해 · 내용물 보존", 1);
+                new DamageReaction(DamageResponse.CoverDamage, "거미줄 1피해 · 내용물 보존", definition.RequireLayer().Damage);
 
         internal static void Apply(LevelRuntimeState state, RuntimeCell cell, TurnEffectContext context)
+            => ElementLayerBehaviorRegistry.Apply(cell.CoverElement ?? LegacyElementDefinitions.Get(CoverKind.Web), state, cell, context);
+
+        internal static void ApplyDefinition(ElementDefinition definition, LevelRuntimeState state, RuntimeCell cell, TurnEffectContext context)
         {
             if (cell.Cover != CoverKind.Web || context.HasDamagedWeb(cell.Coordinate)) return;
             context.RegisterWeb(cell.Coordinate);
-            if (--cell.CoverDurability == 0)
-            { cell.Cover = null; MissionProgressRules.Complete(state, MissionKind.Web, cell.Coordinate); }
+            cell.CoverDurability = System.Math.Max(0, cell.CoverDurability - definition.RequireLayer().Damage);
+            if (cell.CoverDurability == 0)
+            { cell.Cover = null; cell.CoverElement = null; MissionProgressRules.Complete(state, definition.RequireLayer().Mission, cell.Coordinate); }
         }
     }
 
@@ -26,10 +34,14 @@ namespace Simulation
             => cell.DustDurability > 0 && context?.HasDamagedDust(cell.Coordinate) != true;
 
         internal static void ConsumeNormal(LevelRuntimeState state, RuntimeCell cell, TurnEffectContext context)
+            => ElementLayerBehaviorRegistry.Apply(cell.DustElement ?? LegacyElementDefinitions.GetDust(), state, cell, context);
+
+        internal static void ApplyDefinition(ElementDefinition definition, LevelRuntimeState state, RuntimeCell cell, TurnEffectContext context)
         {
             if (!CanDamage(cell, context)) return;
             context.RegisterDust(cell.Coordinate);
-            if (--cell.DustDurability == 0) MissionProgressRules.Complete(state, MissionKind.Dust, cell.Coordinate);
+            cell.DustDurability = System.Math.Max(0, cell.DustDurability - definition.RequireLayer().Damage);
+            if (cell.DustDurability == 0) MissionProgressRules.Complete(state, definition.RequireLayer().Mission, cell.Coordinate);
         }
     }
 }

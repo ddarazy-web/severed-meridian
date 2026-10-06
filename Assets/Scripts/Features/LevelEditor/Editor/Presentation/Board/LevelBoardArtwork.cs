@@ -103,20 +103,23 @@ namespace Levels.Editor
             => Obstacle(obstacle, obstacle.Durability);
 
         internal static Sprite Obstacle(ObstaclePlacementDefinition obstacle, int durability, int charge = 0)
+            => Obstacle(obstacle.Kind, obstacle.Color, obstacle.RequiredCharge, durability, charge);
+
+        internal static Sprite Obstacle(ObstacleKind kind, RabbitColor selectedColor, int requiredCharge, int durability, int charge = 0)
         {
-            if (obstacle.Kind != ObstacleKind.Generator &&
-                (durability < 1 || durability > LevelPlacementRules.MaxDurability(obstacle.Kind))) return null;
-            int color = (int)obstacle.Color;
+            if (kind != ObstacleKind.Generator &&
+                (durability < 1 || durability > LevelPlacementRules.MaxDurability(kind))) return null;
+            int color = (int)selectedColor;
             string colorName = color >= 0 && color < colors.Length ? colors[color] : null;
-            string file = obstacle.Kind switch
+            string file = kind switch
             {
                 ObstacleKind.Crate => "Crate/crate-durability-" + durability + "-v1-256",
                 ObstacleKind.Scrap => "Scrap/scrap-durability-" + durability + "-v1-256",
                 ObstacleKind.Safe => "RecoveryCapsule/recovery-capsule-durability-" + durability + "-v1-256",
                 ObstacleKind.ColorLock when colorName != null => "ColorLock/color-lock-" + colorName + "-durability-" + durability + "-v1-256",
                 ObstacleKind.Appliance when colorName != null => "MetalRodBox/metal-rod-box-" + colorName + "-durability-" + durability + "-v1-256",
-                ObstacleKind.Generator when obstacle.RequiredCharge >= 3 && obstacle.RequiredCharge <= 5 =>
-                    "Generator/generator-charge-" + Mathf.Clamp(charge, 0, obstacle.RequiredCharge) + "-of-" + obstacle.RequiredCharge + "-v1-512",
+                ObstacleKind.Generator when requiredCharge >= 3 && requiredCharge <= 5 =>
+                    "Generator/generator-charge-" + Mathf.Clamp(charge, 0, requiredCharge) + "-of-" + requiredCharge + "-v1-512",
                 _ => null
             };
             return file == null ? null : Load("Obstacles/" + file + ".png");

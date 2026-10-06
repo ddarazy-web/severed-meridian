@@ -36,7 +36,8 @@ namespace Levels.Editor
             if (board.Brush != LevelBrush.Select) selectedPlacements.Clear();
             selectedPlacements.RemoveWhere(item => item.Layer != board.Layer || LevelCommonEditing.Resolve(level, item) < 0);
             board.PlacementSelection = selectedPlacements.SelectMany(item => LevelPlacementRules.Footprint(item.Coordinate,
-                item.Layer == PlacementLayer.Obstacle ? LevelPlacementRules.Size((ObstacleKind)item.Kind) : 1)).Distinct().ToArray();
+                item.DefinitionId != null ? Elements.Editor.ElementPlacementEditing.Size(level.CreateElementCatalog().Get(new Elements.ElementId(item.DefinitionId))) :
+                    item.Layer == PlacementLayer.Obstacle ? LevelPlacementRules.Size((ObstacleKind)item.Kind) : 1)).Distinct().ToArray();
         }
 
         private bool BuildCommonProperties()
@@ -53,20 +54,20 @@ namespace Levels.Editor
             }
             if (targets.Length == 1)
             {
-                if (LevelCommonEditing.Fields(targets[0]).Length == 0) selectedProperties.Add(new Label("복사할 가변 속성이 없습니다."));
+                if (LevelCommonEditing.Fields(targets[0], level).Length == 0) selectedProperties.Add(new Label("복사할 가변 속성이 없습니다."));
                 return false;
             }
             flowProperties.Clear();
             selectedProperties.Add(new Label($"{targets.Length}개 선택 · Ctrl/Cmd+클릭으로 추가/해제"));
             selectedProperties.Add(new Label("이동·삭제·연결 수정은 하나만 선택하세요."));
-            if (targets.Any(item => item.Layer != targets[0].Layer || item.Kind != targets[0].Kind))
+            if (targets.Any(item => item.Layer != targets[0].Layer || item.Kind != targets[0].Kind || item.DefinitionId != targets[0].DefinitionId))
             {
-                foreach (IGrouping<string, PlacementSelection> group in targets.GroupBy(LevelCommonEditing.Name))
+                foreach (IGrouping<string, PlacementSelection> group in targets.GroupBy(item => LevelCommonEditing.Name(item, level)))
                     selectedProperties.Add(new Label($"{group.Key} {group.Count()}개"));
                 selectedProperties.Add(new Label("종류가 섞여 있습니다. 설정 붙여넣기는 같은 종류에만 적용합니다."));
                 return true;
             }
-            string[] fields = LevelCommonEditing.Fields(targets[0]);
+            string[] fields = LevelCommonEditing.Fields(targets[0], level);
             if (fields.Length == 0) selectedProperties.Add(new Label("공통으로 변경할 가변 속성이 없습니다."));
             foreach (string field in fields)
             {

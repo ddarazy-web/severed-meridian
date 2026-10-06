@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Elements;
 
 namespace Levels
 {
@@ -27,30 +28,55 @@ namespace Levels
 
         public static MissionSupplySummary Supply(LevelDefinition level, LevelMissionDefinition mission)
         {
+            if (level.SchemaVersion == 5)
+            {
+                using (ElementLevelLayout layout = new ElementLevelLayout(level, level.CreateElementCatalog()))
+                    return layout.MissionSupply(mission);
+            }
             long initial = mission.Kind switch
             {
                 MissionKind.Color => level.InitialBlocks?.Count(block => block.FixedColor == mission.Color) ?? 0,
-                MissionKind.Web => level.Covers?.Count(cover => cover.Kind == CoverKind.Web) ?? 0,
-                MissionKind.Mold => level.Covers?.Count(cover => cover.Kind == CoverKind.Mold) ?? 0,
-                MissionKind.Dust => level.Dust?.Count ?? 0,
+                MissionKind.Web or MissionKind.Mold or MissionKind.Dust =>
+                    (level.Covers?.Count(cover => Enum.IsDefined(typeof(CoverKind), cover.Kind) &&
+                        LegacyElementDefinitions.Get(cover.Kind).RequireLayer().Mission == mission.Kind) ?? 0) +
+                    ((level.Dust?.Count ?? 0) > 0 && LegacyElementDefinitions.GetDust().RequireLayer().Mission == mission.Kind ? level.Dust.Count : 0),
                 MissionKind.Recovery => level.RecoveryParts?.Count ?? 0,
-                _ => level.Obstacles?.Count(obstacle => mission.Kind switch
-                {
-                    MissionKind.Crate => obstacle.Kind == ObstacleKind.Crate, MissionKind.Scrap => obstacle.Kind == ObstacleKind.Scrap,
-                    MissionKind.Safe => obstacle.Kind == ObstacleKind.Safe, MissionKind.ColorLock => obstacle.Kind == ObstacleKind.ColorLock,
-                    MissionKind.Appliance => obstacle.Kind == ObstacleKind.Appliance, _ => false
-                }) ?? 0
+                _ => level.Obstacles?.Count(obstacle =>
+                    (mission.Kind == MissionKind.Crate || mission.Kind == MissionKind.Scrap || mission.Kind == MissionKind.Safe ||
+                     mission.Kind == MissionKind.ColorLock || mission.Kind == MissionKind.Appliance) &&
+                    (obstacle.Kind == ObstacleKind.Crate || obstacle.Kind == ObstacleKind.Scrap || obstacle.Kind == ObstacleKind.Safe ||
+                     obstacle.Kind == ObstacleKind.ColorLock || obstacle.Kind == ObstacleKind.Appliance) &&
+                    LegacyElementDefinitions.Get(obstacle.Kind).RequireRemovalMissionProfile().Kind == mission.Kind) ?? 0
             };
-            if (mission.Kind == MissionKind.Color || mission.Kind == MissionKind.Mold) return new MissionSupplySummary(initial, 0, 0, true);
-            long fixedCount = mission.Kind == MissionKind.Scrap ? LevelSupplyRules.FixedCount(level, SupplyKind.Scrap) :
-                mission.Kind == MissionKind.Recovery ? LevelSupplyRules.FixedCount(level, SupplyKind.Recovery) : 0;
-            bool scrap = mission.Kind == MissionKind.Scrap && LevelSupplyRules.HasMode(level, SupplyMode.MaintainScrap) && level.Supply.ScrapTarget > 0;
+            if (mission.Kind == MissionKind.Color || mission.Kind == MissionKind.Mold ||
+                level.Covers?.Any(cover => Enum.IsDefined(typeof(CoverKind), cover.Kind) &&
+                    LegacyElementDefinitions.Get(cover.Kind).Turn != null && LegacyElementDefinitions.Get(cover.Kind).RequireLayer().Mission == mission.Kind) == true)
+                return new MissionSupplySummary(initial, 0, 0, true);
+            bool removal = mission.Kind == MissionKind.Crate || mission.Kind == MissionKind.Scrap || mission.Kind == MissionKind.Safe ||
+                mission.Kind == MissionKind.ColorLock || mission.Kind == MissionKind.Appliance;
+            long fixedScrap = mission.Kind == MissionKind.Scrap ? LevelSupplyRules.FixedCount(level, SupplyKind.Scrap) : 0;
+            if (removal && mission.Kind != MissionKind.Scrap && level.Supply?.Sources?.Any(source =>
+                source.Mode == SupplyMode.Fixed && source.Items?.Any(item => item.Kind == SupplyKind.Scrap) == true) == true)
+            {
+                ElementRemovalMissionProfile profile = LegacyElementDefinitions.Get(ObstacleKind.Scrap).RemovalMissionProfile;
+                if (profile == null || profile.Kind == mission.Kind) fixedScrap = LevelSupplyRules.FixedCount(level, SupplyKind.Scrap);
+            }
+            bool maintainedScrap = removal && LevelSupplyRules.HasMode(level, SupplyMode.MaintainScrap) && level.Supply.ScrapTarget > 0;
+            long scrapLimit = maintainedScrap ? Math.Max(0, level.Supply.ScrapLimit) : 0;
+            bool scrapMission = (fixedScrap > 0 || scrapLimit > 0) &&
+                LegacyElementDefinitions.Get(ObstacleKind.Scrap).RequireRemovalMissionProfile().Kind == mission.Kind;
+            long fixedCount = scrapMission ? fixedScrap : mission.Kind == MissionKind.Recovery ? LevelSupplyRules.FixedCount(level, SupplyKind.Recovery) : 0;
+            bool scrap = scrapMission && maintainedScrap;
             bool recovery = mission.Kind == MissionKind.Recovery && LevelSupplyRules.HasMode(level, SupplyMode.MaintainRecovery) && level.Supply.RecoveryTarget > 0;
             long maintained = scrap ? Math.Max(0, level.Supply.ScrapLimit) : recovery ? Math.Max(0, (long)mission.Count - initial - fixedCount) : 0;
             return new MissionSupplySummary(initial, fixedCount, maintained, false, recovery);
         }
 
         public static void Validate(LevelDefinition level, List<LevelValidationIssue> issues)
+            => Validate(level, issues, mission => Supply(level, mission));
+
+        internal static void Validate(LevelDefinition level, List<LevelValidationIssue> issues,
+            Func<LevelMissionDefinition, MissionSupplySummary> supply)
         {
             if (level.SchemaVersion < 4) return;
             if (level.Missions == null || level.Missions.Count < 1 || level.Missions.Count > 4)
@@ -72,7 +98,7 @@ namespace Levels
                 if (mission.Kind == MissionKind.Recovery && level.Flow?.Arrivals?.Any(cell => LevelFlowRules.Active(level, cell) &&
                     LevelSupplyRules.FindSource(level, cell) == -1 && level.Flow.Portals?.Any(portal => portal.Entrance.Equals(cell) || (portal.HasExit && portal.Exit.Equals(cell))) != true) != true)
                     issues.Add(new LevelValidationIssue(LevelValidationCode.InvalidMission, "회수 미션에 유효한 도착 바닥이 없습니다.", path));
-                MissionSupplySummary quantity = Supply(level, mission);
+                MissionSupplySummary quantity = supply(mission);
                 if (!quantity.Dynamic && mission.Count > quantity.Maximum)
                     issues.Add(new LevelValidationIssue(LevelValidationCode.InsufficientSupply, $"{Name(mission.Kind)} 목표 {mission.Count}: {quantity}", path));
             }

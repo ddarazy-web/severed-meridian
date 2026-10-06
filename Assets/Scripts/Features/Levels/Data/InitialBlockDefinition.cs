@@ -45,5 +45,8 @@ namespace Levels
 
         // 무작위 유형에서 이전 고정 색을 보존하되 실행 의미를 부여하지 않는다.
         [MemoryPackIgnore] public RabbitColor? FixedColor => kind == InitialBlockKind.FixedNormal ? fixedColor : null;
+
+        internal InitialBlockDefinition(BoardCoordinate coordinate, InitialBlockKind kind, RabbitColor color, RocketDirection direction)
+        { this.coordinate = coordinate; this.kind = kind; fixedColor = color; rocketDirection = direction; }
     }
 }

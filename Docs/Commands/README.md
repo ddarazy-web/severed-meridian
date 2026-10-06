@@ -67,3 +67,32 @@
 - [EF-22 — 금속기둥 상자 피해 원인 허용 정책 복사용 명령문](MoonRabbitJunkyard/ElementFramework/stage-22-command.md)
 
 - [EF-23 — 발전기 반응 원인 허용 조회 복사용 명령문](MoonRabbitJunkyard/ElementFramework/stage-23-command.md)
+
+- [EF-24 — 색 일치 조회 복사용 명령문](MoonRabbitJunkyard/ElementFramework/stage-24-command.md)
+
+- [EF-25 — 피해 집계 조회 복사용 명령문](MoonRabbitJunkyard/ElementFramework/stage-25-command.md)
+
+- [EF-26 — 예약 피해량 조회 복사용 명령문](MoonRabbitJunkyard/ElementFramework/stage-26-command.md)
+
+- [EF-27 — 실제 타격 기록 집계 연결 복사용 명령문](MoonRabbitJunkyard/ElementFramework/stage-27-command.md)
+
+- [EF-28 — 내구도형 제거 미션 정의 연결 실행문](MoonRabbitJunkyard/ElementFramework/stage-28-command.md)
+
+- [EF-29 — 최초 장애물 미션 수량 정의 연결 실행문](MoonRabbitJunkyard/ElementFramework/stage-29-command.md)
+
+- [EF-30 — 회수캡슐 일반 인접 정책 실행문](MoonRabbitJunkyard/ElementFramework/stage-30-command.md)
+
+- [EF-31 — 회수캡슐 자석 인접 정책 실행문](MoonRabbitJunkyard/ElementFramework/stage-31-command.md)
+
+- [EF-32 — 상자·고철·금속기둥 자석 정책 실행문](MoonRabbitJunkyard/ElementFramework/stage-32-command.md)
+
+
+- [EF-33 — 반응 행동 키·조회 등록표 실행문](MoonRabbitJunkyard/ElementFramework/stage-33-command.md)
+
+- [EF-34 — 반응 행동 등록과 실제 적용 위임 실행문](MoonRabbitJunkyard/ElementFramework/stage-34-command.md)
+
+- [큰 구간2 — 복사용 목표 실행문](MoonRabbitJunkyard/ElementFramework/phase-02-command.md)
+
+- [큰 구간3 — 전체 복사용 목표 실행문](MoonRabbitJunkyard/ElementFramework/phase-03-command.md)
+
+- [큰 구간4 — 전체 복사용 목표 실행문](MoonRabbitJunkyard/ElementFramework/phase-04-command.md)

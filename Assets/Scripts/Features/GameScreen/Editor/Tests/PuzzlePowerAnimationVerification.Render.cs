@@ -85,7 +85,7 @@ namespace GameScreen.Editor
                             "드론은 선행 공격 대기 중에도 프로펠러 본체 표시");
                     int droneFrame = 0;
                     bool checkedTransformBefore = false, checkedTransformAfter = false;
-                    bool checkedDroneOrbit = false, checkedDroneSeparation = false;
+                    bool checkedDroneRise = false, checkedDroneSeparation = false;
                     var flight = timeline.Attacks.FirstOrDefault(attack => attack.Record.IsFlight);
                     var hoveringClips = ((System.Collections.IEnumerable)playbackType.GetField("clips", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(playback))
                         .Cast<object>().Where(clip => (string)clip.GetType().GetField("Label", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) == "Drone-hover").ToArray();
@@ -95,41 +95,38 @@ namespace GameScreen.Editor
                     foreach (object clip in hoveringClips)
                     {
                         Type clipType = clip.GetType();
-                        float orbitRadius = (float)clipType.GetField("OrbitRadius", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
-                        if (fixture == 2 || fixture == 9)
-                        {
-                            Vector3 from = (Vector3)clipType.GetField("From", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
-                            Vector3 to = (Vector3)clipType.GetField("To", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
-                            Check((bool)clipType.GetField("LiftOnly", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) && Mathf.Abs(to.y - from.y - .65f) < .001f,
-                                "단독·3기 드론은 생성점에서 0.65칸 천천히 상승 " + fixture);
-                        }
-                        else Check(orbitRadius >= 1 && orbitRadius <= 4, "조합 드론 선회 반지름은 블록 1~4칸 " + fixture);
-                        Check((float)clipType.GetField("End", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) -
-                            (float)clipType.GetField("Start", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) >= (fixture == 2 || fixture == 9 ? .999f : 1.799f),
-                            "드론은 공중 이동 후 선회할 시간을 확보 " + fixture);
+                        DroneFlightMotion.Phase phase = (DroneFlightMotion.Phase)clipType.GetField("DronePhase", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
+                        Check(phase.Kind == DroneFlightPhaseKind.Rise || phase.Kind == DroneFlightPhaseKind.Hover,
+                            "모든 드론 조합은 선회 없이 상승·호버 " + fixture);
+                        if (phase.Kind == DroneFlightPhaseKind.Rise)
+                            Check(Mathf.Abs(phase.To.y - phase.From.y - .65f) < .001f && Mathf.Abs(phase.End - phase.Start - .5f) < .001f,
+                                "모든 드론은 생성점에서 0.65칸 천천히 상승 " + fixture);
+                        else Check(Vector3.Distance(phase.PositionAt(phase.Start), phase.PositionAt(phase.End)) < .001f,
+                            "호버 구간은 위치 유지 " + fixture);
                     }
+                    foreach (DroneFlightMotion motion in timeline.Flights)
+                        Check(motion.Phases.Where(phase => phase.Kind == DroneFlightPhaseKind.Hover).Sum(phase => phase.End - phase.Start) >= .349f,
+                            "드론 상승 후 기본 호버 확보 " + fixture);
                     var droneClips = ((System.Collections.IEnumerable)playbackType.GetField("clips", BindingFlags.Instance | BindingFlags.NonPublic)
                         .GetValue(playback)).Cast<object>().Where(clip => (string)clip.GetType().GetField("Label", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) == "Drone-flight").ToArray();
                     foreach (object clip in droneClips)
                     {
-                        Type clipType = clip.GetType();
-                        Vector3 departure = (Vector3)clipType.GetField("From", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
-                        Vector3 destination = (Vector3)clipType.GetField("To", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
-                        Vector3 control = (Vector3)clipType.GetField("Control1", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
-                        float duration = (float)clipType.GetField("End", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip) -
-                            (float)clipType.GetField("Start", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
-                        Check(Vector3.Cross(destination - departure, control - departure).magnitude > .01f, "드론 돌진 곡선 제어점 " + fixture);
-                        Check(Vector3.Distance(departure, destination) / duration > .12f * Mathf.PI * 2 / .7f, "드론 돌진 평균 속도는 선회보다 빠름 " + fixture);
+                        DroneFlightMotion.Phase phase = (DroneFlightMotion.Phase)clip.GetType().GetField("DronePhase", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip);
+                        float duration = phase.End - phase.Start;
+                        Vector3 midpoint = phase.PositionAt((phase.Start + phase.End) * .5f);
+                        Check(Vector3.Cross(phase.To - phase.From, midpoint - phase.From).magnitude > .01f, "드론 돌진 곡선 경로 " + fixture);
+                        Check(Vector3.Distance(phase.From, phase.PositionAt(phase.End)) / duration > .65f / .5f,
+                            "드론 돌진 평균 속도는 상승보다 빠름 " + fixture);
                     }
                     for (float time = 0; time < timeline.Duration + .02f; time += .02f)
                     {
                         playbackType.GetMethod("Tick", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(playback, new object[] { .02f });
-                        if (fixture == 2 && !checkedDroneOrbit && time + .02f >= .08f)
+                        if (fixture == 2 && !checkedDroneRise && time + .02f >= .08f)
                         {
                             Transform hover = board.GetComponentsInChildren<Transform>().First(item => item.name == "Drone-hover");
                             Check(Vector3.Distance(hover.localPosition, PuzzleWorldBoard.CellPosition(flight.Record.Origin)) > .01f,
                                 "드론은 발동 직후 천천히 떠오르기 시작");
-                            checkedDroneOrbit = true;
+                            checkedDroneRise = true;
                         }
                         if (fixture == 2 && time + .02f >= .60f && time + .02f <= .80f)
                         {
@@ -140,10 +137,10 @@ namespace GameScreen.Editor
                         if ((fixture == 9 || fixture == 12) && !checkedDroneSeparation && time + .02f >= (timeline.Combination?.IsTransformation == true ? 1.03f : .68f))
                         {
                             Transform[] hovering = board.GetComponentsInChildren<Transform>().Where(item => item.name == "Drone-hover").ToArray();
-                            Check(hovering.Length > 1, "다중 드론 선회 fixture " + fixture);
+                            Check(hovering.Length > 1, "다중 드론 호버 fixture " + fixture);
                             for (int a = 0; a < hovering.Length; a++)
                                 for (int b = a + 1; b < hovering.Length; b++)
-                                    Check(Vector3.Distance(hovering[a].localPosition, hovering[b].localPosition) >= .95f, "드론 선회 궤도 분리 " + fixture + ":" + a + ":" + b);
+                                    Check(Vector3.Distance(hovering[a].localPosition, hovering[b].localPosition) >= .95f, "드론 상승 대기 위치 분리 " + fixture + ":" + a + ":" + b);
                             checkedDroneSeparation = true;
                         }
                         if (timeline.Combination?.IsTransformation == true)
@@ -176,6 +173,7 @@ namespace GameScreen.Editor
                 await VerifyObstacleFramesAsync(board, playback, playbackType);
                 await VerifyLayerFramesAsync(board, playback, playbackType);
                 await VerifyCreationFramesAsync(board, playback, playbackType);
+                await VerifyRetargetFramesAsync(board, playback, playbackType);
                 UnityEngine.Object.Destroy(level);
                 level = (LevelDefinition)typeof(BoardActionVerification).GetMethod("RocketBoard", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
                 before = LevelStateBuilder.Build(level, 12345).State;
@@ -227,7 +225,10 @@ namespace GameScreen.Editor
                 sessionCamera.transform.SetParent(root.transform); sessionCamera.enabled = false;
                 PuzzleGameSession session = root.AddComponent<PuzzleGameSession>(); session.Configure(board, sessionCamera);
                 await session.InitializeAsync(UnityEngine.Object.Instantiate(sessionLevel), 12345, CancellationToken.None);
-                Check(session.IsReady && session.TryActivate(origin), "게임 세션 파워 발동");
+                Check(session.IsReady && session.IsStartingFeedback && !session.CanAcceptInput, "시작 연출 동안 입력 잠금 유지");
+                float startDeadline = Time.realtimeSinceStartup + 5;
+                while (session.IsStartingFeedback && Time.realtimeSinceStartup < startDeadline) await UniTask.Yield();
+                Check(!session.IsStartingFeedback && session.TryActivate(origin), "시작 연출 종료 후 게임 세션 파워 발동");
                 Check(session.IsPresenting && !session.CanAcceptInput && !session.CanUseItems, "효과 준비부터 입력·아이템 잠금");
                 session.SetPaused(true);
                 float deadline = Time.realtimeSinceStartup + 20;
@@ -246,6 +247,9 @@ namespace GameScreen.Editor
                     GameObject owner = new GameObject("Effect lifetime verification"); owner.transform.SetParent(root.transform);
                     PuzzleGameSession lifetimeSession = owner.AddComponent<PuzzleGameSession>(); lifetimeSession.Configure(board, sessionCamera);
                     await lifetimeSession.InitializeAsync(UnityEngine.Object.Instantiate(sessionLevel), 12345, CancellationToken.None);
+                    startDeadline = Time.realtimeSinceStartup + 5;
+                    while (lifetimeSession.IsStartingFeedback && Time.realtimeSinceStartup < startDeadline) await UniTask.Yield();
+                    Check(lifetimeSession.CanAcceptInput, "자원 검사도 시작 연출 종료 후 입력 가능 " + missingSprite);
                     PuzzleArtwork lifetimeArt = (PuzzleArtwork)typeof(PuzzleGameSession).GetField("artwork", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(lifetimeSession);
                     if (missingSprite)
                     {
@@ -283,6 +287,59 @@ namespace GameScreen.Editor
             }
         }
 
+        private static async UniTask VerifyRetargetFramesAsync(PuzzleWorldBoard board, object playback, Type playbackType)
+        {
+            LevelDefinition level = (LevelDefinition)typeof(CombinationVerification).GetMethod("Make", BindingFlags.NonPublic | BindingFlags.Static)
+                .Invoke(null, new object[] { 8, RocketDirection.Horizontal, null });
+            PuzzleArtwork artwork = null;
+            try
+            {
+                LevelRuntimeState before = LevelStateBuilder.Build(level, 10).State;
+                var fixtureRandom = new System.Random(10);
+                foreach (RuntimeCell cell in before.Cells.Where(cell => cell.Content == RuntimeContent.Normal))
+                {
+                    int choice = fixtureRandom.Next(12);
+                    if (choice > 1) continue;
+                    cell.GetType().GetProperty("Content").GetSetMethod(true).Invoke(cell, new object[] { choice == 0 ? RuntimeContent.Bomb : RuntimeContent.Rocket });
+                    cell.GetType().GetProperty("RocketDirection").GetSetMethod(true).Invoke(cell, new object[] { RocketDirection.Horizontal });
+                }
+                BoardActionExecutor executor = new BoardActionExecutor(before);
+                BoardActionResult action = executor.Swap(new BoardCoordinate(4, 4), new BoardCoordinate(4, 5));
+                Check(action.IsApplied, "실제 돌진 소실 그래픽 fixture 발동");
+                PuzzleEffectTimeline schedule = new PuzzleEffectTimeline(before, action.Changes, action.Effects, action.PowerTrace);
+                DroneFlightMotion motion = schedule.Flights.First(item => item.Record.LandingTarget.HasValue && item.Phases.Any(phase => phase.Interrupted));
+                DroneFlightMotion.Phase interrupted = motion.Phases.First(phase => phase.Interrupted);
+                DroneFlightMotion.Phase hover = motion.Phases[motion.Phases.IndexOf(interrupted) + 1];
+                DroneFlightMotion.Phase dash = motion.Phases.Last();
+                Check(motion.Record.Retargets.Any(change => Mathf.Abs(interrupted.End - schedule.Reactions[change.EffectIndex].Time) < .001f && Vector3.Distance(interrupted.To, PuzzleWorldBoard.CellPosition(change.LostTarget)) < .001f) && hover.End - hover.Start > .02f,
+                    "실제 표시 소실 시간과 정지 호버 구간 연결");
+                artwork = new PuzzleArtwork(); await artwork.PrepareAsync(before, CancellationToken.None);
+                await (UniTask)playbackType.GetMethod("PrepareAsync", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(playback,
+                    new object[] { before, executor.State, artwork, schedule, CancellationToken.None });
+                playbackType.GetMethod("Begin", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(playback, new object[] { board });
+                object[] clips = ((System.Collections.IEnumerable)playbackType.GetField("clips", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(playback)).Cast<object>().ToArray();
+                float elapsed = 0;
+                foreach (float time in new[] { interrupted.End - .01f, hover.Start + .01f, hover.End - .01f, (dash.Start + dash.End) * .5f })
+                {
+                    playbackType.GetMethod("Tick", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(playback, new object[] { time - elapsed });
+                    elapsed = time;
+                    DroneFlightMotion.Phase phase = motion.Phases.First(item => time < item.End);
+                    int clipIndex = Array.FindIndex(clips, clip => ReferenceEquals(clip.GetType().GetField("DronePhase", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(clip), phase));
+                    object effect = typeof(PuzzleWorldBoard).GetMethod("EffectAt", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(board, new object[] { clipIndex });
+                    Transform visible = (Transform)effect.GetType().GetField("root", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(effect);
+                    Check(visible.gameObject.activeSelf && Vector3.Distance(visible.localPosition, phase.PositionAt(time)) < .001f,
+                        "소실 전·정지·호버 끝·새 돌진 실제 렌더러 위치 " + time);
+                    if (phase.Kind == DroneFlightPhaseKind.Hover)
+                        Check(Vector3.Distance(visible.localPosition, interrupted.PositionAt(interrupted.End)) < .001f,
+                            "목표 소실 후 실제 본체가 진행 중 위치에서 호버");
+                    CapturePower(board, "retarget-motion-" + time.ToString("F3", System.Globalization.CultureInfo.InvariantCulture), false);
+                }
+                playbackType.GetMethod("Tick", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(playback, new object[] { schedule.Duration + .1f });
+                Check(!(bool)playbackType.GetProperty("IsPlaying", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(playback), "재탐색 비행 표시 유한 종료");
+                playbackType.GetMethod("Reset", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(playback, null);
+            }
+            finally { artwork?.Dispose(); UnityEngine.Object.Destroy(level); }
+        }
         private static void CapturePower(PuzzleWorldBoard board, string name, bool portrait)
         {
             int width = portrait ? 450 : 1280, height = portrait ? 800 : 720;

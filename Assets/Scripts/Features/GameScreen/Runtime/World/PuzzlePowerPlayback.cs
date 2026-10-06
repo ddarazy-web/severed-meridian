@@ -22,9 +22,7 @@ namespace GameScreen
             internal Vector3 Offset;
             internal Vector3[] FrameOffsets;
             internal bool Sheet;
-            internal bool LiftOnly;
-            internal Vector3 LaneOffset, Control1, Control2;
-            internal float OrbitRadius, OrbitPhase, OrbitPeriod, OrbitDirection;
+            internal DroneFlightMotion.Phase DronePhase;
         }
         private readonly List<Clip> clips = new List<Clip>();
         private readonly List<(SpriteRenderer image, Vector3 scale, Color color)> matching = new List<(SpriteRenderer, Vector3, Color)>();
@@ -138,34 +136,14 @@ namespace GameScreen
                 if (clip.MotionDelay > 0) frame = elapsed < clip.Start + clip.MotionDelay ? 0 : 1 + Mathf.Min(2, (int)(motion * 3));
                 Vector3 position = Vector3.Lerp(clip.From, clip.To, motion) + (clip.FrameOffsets == null ? clip.Offset : clip.FrameOffsets[frame]);
                 float angle = clip.Angle;
-                if (clip.Label == "Drone-hover")
+                if (clip.DronePhase != null)
                 {
-                    position = clip.LiftOnly ? Vector3.Lerp(clip.From, clip.To, Mathf.SmoothStep(0, 1, Mathf.Clamp01((elapsed - clip.Start) / .55f))) :
-                        DroneOrbitPosition(clip.From, clip.LaneOffset, elapsed - clip.Start, elapsed,
-                            clip.OrbitRadius, clip.OrbitPhase, clip.OrbitPeriod, clip.OrbitDirection);
-                    angle += 6 * Mathf.Sin(elapsed * Mathf.PI * 2 / .7f);
-                }
-                else if (clip.Label == "Drone-flight")
-                {
-                    // 선회에서 출발한 뒤 가속하며 표적에 돌진한다. 착탄 직전에는 감속하지 않는다.
-                    float u = t * t, remaining = 1 - u;
-                    position = remaining * remaining * remaining * clip.From + 3 * remaining * remaining * u * clip.Control1 +
-                        3 * remaining * u * u * clip.Control2 + u * u * u * clip.To;
-                    angle += 12 * Mathf.Sin(u * Mathf.PI * 2);
+                    position = clip.DronePhase.PositionAt(elapsed);
+                    angle += clip.DronePhase.Kind == DroneFlightPhaseKind.Dash ?
+                        12 * Mathf.Sin(t * t * Mathf.PI * 2) : 6 * Mathf.Sin(elapsed * Mathf.PI * 2 / .7f);
                 }
                 image.Paint(clip.Frames[clip.Sheet ? 0 : frame], position, clip.Size, angle, clip.Sheet, frame, clip.Label);
             }
-        }
-
-        // 대기 위치까지 휘어 이동한 뒤 개별 크기·방향·속도의 원을 돈다. 출발 위치 계산에도 같은 식을 사용한다.
-        internal static Vector3 DroneOrbitPosition(Vector3 origin, Vector3 laneOffset, float age, float time,
-            float radius, float phaseOffset, float period, float direction)
-        {
-            float phase = phaseOffset + time * Mathf.PI * 2 / period * direction;
-            float lift = Mathf.SmoothStep(0, 1, Mathf.Clamp01(age / .32f));
-            Vector3 sideways = new Vector3(-laneOffset.y, laneOffset.x, 0).normalized;
-            return origin + lift * (laneOffset + new Vector3(radius * Mathf.Sin(phase), radius * Mathf.Cos(phase), 0)) +
-                sideways * (.45f * Mathf.Sin(lift * Mathf.PI) * direction);
         }
 
         private static void Clear(RuntimeCell cell)

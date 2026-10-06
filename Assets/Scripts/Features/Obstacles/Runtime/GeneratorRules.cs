@@ -34,15 +34,21 @@ namespace Simulation
             .Where(c => c.GeneratorId == state.Obstacles[generator].Definition.Id).Select(c => Find(state, c.TargetId));
 
         internal static DamageReaction Query(LevelRuntimeState state, int index, TurnEffectContext context)
+            => QueryDefinition(state.Obstacles[index].Element, state, index, context);
+
+        internal static DamageReaction QueryDefinition(Elements.ElementDefinition definition, LevelRuntimeState state, int index, TurnEffectContext context)
             => context?.HasCharged(index) == true ? new DamageReaction(DamageResponse.AlreadyDamaged, "발전기 본체별 수당 최대 1 충전") :
-                new DamageReaction(DamageResponse.Charge, "발전기 충전", 1);
+                new DamageReaction(DamageResponse.Charge, "발전기 충전", definition.RequireChargePlacement().ChargePerHit);
 
         internal static void Apply(LevelRuntimeState state, int index, TurnEffectContext context)
+            => ApplyDefinition(state.Obstacles[index].Element, state, index, context);
+
+        internal static void ApplyDefinition(Elements.ElementDefinition definition, LevelRuntimeState state, int index, TurnEffectContext context)
         {
             RuntimeObstacle generator = state.Obstacles[index];
             int before = generator.Charge;
             context.RegisterCharge(index);
-            generator.Charge++;
+            generator.Charge += definition.RequireChargePlacement().ChargePerHit;
             context.RecordGenerator(new GeneratorRecord(GeneratorEvent.Charged, index, null, before, generator.Charge));
             if (generator.Charge < generator.Definition.RequiredCharge) return;
             int[] targets = Targets(state, index).ToArray();

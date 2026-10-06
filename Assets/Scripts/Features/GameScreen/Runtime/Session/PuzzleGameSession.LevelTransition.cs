@@ -55,7 +55,7 @@ namespace GameScreen
                     definition = await LevelPackLoader.LoadAsync(nextNumber);
                     linked.Token.ThrowIfCancellationRequested();
                     if (!isActiveAndEnabled) throw new OperationCanceledException();
-                    candidateBytes = LevelPackCodec.Encode(new[] { definition });
+                    candidateBytes = LevelPackCodec.Snapshot(definition);
                     StartingBoardSearch search = new StartingBoardSearch(definition, seed);
                     while (!search.IsDone)
                     {

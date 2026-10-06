@@ -24,7 +24,7 @@ namespace Levels.Editor
             if (analysis == null) { identity.text = ""; return; }
             LevelDefinition current = currentLevel();
             BotBatchRecord record = analysis.Record;
-            string relation = current == null ? "현재 편집 레벨 없음" : LevelStateBuilder.Fingerprint(current) == record.fingerprint ?
+            string relation = current == null ? "현재 편집 레벨 없음" : LevelEditorInputIdentity.Matches(current, record.fingerprint) ?
                 "현재 편집 내용과 같은 정의" : "현재 편집 내용과 다른 과거 사본";
             string source = string.IsNullOrEmpty(record.sourceGuid) ? "원본 연결 정보 없음 · 이름/번호만으로 이력을 합치지 않습니다." :
                 AssetDatabase.GUIDToAssetPath(record.sourceGuid);

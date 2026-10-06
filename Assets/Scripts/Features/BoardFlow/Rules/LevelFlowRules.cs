@@ -84,8 +84,13 @@ namespace Levels
         public static string WallError(LevelDefinition level, BoardEdge wall)
         {
             if (!wall.IsAdjacent || !Active(level, wall.A) || !Active(level, wall.B)) return "벽은 활성 인접 칸 사이에 설치하세요.";
-            if (level.Obstacles != null && level.Obstacles.Any(item => InternalWall(wall, item.Coordinate, LevelPlacementRules.Size(item.Kind))))
-                return "2×2 본체 내부에는 벽을 놓을 수 없습니다.";
+            try
+            {
+                if (LevelConnectionRules.BodyIndices(level).Any(index => InternalWall(wall, LevelConnectionRules.Body(level, index).Coordinate, LevelConnectionRules.Body(level, index).Size)))
+                    return "2×2 본체 내부에는 벽을 놓을 수 없습니다.";
+            }
+            catch (Exception error) when (error is ArgumentException || error is InvalidOperationException || error is KeyNotFoundException)
+            { return "벽 점유 검사에 필요한 본체 정의 오류: " + error.Message; }
             if (level.Flow?.Paths != null && level.Flow.Paths.Any(item => !item.IsEnd && wall.Equals(new BoardEdge(item.Coordinate, item.Next))))
                 return "직접 경로가 지나는 경계입니다.";
             BoardEdge segment = WallSegment(wall);

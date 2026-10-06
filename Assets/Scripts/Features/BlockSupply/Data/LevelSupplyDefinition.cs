@@ -33,6 +33,8 @@ namespace Levels
     [Serializable, MemoryPackable(SerializeLayout.Explicit)]
     public partial struct SupplySourceDefinition
     {
+        internal SupplySourceDefinition(BoardCoordinate coordinate, SupplyMode mode, SupplyExhaustion exhaustion, List<SupplyItem> items)
+        { this.coordinate = coordinate; this.mode = mode; this.exhaustion = exhaustion; this.items = items; }
         [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private BoardCoordinate coordinate;
         [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private SupplyMode mode;
         [SerializeField, MemoryPackInclude, MemoryPackOrder(2)] private SupplyExhaustion exhaustion;
@@ -47,6 +49,12 @@ namespace Levels
     [Serializable, MemoryPackable(SerializeLayout.Explicit)]
     public sealed partial class LevelSupplyDefinition
     {
+        [MemoryPackConstructor] public LevelSupplyDefinition() { }
+        internal LevelSupplyDefinition(List<SupplySourceDefinition> sources, int scrapTarget, int scrapLimit, int scrapDurability, int recoveryTarget)
+        {
+            this.sources = sources; this.scrapTarget = scrapTarget; this.scrapLimit = scrapLimit;
+            this.scrapDurability = scrapDurability; this.recoveryTarget = recoveryTarget;
+        }
         [SerializeField, MemoryPackInclude, MemoryPackOrder(0)] private List<SupplySourceDefinition> sources = new List<SupplySourceDefinition>();
         [SerializeField, MemoryPackInclude, MemoryPackOrder(1)] private int scrapTarget;
         [SerializeField, MemoryPackInclude, MemoryPackOrder(2)] private int scrapLimit;

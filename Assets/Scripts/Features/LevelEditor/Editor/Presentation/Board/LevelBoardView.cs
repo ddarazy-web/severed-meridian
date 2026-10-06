@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace Levels.Editor
 {
-    public sealed class LevelBoardView : VisualElement
+    public sealed partial class LevelBoardView : VisualElement
     {
         public const int CellSize = 44;
         private readonly Label[] cells = new Label[BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns];
@@ -269,6 +269,8 @@ namespace Levels.Editor
 
         private void Redraw()
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
+            { RedrawElements(); return; }
             int selectedObstacle = Layer == PlacementLayer.Obstacle && selected.HasValue
                 ? LevelPlacementRules.Find(level, PlacementLayer.Obstacle, selected.Value) : -1;
             HashSet<BoardCoordinate> selectedArea = selectedObstacle >= 0

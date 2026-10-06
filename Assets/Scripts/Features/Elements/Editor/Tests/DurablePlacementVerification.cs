@@ -49,7 +49,7 @@ namespace Elements.Editor
                 if (before) File.WriteAllLines(Evidence + "/baseline-values.jsonl", Values);
                 else
                 {
-                    Check(File.ReadAllLines(Evidence + "/baseline-values.jsonl").SequenceEqual(Values), "배치/오류/피해/미션/난수/바이트 전후 기록 동일");
+                    Check(RecordedLogicComparison.Equal(File.ReadAllLines(Evidence + "/baseline-values.jsonl"), Values), "기존 논리/입력/팩 비교 · 추가 비행 표시 이력 별도");
                     foreach (ObstacleKind kind in Kinds)
                     {
                         ElementDefinition definition = LegacyElementDefinitions.Get(kind);
@@ -224,7 +224,7 @@ namespace Elements.Editor
                 string original = JsonUtility.ToJson(connected); byte[] packed = LevelPackCodec.Encode(new[] { connected });
                 LevelStateBuildResult built = LevelStateBuilder.Build(connected, 12345);
                 Check(built.IsBuilt && GeneratorRules.ActiveConnections(built.State).Count == 1 && connected.Obstacles.Select(body => body.Id).Distinct().Count() == 2, "발전기 본체 ID/활성 연결 유지");
-                Check(LevelPackCodec.FormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50 && packed.SequenceEqual(LevelPackCodec.Encode(new[] { connected })), "연결 팩 바이트/버전1/50구간 유지");
+                Check(LevelPackCodec.LegacyFormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50 && packed.SequenceEqual(LevelPackCodec.Encode(new[] { connected })), "연결 팩 바이트/버전1/50구간 유지");
                 Record("connected", original, Snapshot(built.State) + ";pack=" + Convert.ToBase64String(packed));
             }
             finally { UnityEngine.Object.DestroyImmediate(connected); }

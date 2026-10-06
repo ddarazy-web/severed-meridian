@@ -21,5 +21,8 @@ namespace Levels
         [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
         [MemoryPackIgnore] public CoverKind Kind => kind;
         [MemoryPackIgnore] public int Durability => durability;
+
+        internal CoverPlacementDefinition(BoardCoordinate coordinate, CoverKind kind, int durability)
+        { this.coordinate = coordinate; this.kind = kind; this.durability = durability; }
     }
 }

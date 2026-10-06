@@ -30,7 +30,7 @@ namespace Levels.Editor
             Record = new MultiLevelTestRecord { id = Guid.NewGuid().ToString("N"), startedUtc = DateTime.UtcNow.ToString("O"), mode = mode, samples = samples };
             foreach (LevelDefinition level in levels.Where(l => l != null).Distinct())
                 Record.entries.Add(new MultiLevelTestEntry { name = level.name, assetGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(level)),
-                    definitionJson = JsonUtility.ToJson(level), status = MultiLevelTestStatus.Waiting, message = "대기" });
+                    definitionJson = LevelPackCodec.CaptureJson(level), status = MultiLevelTestStatus.Waiting, message = "대기" });
             if (Record.entries.Count == 0) throw new ArgumentException("시험할 레벨을 선택하세요.");
             store.Save(Record);
         }

@@ -24,7 +24,7 @@ namespace Levels.Editor
             message = Check(level);
             if (message != null) return false;
             using SerializedObject data = new SerializedObject(level);
-            data.FindProperty("schemaVersion").intValue = LevelDefinition.CurrentSchemaVersion;
+            data.FindProperty("schemaVersion").intValue = LevelDefinition.LegacySchemaVersion;
             if (level.SchemaVersion == 1)
             {
                 data.FindProperty("obstacles").arraySize = 0;

@@ -39,12 +39,11 @@ namespace AutoPlay
             List<LevelValidationIssue> issues = LevelDefinitionValidator.Validate(source);
             if (issues.Count != 0) throw new ArgumentException(string.Join("\n", issues.Select(i => i.ToString())), nameof(source));
             this.checkpoint = checkpoint ?? throw new ArgumentNullException(nameof(checkpoint));
-            definition = ScriptableObject.CreateInstance<LevelDefinition>();
+            definition = LevelPackCodec.Copy(source);
             definition.hideFlags = HideFlags.HideAndDontSave;
             try
             {
-                string json = JsonUtility.ToJson(source);
-                JsonUtility.FromJsonOverwrite(json, definition);
+                string json = JsonUtility.ToJson(definition);
                 Record = new BotBatchRecord {
                     id = Guid.NewGuid().ToString("N"), definitionJson = json, fingerprint = LevelStateBuilder.Fingerprint(definition),
                     startedUtc = DateTime.UtcNow.ToString("O"), seeds = (int[])seeds.Clone(), status = BotBatchStatus.Running,

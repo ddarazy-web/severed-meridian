@@ -117,11 +117,11 @@ namespace Levels.Editor
                 int index = i;
                 LevelConnectionDefinition connection = level.Connections[i];
                 int generator = LevelConnectionRules.Find(level, connection.GeneratorId), target = LevelConnectionRules.Find(level, connection.TargetId);
-                string from = generator >= 0 ? level.Obstacles[generator].Coordinate.ToString() : "ID 오류";
-                string to = target >= 0 ? level.Obstacles[target].Coordinate.ToString() : "ID 오류";
+                string from = generator >= 0 ? LevelConnectionRules.Body(level, generator).Coordinate.ToString() : "ID 오류";
+                string to = target >= 0 ? LevelConnectionRules.Body(level, target).Coordinate.ToString() : "ID 오류";
                 string invalid = LevelConnectionRules.TargetError(level, connection.GeneratorId, connection.TargetId, i) ??
                     LevelConnectionRules.WireError(level, connection.GeneratorId, connection.TargetId, connection.Vertices, i);
-                list.Add(FlowLink($"◆{i + 1} {from} → {to}" + (invalid == null ? "" : " !"), generator >= 0 ? level.Obstacles[generator].Coordinate : null,
+                list.Add(FlowLink($"◆{i + 1} {from} → {to}" + (invalid == null ? "" : " !"), generator >= 0 ? LevelConnectionRules.Body(level, generator).Coordinate : null,
                     () => flowOverlay.HighlightConnection = index, "flow-connection-" + i));
             }
         }
@@ -207,11 +207,11 @@ namespace Levels.Editor
                 ActionButton("통로 쌍 삭제", "remove-portal", () => LevelFlowEditing.RemovePortal(level, portal.Entrance));
             }
             if (level.Flow.Arrivals.Contains(cell)) ActionButton("도착 바닥 삭제", "remove-arrival", () => LevelFlowEditing.SetArrival(level, cell, true));
-            int body = LevelPlacementRules.Find(level, PlacementLayer.Obstacle, cell);
+            int body = LevelConnectionRules.FindAt(level, cell);
             if (body >= 0)
             {
-                ObstaclePlacementDefinition obstacle = level.Obstacles[body];
-                if (obstacle.Kind == ObstacleKind.Generator)
+                LevelConnectionBody obstacle = LevelConnectionRules.Body(level, body);
+                if (obstacle.IsGenerator)
                     ActionButton("연결 대상 추가", "add-generator-target", () => { SetFlowTool(FlowTool.Connect); flowOverlay.GeneratorId = obstacle.Id; return "연결할 장애물을 클릭하세요."; });
                 for (int i = 0; i < level.Connections.Count; i++)
                 {

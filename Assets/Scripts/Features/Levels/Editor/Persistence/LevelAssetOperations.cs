@@ -26,13 +26,17 @@ namespace Levels.Editor
                 AssetDatabase.CreateFolder("Assets/Data", "Levels");
 
             string path = DefaultFolder + "/" + fileName.Trim() + ".asset";
-            LevelDefinition level = CreateAtPath(path);
+            LevelDefinition level = CreateElementAtPath(path);
             Selection.activeObject = level;
             EditorGUIUtility.PingObject(level);
             return level;
         }
 
-        public static LevelDefinition CreateAtPath(string path)
+        // 구형 제작·고정 회귀 입력의 생성 계약은 별도로 유지한다.
+        public static LevelDefinition CreateAtPath(string path) => CreateAtPath(path, false);
+        public static LevelDefinition CreateElementAtPath(string path) => CreateAtPath(path, true);
+
+        private static LevelDefinition CreateAtPath(string path, bool elements)
         {
             // 명시적으로 지정한 경로의 기존 에셋을 덮어쓰지 않는다.
             if (string.IsNullOrWhiteSpace(path) || !path.StartsWith("Assets/", StringComparison.Ordinal) ||
@@ -46,6 +50,11 @@ namespace Levels.Editor
             try
             {
                 LevelSupplyEditing.AddTopSources(level);
+                if (elements)
+                {
+                    ElementLevelSupplyDefinition supply = ElementLevelSupplyDefinition.FromLegacy(level.Supply);
+                    JsonUtility.FromJsonOverwrite("{\"schemaVersion\":5,\"supply\":{\"sources\":[]},\"elementSupply\":" + JsonUtility.ToJson(supply) + "}", level);
+                }
                 AssetDatabase.CreateAsset(level, path);
                 AssetDatabase.SaveAssetIfDirty(level);
                 return level;

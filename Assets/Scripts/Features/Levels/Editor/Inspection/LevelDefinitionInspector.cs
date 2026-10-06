@@ -26,23 +26,28 @@ namespace Levels.Editor
             fields.Add(new PropertyField(serializedObject.FindProperty("moveCount"), "이동 횟수"));
             fields.Add(new PropertyField(serializedObject.FindProperty("colors"), "사용할 달토끼 종류"));
             fields.Add(new PropertyField(serializedObject.FindProperty("board"), "보드"));
-            fields.Add(new PropertyField(serializedObject.FindProperty("initialBlocks"), "초기 일반/파워 블록 배치"));
-            fields.Add(new PropertyField(serializedObject.FindProperty("obstacles"), "장애물/장치"));
-            fields.Add(new PropertyField(serializedObject.FindProperty("covers"), "덮개"));
-            fields.Add(new PropertyField(serializedObject.FindProperty("dust"), "먼지"));
+            VisualElement legacy = new VisualElement(), elements = new VisualElement(); fields.Add(legacy); fields.Add(elements);
+            legacy.Add(new PropertyField(serializedObject.FindProperty("initialBlocks"), "초기 일반/파워 블록 배치"));
+            legacy.Add(new PropertyField(serializedObject.FindProperty("obstacles"), "장애물/장치"));
+            legacy.Add(new PropertyField(serializedObject.FindProperty("covers"), "덮개"));
+            legacy.Add(new PropertyField(serializedObject.FindProperty("dust"), "먼지"));
+            elements.Add(new PropertyField(serializedObject.FindProperty("elementCatalog"), "요소 카탈로그"));
+            elements.Add(new PropertyField(serializedObject.FindProperty("elements"), "정의 ID 배치"));
+            elements.Add(new PropertyField(serializedObject.FindProperty("elementSupply"), "정의 ID 공급"));
             fields.Add(new PropertyField(serializedObject.FindProperty("flow"), "바닥 흐름·벽·통로"));
             fields.Add(new PropertyField(serializedObject.FindProperty("connections"), "발전기 연결·전선"));
-            fields.Add(new PropertyField(serializedObject.FindProperty("supply"), "생성구·공급 설정"));
-            fields.Add(new PropertyField(serializedObject.FindProperty("recoveryParts"), "회수 부품"));
+            legacy.Add(new PropertyField(serializedObject.FindProperty("supply"), "생성구·공급 설정"));
+            legacy.Add(new PropertyField(serializedObject.FindProperty("recoveryParts"), "회수 부품"));
+            ShowVersionFields();
             fields.Add(new PropertyField(serializedObject.FindProperty("missions"), "미션"));
-            fields.SetEnabled(((LevelDefinition)target).SchemaVersion == LevelDefinition.CurrentSchemaVersion);
+            fields.SetEnabled((((LevelDefinition)target).SchemaVersion == LevelDefinition.LegacySchemaVersion || ((LevelDefinition)target).SchemaVersion == LevelDefinition.CurrentSchemaVersion));
             Label upgradeStatus = new Label();
             Button upgrade = new Button(() =>
             {
                 LevelSchemaUpgrade.Upgrade((LevelDefinition)target, out string message);
                 upgradeStatus.text = message;
             }) { text = "5단계 형식으로 전환", name = "upgrade-level" };
-            upgrade.style.display = ((LevelDefinition)target).SchemaVersion >= 1 && ((LevelDefinition)target).SchemaVersion < LevelDefinition.CurrentSchemaVersion ? DisplayStyle.Flex : DisplayStyle.None;
+            upgrade.style.display = ((LevelDefinition)target).SchemaVersion >= 1 && ((LevelDefinition)target).SchemaVersion < LevelDefinition.LegacySchemaVersion ? DisplayStyle.Flex : DisplayStyle.None;
             root.Add(upgrade);
             root.Add(upgradeStatus);
 
@@ -67,12 +72,20 @@ namespace Levels.Editor
             root.Add(results);
             root.TrackSerializedObjectValue(serializedObject, _ =>
             {
-                fields.SetEnabled(((LevelDefinition)target).SchemaVersion == LevelDefinition.CurrentSchemaVersion);
-                upgrade.style.display = ((LevelDefinition)target).SchemaVersion >= 1 && ((LevelDefinition)target).SchemaVersion < LevelDefinition.CurrentSchemaVersion ? DisplayStyle.Flex : DisplayStyle.None;
+                ShowVersionFields();
+                fields.SetEnabled((((LevelDefinition)target).SchemaVersion == LevelDefinition.LegacySchemaVersion || ((LevelDefinition)target).SchemaVersion == LevelDefinition.CurrentSchemaVersion));
+                upgrade.style.display = ((LevelDefinition)target).SchemaVersion >= 1 && ((LevelDefinition)target).SchemaVersion < LevelDefinition.LegacySchemaVersion ? DisplayStyle.Flex : DisplayStyle.None;
                 results.Clear();
                 status.text = "데이터가 변경되었습니다. 다시 검사하세요.";
             });
             return root;
+
+            void ShowVersionFields()
+            {
+                bool current = ((LevelDefinition)target).SchemaVersion == LevelDefinition.CurrentSchemaVersion;
+                legacy.style.display = current ? DisplayStyle.None : DisplayStyle.Flex;
+                elements.style.display = current ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
     }
 }

@@ -16,6 +16,8 @@ namespace Levels.Editor
         private const string Evidence = "Logs/TargetPowerVerification";
         private static readonly List<string> Results = new List<string>();
         private static readonly List<LevelDefinition> Definitions = new List<LevelDefinition>();
+        // 고정 입력 재실행 검사에서만 설정한다. 기존 단독 검사는 null을 유지한다.
+        internal static Action<LevelDefinition> PrepareFixture;
         private static BoardCoordinate C(int row, int column) => new BoardCoordinate(row, column);
         private static object Invoke(Type type, string name, object owner, params object[] args)
             => type.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Invoke(owner, args);
@@ -43,6 +45,7 @@ namespace Levels.Editor
         }
         private static LevelRuntimeState Build(LevelDefinition level, int seed = 12345)
         {
+            PrepareFixture?.Invoke(level);
             if (level.Missions.Count == 0) Mission(level, MissionKind.Color, 100);
             LevelStateBuildResult result = LevelStateBuilder.Build(level, seed);
             if (!result.IsBuilt) throw new InvalidOperationException(string.Join("|", result.Issues));

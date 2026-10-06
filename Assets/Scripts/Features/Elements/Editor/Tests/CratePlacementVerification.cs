@@ -56,7 +56,7 @@ namespace Elements.Editor
                 if (before) File.WriteAllLines(Evidence + "/baseline-values.jsonl", Values);
                 else
                 {
-                    Check(File.ReadAllLines(Evidence + "/baseline-values.jsonl").SequenceEqual(Values), "실제 전환 전후 배치/실행/바이트 기록 전체 동일");
+                    Check(RecordedLogicComparison.Equal(File.ReadAllLines(Evidence + "/baseline-values.jsonl"), Values), "기존 논리/입력/팩 비교 · 추가 비행 표시 이력 별도");
                     ProfileChecks();
                 }
             }
@@ -133,7 +133,7 @@ namespace Elements.Editor
                     object effects = Invoke(typeof(FixedObstacleVerification), "Hit", built.State, target, context);
                     Check(built.State.Obstacles[0].Durability == durability - 1 && built.State.Missions[0].Progress == (durability == 1 ? 1 : 0), "실제 피해1/제거 미션 " + durability);
                     Check(built.State.Random.DrawCount == randomBefore && JsonUtility.ToJson(UnityEngine.Random.state) == global, "규칙/전역 난수 무소비 " + durability);
-                    Check(original == JsonUtility.ToJson(level) && packed.SequenceEqual(LevelPackCodec.Encode(new[] { level })) && LevelPackCodec.FormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50, "입력/배치 ID/저장 바이트/버전 유지 " + durability);
+                    Check(original == JsonUtility.ToJson(level) && packed.SequenceEqual(LevelPackCodec.Encode(new[] { level })) && LevelPackCodec.LegacyFormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50, "입력/배치 ID/저장 바이트/버전 유지 " + durability);
                     Record("runtime", original, "before=" + runtimeBefore + ";after=" + Snapshot(built.State) + ";effects=" + Snapshot(effects) + ";pack=" + Convert.ToBase64String(packed));
                 }
                 finally { UnityEngine.Object.DestroyImmediate(level); }
@@ -146,7 +146,7 @@ namespace Elements.Editor
             Check(profileType.IsSealed && profileType.GetProperties().All(property => property.SetMethod == null) && profileType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).All(field => field.IsInitOnly && field.FieldType == typeof(int)), "프로필 양수 수치 불변 값");
             Type boundaryType = typeof(ElementId).Assembly.GetType("Elements.LegacyElementDefinitions");
             Check(boundaryType != null, "상자 정의 호환 경계 존재");
-            MethodInfo lookup = boundaryType.GetMethod("Get");
+            MethodInfo lookup = boundaryType.GetMethod("Get", new[] { typeof(ObstacleKind) });
             ElementDefinition first = (ElementDefinition)lookup.Invoke(null, new object[] { ObstacleKind.Crate });
             Check(ReferenceEquals(first, lookup.Invoke(null, new object[] { ObstacleKind.Crate })) && first.Id == LegacyElementMap.Get(ObstacleKind.Crate), "한 번 준비한 동일 상자 정의 조회");
             MethodInfo require = typeof(ElementDefinition).GetMethod("RequirePlacement");

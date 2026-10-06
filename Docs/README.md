@@ -82,3 +82,33 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 - [EF-21 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-21-progress.md), 9421 PASS/0 FAIL·전후 동일2782건. 다음 [EF-22 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-22-appliance-damage-policy-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-22-appliance-damage-policy-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-22-command.md). 색 자물쇠 허용 원인 조회 완료, 금속기둥1종 연결 준비.
 
 - [EF-22 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-22-progress.md), 14506 PASS/0 FAIL·전후 동일3040건. 다음 [EF-23 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-23-generator-reaction-policy-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-23-generator-reaction-policy-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-23-command.md). 금속기둥 허용 조회 완료, 발전기1종 연결 준비.
+
+- [EF-23 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-23-progress.md), 38995 PASS/0 FAIL·전후 동일8745건. 다음 [EF-24 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-24-color-match-policy-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-24-color-match-policy-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-24-command.md). 기존6종 원인 허용 연결 완료, 색 조건 한 비교 연결 준비.
+
+- [EF-24 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-24-progress.md), 59856 PASS/0 FAIL·전후 동일8447건. 다음 [EF-25 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-25-damage-aggregation-query-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-25-damage-aggregation-query-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-25-command.md). 색 일치 조회 연결 완료, 본체별/칸별 집계 조회 연결 준비.
+
+- [EF-25 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-25-progress.md) · [EF-26 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-26-reserved-damage-query-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-26-reserved-damage-query-goal.md) · [명령문](Commands/MoonRabbitJunkyard/ElementFramework/stage-26-command.md)
+
+- [EF-26 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-26-progress.md) · [EF-27 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-27-damage-record-policy-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-27-damage-record-policy-goal.md) · [명령문](Commands/MoonRabbitJunkyard/ElementFramework/stage-27-command.md)
+
+- [EF-27 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-27-progress.md),185192 PASS/0 FAIL · [EF-28 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-28-removal-mission-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-28-removal-mission-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-28-command.md)
+
+- [EF-28 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-28-progress.md),228623 PASS/0 FAIL · [EF-29 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-29-initial-mission-supply-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-29-initial-mission-supply-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-29-command.md)
+
+- [EF-29 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-29-progress.md),275824 PASS/0 FAIL · [EF-30 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-30-capsule-adjacent-policy-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-30-capsule-adjacent-policy-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-30-command.md)
+
+- [EF-30 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-30-progress.md),324210 PASS/0 FAIL · [EF-31 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-31-capsule-magnet-policy-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-31-capsule-magnet-policy-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-31-command.md)
+
+- [EF-31 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-31-progress.md),373376 PASS/0 FAIL · [EF-32 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-32-durable-magnet-policy-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-32-durable-magnet-policy-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-32-command.md)
+
+
+- [EF-32 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-32-progress.md),427683 PASS/0 FAIL · [EF-33 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-33-reaction-behavior-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-33-reaction-behavior-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-33-command.md)
+
+- [EF-33 검증 완료](Verification/MoonRabbitJunkyard/ElementFramework/stage-33-progress.md),480736 PASS/0 FAIL · [EF-34 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-34-reaction-apply-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-34-reaction-apply-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-34-command.md)
+
+## 요소 확장 리팩토링 최신 구간
+
+- [큰 구간2 완료 기록](Verification/MoonRabbitJunkyard/ElementFramework/phase-02-progress.md): 드론 정책·상승/호버/돌진·실제 반복 재선택, 최종41종688965 PASS/0 FAIL.
+- [큰 구간3 완료 기록](Verification/MoonRabbitJunkyard/ElementFramework/phase-03-progress.md): 정의 ID 저장·제작/편집 도구·스키마5/팩2, 최종54종690245 PASS/0 FAIL.
+- 다음 큰 구간4: [계획](Planning/MoonRabbitJunkyard/ElementFramework/phase-04-presentation-resources-plan.md) · [목표/완료 조건](Goals/MoonRabbitJunkyard/ElementFramework/phase-04-presentation-resources-goal.md) · [전체 복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/phase-04-command.md). 구현 미착수.
+- [5개 큰 구간 통합 가이드](Planning/MoonRabbitJunkyard/ElementFramework/integration-guideline.md).

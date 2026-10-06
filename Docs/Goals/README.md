@@ -103,3 +103,32 @@
 - [EF-22 — 금속기둥 상자 피해 원인 허용 정책 목표](MoonRabbitJunkyard/ElementFramework/stage-22-appliance-damage-policy-goal.md)
 
 - [EF-23 — 발전기 반응 원인 허용 조회 목표](MoonRabbitJunkyard/ElementFramework/stage-23-generator-reaction-policy-goal.md)
+
+- [EF-24 — 색 자물쇠 색 일치 조회 정책 목표](MoonRabbitJunkyard/ElementFramework/stage-24-color-match-policy-goal.md)
+
+- [EF-25 — 내구도형 피해 집계 조회 정책 목표](MoonRabbitJunkyard/ElementFramework/stage-25-damage-aggregation-query-goal.md)
+
+- [EF-26 — 예약 피해량 조회 연결 목표](MoonRabbitJunkyard/ElementFramework/stage-26-reserved-damage-query-goal.md)
+
+- [EF-27 — 실제 타격 기록 집계 연결 목표](MoonRabbitJunkyard/ElementFramework/stage-27-damage-record-policy-goal.md)
+
+- [EF-28 — 내구도형 제거 미션 정의 연결 목표](MoonRabbitJunkyard/ElementFramework/stage-28-removal-mission-goal.md)
+
+- [EF-29 — 최초 장애물 미션 수량 정의 연결 목표](MoonRabbitJunkyard/ElementFramework/stage-29-initial-mission-supply-goal.md)
+
+- [EF-30 — 회수캡슐 일반 인접 정책 목표](MoonRabbitJunkyard/ElementFramework/stage-30-capsule-adjacent-policy-goal.md)
+
+- [EF-31 — 회수캡슐 자석 인접 정책 목표](MoonRabbitJunkyard/ElementFramework/stage-31-capsule-magnet-policy-goal.md)
+
+- [EF-32 — 상자·고철·금속기둥 자석 정책 목표](MoonRabbitJunkyard/ElementFramework/stage-32-durable-magnet-policy-goal.md)
+
+
+- [EF-33 — 반응 행동 키·조회 등록표 목표](MoonRabbitJunkyard/ElementFramework/stage-33-reaction-behavior-goal.md)
+
+- [EF-34 — 반응 행동 등록과 실제 적용 위임 목표](MoonRabbitJunkyard/ElementFramework/stage-34-reaction-apply-goal.md)
+
+- [큰 구간2 — 드론 목표·완료 조건](MoonRabbitJunkyard/ElementFramework/phase-02-drone-target-flight-goal.md)
+
+- [큰 구간3 — 정의 ID 저장·제작 도구 목표](MoonRabbitJunkyard/ElementFramework/phase-03-storage-authoring-goal.md)
+
+- [큰 구간4 — 표현·자원·풀·HUD·공개 관찰 목표](MoonRabbitJunkyard/ElementFramework/phase-04-presentation-resources-goal.md)

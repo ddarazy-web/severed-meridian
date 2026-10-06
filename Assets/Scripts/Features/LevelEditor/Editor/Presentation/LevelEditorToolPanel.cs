@@ -63,6 +63,8 @@ namespace Levels.Editor
             actions.Add(erase);
             tools.Add(actions);
 
+            BuildElementCatalogTools(editable);
+
             AddToolMenu("보드", "menu-board", new List<ToolOption>
             {
                 new ToolOption("칸 활성화", LevelBrush.Activate, board.Layer),
@@ -182,6 +184,20 @@ namespace Levels.Editor
             title.style.marginTop = 5;
             used.Add(title);
             tools.Add(used);
+            if (level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
+            {
+                used.Add(new Label($"{level.Elements.Count}개 ID 배치 · 블록/장애물/덮개/먼지") { name = "used-count" });
+                foreach (IGrouping<(PlacementLayer Layer, string Id), ElementPlacementDefinition> group in level.Elements
+                    .GroupBy(item => (Layer: item.layer, Id: item.definitionId)).OrderBy(group => group.Key.Layer).ThenBy(group => group.Key.Id))
+                {
+                    string display;
+                    try { display = level.CreateElementCatalog().Get(new Elements.ElementId(group.Key.Id)).DisplayName; }
+                    catch (Exception error) { display = group.Key.Id + " / " + error.Message; }
+                    AddUsedGroup(used, group.Key.Layer, 0, display, group.Select(item => (item.coordinate,
+                        "내구 " + item.durability + " · 충전 " + item.requiredCharge)), group.Key.Id);
+                }
+                return;
+            }
             int total = (level.Obstacles?.Count ?? 0) + (level.Covers?.Count ?? 0) + (level.Dust?.Count ?? 0);
             used.Add(new Label(total == 0 ? "아직 배치된 장애물이 없습니다." : $"{total}개 배치 · 덮개/먼지/장치 포함") { name = "used-count" });
             if (level.Obstacles != null)
@@ -197,10 +213,10 @@ namespace Levels.Editor
         }
 
         private void AddUsedGroup(VisualElement parent, PlacementLayer layer, int kind, string title,
-            IEnumerable<(BoardCoordinate Coordinate, string Value)> placements)
+            IEnumerable<(BoardCoordinate Coordinate, string Value)> placements, string definitionId = null)
         {
             List<(BoardCoordinate Coordinate, string Value)> items = placements.OrderBy(item => item.Coordinate.Row).ThenBy(item => item.Coordinate.Column).ToList();
-            string key = layer + "-" + kind;
+            string key = layer + "-" + (definitionId ?? kind.ToString());
             Foldout group = new Foldout { text = $"{title} · {items.Count}개", name = "used-" + key, value = expandedUsedGroups.Contains(key) };
             group.RegisterValueChangedCallback(evt =>
             {

@@ -8,6 +8,8 @@ using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
 using UnityEngine;
+using Elements;
+using MemoryPack;
 
 namespace Levels.Editor
 {
@@ -25,10 +27,10 @@ namespace Levels.Editor
             // 전체 변환을 먼저 검증한다. 중복 번호나 스키마 오류로 기존 산출물을 일부만 바꾸지 않는다.
             LevelDefinition[] levels = AssetDatabase.FindAssets("t:LevelDefinition", new[] { LevelAssetOperations.DefaultFolder })
                 .Select(AssetDatabase.GUIDToAssetPath).Select(AssetDatabase.LoadAssetAtPath<LevelDefinition>).ToArray();
-            Dictionary<string, byte[]> outputs = levels.GroupBy(level => LevelPackCodec.FirstLevel(level.LevelNumber))
-                .ToDictionary(group => FilePath(group.Key), group => LevelPackCodec.Encode(group));
+            Dictionary<string, byte[]> outputs = CreatePackBytes(levels);
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
-            foreach (string guid in AssetDatabase.FindAssets("t:LevelDefinition")) settings.RemoveAssetEntry(guid);
+            ValidateExclusion(settings, true);
+            foreach (string guid in AuthoringGuids()) settings.RemoveAssetEntry(guid);
             ValidateExclusion(settings);
             Directory.CreateDirectory(OutputFolder);
             foreach (var output in outputs)
@@ -65,6 +67,9 @@ namespace Levels.Editor
         }
 
         public static void ValidateExclusion(AddressableAssetSettings settings)
+            => ValidateExclusion(settings, false);
+
+        private static void ValidateExclusion(AddressableAssetSettings settings, bool omitDirectOriginals)
         {
             List<string> roots = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToList();
             roots.AddRange(PlayerSettings.GetPreloadedAssets().Where(asset => asset != null).Select(AssetDatabase.GetAssetPath));
@@ -73,13 +78,39 @@ namespace Levels.Editor
             foreach (AddressableAssetGroup group in settings.groups.Where(group => group != null))
                 foreach (AddressableAssetEntry entry in group.entries)
                 {
+                    if (omitDirectOriginals && IsAuthoringType(AssetDatabase.GetMainAssetTypeAtPath(entry.AssetPath))) continue;
                     List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
                     entry.GatherAllAssets(entries, true, true, false);
                     roots.AddRange(entries.Select(asset => asset.AssetPath));
                 }
             string[] dependencies = AssetDatabase.GetDependencies(roots.Where(path => !string.IsNullOrEmpty(path)).Distinct().ToArray(), true);
-            string[] originals = dependencies.Where(path => AssetDatabase.GetMainAssetTypeAtPath(path) == typeof(LevelDefinition)).ToArray();
-            if (originals.Length > 0) throw new BuildFailedException("레벨 원본이 빌드 리소스에서 참조됩니다. 씬/프리팹/Resources/Addressables 폴더 참조를 제거하고 레벨 번호로 로드하세요:\n" + string.Join("\n", originals));
+            string[] originals = dependencies.Where(path => IsAuthoringType(AssetDatabase.GetMainAssetTypeAtPath(path))).ToArray();
+            if (originals.Length > 0) throw new BuildFailedException("레벨/요소 제작 원본이 빌드 리소스에서 참조됩니다. 씬/프리팹/Resources/Addressables 폴더 참조를 제거하고 팩으로 로드하세요:\n" + string.Join("\n", originals));
+        }
+
+        internal static bool IsAuthoringType(Type type) => type == typeof(LevelDefinition) || type == typeof(ElementCatalogAsset) || type == typeof(ElementDefinitionAsset);
+        private static IEnumerable<string> AuthoringGuids() => new[] { "t:LevelDefinition", "t:ElementCatalogAsset", "t:ElementDefinitionAsset" }
+            .SelectMany(filter => AssetDatabase.FindAssets(filter)).Distinct();
+
+        // 선검증과 메모리 인코딩만 수행한다. 디스크/Addressables 변경은 Generate가 별도로 소유한다.
+        public static Dictionary<string, byte[]> CreatePackBytes(IEnumerable<LevelDefinition> levels)
+        {
+            return levels.GroupBy(level => LevelPackCodec.FirstLevel(level.LevelNumber)).ToDictionary(group => FilePath(group.Key), group =>
+            {
+                Dictionary<ElementId, ElementDefinition> definitions = new Dictionary<ElementId, ElementDefinition>();
+                foreach (ElementDefinition definition in group.SelectMany(level => (level.SchemaVersion == LevelDefinition.LegacySchemaVersion
+                    ? LegacyElementDefinitions.DefaultCatalog : level.CreateElementCatalog()).Definitions))
+                {
+                    if (definitions.TryGetValue(definition.Id, out ElementDefinition previous))
+                    {
+                        if (!MemoryPackSerializer.Serialize(PackedElementDefinition.FromDefinition(previous))
+                            .SequenceEqual(MemoryPackSerializer.Serialize(PackedElementDefinition.FromDefinition(definition))))
+                            throw new ArgumentException($"레벨 구간의 정의 ID 충돌: {definition.Id.Value}");
+                    }
+                    else definitions.Add(definition.Id, definition);
+                }
+                return LevelPackCodec.Encode(group, new ElementCatalog(definitions.Values));
+            });
         }
 
         public static void Prepare()

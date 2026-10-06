@@ -98,7 +98,8 @@ namespace Simulation
                     new BoardCoordinate(source.Row, source.Column - 1), new BoardCoordinate(source.Row - 1, source.Column) })
                     pending.Push((source, target, cause, false, color, PowerArea.Point, hit, false));
             }
-            Queue<(int request, BoardCoordinate origin)> landings = new Queue<(int, BoardCoordinate)>();
+            Queue<(int request, BoardCoordinate origin, DroneTarget initial, int effects, int attacks, List<DroneRetargetRecord> retargets)> landings =
+                new Queue<(int, BoardCoordinate, DroneTarget, int, int, List<DroneRetargetRecord>)>();
             if (activation.HasValue) pending.Push((activation.Value, activation.Value, hammer ? DamageCause.Hammer : DamageCause.Power, false, exchangeColor, PowerArea.Point, context.NextHit(), false));
             if (combination != null)
             {
@@ -131,15 +132,33 @@ namespace Simulation
                 {
                     var landing = landings.Dequeue();
                     DroneTarget target = targets.Land(landing.request, landing.origin);
+                    int landingHit = target == null ? 0 : context.NextHit();
+                    bool retargeted = context.Targeting.Any(record => record.Request == landing.request && record.Event == TargetingEvent.Retargeted);
+                    if (landing.initial != null)
+                    {
+                        int interrupted = -1;
+                        if (retargeted)
+                            for (int i = landing.effects; i < records.Count; i++)
+                            {
+                                EffectRecord effect = records[i];
+                                bool removedBody = landing.initial.ObstacleIndex.HasValue && effect.RemovedObstacleIndices.Contains(landing.initial.ObstacleIndex.Value);
+                                bool changedCell = effect.Target.Equals(landing.initial.Coordinate) &&
+                                    (effect.Response == DamageResponse.Remove || effect.Response == DamageResponse.Activate ||
+                                     effect.CoverBefore != effect.CoverAfter || effect.DustBefore != effect.DustAfter || effect.Response == DamageResponse.Charge);
+                                if (!removedBody && !changedCell) continue;
+                                interrupted = i; break;
+                            }
+                        trace.AddFlight(new DroneFlightRecord(landing.request, landingHit, landing.origin, landing.initial.Coordinate,
+                            target?.Coordinate, landing.effects, landing.attacks, landing.retargets.Count > 0 ? landing.retargets[0].EffectIndex : interrupted, retargeted, landing.retargets));
+                    }
                     if (target != null)
                     {
                         // 타격 Source는 기존 규칙대로 유지하되 별도 표시 기록에는 실제 착탄점도 보존한다.
-                        int landingHit = context.NextHit();
                         BoardCoordinate source = target.Area == PowerArea.Point ? landing.origin : target.Coordinate;
                         BoardCoordinate[] selected = PowerCombinationResolution.Range(work, target.Coordinate, target.Area).ToArray();
                         trace.Add(new PowerAttackRecord(landingHit, 0, landing.origin, target.Coordinate, RuntimeContent.Drone,
                             null, target.Area, true, trace.Attacks.Count, selected,
-                            context.Targeting.Any(record => record.Request == landing.request && record.Event == TargetingEvent.Retargeted)));
+                            retargeted));
                         foreach (BoardCoordinate coordinate in selected.Reverse())
                             pending.Push((source, coordinate, DamageCause.Power, false, null, PowerArea.Point, landingHit, false));
                     }
@@ -148,7 +167,8 @@ namespace Simulation
                 var hit = pending.Pop();
                 if (hit.request)
                 {
-                    landings.Enqueue((targets.RequestArea(hit.source, hit.area), hit.source));
+                    int request = targets.RequestArea(hit.source, hit.area);
+                    landings.Enqueue((request, hit.source, targets.Reservation(request), records.Count, trace.Attacks.Count, new List<DroneRetargetRecord>()));
                     continue;
                 }
                 DamageReaction reaction = DamageReaction.Evaluate(work, hit.target, hit.cause, hit.source, context,
@@ -166,7 +186,7 @@ namespace Simulation
                 if (reaction.Response == DamageResponse.Charge)
                 {
                     int index = cell.ObstacleIndex.Value;
-                    GeneratorRules.Apply(work, index, context);
+                    ObstacleDamageRules.ApplyReaction(work, cell, context, hit.hit);
                     chargeAfter = work.Obstacles[index].Charge;
                     targets.Invalidate();
                 }
@@ -191,10 +211,10 @@ namespace Simulation
                 }
                 if (reaction.Response == DamageResponse.Damage)
                 {
-                    after = ObstacleDamageRules.Apply(work, cell, context, hit.hit);
+                    after = ObstacleDamageRules.ApplyReaction(work, cell, context, hit.hit);
                 }
                 if (reaction.Response == DamageResponse.CoverDamage)
-                { if (cell.Cover == CoverKind.Mold) MoldRules.Remove(work, cell, context); else WebRules.Apply(work, cell, context); }
+                { Elements.ElementLayerBehaviorRegistry.Apply(cell.CoverElement ?? Elements.LegacyElementDefinitions.Get(cell.Cover.Value), work, cell, context); }
                 if (reaction.Response == DamageResponse.Remove)
                 {
                     MissionProgressRules.ConsumeColor(work, originalColor, hit.target);
@@ -215,6 +235,16 @@ namespace Simulation
                 }
                 records.Add(new EffectRecord(hit.source, hit.target, hit.cause, reaction, original, before, after, originalColor, coverBefore, cell.CoverDurability, dustBefore, cell.DustDurability)
                 { HitGroup = hit.hit, ChargeBefore = chargeBefore, ChargeAfter = chargeAfter, RemovedObstacleIndices = removedBodies.OrderBy(index => index).ToList().AsReadOnly() });
+                // 착탄 전에도 실제 효과마다 예약을 검증한다. 재선택은 동일 정책·예약·규칙 난수를 사용한다.
+                foreach (var flying in landings)
+                {
+                    DroneTarget previousTarget = targets.Reservation(flying.request);
+                    if (previousTarget == null) continue;
+                    int previousRetargets = context.Targeting.Count(record => record.Request == flying.request && record.Event == TargetingEvent.Retargeted);
+                    DroneTarget nextTarget = targets.Refresh(flying.request, flying.origin);
+                    if (context.Targeting.Count(record => record.Request == flying.request && record.Event == TargetingEvent.Retargeted) > previousRetargets)
+                        flying.retargets.Add(new DroneRetargetRecord(previousTarget.Coordinate, nextTarget?.Coordinate, records.Count - 1));
+                }
             }
             if (targets.ReservationCount != 0) { error = "미해제 드론 예약 · 행동 전체 취소"; return false; }
             error = null; return true;

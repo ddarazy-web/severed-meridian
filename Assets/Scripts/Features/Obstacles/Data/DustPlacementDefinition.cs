@@ -13,5 +13,8 @@ namespace Levels
 
         [MemoryPackIgnore] public BoardCoordinate Coordinate => coordinate;
         [MemoryPackIgnore] public int Durability => durability;
+
+        internal DustPlacementDefinition(BoardCoordinate coordinate, int durability)
+        { this.coordinate = coordinate; this.durability = durability; }
     }
 }

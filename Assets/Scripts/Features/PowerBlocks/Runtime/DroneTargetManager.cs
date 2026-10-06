@@ -66,6 +66,7 @@ namespace Simulation
     {
         private readonly LevelRuntimeState state;
         private readonly TurnEffectContext context;
+        private readonly DroneTargetPolicyRegistry policies;
         private readonly Dictionary<int, DroneTarget> reservations = new Dictionary<int, DroneTarget>();
         private readonly Dictionary<PowerArea, List<DroneTarget>> cache = new Dictionary<PowerArea, List<DroneTarget>>();
         public int CacheBuildCount { get; private set; }
@@ -74,8 +75,10 @@ namespace Simulation
             .Sum(g => System.Math.Min(state.Missions[g.Key].Remaining, g.Sum(c => c.ExpectedComplete)));
         public int ExpectedDamage => MissionProgressRules.Project(state, LiveReservations(0).SelectMany(t => t.Impacts)).damage;
         public int ExpectedCharge => MissionProgressRules.Project(state, LiveReservations(0).SelectMany(t => t.Impacts)).charge;
-        internal DroneTargetManager(LevelRuntimeState state, TurnEffectContext context) { this.state = state; this.context = context; }
-        internal void Invalidate() => cache.Clear();
+        internal DroneTargetManager(LevelRuntimeState state, TurnEffectContext context)
+        { this.state = state; this.context = context; policies = new DroneTargetPolicyRegistry(state, context); }
+        internal void Invalidate() { cache.Clear(); policies.Invalidate(); }
+        internal DroneTarget Reservation(int request) => reservations.TryGetValue(request, out DroneTarget target) ? target : null;
 
         public ReadOnlyCollection<DroneTarget> Query(int excludingRequest = 0)
             => QueryArea(PowerArea.Point, excludingRequest);
@@ -90,7 +93,7 @@ namespace Simulation
                     DamageReaction reaction = DamageReaction.Evaluate(state, cell.Coordinate, DamageCause.Power, cell.Coordinate, context);
                     if (reaction.Response != DamageResponse.Remove && reaction.Response != DamageResponse.Damage && reaction.Response != DamageResponse.CoverDamage && reaction.Response != DamageResponse.Charge) continue;
                     DroneImpact[] impacts = PowerCombinationResolution.Range(state, cell.Coordinate, area)
-                        .Select(c => new DroneImpact(state.CellAt(c), MissionProgressRules.Query(state, c, context))).Where(i => i.Contributions.Count > 0).ToArray();
+                        .Select(c => new DroneImpact(state.CellAt(c), policies.Query(c))).Where(i => i.Contributions.Count > 0).ToArray();
                     candidates.Add(new DroneTarget(state, cell, area, impacts));
                 }
             }
@@ -141,7 +144,7 @@ namespace Simulation
                     RuntimeCell current = state.CellAt(impact.Coordinate);
                     if (current.Content != impact.Content || current.Color != impact.Color || current.ObstacleIndex != impact.ObstacleIndex ||
                         current.Cover != impact.Cover || current.CoverDurability != impact.CoverDurability || current.DustDurability != impact.DustDurability) continue;
-                    ReadOnlyCollection<MissionContribution> contributions = MissionProgressRules.Query(state, current.Coordinate, context);
+                    ReadOnlyCollection<MissionContribution> contributions = policies.Query(current.Coordinate);
                     if (contributions.Count > 0) live.Add(new DroneImpact(current, contributions));
                 }
                 yield return new DroneTarget(state, cell, reserved.Area, live);
@@ -174,7 +177,7 @@ namespace Simulation
             return selected;
         }
 
-        internal DroneTarget Land(int request, BoardCoordinate origin)
+        internal DroneTarget Refresh(int request, BoardCoordinate origin)
         {
             // 예약 뒤 다른 폭발로 목표가 바뀔 수 있다. 좌표뿐 아니라 블록·덮개·내구도와
             // 미션 기여까지 다시 확인한다. 자기 예약은 제외하고 조회해 스스로 목표를 없애지 않는다.
@@ -192,6 +195,13 @@ namespace Simulation
                 if (target == null) return null;
             }
             else target = valid;
+            return target;
+        }
+
+        internal DroneTarget Land(int request, BoardCoordinate origin)
+        {
+            DroneTarget target = Refresh(request, origin);
+            if (target == null) return null;
             Release(request, origin, "착탄 · 예상 기여 반환");
             Record(TargetingEvent.Landed, request, origin, target.Coordinate, "도착 타격 " + target.Area);
             return target;

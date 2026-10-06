@@ -133,7 +133,7 @@ namespace Levels.Editor
             int finished = record.trials.Count * 200 + (Session?.Current?.Record.finished ?? 0);
             progress.text = $"{record.sourceName} · {(complete ? "전체 완료" : "중간 결과")} · {record.trials.Count}/100개 횟수 · {finished:N0}/20,000판\n{record.message}";
             if (errorMessage != null) progress.text += "\n" + errorMessage;
-            if (source() == null || LevelStateBuilder.Fingerprint(source()) != record.fingerprint)
+            if (!LevelEditorInputIdentity.Matches(source(), record.fingerprint))
                 progress.text += "\n현재 편집 내용과 다른 사본의 결과입니다.";
             recommendations.text = compatible ? string.Join("\n", Enumerable.Range(0, 4).Select(grade => {
                 string range = BotMoveRecommendations.Ranges(record.trials, grade);

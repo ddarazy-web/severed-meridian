@@ -24,7 +24,7 @@ namespace GameScreen.Editor
             if (source == null) throw new InvalidOperationException("실행할 레벨을 선택하세요.");
             if (source.LevelNumber < 1) throw new InvalidOperationException("레벨 번호는 1 이상이어야 합니다.");
             byte[] snapshot;
-            if (mode == PuzzleEditorLevelSource.Asset) snapshot = LevelPackCodec.Encode(new[] { source });
+            if (mode == PuzzleEditorLevelSource.Asset) snapshot = LevelPackCodec.Snapshot(source);
             else if (mode == PuzzleEditorLevelSource.MemoryPack)
             {
                 string path = LevelPackBuild.FilePath(source.LevelNumber);

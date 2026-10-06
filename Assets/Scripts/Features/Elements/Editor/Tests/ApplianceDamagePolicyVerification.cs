@@ -70,9 +70,9 @@ namespace Elements.Editor
             try
             {
                 QueryChecks(before); ApplyChecks(before); AdjacentChecks(before); HitChecks(before); ReservationChecks(before); OverlapChecks(before); OtherChecks(before); GeneratorChecks(before);
-                Check(LevelPackCodec.FormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50, "팩 버전1/50구간 유지");
+                Check(LevelPackCodec.LegacyFormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50, "팩 버전1/50구간 유지");
                 if (before) File.WriteAllLines(Evidence + "/baseline-values.jsonl", Values);
-                else { Check(File.ReadAllLines(Evidence + "/baseline-values.jsonl").SequenceEqual(Values), "동일 입력/시드 실제 조회·피해·미션·철거·효과·예약·바이트 전후 일치"); PolicyChecks(); }
+                else { Check(RecordedLogicComparison.Equal(File.ReadAllLines(Evidence + "/baseline-values.jsonl"), Values), "기존 논리/입력/팩 비교 · 추가 비행 표시 이력 별도"); PolicyChecks(); }
             }
             catch (Exception error) { Results.Add("FAIL " + error); Debug.LogException(error); exit = 1; }
             finally

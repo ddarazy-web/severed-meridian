@@ -51,7 +51,7 @@ namespace Elements.Editor
             {
                 PlacementChecks(before); RuntimeChecks(before);
                 if (before) File.WriteAllLines(Evidence + "/baseline-values.jsonl", Values);
-                else { Check(File.ReadAllLines(Evidence + "/baseline-values.jsonl").SequenceEqual(Values), "발전기 배치/충전/대상 제거/바이트 전후 동일"); ProfileChecks(); }
+                else { Check(RecordedLogicComparison.Equal(File.ReadAllLines(Evidence + "/baseline-values.jsonl"), Values), "기존 논리/입력/팩 비교 · 추가 비행 표시 이력 별도"); ProfileChecks(); }
             }
             catch (Exception error) { Results.Add("FAIL " + error); Debug.LogException(error); exit = 1; }
             finally
@@ -172,7 +172,7 @@ namespace Elements.Editor
                     }
                     finally { UnityEngine.Object.DestroyImmediate(level); }
                 }
-            Check(LevelPackCodec.FormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50, "기존 팩 버전1/50구간");
+            Check(LevelPackCodec.LegacyFormatVersion == 1 && LevelPackCodec.LevelsPerPack == 50, "기존 팩 버전1/50구간");
         }
         private static void ProfileChecks()
         {

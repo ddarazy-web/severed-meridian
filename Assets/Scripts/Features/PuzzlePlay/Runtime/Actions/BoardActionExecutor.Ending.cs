@@ -109,6 +109,7 @@ namespace Simulation
                 int index = candidates.Count == 1 ? 0 : work.Random.Next(candidates.Count);
                 RuntimeCell cell = candidates[index]; candidates.RemoveAt(index);
                 cell.Content = RuntimeContent.Rocket; cell.Color = null;
+                cell.ContentElement = Elements.LegacyElementDefinitions.GetContent(cell.Content, work.ElementCatalog);
                 cell.RocketDirection = work.Random.Next(2) == 0 ? RocketDirection.Horizontal : RocketDirection.Vertical;
             }
             State = work; TurnEffects = new TurnEffectContext(0, Array.Empty<MatchedBlockChange>());

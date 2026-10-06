@@ -125,6 +125,7 @@ namespace Simulation
                     changes.Add(new MatchedBlockChange(coordinate, cell.Color.Value, content, direction, turn) { HitGroup = hit });
                     DustRules.ConsumeNormal(work, cell, context);
                     cell.Content = content; cell.Color = null; cell.RocketDirection = direction; cell.ObstacleIndex = null;
+                    cell.ContentElement = Elements.LegacyElementDefinitions.GetContent(content, work.ElementCatalog);
                 }
             }
             return changes.AsReadOnly();

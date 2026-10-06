@@ -6,8 +6,38 @@ namespace Levels
 {
     public static class LevelDefinitionValidator
     {
+        internal static List<LevelValidationIssue> ValidateElements(LevelDefinition source, Elements.ElementLevelLayout layout)
+        {
+            List<LevelValidationIssue> issues = new List<LevelValidationIssue>(layout.Issues);
+            if (source.LevelNumber <= 0) issues.Add(new LevelValidationIssue(LevelValidationCode.InvalidLevelNumber, "레벨 번호는 양수여야 합니다.", "levelNumber"));
+            if (source.MoveCount <= 0) issues.Add(new LevelValidationIssue(LevelValidationCode.InvalidMoveCount, "이동 횟수는 양수여야 합니다.", "moveCount"));
+            ValidateColors(source, issues); ValidateBoard(source.Board, issues);
+            LevelFlowRules.Validate(layout.Level, issues); LevelConnectionRules.Validate(layout.Level, issues, layout.Bodies);
+            List<LevelValidationIssue> supplyIssues = new List<LevelValidationIssue>();
+            LevelSupplyRules.Validate(layout.Level, supplyIssues,
+                (sourceIndex, itemIndex) => layout.Supply.ItemError(layout.Level, sourceIndex, itemIndex), () => layout.Supply.ScrapMaximum, layout.Supply.HasFixed);
+            foreach (LevelValidationIssue issue in supplyIssues)
+                issues.Add(new LevelValidationIssue(issue.Code, issue.Message,
+                    issue.PropertyPath.StartsWith("supply", StringComparison.Ordinal) ? "elementSupply" + issue.PropertyPath.Substring(6) : issue.PropertyPath,
+                    issue.Coordinate));
+            LevelMissionRules.Validate(layout.Level, issues, layout.MissionSupply);
+            return issues;
+        }
         public static List<LevelValidationIssue> Validate(LevelDefinition level)
         {
+            if (level != null && level.SchemaVersion == 5)
+            {
+                try
+                {
+                    using (Elements.ElementLevelLayout layout = new Elements.ElementLevelLayout(level, level.CreateElementCatalog()))
+                        return ValidateElements(level, layout);
+                }
+                catch (ArgumentException error)
+                {
+                    return new List<LevelValidationIssue> { new LevelValidationIssue(LevelValidationCode.InvalidPlacementValue,
+                        error.Message, "elementCatalog") };
+                }
+            }
             List<LevelValidationIssue> issues = new List<LevelValidationIssue>();
             if (level == null)
             {
@@ -15,7 +45,7 @@ namespace Levels
                 return issues;
             }
 
-            if (level.SchemaVersion < 1 || level.SchemaVersion > LevelDefinition.CurrentSchemaVersion)
+            if (level.SchemaVersion < 1 || level.SchemaVersion > LevelDefinition.LegacySchemaVersion)
                 issues.Add(new LevelValidationIssue(LevelValidationCode.UnsupportedSchemaVersion,
                     "지원하지 않는 저장 형식 버전입니다.", "schemaVersion"));
             if (level.LevelNumber <= 0)
@@ -184,9 +214,10 @@ namespace Levels
                     DustPlacementDefinition dust = level.Dust[i];
                     string path = $"dust.Array.data[{i}]";
                     ValidateLayerCell(level, dust.Coordinate, path + ".coordinate", issues);
-                    if (dust.Durability < 1 || dust.Durability > 3)
+                    string dustError = LevelPlacementRules.DustValueError(dust.Durability);
+                    if (dustError != null)
                         issues.Add(new LevelValidationIssue(LevelValidationCode.InvalidPlacementValue,
-                            "먼지 내구도는 1~3입니다.", path + ".durability", dust.Coordinate));
+                            dustError, path + ".durability", dust.Coordinate));
                     if (LevelPlacementRules.Find(level, PlacementLayer.Dust, dust.Coordinate) == -2)
                         issues.Add(new LevelValidationIssue(LevelValidationCode.DuplicatePlacement,
                             "먼지가 중복되었습니다.", path, dust.Coordinate));

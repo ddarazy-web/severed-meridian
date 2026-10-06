@@ -13,8 +13,8 @@ namespace Levels.Editor
             if (!LevelFlowEditing.CanEdit(level)) return "편집할 수 없는 레벨입니다.";
             string error = LevelConnectionRules.TargetError(level, generatorId, targetId);
             if (error != null) return error;
-            ObstaclePlacementDefinition generator = level.Obstacles[LevelConnectionRules.Find(level, generatorId)];
-            ObstaclePlacementDefinition target = level.Obstacles[LevelConnectionRules.Find(level, targetId)];
+            LevelConnectionBody generator = LevelConnectionRules.Body(level, LevelConnectionRules.Find(level, generatorId));
+            LevelConnectionBody target = LevelConnectionRules.Body(level, LevelConnectionRules.Find(level, targetId));
             if (!LevelConnectionRules.Terminal(generator, start)) return "발전기 연결점 위치를 확인하세요.";
             if (end.HasValue && !LevelConnectionRules.Terminal(target, end.Value)) return "장애물 연결점 위치를 확인하세요.";
             HashSet<BoardCoordinate> blocked = new HashSet<BoardCoordinate>(level.Connections.Where(c => c.Vertices != null).SelectMany(c => c.Vertices));
@@ -22,7 +22,7 @@ namespace Levels.Editor
                 for (int column = 0; column <= BoardDefinition.DefaultColumns; column++)
                 {
                     BoardCoordinate vertex = new BoardCoordinate(row, column);
-                    if (level.Obstacles.Any(body => LevelConnectionRules.Inside(body, vertex))) blocked.Add(vertex);
+                    if (LevelConnectionRules.BodyIndices(level).Any(index => LevelConnectionRules.Inside(LevelConnectionRules.Body(level, index), vertex))) blocked.Add(vertex);
                 }
             if (blocked.Contains(start)) return "이 연결점은 다른 전선이 지나갑니다. 다른 점을 선택하세요.";
             HashSet<BoardEdge> walls = new HashSet<BoardEdge>(level.Flow.Walls.Where(w => w.IsAdjacent).Select(LevelFlowRules.WallSegment));

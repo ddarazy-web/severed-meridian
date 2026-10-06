@@ -73,7 +73,7 @@ namespace Levels.Editor
             {
                 int[] indices = sources.Select(cell => LevelSupplyRules.FindSource(level, cell)).ToArray();
                 if (indices.Length == 0) return;
-                bool fixedSources = indices.All(index => index >= 0 && level.Supply.Sources[index].Mode == SupplyMode.Fixed);
+                bool fixedSources = indices.All(index => index >= 0 && (level.SchemaVersion == 5 ? level.ElementSupply.sources[index].mode : level.Supply.Sources[index].Mode) == SupplyMode.Fixed);
                 Add("공급 목록 복사", fixedSources && indices.Length == 1, () =>
                 {
                     EditorGUIUtility.systemCopyBuffer = LevelSupplyEditing.Copy(level, indices[0]);
@@ -83,7 +83,7 @@ namespace Levels.Editor
                 Add("공급 목록 뒤에 추가", fixedSources, () => SupplyAction(() => LevelSupplyEditing.Paste(level, indices, EditorGUIUtility.systemCopyBuffer, true)));
                 if (fixedSources && indices.Length == 1)
                 {
-                    int count = level.Supply.Sources[indices[0]].Items?.Count ?? 0;
+                    int count = level.SchemaVersion == 5 ? level.ElementSupply.sources[indices[0]].items?.Count ?? 0 : level.Supply.Sources[indices[0]].Items?.Count ?? 0;
                     bool item = supplyItem >= 0 && supplyItem < count;
                     evt.menu.AppendSeparator();
                     Existing("add-supply-item", "공급 항목/추가");
@@ -98,12 +98,12 @@ namespace Levels.Editor
             }
             else if (brush == LevelBrush.Select && placements.Length > 0)
             {
-                Add("설정 복사", placements.Length == 1 && LevelCommonEditing.Fields(placements[0]).Length > 0, () =>
+                Add("설정 복사", placements.Length == 1 && LevelCommonEditing.Fields(placements[0], level).Length > 0, () =>
                 {
                     string text = LevelCommonEditing.Copy(level, placements[0]);
                     if (text != null) { EditorGUIUtility.systemCopyBuffer = text; operation.text = "선택 요소의 설정을 복사했습니다."; }
                 });
-                Add("설정 붙여넣기", placements.Any(item => LevelCommonEditing.Fields(item).Length > 0), () =>
+                Add("설정 붙여넣기", placements.Any(item => LevelCommonEditing.Fields(item, level).Length > 0), () =>
                 {
                     board.CancelStroke();
                     string error = LevelCommonEditing.Paste(level, placements, EditorGUIUtility.systemCopyBuffer, out int changed, out int excluded);

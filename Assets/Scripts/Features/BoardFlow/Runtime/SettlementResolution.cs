@@ -75,10 +75,10 @@ namespace Simulation
                     return Reject(SettlementReason.Unsupported, "미지원 공급 방식 또는 목록 항목입니다.");
             }
             if (original.Supply.Sources.Any(s => s.Mode == SupplyMode.MaintainScrap) &&
-                original.Supply.Sources.Any(s => s.Mode == SupplyMode.Fixed && s.Items.Any(i => i.Kind == SupplyKind.Scrap)))
+                original.Supply.Sources.Any(s => s.HasFixed(SupplyKind.Scrap, original.ElementCatalog)))
                 return Reject(SettlementReason.Unsupported, "고정 고철 목록과 고철 개수 유지는 한 레벨에서 혼용할 수 없습니다.");
             if (original.Supply.Sources.Any(s => s.Mode == SupplyMode.MaintainRecovery) &&
-                original.Supply.Sources.Any(s => s.Mode == SupplyMode.Fixed && s.Items.Any(i => i.Kind == SupplyKind.Recovery)))
+                original.Supply.Sources.Any(s => s.HasFixed(SupplyKind.Recovery, original.ElementCatalog)))
                 return Reject(SettlementReason.Unsupported, "고정 회수 목록과 회수 개수 유지는 한 레벨에서 혼용할 수 없습니다.");
             string invalidFlow = MovementQuery.ValidateFlow(original);
             if (invalidFlow != null) return Reject(SettlementReason.InvalidFlow, invalidFlow);
@@ -130,6 +130,7 @@ namespace Simulation
                         RuntimeCell source = work.CellAt(move.Source), target = work.CellAt(move.Target);
                         context.RecordArrival(move.Source, move.Target, batch, source.Content == RuntimeContent.Normal);
                         target.Content = source.Content; target.Color = source.Color; target.RocketDirection = source.RocketDirection;
+                        target.ContentElement = source.ContentElement;
                         target.ObstacleIndex = source.ObstacleIndex;
                         source.Content = RuntimeContent.Empty; source.Color = null; source.RocketDirection = null;
                         source.ObstacleIndex = null;
@@ -187,6 +188,7 @@ namespace Simulation
                     RuntimeCell cell = work.CellAt(source.Coordinate);
                     if (!cell.IsActive || cell.Content != RuntimeContent.Empty) continue;
                     cell.Content = RuntimeContent.Normal; cell.Color = LastPangColors[work.Random.Next(LastPangColors.Length)];
+                    cell.ContentElement = Elements.LegacyElementDefinitions.GetContent(cell.Content, work.ElementCatalog);
                     cell.RocketDirection = null; cell.ObstacleIndex = null;
                     context.RecordArrival(source.Coordinate, source.Coordinate, batch, true);
                     records.Add(new SettlementRecord(batch, MovementKind.Supply, source.Coordinate, cell, false,
@@ -203,7 +205,8 @@ namespace Simulation
                 int index = available.Count == 1 ? 0 : work.Random.Next(available.Count);
                 RuntimeSource source = available[index]; available.RemoveAt(index);
                 RuntimeCell cell = work.CellAt(source.Coordinate);
-                work.SupplyScrap(cell, work.Supply.ScrapDurability);
+                Elements.ElementSupplyBehaviorRegistry.Apply(work.Supply.ScrapDefinition ?? Elements.LegacyElementDefinitions.GetSupply(SupplyKind.Scrap),
+                    work, cell, new SupplyItem(SupplyKind.Scrap, durability: work.Supply.ScrapDurability));
                 work.Supply.ScrapGenerated++; needed--;
                 context.RecordArrival(source.Coordinate, source.Coordinate, batch, false);
                 records.Add(new SettlementRecord(batch, MovementKind.Supply, source.Coordinate, cell, false));
@@ -216,7 +219,7 @@ namespace Simulation
                 int index = available.Count == 1 ? 0 : work.Random.Next(available.Count);
                 RuntimeSource source = available[index]; available.RemoveAt(index);
                 RuntimeCell cell = work.CellAt(source.Coordinate);
-                cell.Content = RuntimeContent.Recovery; cell.Color = null; cell.RocketDirection = null; cell.ObstacleIndex = null;
+                Elements.ElementSupplyBehaviorRegistry.Apply(work.Supply.RecoveryDefinition ?? Elements.LegacyElementDefinitions.GetSupply(SupplyKind.Recovery), work, cell, new SupplyItem(SupplyKind.Recovery));
                 context.RecordArrival(source.Coordinate, source.Coordinate, batch, false);
                 records.Add(new SettlementRecord(batch, MovementKind.Supply, source.Coordinate, cell, false));
             }
@@ -231,23 +234,8 @@ namespace Simulation
                 // 목록에는 랜덤 항목을 그대로 남기고, 실제 공급하는 한 개마다 종류를 뽑는다.
                 // 공통 상태의 난수를 사용하므로 게임·봇·같은 시드 재실행 결과가 일치한다.
                 // 자석은 기존 개별 공급만 지원하며 랜덤 후보에는 포함하지 않는다.
-                if (item.Kind == SupplyKind.RandomPower)
-                {
-                    SupplyKind chosen = work.Random.Next(3) switch
-                    { 0 => SupplyKind.Rocket, 1 => SupplyKind.Bomb, _ => SupplyKind.Drone };
-                    RocketDirection direction = chosen == SupplyKind.Rocket
-                        ? (RocketDirection)work.Random.Next(2) : RocketDirection.Horizontal;
-                    item = new SupplyItem(chosen, item.Count, direction: direction);
-                }
-                cell.Content = item.Kind switch
-                {
-                    SupplyKind.Rocket => RuntimeContent.Rocket, SupplyKind.Bomb => RuntimeContent.Bomb,
-                    SupplyKind.Drone => RuntimeContent.Drone, SupplyKind.Magnet => RuntimeContent.Magnet,
-                    SupplyKind.Recovery => RuntimeContent.Recovery, _ => RuntimeContent.Normal
-                };
-                cell.Color = item.Kind == SupplyKind.RandomNormal ? work.Colors[work.Random.Next(work.Colors.Count)] : item.Kind == SupplyKind.FixedNormal ? item.Color : (RabbitColor?)null;
-                cell.RocketDirection = item.Kind == SupplyKind.Rocket ? item.Direction : (RocketDirection?)null;
-                if (item.Kind == SupplyKind.Scrap) work.SupplyScrap(cell, item.Durability);
+                Elements.ElementDefinition selected = fixedItem ? source.ItemDefinitions?[source.ItemIndex] : source.RandomDefinition;
+                Elements.ElementSupplyBehaviorRegistry.Apply(selected ?? Elements.LegacyElementDefinitions.GetSupply(item.Kind), work, cell, item);
                 context.RecordArrival(source.Coordinate, source.Coordinate, batch, cell.Content == RuntimeContent.Normal);
                 if (fixedItem && ++source.ItemConsumed == item.Count) { source.ItemIndex++; source.ItemConsumed = 0; }
                 records.Add(new SettlementRecord(batch, MovementKind.Supply, source.Coordinate, cell, false, beforeIndex, beforeConsumed, source.ItemIndex, source.ItemConsumed));

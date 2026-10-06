@@ -59,6 +59,7 @@ namespace Levels.Editor
 
         private void BuildSourceList()
         {
+            if (level.SchemaVersion == 5) { BuildElementSourceList(); return; }
             Foldout list = new Foldout { text = $"생성구 · {level.Supply?.Sources?.Count ?? 0}개", value = true, name = "used-sources" };
             tools.Add(list);
             list.Add(SupplyButton("상단 생성구 추가", "add-top-sources", () => LevelSupplyEditing.AddTopSources(level)));
@@ -83,6 +84,7 @@ namespace Levels.Editor
 
         private bool BuildSupplyProperties()
         {
+            if (level.SchemaVersion == 5) return BuildElementSupplyProperties();
             if (board.Brush != LevelBrush.SourceSelect && board.Brush != LevelBrush.Source && board.Brush != LevelBrush.SourceErase) return false;
             if (!LevelSupplyEditing.CanEdit(level))
             { selectedProperties.Add(new Label("현재 형식으로 전환한 뒤 생성구를 편집하세요.")); return true; }

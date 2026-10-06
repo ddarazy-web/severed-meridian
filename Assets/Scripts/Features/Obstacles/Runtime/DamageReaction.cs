@@ -157,12 +157,16 @@ namespace Simulation
                 if (cell.Content != RuntimeContent.Obstacle && cell.Cover != CoverKind.Mold) return new DamageReaction(DamageResponse.None, "인접 매칭 피해 대상이 아님");
             }
             if (cause == DamageCause.MagnetAdjacent && (cell.Content != RuntimeContent.Obstacle ||
-                state.Obstacles[cell.ObstacleIndex.Value].Definition.Kind != ObstacleKind.ColorLock))
+                (state.SchemaVersion == LevelDefinition.LegacySchemaVersion
+                    ? state.Obstacles[cell.ObstacleIndex.Value].Definition.Kind != ObstacleKind.ColorLock &&
+                      ((state.Obstacles[cell.ObstacleIndex.Value].Definition.Kind < ObstacleKind.Crate || state.Obstacles[cell.ObstacleIndex.Value].Definition.Kind > ObstacleKind.Appliance) ||
+                       !state.Obstacles[cell.ObstacleIndex.Value].Element.RequireDamageSourcePolicy().MagnetAdjacent)
+                    : state.Obstacles[cell.ObstacleIndex.Value].Element.ReactionBehavior != Elements.ElementReactionBehavior.Durability ||
+                      !state.Obstacles[cell.ObstacleIndex.Value].Element.RequireDamageSourcePolicy().MagnetAdjacent)))
                 return new DamageReaction(DamageResponse.None, "자석 인접 예외는 색깔 자물쇠만 적용");
             if (cell.Content == RuntimeContent.Recovery)
                 return new DamageReaction(DamageResponse.None, "회수 부품은 파괴되지 않음");
-            if (cell.Cover == CoverKind.Mold) return new DamageReaction(DamageResponse.CoverDamage, "곰팡이 제거 · 내용물 보존", 1);
-            if (cell.Cover == CoverKind.Web) return WebRules.Query(cell, context);
+            if (cell.Cover.HasValue) return Elements.ElementLayerBehaviorRegistry.Query(cell.CoverElement ?? Elements.LegacyElementDefinitions.Get(cell.Cover.Value), cell, context);
             if (context?.IsProtected(target) == true) return new DamageReaction(DamageResponse.Protected, "이번 턴에 생성된 파워 보호");
             if (cell.Content == RuntimeContent.Obstacle) return ObstacleDamageRules.Query(state, cell, cause,
                 sourceColor ?? state.CellAt(source).Color, context, hit);

@@ -14,8 +14,9 @@ namespace Levels.Editor
         {
             int generator = LevelConnectionRules.Find(level, connection.GeneratorId);
             if (generator < 0 || connection.Vertices == null || connection.Vertices.Count == 0) return 0;
-            BoardCoordinate origin = level.Obstacles[generator].Coordinate, start = connection.Vertices[0];
-            return start.Row == origin.Row ? 0 : start.Column == origin.Column + 2 ? 1 : 2;
+            LevelConnectionBody body = LevelConnectionRules.Body(level, generator);
+            BoardCoordinate origin = body.Coordinate, start = connection.Vertices[0];
+            return start.Row == origin.Row ? 0 : start.Column == origin.Column + body.Size ? 1 : 2;
         }
 
         private void RefreshArtwork()
@@ -45,7 +46,7 @@ namespace Levels.Editor
                 }
                 int target = LevelConnectionRules.Find(level, connection.TargetId);
                 BoardCoordinate last = connection.Vertices[connection.Vertices.Count - 1];
-                bool complete = target >= 0 && LevelConnectionRules.Terminal(level.Obstacles[target], last);
+                bool complete = target >= 0 && LevelConnectionRules.Terminal(LevelConnectionRules.Body(level, target), last);
                 if (complete)
                 {
                     VisualElement pulseImage = AddArtwork("charge-art-" + index, LevelBoardArtwork.ChargePulse(0), Point(connection.Vertices[0], true), 48);

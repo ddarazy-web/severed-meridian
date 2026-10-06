@@ -18,7 +18,8 @@ namespace Levels.Editor
         }
 
         public static bool CanEdit(LevelDefinition level) => LevelBoardEditing.CanEdit(level) &&
-            level.Supply?.Sources != null && level.RecoveryParts != null && level.Missions != null;
+            level.Missions != null && (level.SchemaVersion == LevelDefinition.CurrentSchemaVersion ? level.ElementSupply?.sources != null :
+                level.Supply?.Sources != null && level.RecoveryParts != null);
 
         public static void WriteItem(SerializedProperty property, SupplyItem item)
         {
@@ -31,6 +32,8 @@ namespace Levels.Editor
 
         public static string PlaceSources(LevelDefinition level, IEnumerable<BoardCoordinate> coordinates, bool erase = false)
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
+                return Elements.Editor.ElementSupplyEditing.PlaceSources(level, coordinates, erase);
             if (!CanEdit(level)) return "편집할 수 없는 레벨입니다.";
             BoardCoordinate[] cells = coordinates.Distinct().ToArray();
             foreach (BoardCoordinate cell in cells)
@@ -63,6 +66,20 @@ namespace Levels.Editor
 
         public static string PlaceRecovery(LevelDefinition level, IEnumerable<BoardCoordinate> coordinates, bool erase = false)
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
+            {
+                try
+                {
+                    BoardCoordinate[] elementCells = coordinates.Distinct().Where(cell => !erase ||
+                        Elements.Editor.ElementPlacementEditing.Find(level, PlacementLayer.Block, cell) is int index && index >= 0 &&
+                        level.CreateElementCatalog().Get(new Elements.ElementId(level.Elements[index].definitionId)).Supply?.Behavior == Elements.ElementSupplyBehavior.Recovery).ToArray();
+                    PlacementBrush brush = Elements.Editor.ElementPlacementEditing.ForDefinition(level, new Elements.ElementId(level.ElementSupply.recoveryDefinitionId));
+                    brush.Erase = erase;
+                    PlacementEditResult elementResult = Elements.Editor.ElementPlacementEditing.Apply(level, brush, elementCells);
+                    return elementResult.Skipped > 0 ? string.Join(" / ", elementResult.Reasons) : null;
+                }
+                catch (Exception invalid) when (invalid is ArgumentException || invalid is InvalidOperationException || invalid is KeyNotFoundException) { return invalid.Message; }
+            }
             if (!CanEdit(level)) return "편집할 수 없는 레벨입니다.";
             BoardCoordinate[] cells = coordinates.Distinct().ToArray();
             foreach (BoardCoordinate cell in cells)
@@ -78,6 +95,8 @@ namespace Levels.Editor
 
         public static string SetSourceProperty(LevelDefinition level, IReadOnlyCollection<int> indices, string field, int value)
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
+                return Elements.Editor.ElementSupplyEditing.SetSourceProperty(level, indices, field, value);
             string error = TargetsError(level, indices);
             if (error != null) return error;
             if (field != "mode" && field != "exhaustion") return "공통 편집 가능한 속성이 아닙니다.";
@@ -97,6 +116,7 @@ namespace Levels.Editor
 
         public static string SetItems(LevelDefinition level, int index, IReadOnlyList<SupplyItem> items)
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion) return "신형 레벨은 정의 ID 공급 목록 편집을 사용하세요.";
             string error = TargetsError(level, new[] { index });
             if (error != null) return error;
             if (level.Supply.Sources[index].Mode != SupplyMode.Fixed && items.Count > 0) return "고정 공급 방식에서 목록을 편집하세요.";
@@ -106,12 +126,14 @@ namespace Levels.Editor
 
         public static string Copy(LevelDefinition level, int index)
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion) return Elements.Editor.ElementSupplyEditing.Copy(level, index);
             if (TargetsError(level, new[] { index }) != null || level.Supply.Sources[index].Mode != SupplyMode.Fixed || level.Supply.Sources[index].Items == null) return null;
             return JsonUtility.ToJson(new Clipboard { type = "MatchSupplyList", version = 1, items = level.Supply.Sources[index].Items.ToList() });
         }
 
         public static string Paste(LevelDefinition level, IReadOnlyCollection<int> indices, string text, bool append)
         {
+            if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion) return Elements.Editor.ElementSupplyEditing.Paste(level, indices, text, append);
             string error = TargetsError(level, indices);
             if (error != null) return error;
             Clipboard clipboard;

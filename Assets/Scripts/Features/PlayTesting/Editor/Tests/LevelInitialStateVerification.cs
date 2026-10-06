@@ -26,13 +26,20 @@ namespace Levels.Editor
 
         // 테스트용 전체 의미 상태 기록. 런타임 저장 형식이나 공통 직렬화 프레임워크로 사용하지 않는다.
         private static string Snapshot(object value)
+            => SnapshotValue(value, false);
+
+        // 신형 정의 표는 별도 증거로 기록한다. 구형 논리 관찰의 공개 필드 집합을 확장하지 않는다.
+        private static string SnapshotWithDefinitions(object value) => SnapshotValue(value, true);
+
+        private static string SnapshotValue(object value, bool includeDefinitions)
         {
             if (value == null) return "null";
             Type type = value.GetType();
             if (type.IsEnum || type.IsPrimitive || value is string) return type.Name + ":" + Convert.ToString(value, CultureInfo.InvariantCulture);
-            if (value is IEnumerable items) return "[" + string.Join("|", items.Cast<object>().Select(Snapshot)) + "]";
+            if (value is IEnumerable items) return "[" + string.Join("|", items.Cast<object>().Select(item => SnapshotValue(item, includeDefinitions))) + "]";
             return "{" + string.Join("|", type.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(property => property.GetIndexParameters().Length == 0)
-                .OrderBy(property => property.Name, StringComparer.Ordinal).Select(property => property.Name + "=" + Snapshot(property.GetValue(value)))) + "}";
+                .Where(property => includeDefinitions || type != typeof(RuntimeObstacle) || property.Name != nameof(RuntimeObstacle.Element))
+                .OrderBy(property => property.Name, StringComparer.Ordinal).Select(property => property.Name + "=" + SnapshotValue(property.GetValue(value), includeDefinitions))) + "}";
         }
 
         private static LevelDefinition Make(string name)

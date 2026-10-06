@@ -47,7 +47,7 @@ namespace Simulation
                 RuntimeObstacle obstacle = state.Obstacles[body.Key];
                 if (obstacle.Definition.Kind == ObstacleKind.Generator)
                 {
-                    charge++;
+                    charge += obstacle.Element.RequireChargePlacement().ChargePerHit;
                     foreach (MissionContribution contribution in body.SelectMany(i => i.Contributions))
                     {
                         if (!contribution.BodyIndex.HasValue) continue;
@@ -87,8 +87,8 @@ namespace Simulation
                 RuntimeObstacle body = state.Obstacles[generator];
                 foreach (int linked in GeneratorRules.Targets(state, generator))
                     for (int i = 0; i < state.Missions.Count; i++)
-                        if (state.Missions[i].Remaining > 0 && state.Missions[i].Definition.Kind == ObstacleDamageRules.Mission(state.Obstacles[linked].Definition.Kind))
-                            result.Add(new MissionContribution(i, body.Charge + 1 >= body.Definition.RequiredCharge ? 1 : 0, 0, bodyIndex: linked, charge: 1));
+                        if (state.Missions[i].Remaining > 0 && state.Missions[i].Definition.Kind == ObstacleDamageRules.MissionForBody(state.Obstacles[linked]))
+                            result.Add(new MissionContribution(i, body.Charge + reaction.Amount >= body.Definition.RequiredCharge ? 1 : 0, 0, bodyIndex: linked, charge: reaction.Amount));
                 for (int i = 0; i < state.Missions.Count; i++)
                     if (state.Missions[i].Remaining > 0 && state.Missions[i].Definition.Kind == MissionKind.Recovery)
                     {
@@ -104,10 +104,8 @@ namespace Simulation
                 MissionContribution contribution = mission.Definition.Kind == MissionKind.Recovery ?
                     RecoveryRules.Query(state, target, reaction, i) : mission.Definition.Kind == MissionKind.Color ?
                     NormalMissionRule.Query(state, target, reaction, i) : mission.Definition.Kind == MissionKind.Crate || mission.Definition.Kind == MissionKind.Scrap || mission.Definition.Kind == MissionKind.Safe || mission.Definition.Kind == MissionKind.ColorLock || mission.Definition.Kind == MissionKind.Appliance ?
-                    ObstacleMissionRule.Query(state, target, reaction, i) : mission.Definition.Kind == MissionKind.Web ?
-                    WebMissionRule.Query(state, target, reaction, i) : mission.Definition.Kind == MissionKind.Dust ?
-                    DustMissionRule.Query(state, target, reaction, context, i) : mission.Definition.Kind == MissionKind.Mold &&
-                    state.CellAt(target).Cover == CoverKind.Mold && reaction.Response == DamageResponse.CoverDamage ? new MissionContribution(i, 1, 1) : null;
+                    ObstacleMissionRule.Query(state, target, reaction, i) :
+                    LayerMissionRule.Query(state, target, reaction, context, i);
                 if (contribution != null) result.Add(contribution);
             }
             return result.AsReadOnly();
@@ -159,7 +157,13 @@ namespace Simulation
         {
             if (reaction.Response != DamageResponse.Damage) return null;
             RuntimeObstacle obstacle = state.Obstacles[state.CellAt(target).ObstacleIndex.Value];
-            if (ObstacleDamageRules.Mission(obstacle.Definition.Kind) != state.Missions[index].Definition.Kind) return null;
+            if (ObstacleDamageRules.MissionForBody(obstacle) != state.Missions[index].Definition.Kind) return null;
+            return new MissionContribution(index, obstacle.Durability == reaction.Amount ? 1 : 0, reaction.Amount);
+        }
+        internal static MissionContribution QueryDefinition(Elements.ElementDefinition definition, LevelRuntimeState state, BoardCoordinate target, DamageReaction reaction, int index)
+        {
+            RuntimeObstacle obstacle = state.Obstacles[state.CellAt(target).ObstacleIndex.Value];
+            if (definition.RequireRemovalMissionProfile().Kind != state.Missions[index].Definition.Kind) return null;
             return new MissionContribution(index, obstacle.Durability == reaction.Amount ? 1 : 0, reaction.Amount);
         }
     }
@@ -167,13 +171,41 @@ namespace Simulation
     internal static class WebMissionRule
     {
         internal static MissionContribution Query(LevelRuntimeState state, BoardCoordinate target, DamageReaction reaction, int index)
-            => state.CellAt(target).Cover == CoverKind.Web && reaction.Response == DamageResponse.CoverDamage ? new MissionContribution(index, state.CellAt(target).CoverDurability == 1 ? 1 : 0, 1) : null;
+            => LayerMissionRule.Query(state, target, reaction, null, index);
     }
 
     internal static class DustMissionRule
     {
         internal static MissionContribution Query(LevelRuntimeState state, BoardCoordinate target, DamageReaction reaction, TurnEffectContext context, int index)
-            => reaction.Response == DamageResponse.Remove && DustRules.CanDamage(state.CellAt(target), context) ?
-                new MissionContribution(index, state.CellAt(target).DustDurability == 1 ? 1 : 0, 1) : null;
+            => LayerMissionRule.Query(state, target, reaction, context, index);
+    }
+
+    internal static class LayerMissionRule
+    {
+        internal static MissionContribution Query(LevelRuntimeState state, BoardCoordinate target, DamageReaction reaction, TurnEffectContext context, int index)
+        {
+            RuntimeCell cell = state.CellAt(target);
+            Elements.ElementDefinition definition;
+            int durability;
+            if (cell.Cover.HasValue && reaction.Response == DamageResponse.CoverDamage)
+            {
+                definition = cell.CoverElement ?? Elements.LegacyElementDefinitions.Get(cell.Cover.Value);
+                durability = cell.CoverDurability;
+            }
+            else if (reaction.Response == DamageResponse.Remove && DustRules.CanDamage(cell, context))
+            {
+                definition = cell.DustElement ?? Elements.LegacyElementDefinitions.GetDust();
+                durability = cell.DustDurability;
+            }
+            else return null;
+            if (state.Missions[index].Definition.Kind != definition.RequireLayer().Mission) return null;
+            return QueryDefinition(definition, durability, index);
+        }
+        internal static MissionContribution QueryDefinition(Elements.ElementDefinition definition, int durability, int index)
+        {
+            Elements.ElementLayerProfile layer = definition.RequireLayer();
+            bool removal = layer.Behavior == Elements.ElementLayerBehavior.CoverRemoval;
+            return new MissionContribution(index, removal || durability <= layer.Damage ? 1 : 0, layer.Damage);
+        }
     }
 }

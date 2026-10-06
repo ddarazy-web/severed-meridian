@@ -29,6 +29,19 @@ namespace Elements.Editor
         private static object Catalog(object entries) => Activator.CreateInstance(catalogType, new[] { entries });
         private static object Get(object catalog, ElementId id) => catalogType.GetMethod("Get").Invoke(catalog, new object[] { id });
         private static int Count(object catalog) => (int)catalogType.GetProperty("Count").GetValue(catalog);
+        private static bool ReadOnlyDefinitions(ElementCatalog catalog, ElementDefinition entry)
+        {
+            ICollection<ElementDefinition> values = catalog.Definitions as ICollection<ElementDefinition>;
+            if (values == null || !values.IsReadOnly) return false;
+            ElementDefinition[] before = values.ToArray();
+            foreach (Action mutation in new Action[] { () => values.Add(entry), () => values.Remove(entry), () => values.Clear() })
+            {
+                try { mutation(); return false; }
+                catch (NotSupportedException) { }
+                if (!before.SequenceEqual(values)) return false;
+            }
+            return true;
+        }
         private static void Reject(Action operation, Type expected, string input, string required = null)
         {
             Exception found = null;
@@ -57,16 +70,16 @@ namespace Elements.Editor
                 Check(definitionType != null, "불변 메모리 정의 계약 존재");
                 catalogType = typeof(ElementId).Assembly.GetType("Elements.ElementCatalog");
                 Check(catalogType != null, "읽기 전용 카탈로그 계약 존재");
-                Check(definitionType.IsSealed && !typeof(UnityEngine.Object).IsAssignableFrom(definitionType) && definitionType.GetProperties().All(property => property.SetMethod == null) && definitionType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).All(field => field.IsInitOnly && (field.FieldType == typeof(string) || field.FieldType == typeof(ElementId) || field.FieldType == typeof(ElementPlacementProfile) || field.FieldType == typeof(ElementChargePlacementProfile) || field.FieldType == typeof(ElementDamageSourcePolicy))), "정의는 ID/표시명/프로필 불변 값만 보유");
+                Check(definitionType.IsSealed && !typeof(UnityEngine.Object).IsAssignableFrom(definitionType) && definitionType.GetProperties().All(property => property.SetMethod == null) && definitionType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).All(field => field.IsInitOnly && (field.FieldType == typeof(string) || field.FieldType == typeof(ElementId) || field.FieldType == typeof(ElementPlacementProfile) || field.FieldType == typeof(ElementChargePlacementProfile) || field.FieldType == typeof(ElementDamageSourcePolicy) || field.FieldType == typeof(ElementColorMatchPolicy) || field.FieldType == typeof(ElementDamageAggregationPolicy) || field.FieldType == typeof(ElementRemovalMissionProfile) || field.FieldType == typeof(ElementReactionBehavior?) || field.FieldType == typeof(ElementLayerProfile) || field.FieldType == typeof(ElementTurnProfile) || field.FieldType == typeof(ElementSupplyProfile))), "정의는 ID/표시명/프로필 불변 값만 보유");
                 Check(typeof(ElementDamageSourcePolicy).IsSealed && typeof(ElementDamageSourcePolicy).GetProperties().All(property => property.SetMethod == null) && typeof(ElementDamageSourcePolicy).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).All(field => field.IsInitOnly && field.FieldType == typeof(bool)), "피해 원인 정책도 불변 bool만 보유");
                 Check(typeof(ElementPlacementProfile).IsSealed && typeof(ElementPlacementProfile).GetProperties().All(property => property.SetMethod == null) && typeof(ElementPlacementProfile).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).All(field => field.IsInitOnly && field.FieldType == typeof(int)), "조합한 프로필도 불변 정수만 보유");
                 Check(typeof(ElementChargePlacementProfile).IsSealed && typeof(ElementChargePlacementProfile).GetProperties().All(property => property.SetMethod == null) && typeof(ElementChargePlacementProfile).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).All(field => field.IsInitOnly && field.FieldType == typeof(int)), "충전 배치 프로필도 불변 정수만 보유");
-                Check(catalogType.GetProperties().Select(property => property.Name).SequenceEqual(new[] { "Count" }) && catalogType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(method => !method.IsSpecialName).Select(method => method.Name).SequenceEqual(new[] { "Get" }), "Count/Get만 공개·등록 수정 API 없음");
+                Check(catalogType.GetProperties().Select(property => property.Name).OrderBy(name => name).SequenceEqual(new[] { "Count", "Definitions" }) && catalogType.GetProperties().All(property => property.SetMethod == null) && catalogType.GetProperty("Definitions").PropertyType == typeof(IReadOnlyCollection<ElementDefinition>) && catalogType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(method => !method.IsSpecialName).Select(method => method.Name).SequenceEqual(new[] { "Get" }), "Count/Get/읽기 전용 Definitions만 공개·등록 수정 API 없음");
                 ObstacleKind[] kinds = { ObstacleKind.Crate, ObstacleKind.Scrap, ObstacleKind.Safe, ObstacleKind.ColorLock, ObstacleKind.Appliance, ObstacleKind.Generator };
                 string[] names = { "나무상자", "고철 뭉치", "고물 회수 캡슐", "색깔 자물쇠", "금속기둥 상자", "고장 난 발전기" };
                 object[] entries = kinds.Select((kind, i) => Define(LegacyElementMap.Get(kind), names[i])).ToArray();
                 Array input = Definitions(entries); object catalog = Catalog(input);
-                Check(Count(catalog) == 6, "기존6종 Count6");
+                Check(Count(catalog) == 6 && ReadOnlyDefinitions((ElementCatalog)catalog, (ElementDefinition)entries[0]), "기존6종 Count6·정의 목록 추가/제거/초기화 거절");
                 string global = JsonUtility.ToJson(UnityEngine.Random.state);
                 for (int i = 0; i < kinds.Length; i++) Observe("legacy-six", catalog, LegacyElementMap.Get(kinds[i]), names[i]);
                 object old = Get(catalog, LegacyElementMap.Get(ObstacleKind.Crate));

@@ -57,7 +57,7 @@ namespace GameScreen
                 linked.Token.ThrowIfCancellationRequested();
                 if (definition == null) definition = await LevelPackLoader.LoadAsync(number);
                 linked.Token.ThrowIfCancellationRequested();
-                initialBytes = LevelPackCodec.Encode(new[] { definition });
+                initialBytes = LevelPackCodec.Snapshot(definition);
                 levelNumber = number; seed = randomSeed;
                 await PrepareAsync(definition, randomSeed, linked.Token);
             }

@@ -150,8 +150,14 @@ namespace Levels
         public static string CoverValueError(CoverKind kind, int durability)
         {
             if (!Enum.IsDefined(typeof(CoverKind), kind)) return "정의되지 않은 덮개입니다.";
-            int max = kind == CoverKind.Web ? 3 : 1;
+            int max = LegacyElementDefinitions.Get(kind).RequirePlacement().MaxDurability;
             return durability >= 1 && durability <= max ? null : $"덮개 내구도는 1~{max}입니다.";
+        }
+
+        public static string DustValueError(int durability)
+        {
+            int max = LegacyElementDefinitions.GetDust().RequirePlacement().MaxDurability;
+            return durability >= 1 && durability <= max ? null : $"먼지 내구도는 1~{max}입니다.";
         }
     }
 }

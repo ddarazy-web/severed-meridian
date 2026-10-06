@@ -15,6 +15,8 @@ namespace GameScreen
         {
             public PowerAttackRecord Record { get; }
             public float Start { get; }
+            public float FlightDuration => Mathf.Clamp(Vector3.Distance(PuzzleWorldBoard.CellPosition(Record.Origin),
+                PuzzleWorldBoard.CellPosition(Record.Center)) * .045f, .18f, .38f);
             public float End => Mathf.Max(Start + .2f, Record.Targets.Count == 0 ? Start : Record.Targets.Max(ImpactAt)) + .2f;
             internal Attack(PowerAttackRecord record, float start) { Record = record; Start = start; }
             public float ImpactAt(BoardCoordinate target)
@@ -22,8 +24,7 @@ namespace GameScreen
                 float launch = Start;
                 if (Record.IsFlight)
                 {
-                    float flight = Mathf.Clamp(Vector3.Distance(PuzzleWorldBoard.CellPosition(Record.Origin), PuzzleWorldBoard.CellPosition(Record.Center)) * .045f, .18f, .38f);
-                    launch += flight;
+                    launch += FlightDuration;
                     if (Record.Area != PowerArea.Horizontal && Record.Area != PowerArea.Vertical)
                         return launch + (Record.Area == PowerArea.Point ? 0 : .12f);
                 }
@@ -66,6 +67,7 @@ namespace GameScreen
 
         public ReadOnlyCollection<Attack> Attacks { get; }
         public ReadOnlyCollection<Reaction> Reactions { get; }
+        public ReadOnlyCollection<DroneFlightMotion> Flights { get; }
         public ReadOnlyCollection<MatchedBlockChange> Changes { get; }
         public PowerCombination Combination { get; }
         public float Duration { get; }
@@ -122,9 +124,23 @@ namespace GameScreen
             foreach (PowerAttackRecord record in records) Schedule(record);
             Attacks = records.Select(record => attacks[record.HitGroup]).ToList().AsReadOnly();
             Reactions = reactions.AsReadOnly();
+            List<DroneFlightMotion> flights = new List<DroneFlightMotion>();
+            foreach (DroneFlightRecord flight in trace?.Flights ?? new List<DroneFlightRecord>().AsReadOnly())
+            {
+                float begin = Attacks.Where(attack => !attack.Record.IsFlight && attack.Record.Origin.Equals(flight.Origin))
+                    .Select(attack => attack.Start).DefaultIfEmpty(Combination?.IsTransformation == true ? .35f : 0).Min();
+                Attack landing = Attacks.FirstOrDefault(attack => attack.Record.HitGroup == flight.LandingHitGroup);
+                float departure = landing?.Start ?? Mathf.Max(begin + .85f + DroneFlightMotion.HoverDelay(flight.Request),
+                    Attacks.Select(attack => attack.End).DefaultIfEmpty(0).Max()) + .2f;
+                DroneFlightRecord[] siblings = trace.Flights.Where(candidate => candidate.Origin.Equals(flight.Origin)).ToArray();
+                flights.Add(new DroneFlightMotion(flight, begin, departure, landing?.FlightDuration ?? 0,
+                    Array.IndexOf(siblings, flight), siblings.Length, flight.Retargets.Select(change => Reactions[change.EffectIndex].Time).ToArray()));
+            }
+            Flights = flights.AsReadOnly();
             Duration = Mathf.Max(Changes.Count > 0 ? .32f : 0,
                 Mathf.Max(Attacks.Count > 0 ? Attacks.Max(attack => attack.End) : 0, Reactions.Count > 0 ? Reactions.Max(reaction => reaction.Time) + .2f : 0));
             if (Combination != null) Duration = Mathf.Max(Duration, Combination.IsTransformation ? .55f : .2f);
+            if (Flights.Count > 0) Duration = Mathf.Max(Duration, Flights.Max(flight => flight.End));
 
             Attack Schedule(PowerAttackRecord record)
             {
@@ -141,13 +157,9 @@ namespace GameScreen
                 {
                     float hoverStart = records.Where(prior => !prior.IsFlight && prior.Origin.Equals(record.Origin))
                         .Select(prior => Schedule(prior).Start).DefaultIfEmpty(0).Min();
-                    bool nearTarget = records.Count(candidate => candidate.IsFlight) <= 3 &&
-                        Combination?.Kind != PowerCombinationKind.RocketDrone && Combination?.Kind != PowerCombinationKind.BombDrone &&
-                        Combination?.Kind != PowerCombinationKind.MagnetDrone;
-                    start = Mathf.Max(start, hoverStart + (nearTarget ? 1 : 1.8f));
+                    DroneFlightRecord flight = trace.Flights.FirstOrDefault(candidate => candidate.LandingHitGroup == record.HitGroup);
+                    start = Mathf.Max(start, hoverStart + .85f + DroneFlightMotion.HoverDelay(flight?.Request ?? record.HitGroup));
                 }
-                // 실제 재탐색 기록이 있을 때만 선회하며 새 표적을 확인하는 시간을 표시한다.
-                if (record.Retargeted) start += .18f;
                 Attack attack = new Attack(record, start); attacks.Add(record.HitGroup, attack); return attack;
             }
         }
