@@ -82,8 +82,9 @@ namespace GameScreen
         private async UniTask PrepareAsync(LevelDefinition definition, int randomSeed, CancellationToken token)
         {
             Message = "시작 보드 구성 중"; Changed?.Invoke();
-            CheckTutorialReplay(definition);
-            StartingBoardSearch search = new StartingBoardSearch(definition, definition.HasTutorial ? definition.Tutorial.seed : randomSeed);
+            bool runTutorial = ShouldRunTutorial(definition);
+            if (runTutorial) CheckTutorialReplay(definition);
+            StartingBoardSearch search = new StartingBoardSearch(definition, runTutorial ? definition.Tutorial.seed : randomSeed);
             while (!search.IsDone)
             {
                 token.ThrowIfCancellationRequested();
@@ -92,8 +93,8 @@ namespace GameScreen
             }
             token.ThrowIfCancellationRequested();
             if (search.Status != StartingBoardStatus.Success) throw new InvalidOperationException(search.Message);
-            tutorialFinalState = null;
-            tutorial = definition.HasTutorial ? Tutorial.TutorialBoardAdapter.Prepare(definition, search.State) : null;
+            tutorialFinalState = null; tutorialCompletionRecorded = false;
+            tutorial = runTutorial ? Tutorial.TutorialBoardAdapter.Prepare(definition, search.State) : null;
             executor = tutorial?.Executor ?? new BoardActionExecutor(search.State);
             InitializeProgress();
             artwork = new PuzzleArtwork(visualCatalog);

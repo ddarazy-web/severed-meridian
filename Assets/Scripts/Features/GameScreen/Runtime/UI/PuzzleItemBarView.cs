@@ -7,6 +7,7 @@ namespace GameScreen
     {
         [SerializeField] private UnityEngine.UI.Button[] buttons;
         public void Configure(UnityEngine.UI.Button[] targets) => buttons = targets;
+        public RectTransform ButtonRect(BoardItem item) => buttons[(int)item].transform as RectTransform;
         public void Bind(PuzzleBoardInput input)
         {
             for (int i = 0; i < buttons.Length; i++)
@@ -20,7 +21,7 @@ namespace GameScreen
         {
             for (int i = 0; i < buttons.Length; i++)
             {
-                buttons[i].interactable = session.CanUseItems;
+                buttons[i].interactable = session.CanSelectItem((BoardItem)i);
                 buttons[i].GetComponent<UnityEngine.UI.Image>().color = input.SelectedItem == (BoardItem)i
                     ? new Color32(245, 200, 90, 255) : new Color32(255, 244, 217, 255);
             }

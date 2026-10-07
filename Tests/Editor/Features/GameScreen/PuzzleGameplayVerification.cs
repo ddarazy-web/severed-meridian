@@ -171,7 +171,8 @@ namespace GameScreen.Editor
         private static PuzzleGameSession NewSession()
         {
             GameObject owner = new GameObject("Session"); owner.transform.SetParent(root.transform);
-            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera); return session;
+            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera);
+            session.ConfigureTutorial(Tutorial.TutorialExecutionContext.CreateTest(2)); return session;
         }
         private static async UniTask<PuzzleGameSession> FromState(LevelRuntimeState state)
         {

@@ -23,8 +23,15 @@ namespace GameScreen.Editor
         private static readonly List<string> results = new List<string>();
         static PuzzleGameSceneVerification()
         {
+            SceneManager.sceneLoaded += (scene, mode) =>
+            {
+                if (!Application.isPlaying || !SessionState.GetBool(Key + ".Ordinary", false)) return;
+                foreach (PuzzleGameSession session in scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<PuzzleGameSession>(true)))
+                    session.ConfigureTutorial(Tutorial.TutorialExecutionContext.CreateTest(2));
+            };
             EditorApplication.playModeStateChanged += change =>
             {
+                if (change == PlayModeStateChange.EnteredEditMode) SessionState.EraseBool(Key + ".Ordinary");
                 if (change == PlayModeStateChange.EnteredPlayMode && SessionState.GetBool(Key, false))
                 { SessionState.SetBool(Key, false); VerifyAsync().Forget(Debug.LogException); }
             };
@@ -41,6 +48,8 @@ namespace GameScreen.Editor
         }
         public static void OpenInteractive()
         {
+            // 기존 화면/팝업 회귀는 일반 플레이를 검사한다. 출시 안내/기록은 전용 검사에서 다룬다.
+            SessionState.SetBool(Key + ".Ordinary", true);
             EditorSceneManager.OpenScene(PuzzleGameAssets.ScenePath);
             EditorApplication.ExecuteMenuItem("Window/General/Game");
             EditorApplication.EnterPlaymode();

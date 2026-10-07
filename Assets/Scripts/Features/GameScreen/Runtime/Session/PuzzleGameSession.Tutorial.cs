@@ -4,6 +4,7 @@ using System.Linq;
 using Levels;
 using Simulation;
 using Tutorial;
+using UnityEngine;
 
 namespace GameScreen
 {
@@ -11,6 +12,21 @@ namespace GameScreen
     {
         private TutorialBoardAdapter tutorial;
         private TutorialProgressSnapshot tutorialFinalState;
+        private TutorialExecutionContext tutorialContext;
+        private bool tutorialCompletionRecorded;
+        public bool CanShowTutorial => ready && !failed && !IsStartingFeedback && !IsRestarting && !IsChangingLevel && !IsPaused && !audioBackground;
+        public Vector3 TutorialCellWorldPosition(BoardCoordinate at) => board.transform.TransformPoint(PuzzleWorldBoard.CellPosition(at));
+        public Vector3 TutorialCellWorldOffset => board.transform.TransformVector(new Vector3(1, 1, 0));
+        public void ConfigureTutorial(TutorialExecutionContext context)
+        {
+            if (started) throw new InvalidOperationException("튜토리얼 실행 정책은 시작 전에 전달하세요.");
+            tutorialContext = context ?? throw new ArgumentNullException(nameof(context));
+        }
+        private bool ShouldRunTutorial(LevelDefinition definition)
+        {
+            tutorialContext ??= TutorialExecutionContext.CreatePlayer();
+            return tutorialContext.ShouldRun(definition.LevelNumber, definition.HasTutorial);
+        }
         public TutorialProgressSnapshot TutorialState => tutorial?.Progress.Snapshot ?? tutorialFinalState;
         private bool TutorialActive => tutorial != null && tutorial.Progress.State != TutorialProgressState.Completed;
         private bool TutorialAllowsBoardInput => !TutorialActive || tutorial.Progress.State == TutorialProgressState.AwaitAction && !HasProgressFeedback;
@@ -53,6 +69,11 @@ namespace GameScreen
             TutorialProgressState previousState = tutorial.Progress.State;
             int previousStep = tutorial.Progress.StepIndex;
             tutorial.Tick(TutorialPresentationReady, IsPaused || IsRestarting || IsChangingLevel || audioBackground || !isActiveAndEnabled);
+            if (!tutorialCompletionRecorded && tutorial.Progress.State == TutorialProgressState.Completed && TutorialPresentationReady && !IsPaused)
+            {
+                tutorialContext?.Complete(State.LevelNumber);
+                tutorialCompletionRecorded = true;
+            }
             if (tutorial.Progress.State == TutorialProgressState.Error)
             { Fail("튜토리얼 처리 중단: " + tutorial.Progress.Message); return; }
             if (previousState != tutorial.Progress.State || previousStep != tutorial.Progress.StepIndex)

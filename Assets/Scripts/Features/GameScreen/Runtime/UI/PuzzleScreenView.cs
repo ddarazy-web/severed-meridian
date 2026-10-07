@@ -17,6 +17,7 @@ namespace GameScreen
         [SerializeField] private RectTransform selection;
         private PuzzlePopupBinding popupBinding;
         private PuzzleHudPresenter hudPresenter;
+        private PuzzleTutorialBinding tutorialBinding;
         private UnityEngine.Events.UnityAction onPause, onCancel;
         private System.Action<string> onDescribe;
         private int bindRevision;
@@ -48,6 +49,7 @@ namespace GameScreen
         private void OnDisable() { Unsubscribe(); popupBinding?.Release(); if (input != null) input.SetScreenUIBlocked(false); }
         private void Unsubscribe()
         {
+            tutorialBinding?.Release();
             hudPresenter?.Dispose(); hudPresenter = null;
             bindRevision++;
             if (session != null) session.Changed -= RefreshScreen; if (input != null) input.SelectionChanged -= Refresh;
@@ -61,6 +63,8 @@ namespace GameScreen
             Unsubscribe(); session.Changed += RefreshScreen; input.SelectionChanged += Refresh;
             hudPresenter = new PuzzleHudPresenter(session, hud);
             layout.Bind(session, input); items.Bind(input);
+            tutorialBinding = GetComponentInChildren<PuzzleTutorialBinding>(true);
+            tutorialBinding?.Bind(session, input, items);
             popupBinding = GetComponent<PuzzlePopupBinding>();
             if (popupBinding != null) popupBinding.Configure(session, input, null, null);
             int revision = bindRevision;

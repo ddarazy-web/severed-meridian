@@ -39,6 +39,7 @@ namespace GameScreen.Editor
             SessionState.SetInt(Key + "number", request.LevelNumber);
             SessionState.SetInt(Key + "seed", request.Seed);
             SessionState.SetInt(Key + "source", (int)request.Source);
+            SessionState.SetInt(Key + "tutorialMode", (int)request.TutorialMode);
             SessionState.SetInt(Key + "owner", ownerWindowId);
             SessionState.SetString(Key + "message", "게임을 종료하고 편집으로 돌아왔습니다.");
             SessionState.SetFloat(Key + "requestedAt", (float)EditorApplication.timeSinceStartup);
@@ -68,6 +69,10 @@ namespace GameScreen.Editor
                 string visualJson = SessionState.GetString(Key + "visuals", "");
                 if (visualJson != "") session.ConfigureVisuals(JsonUtility.FromJson<ElementVisualCatalogDto>(visualJson));
                 session.SetLevelAdvanceEnabled(SessionState.GetInt(Key + "source", (int)PuzzleEditorLevelSource.Asset) == (int)PuzzleEditorLevelSource.MemoryPack);
+                session.ConfigureTutorial(Tutorial.TutorialExecutionContext.CreateEditor(
+                    (Tutorial.TutorialRunMode)SessionState.GetInt(Key + "tutorialMode", 0),
+                    level => SessionState.GetBool(Key + "tutorialCompleted." + level, false),
+                    level => SessionState.SetBool(Key + "tutorialCompleted." + level, true)));
                 definition = LevelPackCodec.ReadLevel(Convert.FromBase64String(encoded), SessionState.GetInt(Key + "number", 0));
                 LevelDefinition owned = definition; definition = null;
                 session.InitializeAsync(owned, SessionState.GetInt(Key + "seed", 12345), CancellationToken.None).Forget(error =>
@@ -114,7 +119,7 @@ namespace GameScreen.Editor
             string previous = SessionState.GetString(Key + "previousScene", "");
             EditorSceneManager.playModeStartScene = previous == "" ? null : AssetDatabase.LoadAssetAtPath<SceneAsset>(previous);
             foreach (string field in new[] { "id", "bytes", "visuals", "previousScene", "message" }) SessionState.EraseString(Key + field);
-            foreach (string field in new[] { "number", "seed", "owner", "source" }) SessionState.EraseInt(Key + field);
+            foreach (string field in new[] { "number", "seed", "owner", "source", "tutorialMode" }) SessionState.EraseInt(Key + field);
             SessionState.EraseFloat(Key + "requestedAt");
             Finished?.Invoke(owner, message);
         }

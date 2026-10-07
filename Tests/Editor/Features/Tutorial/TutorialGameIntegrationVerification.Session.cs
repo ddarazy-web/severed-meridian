@@ -65,7 +65,7 @@ public static partial class TutorialGameIntegrationVerification
                     items = Enumerable.Range(0, 64).Select(index => new ElementSupplyItemDefinition { definitionId = "supply.normal.fixed", color = initial.Colors[(index * 2 + source.Coordinate.Column) % initial.Colors.Count] }).ToList() });
             board = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<PuzzleWorldBoard>("Assets/Prefabs/Game/Puzzle/PuzzleWorldBoard.prefab"));
             cameraOwner = new GameObject("TutorialVerificationCamera"); Camera camera = cameraOwner.AddComponent<Camera>(); camera.orthographic = true;
-            owner = new GameObject("TutorialVerificationSession"); PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera);
+            owner = new GameObject("TutorialVerificationSession"); PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera); session.ConfigureTutorial(TutorialExecutionContext.CreateTest(1));
             await session.InitializeAsync(level, 12345, CancellationToken.None); level = null;
             PropertyInfo snapshotProperty = typeof(PuzzleGameSession).GetProperty("TutorialState");
             MethodInfo next = typeof(PuzzleGameSession).GetMethod("TryAdvanceTutorial");
@@ -159,7 +159,7 @@ public static partial class TutorialGameIntegrationVerification
             BoardCoordinate target = new BoardCoordinate(2, 3);
             level.Tutorial.steps.Insert(2, new TutorialStepDefinition { kind = TutorialStepKind.Item, item = BoardItem.Hammer, instructions = "마지막 무료 체험",
                 hasFirst = true, first = target });
-            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera);
+            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera); session.ConfigureTutorial(TutorialExecutionContext.CreateTest(1));
             await session.InitializeAsync(level, 99999, CancellationToken.None); level = null;
             Check(session.IsReady && !session.HasFailed, "이동 0 경계 실제 게임 준비 · " + session.Message);
             await WaitTutorial(session, 0);
@@ -195,6 +195,9 @@ public static partial class TutorialGameIntegrationVerification
         LevelDefinition level = (LevelDefinition)PrivateCall(typeof(PowerEffectVerification), "Make");
         try
         {
+            // 출시 레벨 증가와 무관하게 다음 구간이 없는 상태를 검사한다.
+            if (File.Exists(LevelPackBuild.FilePath(987650011))) throw new InvalidOperationException("검사 전용 구간이 사용 중입니다.");
+            JsonUtility.FromJsonOverwrite("{\"levelNumber\":987650011}", level);
             BoardCoordinate drone = new BoardCoordinate(4, 4), neighbor = new BoardCoordinate(4, 5);
             PrivateCall(typeof(PowerEffectVerification), "Place", level, drone, InitialBlockKind.Drone, RocketDirection.Horizontal, RabbitColor.Type1);
             PrivateCall(typeof(PowerEffectVerification), "Crate", level, new BoardCoordinate(6, 6), 1);
@@ -211,7 +214,7 @@ public static partial class TutorialGameIntegrationVerification
                 level.Tutorial.supply.sources.Add(new ElementSupplySourceDefinition { coordinate = new BoardCoordinate(0, column), mode = SupplyMode.Fixed, exhaustion = SupplyExhaustion.Stop,
                     items = Enumerable.Range(0, 64).Select(index => new ElementSupplyItemDefinition { definitionId = "supply.normal.fixed", color = (RabbitColor)((index * 2 + sourceColumn) % 5) }).ToList() });
             }
-            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera);
+            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera); session.ConfigureTutorial(TutorialExecutionContext.CreateTest(1));
             await session.InitializeAsync(level, 555, CancellationToken.None); level = null;
             Check(session.IsReady && !session.HasFailed, "뒤늦은 드론 결과 실제 게임 준비 · " + session.Message);
             await WaitTutorial(session, 0);
@@ -252,7 +255,7 @@ public static partial class TutorialGameIntegrationVerification
         try
         {
             invalid.Tutorial.supply.sources.Clear();
-            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera);
+            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera); session.ConfigureTutorial(TutorialExecutionContext.CreateTest(1));
             await session.InitializeAsync(invalid, 12345, CancellationToken.None);
             Check(session.HasFailed && !session.CanAcceptInput && session.State == null && session.TutorialState == null && session.Message.Contains("공급"), "실제 재생 오류는 게임 시작 전에 진단·사본/엔진 미게시");
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
@@ -263,7 +266,7 @@ public static partial class TutorialGameIntegrationVerification
         LevelDefinition canceledLevel = RocketTutorial(false);
         try
         {
-            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera);
+            PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera); session.ConfigureTutorial(TutorialExecutionContext.CreateTest(1));
             using CancellationTokenSource canceled = new CancellationTokenSource(); canceled.Cancel();
             await session.InitializeAsync(canceledLevel, 12345, canceled.Token);
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
@@ -277,7 +280,8 @@ public static partial class TutorialGameIntegrationVerification
         string path = "Assets/__TutorialStage03Next-" + Guid.NewGuid().ToString("N") + ".bytes";
         IResourceLocator[] original = Addressables.ResourceLocators.ToArray();
         IResourceLocator locator = null;
-        LevelDefinition next = LevelTutorialDataVerification.Fixture(2);
+        int nextNumber = checked(session.State.LevelNumber + 1);
+        LevelDefinition next = LevelTutorialDataVerification.Fixture(nextNumber);
         bool installed = false;
         try
         {
@@ -286,14 +290,14 @@ public static partial class TutorialGameIntegrationVerification
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
             ResourceLocationMap map = new ResourceLocationMap("TutorialStage03Next");
             AssetDatabaseProvider provider = Addressables.ResourceManager.ResourceProviders.OfType<AssetDatabaseProvider>().First();
-            map.Add(LevelPackCodec.Address(2), new ResourceLocationBase("TutorialStage03Next", path, provider.ProviderId, typeof(TextAsset)));
+            map.Add(LevelPackCodec.Address(nextNumber), new ResourceLocationBase("TutorialStage03Next", path, provider.ProviderId, typeof(TextAsset)));
             Type fixtureLocator = typeof(GameScreen.Editor.PuzzleLevelTransitionVerification).GetNestedType("FixtureLocator", BindingFlags.NonPublic);
             locator = (IResourceLocator)Activator.CreateInstance(fixtureLocator, new object[] { original, map });
             installed = true;
             foreach (IResourceLocator old in original) Addressables.RemoveResourceLocator(old);
             Addressables.AddResourceLocator(locator);
             Check(await session.AdvanceLevelAsync(CancellationToken.None), "튜토리얼 승리 후 실제 다음 레벨 준비·교체 · " + session.Message);
-            Check(previous.Executor == null && session.State.LevelNumber == 2 && session.TutorialState == null && session.State.Random.Seed == 555, "다음 레벨은 이전 튜토리얼 해제·일반 시드 경로 유지");
+            Check(previous.Executor == null && session.State.LevelNumber == nextNumber && session.TutorialState == null && session.State.Random.Seed == 555, "다음 레벨은 이전 튜토리얼 해제·일반 시드 경로 유지");
         }
         finally
         {

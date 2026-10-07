@@ -1,6 +1,6 @@
 # 레벨 튜토리얼 — 통합 개발 가이드라인
 
-상태: 1~3단계 완료, 4단계 준비. 2026-10-07 실제 게임 연결·재생·수명 검증 반영.
+상태: 공통1~4단계 및 후속5단계 완료. 2026-10-07 실제1레벨 기본 매칭·2레벨 로켓 콘텐츠 적용과 검증 반영. 6단계는 계획만 작성.
 
 [확정 기획](../../../Contents/MoonRabbitJunkyard/13_레벨튜토리얼.md) · [확장 구조 결정](../../../Decisions/MoonRabbitJunkyard/2026-10-07-tutorial-extension.md) · [1단계 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-01-progress.md).
 
@@ -45,8 +45,8 @@
 |---|---|---|
 | 1. 데이터·저장·레벨 에디터 — 완료 | 단계/조건/고정 공급, 팩 호환, 대상 선택, 정적 검사·Undo | 작성·저장·재로드·Asset/팩 복원이 동일함 |
 | 2. 확장 가능한 진행 엔진 — 완료 | 등록 목록, 처리기·판정기, 공통 진행, 검사 규칙 공유, 확장 검사 | 게임 UI 없이 기존 종류가 진행되고 중앙 진행 수정 없이 처리기를 등록 가능 |
-| 3. 실제 게임 연결·재생 검사 — 다음 작업 | 입력/세션, 실제 기록, 시드/공급, 연출·종료·수명, 에디터 재생 검사 | 지정 조작만 실제 보드에서 실행되고 같은 보드에서 일반 플레이로 복귀 |
-| 4. 안내 화면·기록·최종 적용 | 강조/말풍선/손가락, 완료 저장, 시험 3모드, 대표 레벨 적용·통합 검증 | 안내·생략·중단 재시작·시험 기록 분리와 실제 플레이 확인 |
+| 3. 실제 게임 연결·재생 검사 — 완료 | 입력/세션, 실제 기록, 시드/공급, 연출·종료·수명, 에디터 재생 검사 | 지정 조작만 실제 보드에서 실행되고 같은 보드에서 일반 플레이로 복귀 |
+| 4. 안내 화면·기록·최종 적용 — 완료 | 강조/말풍선/손가락, 완료 저장, 시험 3모드, 대표 레벨 적용·통합 검증 | 안내·생략·중단 재시작·시험 기록 분리와 실제 플레이 확인 |
 
 ### 2단계의 작업 묶음
 
@@ -92,4 +92,20 @@ Unity6000.3.10f1과 기존 패키지/asmdef를 유지한다. Tests/Editor와 Too
 
 [2단계 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-02-progress.md) · [3단계 계획](stage-03-game-integration-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-03-game-integration-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-03-command.md) · [3단계 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-03-progress.md).
 
-[4단계 계획](stage-04-guidance-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-04-guidance-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-04-command.md). 4단계 소스는 미착수다. 현재 1레벨 기본 매칭만 대표 적용하고, 없는 2~5/9 출시 레벨의 제작은 별도로 남긴다.
+[4단계 계획](stage-04-guidance-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-04-guidance-goal.md) · [수행한 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-04-command.md) · [실제 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-04-progress.md). 4단계까지 완료했다. 1레벨 기본 매칭만 대표 적용했으며, 없는 2~5/9 출시 레벨의 제작은 별도로 남긴다.
+
+## 완료 후 콘텐츠 작업
+
+공통 시스템 개발 1~4단계는 완료했다. 후속 5단계는 기존 시스템을 사용하는 실제 2레벨 청소로켓 콘텐츠 제작이다. 로켓 생성→교환 발동의 한 레벨만 작성·적용·검증하고, 기존 1레벨은 보존한다. 문서 작성 시점에는 새 레벨/팩/소스를 변경하지 않는다.
+
+[5단계 계획](stage-05-rocket-content-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-05-rocket-content-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-05-command.md).
+
+이후 콘텐츠는 기존 소개 순서에 따라 단계 완료 시 다음 범위만 상세 계획한다. 모든 후속 계획을 지금 작성하거나 3~5/9레벨을 동시에 생성하지 않는다.
+
+### 후속 5단계 완료와 다음 범위
+
+5단계에서 실제 전체9×9 Level_02와 같은 구간 팩, 가로4매칭→세로로켓 생성/교환 발동 5단계 안내를 적용했다. Asset/MemoryPack 실제 에디터 진입과 UI/포인터·모드·기록·1→2 전환을 검증했고 게임 소스 단독 컴파일을 확인했다. 기존 드론 종합 시간 검사 실패와 실기기 미검증은 [5단계 완료 보고](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-05-progress.md)를 따른다. 위 이전 시점의 ‘없는2레벨’ 설명은 당시 계획의 전제다.
+
+다음6단계는 실제3레벨 ㄱ 매칭 달 폭탄 하나의 생성→인접 교환3×3 발동 콘텐츠다. 후보·재생, 저장·실제 UI, 기록·회귀·인계의 세 작업 묶음으로 직접 진행한다. 새3레벨/팩 변경은 다음 실행 지시 후 시작한다.
+
+[6단계 계획](stage-06-bomb-content-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-06-bomb-content-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-06-command.md).

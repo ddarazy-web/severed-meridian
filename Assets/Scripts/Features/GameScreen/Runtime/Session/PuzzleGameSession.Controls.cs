@@ -79,8 +79,9 @@ namespace GameScreen
                 Message = "다시 시작하는 중"; Changed?.Invoke();
                 linked.Token.ThrowIfCancellationRequested();
                 definition = LevelPackCodec.ReadLevel(initialBytes, levelNumber);
-                CheckTutorialReplay(definition);
-                StartingBoardSearch search = new StartingBoardSearch(definition, definition.HasTutorial ? definition.Tutorial.seed : seed);
+                bool runTutorial = ShouldRunTutorial(definition);
+                if (runTutorial) CheckTutorialReplay(definition);
+                StartingBoardSearch search = new StartingBoardSearch(definition, runTutorial ? definition.Tutorial.seed : seed);
                 while (!search.IsDone)
                 {
                     linked.Token.ThrowIfCancellationRequested();
@@ -89,7 +90,7 @@ namespace GameScreen
                     await UniTask.Yield(PlayerLoopTiming.Update, linked.Token);
                 }
                 if (search.Status != StartingBoardStatus.Success) throw new InvalidOperationException(search.Message);
-                candidateTutorial = definition.HasTutorial ? Tutorial.TutorialBoardAdapter.Prepare(definition, search.State) : null;
+                candidateTutorial = runTutorial ? Tutorial.TutorialBoardAdapter.Prepare(definition, search.State) : null;
                 BoardActionExecutor candidateExecutor = candidateTutorial?.Executor ?? new BoardActionExecutor(search.State);
                 candidateArtwork = new PuzzleArtwork(visualCatalog);
                 await candidateArtwork.PrepareAsync(candidateExecutor.State, linked.Token);
@@ -108,7 +109,7 @@ namespace GameScreen
 
                 PuzzleArtwork previousArtwork = artwork;
                 ClearProgress(); ResetPresentation();
-                DisposeTutorial(); tutorialFinalState = null;
+                DisposeTutorial(); tutorialFinalState = null; tutorialCompletionRecorded = false;
                 tutorial = candidateTutorial; candidateTutorial = null;
                 executor = candidateExecutor; artwork = candidateArtwork; candidateArtwork = null;
                 ready = true; failed = false; LogicalSessionId = Guid.NewGuid().ToString("N");

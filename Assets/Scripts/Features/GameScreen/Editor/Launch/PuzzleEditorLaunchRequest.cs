@@ -16,13 +16,14 @@ namespace GameScreen.Editor
         public int LevelNumber { get; }
         public int Seed { get; }
         public PuzzleEditorLevelSource Source { get; }
+        public Tutorial.TutorialRunMode TutorialMode { get; private set; }
         internal string EncodedBytes => Convert.ToBase64String(bytes);
         internal string EncodedVisuals => visualJson;
 
         private PuzzleEditorLaunchRequest(byte[] snapshot, int number, int seed, PuzzleEditorLevelSource source, ElementVisualCatalog visuals)
         { bytes = snapshot; LevelNumber = number; Seed = seed; Source = source; visualJson = JsonUtility.ToJson(visuals.ToDto()); }
 
-        public static PuzzleEditorLaunchRequest Capture(LevelDefinition source, PuzzleEditorLevelSource mode, int seed)
+        public static PuzzleEditorLaunchRequest Capture(LevelDefinition source, PuzzleEditorLevelSource mode, int seed, Tutorial.TutorialRunMode tutorialMode = Tutorial.TutorialRunMode.Automatic)
         {
             if (source == null) throw new InvalidOperationException("실행할 레벨을 선택하세요.");
             if (source.LevelNumber < 1) throw new InvalidOperationException("레벨 번호는 1 이상이어야 합니다.");
@@ -41,7 +42,7 @@ namespace GameScreen.Editor
             try
             {
                 return new PuzzleEditorLaunchRequest(snapshot, source.LevelNumber, seed, mode,
-                    ElementVisualLookup.ForLevel(mode == PuzzleEditorLevelSource.MemoryPack ? validation : source));
+                    ElementVisualLookup.ForLevel(mode == PuzzleEditorLevelSource.MemoryPack ? validation : source)) { TutorialMode = tutorialMode };
             }
             finally { UnityEngine.Object.DestroyImmediate(validation); }
         }

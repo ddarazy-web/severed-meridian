@@ -12,6 +12,7 @@ namespace Levels.Editor
     {
         [SerializeField] private PuzzleEditorLevelSource gameLevelSource;
         [SerializeField] private int gameLevelSeed = 12345;
+        [SerializeField] private Tutorial.TutorialRunMode gameTutorialMode;
         [SerializeField] private string gameLaunchMessage = "";
         private Label gameLaunchInfo;
 
@@ -32,6 +33,10 @@ namespace Levels.Editor
             seedField.style.width = 170; seedField.labelElement.style.minWidth = 60; seedField.labelElement.style.width = 60;
             seedField.RegisterValueChangedCallback(evt => { gameLevelSeed = evt.newValue; gameLaunchMessage = ""; });
             parent.Add(seedField);
+            PopupField<string> tutorialMode = new PopupField<string>("튜토리얼", new List<string> { "자동", "항상 실행", "실행 안 함" }, (int)gameTutorialMode) { name = "game-tutorial-mode" };
+            tutorialMode.style.width = 190;
+            tutorialMode.RegisterValueChangedCallback(evt => gameTutorialMode = (Tutorial.TutorialRunMode)tutorialMode.choices.IndexOf(evt.newValue));
+            parent.Add(tutorialMode);
             gameLaunchInfo = new Label { name = "game-launch-info" };
             gameLaunchInfo.style.whiteSpace = WhiteSpace.Normal;
             gameLaunchInfo.style.marginLeft = 6;
@@ -43,7 +48,7 @@ namespace Levels.Editor
             {
                 bool available = !PuzzleEditorLauncher.IsBusy && !EditorApplication.isCompiling && !EditorApplication.isPlayingOrWillChangePlaymode;
                 launch.SetEnabled(level != null && available);
-                source.SetEnabled(available); seedField.SetEnabled(available);
+                source.SetEnabled(available); seedField.SetEnabled(available); tutorialMode.SetEnabled(available);
                 string input = gameLevelSource == PuzzleEditorLevelSource.Asset ? "에셋의 현재 편집값 사용 (미저장 값 포함)" : "마지막 생성 MemoryPack 사용 · 갱신: 플레이 테스트 → MemoryPack 갱신";
                 gameLaunchInfo.text = gameLaunchMessage != "" ? gameLaunchMessage : $"게임 실행: 레벨 {(level != null ? level.LevelNumber.ToString() : "미선택")} · 시드 {gameLevelSeed} · {input}";
             }
@@ -55,7 +60,7 @@ namespace Levels.Editor
             {
                 board?.CancelStroke();
                 data?.ApplyModifiedProperties();
-                PuzzleEditorLaunchRequest request = PuzzleEditorLaunchRequest.Capture(level, gameLevelSource, gameLevelSeed);
+                PuzzleEditorLaunchRequest request = PuzzleEditorLaunchRequest.Capture(level, gameLevelSource, gameLevelSeed, gameTutorialMode);
                 PuzzleEditorLauncher.Launch(request, GetInstanceID());
                 gameLaunchMessage = $"레벨 {request.LevelNumber} · {gameLevelSource} · 시드 {request.Seed} 게임 실행 중";
             }

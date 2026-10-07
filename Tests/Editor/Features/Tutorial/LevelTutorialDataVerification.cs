@@ -27,6 +27,8 @@ namespace Tutorial.Editor
         {
             LevelDefinition level = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<LevelDefinition>("Assets/Data/Levels/Level_01.asset"));
             level.hideFlags = HideFlags.HideAndDontSave;
+            // 출시 레벨 안내와 독립된 형식/엔진 fixture를 구성한다.
+            level.Tutorial.steps.Clear(); level.Tutorial.supply.sources.Clear();
             using (SerializedObject data = new SerializedObject(level)) { data.FindProperty("levelNumber").intValue = number; data.ApplyModifiedPropertiesWithoutUndo(); }
             return level;
         }
@@ -52,7 +54,11 @@ namespace Tutorial.Editor
                 LevelDefinition v1 = Track(LevelPackCodec.ReadLevel(LevelPackCodec.Encode(new[] { plain }), 1)), v2 = Track(LevelPackCodec.ReadLevel(old, 1));
                 Check(!v1.HasTutorial && !v2.HasTutorial, "구형 팩1/2 읽기");
                 string diskPath = "Assets/Data/LevelPacks/levels-000001.bytes"; byte[] disk = File.ReadAllBytes(diskPath); LevelWithCatalog diskLevel = LevelPackCodec.ReadLevelWithCatalog(disk, 1); Track(diskLevel.Level);
-                Check(disk.SequenceEqual(LevelPackCodec.EncodeWithTutorial(new[] { diskLevel.Level }, diskLevel.Catalog)), "이미 저장된 출시 팩2와 재인코딩 바이트 동일");
+                int[] diskNumbers = disk.Take(4).SequenceEqual(new byte[] { 0x54, 0x46, 0x50, 0x4b })
+                    ? LevelPackCodec.DecodeTutorial(disk).Tutorials.Select(item => item.LevelNumber).ToArray()
+                    : LevelPackCodec.DecodeElements(disk).Levels.Select(item => item.LevelNumber).ToArray();
+                LevelDefinition[] diskLevels = diskNumbers.Select(number => Track(LevelPackCodec.ReadLevel(disk, number))).ToArray();
+                Check(disk.SequenceEqual(LevelPackCodec.EncodeWithTutorial(diskLevels, diskLevel.Catalog)), "현재 출시 구간 모든 레벨과 재인코딩 바이트 동일");
                 Check(LevelStateBuilder.Fingerprint(v2) == BitConverter.ToString(SHA256.Create().ComputeHash(LevelPackCodec.Encode(new[] { v2 }, v2.CreateElementCatalog()))).Replace("-", ""), "튜토리얼 없는 v5 지문 공식 보존");
                 LevelDefinition level = Track(Fixture()); Populate(level);
                 Check(LevelDefinitionValidator.Validate(level).Count == 0, "정상 네 종류·미래 생성 파워 초기 배치 불요");

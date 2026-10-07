@@ -1,6 +1,6 @@
 # 레벨 튜토리얼 4단계 — 복사용 목표 실행문
 
-상태: 준비. 아래 실행문으로 4단계만 진행한다.
+상태: 완료. 2026-10-07. 아래 실행문은 수행한 4단계의 범위 기록이다. [실제 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-04-progress.md).
 
 ~~~text
 ServeredMeridian 레벨 튜토리얼 4단계 ‘안내·완료 기록·최종 적용’을 진행해.

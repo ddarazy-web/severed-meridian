@@ -34,6 +34,8 @@ namespace GameScreen.Editor
                 CreateScreen(hud, items, pause, result);
                 PuzzleLevelTransitionAssets.ApplyToPrefab(outputFolder + "/PuzzleResultPopup.prefab");
                 PuzzlePopupAssets.ApplyToPrefabs(outputFolder, outputFolder == Folder ? PuzzlePopupAssets.CatalogPath : outputFolder + "/PopupCatalog.asset");
+                PuzzleTutorialAssets.GenerateOverlay(outputFolder + "/TutorialOverlay.prefab");
+                PuzzleTutorialAssets.ApplyToPrefab(outputFolder + "/PuzzleScreen.prefab", outputFolder + "/TutorialOverlay.prefab");
                 return AssetDatabase.LoadAssetAtPath<GameObject>(outputFolder + "/PuzzleScreen.prefab");
             }
             finally { saveFolder = previousFolder; }
