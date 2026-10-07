@@ -127,7 +127,7 @@ namespace Levels.Editor
 
         private static void Legacy()
         {
-            foreach (string path in Directory.GetFiles("Assets/Scripts/Features/Levels/Editor/Tests/Fixtures", "*.json").OrderBy(s => s))
+            foreach (string path in Directory.GetFiles("Tests/Editor/Features/Levels/Fixtures", "*.json").OrderBy(s => s))
             {
                 byte[] file = File.ReadAllBytes(path); LevelDefinition level = New(); JsonUtility.FromJsonOverwrite(File.ReadAllText(path), level);
                 string before = JsonUtility.ToJson(level);

@@ -12,7 +12,7 @@ namespace Levels.Editor
     {
         private const string Evidence = "Logs/LevelFlowVerification";
         private const string StateFile = Evidence + "/state.json";
-        private const string Fixtures = "Assets/Scripts/Features/Levels/Editor/Tests/Fixtures";
+        private const string Fixtures = "Tests/Editor/Features/Levels/Fixtures";
         private static readonly List<string> Results = new List<string>();
         private static string folder;
         private static LevelDefinition level;

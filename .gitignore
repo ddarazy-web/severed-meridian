@@ -151,3 +151,7 @@ ServerData/*
 # Codex remote attachments
 /.codex-remote-attachments/
 
+# 검사 시에만 연결되는 외부 테스트 복사본
+/Assets/__ProjectTests/
+/Assets/__ProjectTests.meta
+

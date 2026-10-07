@@ -32,7 +32,7 @@ namespace Levels.Editor
                 LevelPackBuild.Generate();
                 Check(LevelPackCodec.FirstLevel(1) == 1 && LevelPackCodec.FirstLevel(50) == 1 && LevelPackCodec.FirstLevel(51) == 51 &&
                     LevelPackCodec.FirstLevel(100) == 51 && LevelPackCodec.FirstLevel(101) == 101, "50레벨 고정 구간 경계");
-                foreach (string fixture in Directory.GetFiles("Assets/Scripts/Features/Levels/Editor/Tests/Fixtures", "*.json"))
+                foreach (string fixture in Directory.GetFiles("Tests/Editor/Features/Levels/Fixtures", "*.json"))
                 {
                     LevelDefinition original = New();
                     JsonUtility.FromJsonOverwrite(File.ReadAllText(fixture), original);

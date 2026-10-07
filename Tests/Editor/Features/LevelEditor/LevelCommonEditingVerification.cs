@@ -84,7 +84,7 @@ namespace Levels.Editor
                 foreach (string fixture in new[] { "Version1Invalid", "Version2Normal", "Version3Flow", "Version3Invalid" })
                 {
                     string legacyPath = folder + "/" + fixture + ".asset";
-                    File.Copy("Assets/Scripts/Features/Levels/Editor/Tests/Fixtures/" + fixture + ".txt", legacyPath);
+                    File.Copy("Tests/Editor/Features/Levels/Fixtures/" + fixture + ".txt", legacyPath);
                     AssetDatabase.ImportAsset(legacyPath, ImportAssetOptions.ForceSynchronousImport);
                     LevelDefinition legacy = AssetDatabase.LoadAssetAtPath<LevelDefinition>(legacyPath);
                     string legacyJson = JsonUtility.ToJson(legacy);
