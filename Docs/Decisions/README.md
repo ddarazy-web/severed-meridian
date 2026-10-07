@@ -4,6 +4,8 @@
 
 ## 기능별 문서
 
+- [레벨 튜토리얼 등록식 확장과 단계 경계](MoonRabbitJunkyard/2026-10-07-tutorial-extension.md)
+
 - [레벨 튜토리얼 팩3 봉투 저장](MoonRabbitJunkyard/2026-10-07-tutorial-pack-envelope.md)
 
 - [요소 ScriptableObject 제작 원본과 MemoryPack 배포](project-wide/2026-10-07-element-content-authoring.md)

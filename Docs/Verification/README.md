@@ -3,6 +3,7 @@
 [전체 문서 분류](../README.md)
 
 - [레벨 튜토리얼 1단계 — 데이터·저장·에디터 검증](MoonRabbitJunkyard/Tutorial/stage-01-progress.md)
+- [레벨 튜토리얼 2단계 — 등록식 진행 엔진 검증](MoonRabbitJunkyard/Tutorial/stage-02-progress.md)
 
 - [요소 ScriptableObject 제작·MemoryPack 검증](project-wide/2026-10-07-element-content-authoring.md)
 

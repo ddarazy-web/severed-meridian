@@ -1,32 +1,37 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Board;
 using Elements;
 using Levels;
-using Simulation;
 
 namespace Tutorial
 {
     /// <summary>제작 시 알 수 있는 정적 조건만 검사한다. 후속 보드 상태는 실행 재생 검사에서 판단한다.</summary>
     public static class LevelTutorialValidator
     {
-        public static IEnumerable<string> References(LevelTutorialDefinition tutorial)
+        public static IEnumerable<string> References(LevelTutorialDefinition tutorial, TutorialHandlerRegistry registry = null)
         {
             if (tutorial?.steps == null || tutorial.steps.Count == 0) yield break;
+            registry ??= TutorialHandlerRegistry.CreateDefault();
+            registry.Freeze();
             foreach (TutorialStepDefinition step in tutorial.steps)
             {
                 if (step == null) continue;
-                if (step.kind == TutorialStepKind.PowerSwap) yield return step.actionDefinitionId;
+                if (!registry.TryGetStep(step, out ITutorialStepHandler handler)) throw new ArgumentException("등록되지 않은 튜토리얼 행동입니다.");
+                foreach (string id in handler.References(step)) yield return id;
                 foreach (TutorialResultDefinition result in step.results ?? new List<TutorialResultDefinition>())
-                    if (result != null) yield return result.definitionId;
+                {
+                    if (result == null) continue;
+                    if (!registry.TryGetResult(result.kind, out ITutorialResultEvaluator evaluator)) throw new ArgumentException("등록되지 않은 튜토리얼 조건입니다.");
+                    foreach (string id in evaluator.References(result)) yield return id;
+                }
             }
             foreach (ElementSupplySourceDefinition source in tutorial.supply?.sources ?? new List<ElementSupplySourceDefinition>())
                 foreach (ElementSupplyItemDefinition item in source?.items ?? new List<ElementSupplyItemDefinition>())
                     if (item != null) yield return item.definitionId;
         }
 
-        public static List<LevelValidationIssue> Validate(LevelDefinition level, ElementCatalog catalog = null)
+        public static List<LevelValidationIssue> Validate(LevelDefinition level, ElementCatalog catalog = null, TutorialHandlerRegistry registry = null)
         {
             List<LevelValidationIssue> issues = new List<LevelValidationIssue>();
             LevelTutorialDefinition tutorial = level?.Tutorial;
@@ -36,91 +41,18 @@ namespace Tutorial
             if (tutorial.steps == null) { Error("tutorial.steps", "단계 목록이 없습니다."); return issues; }
             if (tutorial.steps.Count == 0) return issues;
             catalog ??= level.CreateElementCatalog();
-            ElementDefinition Resolve(string id, string path, bool power = false)
-            {
-                try
-                {
-                    ElementDefinition definition = catalog.Get(new ElementId(id));
-                    PackedElementDefinition.ValidateDefinition(definition);
-                    if (power && definition.Supply?.Behavior != ElementSupplyBehavior.Power)
-                        throw new ArgumentException("파워 생성 정의를 지정하세요.");
-                    return definition;
-                }
-                catch (Exception error) when (error is ArgumentException || error is InvalidOperationException || error is KeyNotFoundException)
-                { Error(path, $"정의 '{id}': {error.Message}"); return null; }
-            }
-            void Cell(BoardCoordinate coordinate, string path)
-            {
-                string error = LevelPlacementRules.CellError(level, coordinate);
-                if (error != null) Error(path, error, coordinate);
-            }
+            registry ??= TutorialHandlerRegistry.CreateDefault(); registry.Freeze();
+            TutorialValidationContext root = new TutorialValidationContext(level, catalog, "", Error);
+            ElementDefinition Resolve(string id, string path, bool power = false) => root.Resolve(id, path, power);
             bool firstAction = true; int moves = 0;
             for (int i = 0; i < tutorial.steps.Count; i++)
             {
                 TutorialStepDefinition step = tutorial.steps[i]; string path = $"tutorial.steps.Array.data[{i}]";
-                if (step == null) { Error(path, "단계가 null입니다."); continue; }
-                if (!Enum.IsDefined(typeof(TutorialStepKind), step.kind)) Error(path + ".kind", "단계 종류가 잘못됐습니다.");
-                if (string.IsNullOrWhiteSpace(step.instructions)) Error(path + ".instructions", "안내 문구를 작성하세요.");
-                if (step.highlights == null) Error(path + ".highlights", "강조 목록이 없습니다.");
-                else for (int j = 0; j < step.highlights.Count; j++) Cell(step.highlights[j], path + $".highlights.Array.data[{j}]");
-                bool pair = step.kind == TutorialStepKind.Swap || step.kind == TutorialStepKind.PowerSwap || step.kind == TutorialStepKind.Item && step.item == BoardItem.Swap;
-                bool target = pair || step.kind == TutorialStepKind.Item && step.item == BoardItem.Hammer;
-                if (target)
-                {
-                    if (!step.hasFirst) Error(path + ".hasFirst", "첫 번째 대상 칸이 필요합니다.");
-                    else Cell(step.first, path + ".first");
-                }
-                else if (step.hasFirst || step.hasSecond) Error(path, "설명·섞기 단계는 행동 대상이 없습니다.");
-                if (pair)
-                {
-                    if (!step.hasSecond) Error(path + ".hasSecond", "두 번째 대상 칸이 필요합니다.");
-                    else Cell(step.second, path + ".second");
-                    if (step.hasFirst && step.hasSecond)
-                    {
-                        BoardEdge edge = new BoardEdge(step.first, step.second);
-                        if (!edge.IsAdjacent) Error(path + ".second", "교환 대상은 인접해야 합니다.", step.second);
-                        else if (level.Flow?.Walls?.Contains(edge) == true) Error(path + ".second", "벽을 통과하는 교환입니다.", step.second);
-                    }
-                }
-                else if (target && step.hasSecond) Error(path + ".hasSecond", "망치는 한 칸만 선택합니다.");
-                if (step.kind == TutorialStepKind.Swap || step.kind == TutorialStepKind.PowerSwap) moves++;
-                if (step.kind == TutorialStepKind.Item && !Enum.IsDefined(typeof(BoardItem), step.item)) Error(path + ".item", "아이템 종류가 잘못됐습니다.");
-                ElementDefinition power = step.kind == TutorialStepKind.PowerSwap ? Resolve(step.actionDefinitionId, path + ".actionDefinitionId", true) : null;
-                if (firstAction && step.kind != TutorialStepKind.Description)
-                {
-                    firstAction = false;
-                    // 첫 조작의 초기 대상만 조회한다. 나중에 생성될 파워는 초기 배치를 요구하지 않는다.
-                    IReadOnlyList<ElementPlacementDefinition> placements = level.Elements;
-                    try { if (level.SchemaVersion == 4) placements = LegacyElementLevelAdapter.Preview(level); }
-                    catch (Exception error) when (error is ArgumentException || error is NullReferenceException)
-                    { Error(path, "초기 배치 데이터 오류: " + error.Message); placements = Array.Empty<ElementPlacementDefinition>(); }
-                    foreach (BoardCoordinate coordinate in target ? pair ? new[] { step.first, step.second } : new[] { step.first } : Array.Empty<BoardCoordinate>())
-                    {
-                        ElementPlacementDefinition placement = placements?.FirstOrDefault(item => item?.layer == PlacementLayer.Block && item.coordinate.Equals(coordinate));
-                        if (pair)
-                        {
-                            ElementDefinition definition = placement == null ? null : Resolve(placement.definitionId, path);
-                            if (definition?.Supply?.Behavior != ElementSupplyBehavior.FixedNormal && definition?.Supply?.Behavior != ElementSupplyBehavior.Power)
-                                Error(path, "첫 교환은 초기 고정 블록 또는 파워를 대상으로 지정하세요.", coordinate);
-                            if (placements?.Any(item => item?.layer == PlacementLayer.Cover && item.coordinate.Equals(coordinate)) == true)
-                                Error(path, "덮개가 있는 초기 블록은 교환할 수 없습니다.", coordinate);
-                        }
-                        else if (placement == null && placements?.Any(item => item != null && LevelPlacementRules.Footprint(item.coordinate,
-                            Resolve(item.definitionId, path)?.Placement?.Size ?? Resolve(item.definitionId, path)?.ChargePlacement?.Size ?? 1).Contains(coordinate)) != true)
-                            Error(path, "첫 망치 대상에 제거·피해를 받을 배치가 없습니다.", coordinate);
-                    }
-                    if (power != null && placements?.Any(item => item?.layer == PlacementLayer.Block && item.coordinate.Equals(step.first) && item.definitionId == power.Id.Value) != true)
-                        Error(path + ".first", "첫 파워 교환의 첫 칸에 지정 파워가 없습니다.", step.first);
-                }
-                if (step.results == null) Error(path + ".results", "결과 조건 목록이 없습니다.");
-                else for (int j = 0; j < step.results.Count; j++)
-                {
-                    TutorialResultDefinition condition = step.results[j]; string resultPath = path + $".results.Array.data[{j}]";
-                    if (condition == null) { Error(resultPath, "결과 조건이 null입니다."); continue; }
-                    if (!Enum.IsDefined(typeof(TutorialResultKind), condition.kind) || condition.count <= 0) Error(resultPath, "조건 종류·수량이 잘못됐습니다.");
-                    Resolve(condition.definitionId, resultPath + ".definitionId", condition.kind != TutorialResultKind.Removed);
-                    if (condition.hasCoordinate) Cell(condition.coordinate, resultPath + ".coordinate");
-                }
+                TutorialValidationContext context = new TutorialValidationContext(level, catalog, path, Error, firstAction);
+                ITutorialStepHandler handler = ValidateStep(step, registry, context);
+                if (handler == null) continue;
+                if (handler.ConsumesMove) moves++;
+                if (!handler.IsDescription) firstAction = false;
             }
             if (moves > level.MoveCount) Error("tutorial.steps", "튜토리얼 교환 수가 레벨 이동 수를 초과합니다.");
             if (tutorial.supply?.sources == null) { Error("tutorial.supply", "고정 공급 목록이 없습니다."); return issues; }
@@ -157,6 +89,29 @@ namespace Tutorial
             foreach (LevelValidationIssue issue in supplyIssues)
                 Error(issue.PropertyPath.Replace("elementSupply", "tutorial.supply"), issue.Message, issue.Coordinate);
             return issues;
+        }
+
+        // 저장 검사와 실행 준비가 같은 등록·설정 규칙을 사용한다.
+        internal static ITutorialStepHandler ValidateStep(TutorialStepDefinition step, TutorialHandlerRegistry registry, TutorialValidationContext context)
+        {
+            if (step == null) { context.Error("", "단계가 null입니다."); return null; }
+            if (string.IsNullOrWhiteSpace(step.instructions)) context.Error(".instructions", "안내 문구를 작성하세요.");
+            if (step.highlights == null) context.Error(".highlights", "강조 목록이 없습니다.");
+            else for (int j = 0; j < step.highlights.Count; j++) context.Cell(step.highlights[j], $".highlights.Array.data[{j}]");
+            if (!registry.TryGetStep(step, out ITutorialStepHandler handler))
+                context.Error(step.kind == TutorialStepKind.Item ? ".item" : ".kind", "등록되지 않은 단계·아이템 종류입니다.");
+            else handler.Validate(step, context);
+            if (step.results == null) context.Error(".results", "결과 조건 목록이 없습니다.");
+            else for (int j = 0; j < step.results.Count; j++)
+            {
+                TutorialResultDefinition condition = step.results[j];
+                TutorialValidationContext resultContext = context.ForChild($".results.Array.data[{j}]");
+                if (condition == null) { resultContext.Error("", "결과 조건이 null입니다."); continue; }
+                if (!registry.TryGetResult(condition.kind, out ITutorialResultEvaluator evaluator))
+                    resultContext.Error("", "등록되지 않은 결과 조건 종류입니다.");
+                else evaluator.Validate(condition, resultContext);
+            }
+            return handler;
         }
     }
 }

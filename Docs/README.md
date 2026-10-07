@@ -27,7 +27,7 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 
 - [게임 기획서](Contents/MoonRabbitJunkyard/기획서.md)
 - [고물탑 쌓기 기획서](Contents/MoonRabbitJunkyard/12_고물탑쌓기.md) — 퍼즐 이외의 별 소비·고물 수집·탑 성장 콘텐츠. 핵심 규칙 정리, 구현 미착수.
-- [레벨 튜토리얼 기획서](Contents/MoonRabbitJunkyard/13_레벨튜토리얼.md) — 레벨 데이터·단계 편집·자동 진행과 에디터 시험의 15개 결정 정리, 구현 미착수.
+- [레벨 튜토리얼 기획서](Contents/MoonRabbitJunkyard/13_레벨튜토리얼.md) — 15개 결정. 데이터·제작과 등록식 진행 엔진은 완료, 실제 게임 연결·안내는 후속 단계. [진행 가이드라인](Planning/MoonRabbitJunkyard/Tutorial/integration-guideline.md).
 - [퍼즐 요소 확장 구조 설계안](Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [전체 목표·현재 증거20개](Goals/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md) — 큰 구간1~5 완료. 초기7구간/EF 이력은 과거 참고.
 - [요소 확장·드론 수정 통합 개발 가이드라인](Planning/MoonRabbitJunkyard/ElementFramework/integration-guideline.md) · [5단계 최종 기록](Verification/MoonRabbitJunkyard/ElementFramework/phase-05-progress.md) · [콘텐츠·행동·정책 추가 안내](Guides/MoonRabbitJunkyard/ElementFramework/element-extension-usage.md) — 실제 제작500개·필요 자원 준비·현재85종692682 PASS/FAIL0·전량 논리/원본 보존 감사 완료. 후속 구현 자동 시작 없음.
 - [월드 게임 화면 전체 단계 계획](Planning/MoonRabbitJunkyard/WorldGameScreen/2026-09-30-world-game-screen.md)
