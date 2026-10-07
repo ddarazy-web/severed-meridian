@@ -66,7 +66,7 @@ namespace GameScreen
                     }
                     if (search.Status != StartingBoardStatus.Success) throw new InvalidOperationException(search.Message);
                     candidateExecutor = new BoardActionExecutor(search.State);
-                    candidateArtwork = new PuzzleArtwork();
+                    candidateArtwork = new PuzzleArtwork(visualCatalog);
                     await candidateArtwork.PrepareAsync(candidateExecutor.State, linked.Token);
                     // 아틀라스 로드 성공만으로는 HUD 전용 미션 그림의 존재를 보장하지 않는다.
                     foreach (RuntimeMission mission in candidateExecutor.State.Missions)

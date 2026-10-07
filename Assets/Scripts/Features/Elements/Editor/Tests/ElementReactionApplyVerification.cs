@@ -49,7 +49,7 @@ namespace Elements.Editor
         private static void ApplyContract()
         {
             IDictionary entries = Entries(); object registry = Registry();
-            Check(entries.Count == 2, "등록 짝 정확히2개");
+            Check(entries.Count == 3, "기존2개와 추가 행동의 등록 짝 정확히3개");
             Check(registry.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Length == 0, "공개 등록 수정 API 없음");
             foreach (ElementReactionBehavior key in Enum.GetValues(typeof(ElementReactionBehavior)))
             {

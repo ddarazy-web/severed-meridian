@@ -60,6 +60,7 @@ namespace Elements
                 switch (definition.RequireReactionBehavior())
                 {
                     case ElementReactionBehavior.Durability:
+                    case ElementReactionBehavior.EvenTurnDurability:
                         definition.RequirePlacement(); definition.RequireDamageAggregationPolicy(); definition.RequireRemovalMissionProfile();
                         if (definition.ChargePlacement != null) throw new ArgumentException("내구도 행동에 충전 프로필이 있습니다.");
                         break;

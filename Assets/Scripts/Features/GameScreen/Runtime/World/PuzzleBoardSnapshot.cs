@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Board;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace GameScreen
 {
@@ -34,21 +35,37 @@ namespace GameScreen
             internal void Restore()
             {
                 if (Renderer == null) return;
+                if (temporary) { ReturnTemporary(); return; }
                 Renderer.transform.localPosition = originalPosition; Renderer.transform.localScale = Scale;
                 Renderer.color = Color; Renderer.enabled = originalEnabled; Renderer.sortingOrder = originalOrder;
-                if (temporary) { ReleaseClip(); Renderer.gameObject.SetActive(false); }
             }
 
             internal void Hide()
             {
+                if (temporary) { ReturnTemporary(); return; }
                 Renderer.enabled = false;
-                if (temporary) { ReleaseClip(); Renderer.gameObject.SetActive(false); }
+            }
+
+            private void ReturnTemporary()
+            {
+                SortingGroup group = Renderer.transform.parent.GetComponent<SortingGroup>();
+                group.sortingOrder = 10;
+                group.transform.localPosition = Vector3.zero; group.transform.localRotation = Quaternion.identity;
+                group.transform.localScale = Vector3.one;
+                ReleaseClip(); Renderer.sprite = null; Renderer.enabled = false; Renderer.color = UnityEngine.Color.white;
+                Renderer.sortingOrder = 0; Renderer.flipX = Renderer.flipY = false;
+                Renderer.transform.localPosition = Vector3.zero; Renderer.transform.localScale = Vector3.one;
+                Renderer.transform.localRotation = Quaternion.identity; Renderer.gameObject.SetActive(false);
             }
 
             internal void ReleaseClip()
             {
                 if (clip == null) return;
                 clip.gameObject.SetActive(false); Renderer.maskInteraction = SpriteMaskInteraction.None;
+                clip.sprite = null; clip.isCustomRangeActive = false; clip.alphaCutoff = .5f;
+                clip.frontSortingLayerID = clip.backSortingLayerID = 0; clip.frontSortingOrder = clip.backSortingOrder = 0;
+                clip.transform.localPosition = Vector3.zero; clip.transform.localRotation = Quaternion.identity;
+                clip.transform.localScale = Vector3.one;
             }
         }
 

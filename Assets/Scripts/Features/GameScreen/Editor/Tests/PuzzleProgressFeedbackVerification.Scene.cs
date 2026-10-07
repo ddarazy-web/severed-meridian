@@ -63,7 +63,7 @@ namespace GameScreen.Editor
                 PuzzleScreenView screen = UnityEngine.Object.FindFirstObjectByType<PuzzleScreenView>(); Invoke(screen, "Refresh");
                 PuzzleUIRenderVerification.SetSize(1280, 720); await UniTask.Yield();
                 PuzzleHudView hud = screen.GetComponentInChildren<PuzzleHudView>();
-                PuzzleResultView resultPanel = screen.GetComponentInChildren<PuzzleResultView>(true);
+                PuzzlePopupBinding popups = screen.GetComponent<PuzzlePopupBinding>();
                 UnityEngine.UI.Text count = hud.GetComponentsInChildren<UnityEngine.UI.Text>().Single(text => text.name == "Count");
                 Check(count.text == "0/2", "시작 HUD 실제 초기 미션 표시");
                 Check(session.TryActivate(origin), "게임 화면 로켓 발동"); direct.Activate(origin);
@@ -111,7 +111,7 @@ namespace GameScreen.Editor
                         ScreenCapture.CaptureScreenshot(Output + "last-pang.png"); await UniTask.Yield();
                     }
                     if (session.Outcome != null && session.Phase == BoardActionPhase.Stopped && session.HasProgressFeedback)
-                        Check(!resultPanel.gameObject.activeSelf, "보드 종료 후 남은 수집·종료 반응 중 결과 패널 숨김");
+                        Check(!popups.Service.Inspect().Items.Any(item => item.Id == PuzzlePopupBinding.ResultId), "보드 종료 후 남은 수집·종료 반응 중 결과 팝업 없음");
                     if (!session.IsPresenting && !executor.HasPendingCascade && !session.HasProgressFeedback) break;
                     if (frame == 999) throw new InvalidOperationException("수집·보드 종료 timeout");
                 }
@@ -125,12 +125,14 @@ namespace GameScreen.Editor
                 Check((string)snapshot.Invoke(null, new object[] { session.State }) == (string)snapshot.Invoke(null, new object[] { direct.State }) &&
                     session.Phase == direct.Phase && session.Outcome.Kind == direct.Outcome.Kind, "실제 씬 전체 공개 상태·미션·공급·승패 동등성");
                 Check(hud.CollectionPoolCount <= 8, "실제 수집 이미지 풀 최대 8개");
-                Check(session.ResultReady && resultPanel.gameObject.activeSelf && shotLastPang, "실제 라스트팡과 표시 정리 후 승패 패널 표시");
+                PopupUI.PopupInspectionItem resultItem = popups.Service.Inspect().Items.Single(item => item.Id == PuzzlePopupBinding.ResultId);
+                PuzzleResultView resultPanel = (PuzzleResultView)popups.Service.GetView(resultItem.Handle);
+                Check(session.ResultReady && resultPanel.gameObject.activeSelf && shotLastPang, "실제 라스트팡과 표시 정리 후 승패 팝업 표시");
                 UnityEngine.UI.Text resultTitle = (UnityEngine.UI.Text)typeof(PuzzleResultView).GetField("title", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(resultPanel);
-                string originalTitle = resultTitle.text; resultTitle.text = "표시 한 번 검사";
+                string originalTitle = resultTitle.text; int resultInstance = resultPanel.GetInstanceID();
                 for (int refresh = 0; refresh < 3; refresh++) Invoke(screen, "Refresh");
-                Check(resultTitle.text == "표시 한 번 검사", "같은 결과에서 HUD Refresh는 패널을 다시 Show하지 않음");
-                resultTitle.text = originalTitle;
+                Check(resultTitle.text == originalTitle && popups.Service.Inspect().Items.Count(item => item.Id == PuzzlePopupBinding.ResultId) == 1 &&
+                    popups.Service.GetView(resultItem.Handle).GetInstanceID() == resultInstance, "같은 결과에서 HUD Refresh는 결과 팝업을 중복 생성하지 않음");
                 Check(session.ProgressFeedback.CompletionCount(0) == 1, "실제 게임 미션 완료 강조 한 번");
                 await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate); ScreenCapture.CaptureScreenshot(Output + "result.png"); await UniTask.Yield();
                 PropertyInfo starting = typeof(PuzzleGameSession).GetProperty("IsStartingFeedback");

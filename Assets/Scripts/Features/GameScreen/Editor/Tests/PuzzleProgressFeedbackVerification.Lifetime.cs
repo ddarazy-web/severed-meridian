@@ -24,6 +24,7 @@ namespace GameScreen.Editor
             foreach (PuzzleEditorLevelSource mode in new[] { PuzzleEditorLevelSource.Asset, PuzzleEditorLevelSource.MemoryPack })
             {
                 PuzzleGameSession old = UnityEngine.Object.FindFirstObjectByType<PuzzleGameSession>();
+                Transform[] previousBoardObjects = UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>().GetComponentsInChildren<Transform>(true);
                 PuzzleArtwork previousArt = (PuzzleArtwork)typeof(PuzzleGameSession).GetField("artwork", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(old);
                 PuzzleHudView previousHud = UnityEngine.Object.FindFirstObjectByType<PuzzleHudView>();
                 Image[] previousCollections = previousHud.GetComponentInParent<Canvas>().GetComponentsInChildren<Image>(true)
@@ -51,6 +52,7 @@ namespace GameScreen.Editor
                 while (!session.IsReady && !session.HasFailed && Time.realtimeSinceStartup < deadline) await UniTask.Yield();
                 Check(session.IsReady && session.IsStartingFeedback, mode + " 실제 씬 소유 데이터 준비·시작 표시");
                 Check(old == null && previousHud == null && previousArt.AtlasCount == 0, mode + " 씬 교체 후 이전 세션·HUD·아틀라스 반환");
+                Check(previousBoardObjects.All(value => value == null), mode + " 실제 씬 교체 후 이전 보드/공급/효과/마스크 객체 파기");
                 Check(previousCollections.All(image => image == null), mode + " 이전 HUD 소유 수집 이미지 모두 파괴");
                 Check(StateSnapshot(session.State) == StateSnapshot(new BoardActionExecutor(search.State).State), mode + " 실제 입력 소스 초기 전체 상태 동등");
                 Check(session.SetPaused(true), mode + " 시작 표시 pause");
@@ -100,6 +102,7 @@ namespace GameScreen.Editor
                 LevelRuntimeState input = session.State;
                 PuzzleArtwork art = (PuzzleArtwork)typeof(PuzzleGameSession).GetField("artwork", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session);
                 int pool = -1;
+                int[] boardCapacity = null;
                 for (int repeat = 0; repeat < 3; repeat++)
                 {
                     session.enabled = false;
@@ -128,6 +131,10 @@ namespace GameScreen.Editor
                         StateSnapshot(session.State) == StateSnapshot(direct.State) && session.Phase == direct.Phase && StateSnapshot(session.Outcome) == StateSnapshot(direct.Outcome),
                         mode + " 수집 후 미션·보드·공급·난수·이동·승패 전체 동등 " + repeat);
                     hud.Frame(session);
+                    CheckBoardSlotsReturned(session, board, mode + " 반복 " + repeat);
+                    int[] boardObjects = board.GetComponentsInChildren<Transform>(true).Select(value => value.GetInstanceID()).ToArray();
+                    if (boardCapacity == null) boardCapacity = boardObjects;
+                    Check(boardObjects.SequenceEqual(boardCapacity), mode + " 동일 행동 반복의 준비된 보드/공급/효과/마스크 용량 안 추가 생성0 " + repeat);
                     if (pool < 0) pool = hud.CollectionPoolCount;
                     Check(pool > 0 && pool <= 8 && hud.CollectionPoolCount == pool && !screen.GetComponentsInChildren<Image>().Any(image => image.name.StartsWith("MissionCollection")),
                         mode + " 반복 실제 수집 풀 재사용·잔상 없음 " + repeat);
@@ -143,12 +150,23 @@ namespace GameScreen.Editor
                 for (int frame = 0; frame < 1000 && session.ProgressFeedback.Flights.Count == 0; frame++) await ProgressFrame(session, .02f);
                 Check(session.ProgressFeedback.Flights.Count > 0, mode + " 취소 직전 실제 수집 진행 중");
                 using CancellationTokenSource cancelled = new CancellationTokenSource(); cancelled.Cancel();
-                await session.RestartAsync(cancelled.Token); await UniTask.Yield();
-                Check(!session.IsReady && !session.IsRestarting && !session.HasProgressFeedback && !session.CanAcceptInput, mode + " 재시작 준비 취소·표시·잠금 정리");
-                Check(!screen.GetComponentsInChildren<Image>().Any(image => image.name.StartsWith("MissionCollection")), mode + " 수집 중 취소 직후 화면 잔상 없음");
+                LevelRuntimeState previousState = session.State;
+                PuzzleArtwork previousArtwork = (PuzzleArtwork)typeof(PuzzleGameSession).GetField("artwork", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session);
+                int previousFlights = session.ProgressFeedback.Flights.Count;
+                await session.RestartAsync(cancelled.Token);
+                Check(ReferenceEquals(session.State, previousState) && session.ProgressFeedback.Flights.Count == previousFlights, mode + " 비활성 세션의 재시작 요청은 기존 표시를 변경하지 않음");
+                session.enabled = true;
+                await session.RestartAsync(cancelled.Token);
+                session.enabled = false;
+                Check(session.IsReady && !session.IsRestarting && !session.HasFailed && ReferenceEquals(session.State, previousState) &&
+                    ReferenceEquals(typeof(PuzzleGameSession).GetField("artwork", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session), previousArtwork),
+                    mode + " 재시작 후보 준비 취소는 이전 보드/아틀라스 소유권 보존");
+                Check(session.ProgressFeedback.Flights.Count == previousFlights && hud.CollectionPoolCount == pool, mode + " 취소 후보의 수집/슬롯 추가0·이전 수집 보존");
+                session.enabled = true;
                 await session.RestartAsync(CancellationToken.None); Invoke(session, "TickProgress", .7f);
                 session.enabled = true;
                 Check(session.CanAcceptInput && !session.HasFailed, mode + " 취소 후 새 재시작 정상 입력");
+                CheckBoardSlotsReturned(session, board, mode + " 취소 후 재시작");
                 candidate = ActionQuery.Find(session.State).First(action => action.Kind == QueryActionKind.SwapMatch);
                 Check(session.TrySwap(candidate.First, candidate.Second.Value), mode + " 실패 검사 실제 행동");
                 session.enabled = false;
@@ -162,8 +180,25 @@ namespace GameScreen.Editor
                     mode + " 실패 후 표시·예약·입력·진행 중 로드 완료 후 아틀라스 정리");
                 session.enabled = true; await session.RestartAsync(CancellationToken.None); Invoke(session, "TickProgress", .7f);
                 Check(session.CanAcceptInput && !session.HasFailed && hud.CollectionPoolCount == pool, mode + " 실패 후 재시작 풀·입력 복원");
+                CheckBoardSlotsReturned(session, board, mode + " 실패 후 재시작");
             }
             Check(JsonUtility.ToJson(source) == sourceJson, "Asset·MemoryPack 실제 씬 검사 후 원본 레벨 불변");
+        }
+
+        private static void CheckBoardSlotsReturned(PuzzleGameSession session, PuzzleWorldBoard board, string label)
+        {
+            SpriteRenderer[] temporary = board.GetComponentsInChildren<SpriteRenderer>(true)
+                .Where(image => image.name == "Supply-playback" || image.name == "Effect-playback").ToArray();
+            Check(temporary.All(image => !image.enabled && image.sprite == null && image.color == Color.white &&
+                !image.flipX && !image.flipY && image.sortingOrder == 0 && image.maskInteraction == SpriteMaskInteraction.None &&
+                image.transform.localPosition == Vector3.zero && image.transform.localScale == Vector3.one && image.transform.localRotation == Quaternion.identity),
+                label + " 반환 공급/효과 Sprite/색/변환/order/마스크 잔류0");
+            Check(board.GetComponentsInChildren<SpriteMask>(true).All(mask => !mask.gameObject.activeSelf && mask.sprite == null &&
+                mask.transform.localPosition == Vector3.zero && mask.transform.localScale == Vector3.one && mask.transform.localRotation == Quaternion.identity),
+                label + " 반환 공급/효과 마스크 참조/변환 잔류0");
+            Check(typeof(PuzzleGameSession).GetField("effectLoad", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session) == null &&
+                typeof(PuzzleGameSession).GetField("powerPlayback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session) == null && !session.IsPresenting,
+                label + " 이전 파워/준비 콜백/취소 소유자 잔류0");
         }
 
         private static async UniTask ProgressFrame(PuzzleGameSession session, float seconds)

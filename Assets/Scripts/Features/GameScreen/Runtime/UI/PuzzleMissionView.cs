@@ -13,13 +13,17 @@ namespace GameScreen
         public void Configure(UnityEngine.UI.Image image, UnityEngine.UI.Text label, UnityEngine.UI.Button target)
         { icon = image; count = label; button = target; }
         public void Refresh(RuntimeMission mission, Sprite sprite, System.Action<string> describe, int? displayedProgress = null)
+            => Refresh(new PuzzleHudMissionState(Name(mission.Definition.Kind), displayedProgress ?? mission.Progress, mission.Target, sprite, 0), describe);
+        public void Refresh(PuzzleHudMissionState mission, System.Action<string> describe)
         {
-            icon.sprite = sprite; icon.enabled = sprite != null;
-            int progress = displayedProgress ?? mission.Progress;
+            icon.sprite = mission.Sprite; icon.enabled = mission.Sprite != null;
+            int progress = mission.Progress;
             count.text = (progress >= mission.Target ? "✓ " : "") + progress + "/" + mission.Target;
             button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(() => describe?.Invoke(Name(mission.Definition.Kind) + "\n" + progress + " / " + mission.Target + " 수집"));
+            button.onClick.AddListener(() => describe?.Invoke(mission.Name + "\n" + progress + " / " + mission.Target + " 수집"));
         }
+        public void Clear()
+        { button.onClick.RemoveAllListeners(); icon.sprite = null; icon.enabled = false; count.text = ""; Animate(0); }
         public void Animate(float pulse)
         {
             icon.rectTransform.localScale = Vector3.one * (1 + .15f * Mathf.Sin(pulse * Mathf.PI));

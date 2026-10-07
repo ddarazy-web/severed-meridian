@@ -112,11 +112,33 @@ namespace GameScreen.Editor
                 Check(previous.AtlasCount == 0 && ((PuzzleArtwork)artworkField.GetValue(session)).AtlasCount > 0, "이전 아틀라스 반환·새 아틀라스 유지");
                 System.Collections.IDictionary loaded = (System.Collections.IDictionary)typeof(PuzzleArtwork).GetField("atlases", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(artworkField.GetValue(session));
                 Check(session.State.Obstacles.Any(body => body.Definition.Kind == ObstacleKind.Appliance) && new System.Collections.Generic.HashSet<string>(loaded.Keys.Cast<string>()).SetEquals(new[]
-                    { BoardSpriteAtlas.AddressFor("Blocks/"), BoardSpriteAtlas.AddressFor("PowerBlocks/"), BoardSpriteAtlas.AddressFor(PuzzleArtworkPaths.Floor), BoardSpriteAtlas.AddressFor("Obstacles/MetalRodBox/") }),
-                    "새 맵 장애물 필요 아틀라스만 준비");
+                    { BoardSpriteAtlas.AddressFor("Blocks/"), BoardSpriteAtlas.AddressFor("PowerBlocks/"), BoardSpriteAtlas.AddressFor(PuzzleArtworkPaths.Floor), BoardSpriteAtlas.AddressFor("Obstacles/MetalRodBox/"),
+                        BoardSpriteAtlas.AddressFor("Effects/Match/"), BoardSpriteAtlas.AddressFor("Effects/PowerCreation/"),
+                        BoardSpriteAtlas.AddressFor("Effects/Rocket/"), BoardSpriteAtlas.AddressFor("Effects/BombExplosion/"),
+                        BoardSpriteAtlas.AddressFor("Effects/Drone/"), BoardSpriteAtlas.AddressFor("Effects/Magnet/"), BoardSpriteAtlas.AddressFor("Effects/MetalBreak/") }),
+                    "새 맵 장애물과 도달 가능한 매칭/생성/파워/피해 효과의 필요 아틀라스만 준비: " + string.Join(",", loaded.Keys.Cast<string>().OrderBy(value => value)));
                 float deadline = Time.realtimeSinceStartup + 45;
                 while (!session.CanAcceptInput && !session.HasFailed && Time.realtimeSinceStartup < deadline) await UniTask.Yield();
                 Check(session.CanAcceptInput, "새 판 시작 후 입력 허용");
+                SpriteRenderer[] temporary = board.GetComponentsInChildren<SpriteRenderer>(true)
+                    .Where(image => image.name == "Supply-playback" || image.name == "Effect-playback").ToArray();
+                Check(temporary.All(image => !image.enabled && image.sprite == null && image.color == Color.white &&
+                    !image.flipX && !image.flipY && image.sortingOrder == 0 && image.maskInteraction == SpriteMaskInteraction.None &&
+                    image.transform.localPosition == Vector3.zero && image.transform.localScale == Vector3.one && image.transform.localRotation == Quaternion.identity),
+                    "실제 다음 레벨 전환의 이전 공급/효과 표시 참조/변환/order 잔류0");
+                Check(board.GetComponentsInChildren<SpriteMask>(true).All(mask => !mask.gameObject.activeSelf && mask.sprite == null),
+                    "실제 다음 레벨 전환의 이전 공급/효과 마스크 잔류0");
+                Check(Private(session, "effectLoad") == null && Private(session, "powerPlayback") == null && !session.IsPresenting,
+                    "실제 다음 레벨 전환의 이전 준비 콜백/파워 소유자 잔류0");
+                int[] capacity = board.GetComponentsInChildren<Transform>(true).Select(value => value.GetInstanceID()).ToArray();
+                for (int repeat = 0; repeat < 3; repeat++)
+                {
+                    await session.RestartAsync(CancellationToken.None); await ReadyOrResult(session, false);
+                    Check(capacity.SequenceEqual(board.GetComponentsInChildren<Transform>(true).Select(value => value.GetInstanceID())),
+                        "전환 후 같은 레벨 3회 재시작의 준비 용량 안 추가 생성0 " + repeat);
+                    Check(initial == (string)typeof(Levels.Editor.LevelInitialStateVerification).GetMethod("Snapshot", BindingFlags.Static | BindingFlags.NonPublic)
+                        .Invoke(null, new object[] { session.State }), "전환 후 재시작 전체 논리 상태 보존 " + repeat);
+                }
                 string imagePath = Output + "next-level-gameplay.png";
                 if (File.Exists(imagePath)) File.Delete(imagePath);
                 ScreenCapture.CaptureScreenshot(imagePath);

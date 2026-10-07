@@ -20,8 +20,8 @@ namespace GameScreen
             foreach (KeyValuePair<BoardCoordinate, PuzzleBoardSnapshot.Image> pair in snapshot.Images)
             {
                 RuntimeCell cell = after.CellAt(pair.Key);
-                Sprite next = art.Get(cell.Content == RuntimeContent.Obstacle && cell.ObstacleIndex.HasValue
-                    ? PuzzleArtworkPaths.Obstacle(after.Obstacles[cell.ObstacleIndex.Value]) : PuzzleArtworkPaths.Content(cell));
+                Sprite next = art.GetVisual(cell.Content == RuntimeContent.Obstacle && cell.ObstacleIndex.HasValue
+                    ? art.Visuals.Obstacle(after.Obstacles[cell.ObstacleIndex.Value]) : art.Visuals.Content(cell));
                 if (consumed.Contains(pair.Key) || next == null || next.name != pair.Value.Renderer.sprite.name) removed.Add(pair.Value);
             }
             duration = Mathf.Max(.01f, seconds); elapsed = 0; IsPlaying = removed.Count > 0;

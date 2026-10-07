@@ -191,6 +191,7 @@ namespace Levels.Editor
         private void DisplayState(LevelRuntimeState shown = null)
         {
             LevelRuntimeState display = shown ?? CurrentState;
+            Elements.ElementVisualCatalog visuals = Elements.ElementVisualLookup.ForLevel(sourceLevel);
             grid.Clear(); selectedButton = null;
             status.text = $"레벨 {display.LevelNumber} · 시드 {seed} · 구성 {LastBuildMilliseconds:F2} ms · 입력 {inputFingerprint.Substring(0, 10)}";
             for (int row = 0; row < display.Rows; row++)
@@ -206,7 +207,7 @@ namespace Levels.Editor
                     if (cell.ObstacleIndex.HasValue && display.Obstacles[cell.ObstacleIndex.Value].Definition.Kind == ObstacleKind.ColorLock)
                         button.AddToClassList("rabbit-" + (int)display.Obstacles[cell.ObstacleIndex.Value].Definition.Color);
                     if (cell.Cover.HasValue) button.AddToClassList("covered");
-                    RuntimeBoardArtwork.Bind(button, cell, display);
+                    RuntimeBoardArtwork.Bind(button, cell, display, visuals);
                     button.clicked += () => ShowCell(cell, button); line.Add(button);
                 }
             }

@@ -45,8 +45,7 @@ namespace Levels.Editor
             if (visualWindow.rootVisualElement.Q<LevelBoardView>().Color != RabbitColor.Type3)
                 throw new InvalidOperationException("그림 버튼의 실제 브러시 선택 실패");
             while (LevelBoardArtwork.Rabbit(RabbitColor.Type1) == null) yield return null;
-            if (visualWindow.rootVisualElement.Q<LevelBoardView>().CellAt(new BoardCoordinate(0, 0))
-                .Q("board-content-art")?.style.backgroundImage.value.sprite == null)
+            if (visualWindow.rootVisualElement.Q<LevelBoardView>().ArtworkAt(new BoardCoordinate(0, 0), "board-content-art")?.style.backgroundImage.value.sprite == null)
                 throw new InvalidOperationException("캡처 대상 편집 보드 이미지가 아직 표시되지 않았습니다.");
             for (int i = 0; i < 10; i++) yield return null;
             Directory.CreateDirectory("Logs/BotAnalysisVerification");
@@ -120,9 +119,9 @@ namespace Levels.Editor
                 {
                     Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(PathFor(i));
                     Check(texture != null && texture.width == 256 && texture.height == 256, "256px 텍스처 로드 " + names[i]);
-                    Check(board.CellAt(new BoardCoordinate(0, i)).Q("board-content-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Rabbit((RabbitColor)i) && texture != null, "편집 보드 색 매핑 " + names[i]);
+                    Check(board.ArtworkAt(new BoardCoordinate(0, i), "board-content-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Rabbit((RabbitColor)i) && texture != null, "편집 보드 색 매핑 " + names[i]);
                 }
-                Check(board.CellAt(new BoardCoordinate(0, 5)).Q<Label>("board-art-badge").text == "?" &&
+                Check(((Label)board.AnnotationAt(new BoardCoordinate(0, 5), "board-art-badge")).text == "?" &&
                     board.CellAt(new BoardCoordinate(0, 5)).style.backgroundImage.value.texture == null, "무작위 물음표 유지");
                 Check(JsonUtility.ToJson(level) == before, "보드 표시가 원본 데이터를 변경하지 않음");
 

@@ -17,11 +17,9 @@ namespace GameScreen
             internal string Label;
             internal string[] Paths;
             internal Sprite[] Frames;
+            internal Elements.ElementVisualFrame[] VisualFrames;
             internal float Start, End, Size, Angle, MotionDelay;
             internal Vector3 From, To;
-            internal Vector3 Offset;
-            internal Vector3[] FrameOffsets;
-            internal bool Sheet;
             internal DroneFlightMotion.Phase DronePhase;
         }
         private readonly List<Clip> clips = new List<Clip>();
@@ -43,7 +41,8 @@ namespace GameScreen
             BuildClips(before);
             await art.PrepareEffectsAsync(clips.SelectMany(clip => clip.Paths), token);
             token.ThrowIfCancellationRequested();
-            foreach (Clip clip in clips) clip.Frames = clip.Paths.Select(art.Get).ToArray();
+            foreach (Clip clip in clips) clip.Frames = clip.VisualFrames == null
+                ? clip.Paths.Select(art.Get).ToArray() : clip.VisualFrames.Select(art.GetVisual).ToArray();
         }
 
         internal void Begin(PuzzleWorldBoard world)
@@ -131,10 +130,10 @@ namespace GameScreen
                 Clip clip = clips[i]; PuzzleEffectSprite image = board.EffectAt(i);
                 if (elapsed < clip.Start || elapsed >= clip.End) { image.Hide(); continue; }
                 float t = Mathf.Clamp01((elapsed - clip.Start) / (clip.End - clip.Start));
-                int frame = clip.Sheet ? (int)((elapsed - clip.Start) / .06f) % 4 : Mathf.Min(clip.Frames.Length - 1, (int)(t * clip.Frames.Length));
+                int frame = clip.DronePhase != null ? (int)((elapsed - clip.Start) / .06f) % 4 : Mathf.Min(clip.Frames.Length - 1, (int)(t * clip.Frames.Length));
                 float motion = Mathf.Clamp01((elapsed - clip.Start - clip.MotionDelay) / Mathf.Max(.01f, clip.End - clip.Start - clip.MotionDelay));
                 if (clip.MotionDelay > 0) frame = elapsed < clip.Start + clip.MotionDelay ? 0 : 1 + Mathf.Min(2, (int)(motion * 3));
-                Vector3 position = Vector3.Lerp(clip.From, clip.To, motion) + (clip.FrameOffsets == null ? clip.Offset : clip.FrameOffsets[frame]);
+                Vector3 position = Vector3.Lerp(clip.From, clip.To, motion);
                 float angle = clip.Angle;
                 if (clip.DronePhase != null)
                 {
@@ -142,7 +141,9 @@ namespace GameScreen
                     angle += clip.DronePhase.Kind == DroneFlightPhaseKind.Dash ?
                         12 * Mathf.Sin(t * t * Mathf.PI * 2) : 6 * Mathf.Sin(elapsed * Mathf.PI * 2 / .7f);
                 }
-                image.Paint(clip.Frames[clip.Sheet ? 0 : frame], position, clip.Size, angle, clip.Sheet, frame, clip.Label);
+                if (clip.VisualFrames != null)
+                    image.PaintVisual(clip.Frames[frame], clip.VisualFrames[frame], position, clip.Size, angle, clip.Label);
+                else image.Paint(clip.Frames[frame], position, clip.Size, angle, false, frame, clip.Label);
             }
         }
 

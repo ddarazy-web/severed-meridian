@@ -11,33 +11,36 @@ namespace GameScreen
         // 효과 대상은 규칙이 확정한 기록에서만 가져온다.
         private void BuildClips(LevelRuntimeState before)
         {
-            string[] colors = { "pink", "yellow", "blue", "green", "purple" };
             foreach (MatchedBlockChange change in timeline.Changes)
             {
                 Vector3 position = PuzzleWorldBoard.CellPosition(change.Coordinate);
                 if (change.IsConsumed)
-                    AddEffect("Match", "match-" + colors[(int)change.OriginalColor], position, position, 0, .2f, 1.1f);
+                    AddNormalEffect(before.CellAt(change.Coordinate), change.OriginalColor, "match", "match", position, 0, .2f, 1.1f);
                 if (change.IsTransformation)
-                    AddEffect("PowerCreation", "power-creation", position, position, .12f, .2f, 1.3f);
+                    AddNormalEffect(before.CellAt(change.Coordinate), change.OriginalColor, "creation", "power-creation", position, .12f, .2f, 1.3f);
                 // 직접 매칭의 레이어 변화는 EffectRecord가 아닌 MatchedBlockChange에 남는다.
                 if (change.CoverBefore > change.CoverAfter)
-                    AddEffect("WebBreak", "web-break", position, position, .12f, .2f, 1.1f);
+                    AddLayerEffect(before.CellAt(change.Coordinate), true, "web-break", position, .12f);
                 if (change.IsConsumed && before.CellAt(change.Coordinate).DustDurability > final.CellAt(change.Coordinate).DustDurability &&
                     !timeline.Reactions.Any(reaction => reaction.Record.Target.Equals(change.Coordinate) && reaction.Record.DustBefore > reaction.Record.DustAfter))
-                    AddEffect("DustClear", "dust-clear", position, position, .12f, .2f, 1.1f);
+                    AddLayerEffect(before.CellAt(change.Coordinate), false, "dust-clear", position, .12f);
             }
             if (timeline.Combination?.IsTransformation == true)
                 foreach (PowerTransformation transformation in timeline.Combination.Transformations)
                 {
                     Vector3 position = PuzzleWorldBoard.CellPosition(transformation.Coordinate);
-                    AddEffect("Magnet", "magnet-transform", position, position, 0, .35f, 1.2f);
+                    AddPowerEffect(before, transformation.Coordinate, RuntimeContent.Magnet, "transform", "magnet-transform", position, position, 0, .35f, 1.2f);
                 }
             foreach (DroneFlightMotion flight in timeline.Flights)
                 foreach (DroneFlightMotion.Phase phase in flight.Phases)
+                {
+                    Elements.ElementVisualFrame[] frames = Enumerable.Range(1, 4).Select(frame =>
+                        art.Visuals.Animation(PowerSource(before, flight.Record.Origin, RuntimeContent.Drone), RuntimeContent.Drone, RocketDirection.Horizontal, frame)).ToArray();
                     clips.Add(new Clip { Label = phase.Kind == DroneFlightPhaseKind.Dash ? "Drone-flight" : "Drone-hover",
-                        Paths = new[] { "PowerBlocks/collection-drone-rotor-4frames-v1" },
+                        Paths = frames.Select(frame => frame.Path).ToArray(), VisualFrames = frames,
                         Start = phase.Start, End = phase.End, From = phase.From, To = phase.To,
-                        Size = .92f, Sheet = true, DronePhase = phase });
+                        Size = .92f, DronePhase = phase });
+                }
             foreach (PuzzleEffectTimeline.Attack attack in timeline.Attacks)
             {
                 PowerAttackRecord record = attack.Record;
@@ -47,28 +50,28 @@ namespace GameScreen
                 if (record.IsFlight)
                 {
                     float flight = attack.FlightDuration;
-                    AddEffect("Drone", "drone-impact", center, center, start + flight, .2f, 1.3f);
+                    AddPowerEffect(before, record.Origin, RuntimeContent.Drone, "impact", "drone-impact", center, center, start + flight, .2f, 1.3f);
                     start += flight;
                 }
                 if (record.Area == PowerArea.Blast3 || record.Area == PowerArea.Blast5 || record.Power == RuntimeContent.Bomb)
-                    AddEffect("BombExplosion", "bomb-explosion", center, center, start, .24f,
-                        record.Area == PowerArea.Blast5 ? 5 : 3, 8);
+                    AddPowerEffect(before, record.Origin, RuntimeContent.Bomb, "blast", "bomb-explosion", center, center, start, .24f,
+                        record.Area == PowerArea.Blast5 ? 5 : 3);
                 else if (record.Power == RuntimeContent.Magnet)
                 {
                     foreach (BoardCoordinate target in record.Targets)
                     {
                         Vector3 position = PuzzleWorldBoard.CellPosition(target);
-                        AddEffect("Magnet", "magnet-pull", position, center, start,
+                        AddPowerEffect(before, record.Origin, RuntimeContent.Magnet, "pull", "magnet-pull", position, center, start,
                             attack.ImpactAt(target) - start, .9f);
                     }
                 }
                 else if (record.Power == RuntimeContent.Rocket || record.Area == PowerArea.Horizontal || record.Area == PowerArea.Vertical)
-                    BuildRocketClips(attack, start, center);
+                    BuildRocketClips(attack, start, center, before);
                 else if (!record.IsFlight)
                     foreach (BoardCoordinate target in record.Targets)
                     {
                         Vector3 position = PuzzleWorldBoard.CellPosition(target);
-                        AddEffect("Drone", "drone-impact", position, position, attack.ImpactAt(target), .2f, 1.1f);
+                        AddPowerEffect(before, record.Origin, RuntimeContent.Drone, "impact", "drone-impact", position, position, attack.ImpactAt(target), .2f, 1.1f);
                     }
             }
             foreach (PuzzleEffectTimeline.Reaction reaction in timeline.Reactions)
@@ -78,36 +81,33 @@ namespace GameScreen
                 if (record.CoverAfter < record.CoverBefore)
                 {
                     bool mold = before.CellAt(record.Target).Cover == CoverKind.Mold;
-                    AddEffect(mold ? "MoldClear" : "WebBreak", mold ? "mold-clear" : "web-break", position, position, reaction.Time, .2f, 1.1f);
+                    AddLayerEffect(before.CellAt(record.Target), true, mold ? "mold-clear" : "web-break", position, reaction.Time);
                 }
                 if (record.DustAfter < record.DustBefore)
-                    AddEffect("DustClear", "dust-clear", position, position, reaction.Time, .2f, 1.1f);
+                    AddLayerEffect(before.CellAt(record.Target), false, "dust-clear", position, reaction.Time);
                 foreach (int removed in record.RemovedObstacleIndices)
                 {
                     if (reaction.BodyIndex == removed && record.Response == DamageResponse.Damage) continue;
                     RuntimeObstacle removedBody = before.Obstacles[removed];
-                    int extent = LevelPlacementRules.Size(removedBody.Definition.Kind);
+                    int extent = Elements.ElementVisualLookup.Size(removedBody.Element);
                     Vector3 removedPosition = PuzzleWorldBoard.CellPosition(removedBody.Definition.Coordinate) + new Vector3((extent - 1) * .5f, -(extent - 1) * .5f);
-                    bool crate = removedBody.Definition.Kind == ObstacleKind.Crate;
-                    AddEffect(crate ? "WoodBreak" : "MetalBreak", crate ? "wood-break" : "metal-break", removedPosition, removedPosition,
+                    AddRegisteredEffect(removedBody.Element, art.Visuals.Obstacle(removedBody), "damage", removedPosition, removedPosition,
                         reaction.Time, .2f, extent == 2 ? 2.16f : 1.1f);
                 }
                 if (!reaction.BodyIndex.HasValue) continue;
                 RuntimeObstacle body = before.Obstacles[reaction.BodyIndex.Value];
-                bool large = body.Definition.Kind == ObstacleKind.Appliance || body.Definition.Kind == ObstacleKind.Generator;
-                if (large) position = PuzzleWorldBoard.CellPosition(body.Definition.Coordinate) + new Vector3(.5f, -.5f);
+                int size = Elements.ElementVisualLookup.Size(body.Element);
+                bool large = size > 1;
+                if (large) position = PuzzleWorldBoard.CellPosition(body.Definition.Coordinate) + new Vector3((size - 1) * .5f, -(size - 1) * .5f);
                 if (record.Response == DamageResponse.Charge)
-                    clips.Add(new Clip { Label = "Generator-charge", Paths = Enumerable.Range(1, 4)
-                        .Select(frame => "Effects/GeneratorCharge/charge-pulse-" + frame.ToString("00") + "-v1-256").ToArray(),
-                        Start = reaction.Time, End = reaction.Time + .2f, From = position, To = position, Size = large ? 2.16f : 1.1f });
+                    AddRegisteredEffect(body.Element, art.Visuals.Obstacle(body), "charge", position, position, reaction.Time, .2f, large ? 2.16f : 1.1f);
                 if (record.Response != DamageResponse.Damage || record.DurabilityAfter >= record.DurabilityBefore) continue;
-                bool wood = body.Definition.Kind == ObstacleKind.Crate;
-                AddEffect(wood ? "WoodBreak" : "MetalBreak", wood ? "wood-break" : "metal-break", position, position,
+                AddRegisteredEffect(body.Element, art.Visuals.Obstacle(body), "damage", position, position,
                     reaction.Time, .2f, large ? 2.16f : 1.1f);
             }
         }
 
-        private void BuildRocketClips(PuzzleEffectTimeline.Attack attack, float start, Vector3 center)
+        private void BuildRocketClips(PuzzleEffectTimeline.Attack attack, float start, Vector3 center, LevelRuntimeState before)
         {
             PowerAttackRecord record = attack.Record;
             bool horizontal = record.Area != PowerArea.Vertical && record.Direction != RocketDirection.Vertical;
@@ -131,36 +131,66 @@ namespace GameScreen
                         BoardCoordinate end = targets.OrderByDescending(target => Vector3.Distance(launch, PuzzleWorldBoard.CellPosition(target))).First();
                         Vector3 destination = PuzzleWorldBoard.CellPosition(end);
                         float arrival = attack.ImpactAt(end);
-                        string direction = alongRow ? "horizontal" : "vertical";
-                        string[] frames = new[] { "PowerBlocks/cleaning-rocket-" + direction + "-v1" }.Concat(
-                            Enumerable.Range(2, 3).Select(frame => "PowerBlocks/cleaning-rocket-" + direction + "-launch-frame-" + frame + "-v1-256")).ToArray();
+                        Elements.ElementVisualFrame[] frames = Enumerable.Range(0, 4).Select(frame =>
+                            art.Visuals.Animation(PowerSource(before, record.Origin, RuntimeContent.Rocket), RuntimeContent.Rocket,
+                                alongRow ? RocketDirection.Horizontal : RocketDirection.Vertical, frame)).ToArray();
                         float angle = sign > 0 ? 0 : 180;
-                        float size = alongRow ? .92f * 1.12f : .92f;
-                        Vector3 offset = alongRow ? new Vector3(-28.5f / 256, 28f / 256, 0) * (size * sign) : Vector3.zero;
-                        // 가로 발사 3·4컷의 본체는 원본 중앙 위에 있어 대기/2컷과 반대 방향 보정이 필요하다.
-                        Vector3[] offsets = alongRow ? new[] { offset, offset,
-                            new Vector3(-28.5f / 256, -23f / 256, 0) * (size * sign),
-                            new Vector3(-28.5f / 256, -23f / 256, 0) * (size * sign) } : null;
-                        clips.Add(new Clip { Label = "Rocket-flight", Paths = frames, Start = start, End = arrival,
-                            From = launch, To = destination, Size = size, Angle = angle, Offset = offset, FrameOffsets = offsets, MotionDelay = .06f });
-                        AddEffect("Rocket", "rocket-trail", launch, destination, start + .06f,
-                            Mathf.Max(.01f, arrival - start - .06f), 1.1f, 4, (alongRow ? 0 : 90) + angle);
+                        clips.Add(new Clip { Label = "Rocket-flight", Paths = frames.Select(frame => frame.Path).ToArray(), VisualFrames = frames,
+                            Start = start, End = arrival, From = launch, To = destination, Size = .92f, Angle = angle, MotionDelay = .06f });
+                        AddPowerEffect(before, record.Origin, RuntimeContent.Rocket, "trail", "rocket-trail", launch, destination, start + .06f,
+                            Mathf.Max(.01f, arrival - start - .06f), 1.1f, (alongRow ? 0 : 90) + angle);
                     }
                 }
             }
             foreach (BoardCoordinate target in record.Targets)
             {
                 Vector3 position = PuzzleWorldBoard.CellPosition(target);
-                AddEffect("Rocket", "rocket-impact", position, position, attack.ImpactAt(target), .2f, 1.1f);
+                AddPowerEffect(before, record.Origin, RuntimeContent.Rocket, "impact", "rocket-impact", position, position, attack.ImpactAt(target), .2f, 1.1f);
             }
         }
 
-        private void AddEffect(string category, string name, Vector3 from, Vector3 to, float start, float duration,
-            float size, int frames = 4, float angle = 0)
+        private void AddRegisteredEffect(Elements.ElementDefinition definition, Elements.ElementVisualFrame visual, string key,
+            Vector3 from, Vector3 to, float start, float duration, float size, float angle = 0, string label = null)
         {
-            clips.Add(new Clip { Label = name, Paths = Enumerable.Range(1, frames)
-                .Select(frame => "Effects/" + category + "/Animations/" + name + "-frame-" + frame.ToString("00") + "-v1-256").ToArray(),
+            if (visual == null || !visual.EffectAnimations.TryGetValue(key, out var selected))
+                throw new System.InvalidOperationException("요소 ID '" + definition.Id.Value + "': 등록되지 않은 효과 키 '" + key + "'");
+            Elements.ElementVisualFrame[] frames = selected.ToArray();
+            clips.Add(new Clip { Label = label ?? (key == "charge" ? "Generator-charge" : "Body-damage"),
+                Paths = frames.Select(frame => frame.Path).ToArray(), VisualFrames = frames,
                 From = from, To = to, Start = start, End = start + duration, Size = size, Angle = angle });
+        }
+        private void AddNormalEffect(RuntimeCell cell, RabbitColor color, string key, string label,
+            Vector3 position, float start, float duration, float size)
+        {
+            Elements.ElementDefinition definition = cell.ContentElement ?? Elements.LegacyElementDefinitions.GetContent(RuntimeContent.Normal);
+            Elements.ElementVisualFrame visual = art.Visuals.Resolver.Resolve(definition.Id,
+                new Elements.ElementVisualState((int)color, 0, 0, 0, 0, 0, 1));
+            AddRegisteredEffect(definition, visual, key, position, position, start, duration, size, label: label);
+        }
+        private void AddLayerEffect(RuntimeCell cell, bool cover, string label, Vector3 position, float start)
+        {
+            Elements.ElementDefinition definition = cover ? cell.CoverElement ?? Elements.LegacyElementDefinitions.Get(cell.Cover.Value)
+                : cell.DustElement ?? Elements.LegacyElementDefinitions.GetDust();
+            AddRegisteredEffect(definition, cover ? art.Visuals.Cover(cell) : art.Visuals.Dust(cell), "clear",
+                position, position, start, .2f, 1.1f, label: label);
+        }
+        private RuntimeCell PowerSource(LevelRuntimeState before, BoardCoordinate origin, RuntimeContent content)
+        {
+            RuntimeCell source = before.CellAt(origin);
+            if (source.Content != content && timeline.Combination != null)
+                source = new[] { before.CellAt(timeline.Combination.First), before.CellAt(timeline.Combination.Center) }
+                    .FirstOrDefault(cell => cell.Content == content) ?? source;
+            return source;
+        }
+        private void AddPowerEffect(LevelRuntimeState before, BoardCoordinate origin, RuntimeContent content, string key, string label,
+            Vector3 from, Vector3 to, float start, float duration, float size, float angle = 0)
+        {
+            RuntimeCell source = PowerSource(before, origin, content);
+            Elements.ElementDefinition definition = source.Content == content ? source.ContentElement : null;
+            definition ??= Elements.LegacyElementDefinitions.GetContent(content);
+            Elements.ElementVisualFrame visual = art.Visuals.Resolver.Resolve(definition.Id,
+                new Elements.ElementVisualState(-1, 0, 0, 0, (int)(source.RocketDirection ?? RocketDirection.Horizontal), 0, 1));
+            AddRegisteredEffect(definition, visual, key, from, to, start, duration, size, angle, label);
         }
     }
 }

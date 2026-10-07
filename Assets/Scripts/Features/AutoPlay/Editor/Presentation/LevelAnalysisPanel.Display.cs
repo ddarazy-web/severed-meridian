@@ -154,6 +154,7 @@ namespace Levels.Editor
             if (state == lastDrawn) return;
             lastDrawn = state; replayGrid.Clear();
             if (state == null) return;
+            Elements.ElementVisualCatalog visuals = Elements.ElementVisualLookup.ForLevel(currentLevel());
             for (int row = 0; row < state.Rows; row++)
             {
                 VisualElement line = new VisualElement(); line.AddToClassList("initial-row"); replayGrid.Add(line);
@@ -165,7 +166,7 @@ namespace Levels.Editor
                     if (!cell.IsActive) label.AddToClassList("inactive");
                     if (cell.Color.HasValue && cell.Cover != CoverKind.Mold) label.AddToClassList("rabbit-" + (int)cell.Color.Value);
                     if (cell.Cover.HasValue) label.AddToClassList("covered");
-                    RuntimeBoardArtwork.Bind(label, cell, state);
+                    RuntimeBoardArtwork.Bind(label, cell, state, visuals);
                     line.Add(label);
                 }
             }

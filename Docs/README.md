@@ -26,8 +26,8 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 - [게임 기획서](Contents/MoonRabbitJunkyard/기획서.md)
 - [고물탑 쌓기 기획서](Contents/MoonRabbitJunkyard/12_고물탑쌓기.md) — 퍼즐 이외의 별 소비·고물 수집·탑 성장 콘텐츠. 핵심 규칙 정리, 구현 미착수.
 - [레벨 튜토리얼 기획서](Contents/MoonRabbitJunkyard/13_레벨튜토리얼.md) — 레벨 데이터·단계 편집·자동 진행과 에디터 시험의 15개 결정 정리, 구현 미착수.
-- [퍼즐 요소 확장 구조 설계안](Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [7단계 전환 계획](Planning/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-plan.md) · [목표·완료 조건](Goals/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md) — 수백 종류 확장을 위한 리팩토링 제안, 구현 미착수.
-- [요소 확장·드론 수정 통합 개발 가이드라인](Planning/MoonRabbitJunkyard/ElementFramework/integration-guideline.md) — EF-01~09 기준 확보 완료. [EF-09 검증](Verification/MoonRabbitJunkyard/ElementFramework/stage-09-progress.md) 추가1615 PASS/0 FAIL·기존 파워 검사 통과. 다음 [EF-10 계획](Planning/MoonRabbitJunkyard/ElementFramework/stage-10-resource-baseline-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/stage-10-resource-baseline-goal.md) · [복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/stage-10-command.md) 준비. 구조 전환·새 드론 비행 미구현.
+- [퍼즐 요소 확장 구조 설계안](Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [전체 목표·현재 증거20개](Goals/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md) — 큰 구간1~5 완료. 초기7구간/EF 이력은 과거 참고.
+- [요소 확장·드론 수정 통합 개발 가이드라인](Planning/MoonRabbitJunkyard/ElementFramework/integration-guideline.md) · [5단계 최종 기록](Verification/MoonRabbitJunkyard/ElementFramework/phase-05-progress.md) · [콘텐츠·행동·정책 추가 안내](Guides/MoonRabbitJunkyard/ElementFramework/element-extension-usage.md) — 실제 제작500개·필요 자원 준비·현재85종692682 PASS/FAIL0·전량 논리/원본 보존 감사 완료. 후속 구현 자동 시작 없음.
 - [월드 게임 화면 전체 단계 계획](Planning/MoonRabbitJunkyard/WorldGameScreen/2026-09-30-world-game-screen.md)
 - 완료된 3단계: [계획](Planning/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-plan.md) · [목표·완료 조건](Goals/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-goal.md) · [목표 명령어](Commands/MoonRabbitJunkyard/WorldGameScreen/stage-03-goal-command.md)
 - [3단계 진행·검증 기록](Verification/MoonRabbitJunkyard/WorldGameScreen/stage-03-progress.md) · [에디터 게임 실행 안내](Guides/MoonRabbitJunkyard/WorldGameScreen/stage-03-editor-launch-usage.md)
@@ -110,5 +110,5 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 
 - [큰 구간2 완료 기록](Verification/MoonRabbitJunkyard/ElementFramework/phase-02-progress.md): 드론 정책·상승/호버/돌진·실제 반복 재선택, 최종41종688965 PASS/0 FAIL.
 - [큰 구간3 완료 기록](Verification/MoonRabbitJunkyard/ElementFramework/phase-03-progress.md): 정의 ID 저장·제작/편집 도구·스키마5/팩2, 최종54종690245 PASS/0 FAIL.
-- 다음 큰 구간4: [계획](Planning/MoonRabbitJunkyard/ElementFramework/phase-04-presentation-resources-plan.md) · [목표/완료 조건](Goals/MoonRabbitJunkyard/ElementFramework/phase-04-presentation-resources-goal.md) · [전체 복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/phase-04-command.md). 구현 미착수.
+- [큰 구간4 완료 기록](Verification/MoonRabbitJunkyard/ElementFramework/phase-04-progress.md): 공통 표현·리소스·풀·HUD/봇 경계, 최종79종691470 PASS/0 FAIL·전량 논리/원본 보존 감사. 다음5단계 [계획](Planning/MoonRabbitJunkyard/ElementFramework/phase-05-extension-validation-plan.md) · [목표](Goals/MoonRabbitJunkyard/ElementFramework/phase-05-extension-validation-goal.md) · [전체 복사용 실행문](Commands/MoonRabbitJunkyard/ElementFramework/phase-05-command.md). 5단계 구현은 미착수.
 - [5개 큰 구간 통합 가이드](Planning/MoonRabbitJunkyard/ElementFramework/integration-guideline.md).

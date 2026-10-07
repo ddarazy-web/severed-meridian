@@ -169,8 +169,14 @@ namespace GameScreen.Editor
                     if (expected != MovementKind.Supply && name != "simultaneous-column") VerifyRecordedFrames(session, board, direct, owners, name);
                     for (int frame = 0; frame < 1000 && session.IsPresenting; frame++) Tick(session, .02f);
                     Check(!session.IsPresenting && !session.HasFailed, name + " playback ends");
-                    Check(scales.All(pair => pair.Key.transform.localScale == pair.Value) && colors.All(pair => pair.Key.color == pair.Value) &&
-                        orders.All(pair => pair.Key.sortingOrder == pair.Value), name + " 원래 축척·색·렌더 순서 복원");
+                    bool Restored(SpriteRenderer image) => image.sprite == null
+                        ? !image.enabled && image.transform.localScale == Vector3.one && image.color == Color.white && image.sortingOrder == 0 && !image.flipX && !image.flipY
+                        : image.transform.localScale == scales[image] && image.color == colors[image] && image.sortingOrder == orders[image];
+                    foreach (KeyValuePair<SpriteRenderer, Vector3> pair in scales.Where(pair => !Restored(pair.Key)))
+                        results.Add("INFO " + name + " restored slot=" + pair.Key.name + " sprite=" + pair.Key.sprite?.name +
+                            " scale=" + pair.Key.transform.localScale + "/" + pair.Value + " color=" + pair.Key.color + "/" + colors[pair.Key] +
+                            " order=" + pair.Key.sortingOrder + "/" + orders[pair.Key]);
+                    Check(scales.Keys.All(Restored), name + " 활성 그림의 축척·색·순서 복원 및 빈 슬롯 초기화");
                     Check(Snapshot(session.State) == Snapshot(direct.State), name + " state/random/supply/recovery identical");
                     Check(floorPositions.All(pair => pair.Key.transform.position == pair.Value), name + " fixed layers stay");
                     Check(!board.GetComponentsInChildren<SpriteRenderer>().Any(image => image.name == "Supply-playback"), name + " temporary supply returned");

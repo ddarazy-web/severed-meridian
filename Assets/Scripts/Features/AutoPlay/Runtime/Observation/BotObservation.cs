@@ -24,6 +24,13 @@ namespace AutoPlay
         public int CoverDurability { get; }
         public int DustDurability { get; }
         public int? BodyKey { get; }
+        public bool CoverUsesDurability { get; }
+        public int CoverDamage { get; }
+        public MissionKind? CoverMission { get; }
+        public bool CoverSpreads { get; }
+        public int SpreadDurability { get; }
+        public int DustDamage { get; }
+        public MissionKind? DustMission { get; }
 
         /// <param name="coordinate">보드 좌표.</param><param name="active">활성 칸 여부.</param>
         /// <param name="content">공개된 점유 종류.</param><param name="color">노출 색.</param>
@@ -32,10 +39,24 @@ namespace AutoPlay
         /// <param name="bodyKey">보이는 본체의 좌표 기반 키.</param>
         internal BotCell(BoardCoordinate coordinate, bool active, BotContent content, RabbitColor? color,
             RocketDirection? rocket, CoverKind? cover, int coverDurability, int dust, int? bodyKey)
+            : this(coordinate, active, content, color, rocket, cover, coverDurability, dust, bodyKey,
+                cover == CoverKind.Web, cover.HasValue ? 1 : 0,
+                cover.HasValue ? (cover == CoverKind.Web ? MissionKind.Web : MissionKind.Mold) : (MissionKind?)null,
+                cover == CoverKind.Mold, cover == CoverKind.Mold ? 1 : 0,
+                dust > 0 ? 1 : 0, dust > 0 ? MissionKind.Dust : (MissionKind?)null)
+        { }
+
+        internal BotCell(BoardCoordinate coordinate, bool active, BotContent content, RabbitColor? color,
+            RocketDirection? rocket, CoverKind? cover, int coverDurability, int dust, int? bodyKey,
+            bool coverUsesDurability, int coverDamage, MissionKind? coverMission, bool coverSpreads,
+            int spreadDurability, int dustDamage, MissionKind? dustMission)
         {
             Coordinate = coordinate; IsActive = active; Content = content; Color = color;
             RocketDirection = rocket; Cover = cover; CoverDurability = coverDurability;
             DustDurability = dust; BodyKey = bodyKey;
+            CoverUsesDurability = coverUsesDurability; CoverDamage = coverDamage; CoverMission = coverMission;
+            CoverSpreads = coverSpreads; SpreadDurability = spreadDurability;
+            DustDamage = dustDamage; DustMission = dustMission;
         }
     }
 
@@ -48,6 +69,16 @@ namespace AutoPlay
         public RabbitColor? Color { get; }
         public int Charge { get; }
         public int RequiredCharge { get; }
+        public bool AcceptsAdjacentMatch { get; }
+        public bool AcceptsPower { get; }
+        public bool AcceptsMagnetAdjacent { get; }
+        public bool AcceptsHammer { get; }
+        public bool RequiresAdjacentColor { get; }
+        public bool PerHitCell { get; }
+        public bool IsCharge { get; }
+        public int ChargePerHit { get; }
+        public int LogicalSize { get; }
+        public MissionKind? RemovalMission { get; }
         public ReadOnlyCollection<BoardCoordinate> Cells { get; }
         public ReadOnlyCollection<int> ConnectedTargets { get; }
 
@@ -57,9 +88,32 @@ namespace AutoPlay
         /// <param name="cells">화면에 보이는 점유 칸.</param><param name="targets">활성 전선의 공개 대상 키.</param>
         internal BotBody(int key, ObstacleKind kind, int durability, RabbitColor? color, int charge,
             int required, IEnumerable<BoardCoordinate> cells, IEnumerable<int> targets)
+            : this(key, kind, durability, color, charge, required, cells, targets,
+                false, false, false, false, false, false, false, 0, 1, null)
+        {
+            // 구형 값 입력의 호환 경계다. 실제 실행 정의를 받거나 관찰에 보관하지 않는다.
+            Elements.ElementDefinition legacy = Elements.LegacyElementDefinitions.Get(kind);
+            Elements.ElementDamageSourcePolicy sources = legacy.RequireDamageSourcePolicy();
+            AcceptsAdjacentMatch = sources.AdjacentMatch; AcceptsPower = sources.Power;
+            AcceptsMagnetAdjacent = sources.MagnetAdjacent; AcceptsHammer = sources.Hammer;
+            RequiresAdjacentColor = legacy.ColorMatchPolicy?.RequiresMatchingColor == true;
+            PerHitCell = legacy.DamageAggregationPolicy?.PerHitCell == true;
+            IsCharge = legacy.RequireReactionBehavior() == Elements.ElementReactionBehavior.GeneratorCharge;
+            ChargePerHit = IsCharge ? legacy.RequireChargePlacement().ChargePerHit : 0;
+            LogicalSize = IsCharge ? legacy.RequireChargePlacement().Size : legacy.RequirePlacement().Size;
+            RemovalMission = legacy.RemovalMissionProfile?.Kind;
+        }
+
+        internal BotBody(int key, ObstacleKind kind, int durability, RabbitColor? color, int charge,
+            int required, IEnumerable<BoardCoordinate> cells, IEnumerable<int> targets,
+            bool adjacentMatch, bool power, bool magnetAdjacent, bool hammer, bool requiresColor, bool perHitCell,
+            bool isCharge, int chargePerHit, int size, MissionKind? removalMission)
         {
             Key = key; Kind = kind; Durability = durability; Color = color; Charge = charge; RequiredCharge = required;
             Cells = Array.AsReadOnly(cells.ToArray()); ConnectedTargets = Array.AsReadOnly(targets.ToArray());
+            AcceptsAdjacentMatch = adjacentMatch; AcceptsPower = power; AcceptsMagnetAdjacent = magnetAdjacent;
+            AcceptsHammer = hammer; RequiresAdjacentColor = requiresColor; PerHitCell = perHitCell;
+            IsCharge = isCharge; ChargePerHit = chargePerHit; LogicalSize = size; RemovalMission = removalMission;
         }
     }
 

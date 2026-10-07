@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Levels;
 using Simulation;
 using UnityEngine;
+using Elements;
 
 namespace GameScreen
 {
@@ -14,6 +15,8 @@ namespace GameScreen
         [SerializeField] private int seed = 12345;
         [SerializeField] private PuzzleWorldBoard board;
         [SerializeField] private Camera boardCamera;
+        [SerializeField] private ElementVisualCatalogDto visualConfiguration;
+        private ElementVisualCatalog visualCatalog;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private PuzzleArtwork artwork;
         private BoardActionExecutor executor;
@@ -30,6 +33,12 @@ namespace GameScreen
 
         public void Configure(PuzzleWorldBoard worldBoard, Camera camera)
         { board = worldBoard; boardCamera = camera; }
+
+        public void ConfigureVisuals(ElementVisualCatalogDto configuration)
+        {
+            if (started) throw new InvalidOperationException("시각 설정은 게임 시작 전에 전달하세요.");
+            visualCatalog = LegacyElementVisuals.WithOverrides(configuration);
+        }
 
         private void Start()
         {
@@ -57,6 +66,7 @@ namespace GameScreen
                 linked.Token.ThrowIfCancellationRequested();
                 if (definition == null) definition = await LevelPackLoader.LoadAsync(number);
                 linked.Token.ThrowIfCancellationRequested();
+                visualCatalog ??= visualConfiguration != null ? LegacyElementVisuals.WithOverrides(visualConfiguration) : ElementVisualLookup.ForLevel(definition);
                 initialBytes = LevelPackCodec.Snapshot(definition);
                 levelNumber = number; seed = randomSeed;
                 await PrepareAsync(definition, randomSeed, linked.Token);
@@ -83,7 +93,7 @@ namespace GameScreen
             if (search.Status != StartingBoardStatus.Success) throw new InvalidOperationException(search.Message);
             executor = new BoardActionExecutor(search.State);
             InitializeProgress();
-            artwork = new PuzzleArtwork();
+            artwork = new PuzzleArtwork(visualCatalog);
             await artwork.PrepareAsync(State, token);
             token.ThrowIfCancellationRequested();
             board.Draw(State, artwork);

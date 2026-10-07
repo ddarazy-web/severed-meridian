@@ -9,18 +9,22 @@ namespace GameScreen
         [SerializeField] private PuzzleMissionView missionPrefab;
         [SerializeField] private Transform missionRoot;
         private readonly List<PuzzleMissionView> views = new List<PuzzleMissionView>();
+        private readonly PuzzleHudState compatibilityState = new PuzzleHudState();
         public System.Action<string> Describe;
         public void Configure(UnityEngine.UI.Text label, PuzzleMissionView prefab, Transform parent)
         { moves = label; missionPrefab = prefab; missionRoot = parent; }
         public void Refresh(PuzzleGameSession session)
+            => Refresh(PuzzleHudPresenter.Capture(session, compatibilityState));
+        public void Refresh(PuzzleHudState state)
         {
-            moves.text = session.State == null ? "—" : session.State.MovesRemaining.ToString();
-            int count = session.IsReady && !session.IsRestarting ? session.State.Missions.Count : 0;
+            moves.text = state.MovesText;
+            int count = state.Missions.Count;
             while (views.Count < count) views.Add(Instantiate(missionPrefab, missionRoot));
             for (int i = 0; i < views.Count; i++)
             {
                 views[i].gameObject.SetActive(i < count);
-                if (i < count) views[i].Refresh(session.State.Missions[i], session.MissionSprite(i), Describe, session.DisplayedMissionProgress(i));
+                if (i < count) views[i].Refresh(state.Missions[i], Describe);
+                else views[i].Clear();
             }
         }
     }

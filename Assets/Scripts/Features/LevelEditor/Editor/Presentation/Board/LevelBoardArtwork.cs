@@ -163,6 +163,13 @@ namespace Levels.Editor
             return Load("BoardTerrain/Floor/floor-" + tile + "-v1-256.png");
         }
 
+        internal static Sprite Visual(Elements.ElementVisualFrame frame)
+        {
+            if (frame == null || Load(frame.Path) == null) return null;
+            return atlases[BoardSpriteAtlas.AddressFor(frame.Path)].GetFrame(Path.GetFileNameWithoutExtension(frame.Path),
+                frame.SheetColumns, frame.SheetRows, frame.SheetFrame);
+        }
+
         private static Sprite Load(string relativePath)
         {
             string address = BoardSpriteAtlas.AddressFor(relativePath);

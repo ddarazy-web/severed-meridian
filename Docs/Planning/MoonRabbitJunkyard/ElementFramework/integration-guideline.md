@@ -1,6 +1,6 @@
 # 퍼즐 요소 확장·드론 수정 — 통합 개발 가이드라인
 
-상태: 큰 구간1~3 완료. 3단계는 최종54종690245 PASS/0 FAIL·전량 논리 비교·원본/과거 증거 보존 감사와4단계 문서 인계를 마쳤다. 큰 구간4~5 구현은 미착수다. EF-01~37 이력은 아래 과거 기록으로 유지하며 EF-38 준비안은5구간 체계로 대체했다.
+상태: 큰 구간1~5 완료. 최종85종692682 PASS/FAIL0·각 실제 종료0·전량 논리 차이0·원본/팩/GUID/과거 증거/WIP 보존을 감사했다. 콘텐츠/새 행동/정책 추가 안내와500개 실측을 인계했다. EF-01~37은 아래 과거 기록이며 후속 구현은 자동 시작하지 않는다.
 
 연결: [설계](../../../Systems/MoonRabbitJunkyard/2026-10-04-element-framework-design.md) · [전체 완료 조건](../../../Goals/MoonRabbitJunkyard/ElementFramework/2026-10-04-refactor-goal.md) · [기존 7개 구간 참고안](2026-10-04-refactor-plan.md) · [EF-01 계획](stage-01-obstacle-baseline-plan.md) · [EF-01 목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/stage-01-obstacle-baseline-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/ElementFramework/stage-01-command.md)
 
@@ -37,7 +37,7 @@
 
 기존 A/B의 기준·정의 도입과 C의 완료분은 유지한다. 새1은 C의 남은 범위이고 새2~5는 기존 D~G에 대응한다. 한 구간 내부의 체크포인트마다 다음 단계 문서나 전체 회귀를 반복하지 않는다. 변경 중에는 관련 검사를, 최종 상태에서는 전체 회귀를 수행하며 실패 영향이 넓을 때만 근거에 따라 확대한다.
 
-완료: [1단계 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-01-progress.md) · [2단계 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-02-progress.md) · [3단계 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-03-progress.md). 다음: [4단계 계획](phase-04-presentation-resources-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/phase-04-presentation-resources-goal.md) · [전체 복사용 실행문](../../../Commands/MoonRabbitJunkyard/ElementFramework/phase-04-command.md). 4~5단계 구현과5단계 상세 문서는 아직 시작하지 않는다. 아래 EF 이력은 과거 기록이며 최신 실행 범위는4단계 계획을 우선한다.
+완료: [1단계 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-01-progress.md) · [2단계 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-02-progress.md) · [3단계 검증](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-03-progress.md). 완료: [4단계 계획](phase-04-presentation-resources-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/phase-04-presentation-resources-goal.md) · [전체 복사용 실행문](../../../Commands/MoonRabbitJunkyard/ElementFramework/phase-04-command.md) · [진행 기록](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-04-progress.md). 완료5단계 [계획](phase-05-extension-validation-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/ElementFramework/phase-05-extension-validation-goal.md) · [실행문](../../../Commands/MoonRabbitJunkyard/ElementFramework/phase-05-command.md) · [최종 기록](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-05-progress.md) · [추가 안내](../../../Guides/MoonRabbitJunkyard/ElementFramework/element-extension-usage.md). 아래 EF 이력은 과거 기록이며 현재 완료 범위는 큰 구간1~5다.
 
 ## 4. 단계 시작·진행·종료
 

@@ -4,6 +4,7 @@ using Levels;
 using Simulation;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Elements;
 
 namespace GameScreen
 {
@@ -71,25 +72,18 @@ namespace GameScreen
                 supplyClips.Add(mask);
             }
             SpriteMask clip = supplyClips[index]; clip.gameObject.SetActive(true);
+            SortingGroup supplyGroup = renderer.transform.parent.GetComponent<SortingGroup>();
+            supplyGroup.transform.localPosition = Vector3.zero;
+            supplyGroup.transform.localScale = Vector3.one;
+            supplyGroup.transform.localRotation = Quaternion.identity;
+            clip.sprite = supplyClipSprite;
             clip.transform.localPosition = CellPosition(record.Target);
+            ElementVisualFrame frame = art.Visuals.Supply(record, state);
+            supplyGroup.sortingOrder = frame?.Order ?? 0;
+            PuzzleCellView.SetVisual(renderer, art.GetVisual(frame), frame, record.Content == RuntimeContent.Obstacle ? 1 : .92f);
             // 내부 생성구에서도 공급되는 동안에는 대상 한 칸 안에서만 드러난다.
             renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-            string path = record.Content switch
-            {
-                RuntimeContent.Normal => PuzzleArtworkPaths.Rabbit(record.Color.Value),
-                RuntimeContent.Recovery => PuzzleArtworkPaths.Recovery,
-                RuntimeContent.Obstacle => PuzzleArtworkPaths.Obstacle(state.Obstacles[record.ObstacleIndex.Value]),
-                RuntimeContent.Rocket => PuzzleArtworkPaths.Power(InitialBlockKind.Rocket, record.Direction ?? RocketDirection.Horizontal),
-                RuntimeContent.Bomb => PuzzleArtworkPaths.Power(InitialBlockKind.Bomb, default),
-                RuntimeContent.Drone => PuzzleArtworkPaths.Power(InitialBlockKind.Drone, default),
-                RuntimeContent.Magnet => PuzzleArtworkPaths.Power(InitialBlockKind.Magnet, default),
-                _ => null
-            };
-            Sprite sprite = art.Get(path);
-            float size = (record.Content == RuntimeContent.Obstacle ? .96f : .92f) * BoardArtworkLayout.ContentScale(sprite);
-            PuzzleCellView.Set(renderer, sprite, size);
-            renderer.name = "Supply-playback"; renderer.color = Color.white; renderer.sortingOrder = 10;
-            renderer.transform.localPosition = CellPosition(record.Target) + new Vector3(BoardArtworkLayout.ContentOffsetX(sprite), BoardArtworkLayout.ContentOffsetY(sprite), 0) * size;
+            renderer.name = "Supply-playback"; renderer.transform.localPosition += CellPosition(record.Target);
             return new PuzzleBoardSnapshot.Image(renderer, record.Target, transform, renderer.transform.localPosition, true, clip);
         }
 
@@ -105,7 +99,14 @@ namespace GameScreen
                 {
                     previewOrigin = preview.transform.localPosition;
                     previewOrder = preview.sortingOrder;
-                    preview.sortingOrder = SwipeSortingOrder;
+                    int order = SwipeSortingOrder;
+                    foreach (PuzzleCellView cell in cells)
+                        if (cell.gameObject.activeSelf) order = Mathf.Max(order, cell.HighestSortingOrder + 1);
+                    foreach (SpriteRenderer body in bodies)
+                        if (body.gameObject.activeSelf && body.enabled) order = Mathf.Max(order, body.sortingOrder + 1);
+                    foreach (SpriteRenderer decoration in decorations)
+                        if (decoration.gameObject.activeSelf && decoration.enabled) order = Mathf.Max(order, decoration.sortingOrder + 1);
+                    preview.sortingOrder = order;
                 }
             }
             if (preview != null) preview.transform.localPosition = previewOrigin + preview.transform.parent.InverseTransformVector(transform.TransformVector(offset));
@@ -142,21 +143,23 @@ namespace GameScreen
                 PuzzleCellView view = cells[i];
                 bool active = i < state.Cells.Count && state.Cells[i].IsActive;
                 view.gameObject.SetActive(active);
-                if (!active) continue;
+                if (!active) { view.Clear(); continue; }
                 RuntimeCell cell = state.Cells[i];
                 view.name = "Cell-" + cell.Coordinate.Row + "-" + cell.Coordinate.Column;
                 view.transform.localPosition = CellPosition(cell.Coordinate);
-                view.Draw(art.Get(PuzzleArtworkPaths.Floor), art.Get(PuzzleArtworkPaths.Dust(cell.DustDurability)),
-                    art.Get(PuzzleArtworkPaths.Content(cell)), art.Get(PuzzleArtworkPaths.Cover(cell)));
+                view.transform.localScale = Vector3.one;
+                view.transform.localRotation = Quaternion.identity;
+                view.Draw(art, art.Visuals.Dust(cell), art.Visuals.Content(cell), art.Visuals.Cover(cell));
                 if (cell.Content != RuntimeContent.Empty && cell.Content != RuntimeContent.Obstacle)
                     occupants[cell.Coordinate] = view.ContentRenderer;
                 if (cell.Content != RuntimeContent.Obstacle || !cell.ObstacleIndex.HasValue || !drawn.Add(cell.ObstacleIndex.Value)) continue;
                 RuntimeObstacle body = state.Obstacles[cell.ObstacleIndex.Value];
-                int size = LevelPlacementRules.Size(body.Definition.Kind);
+                int size = ElementVisualLookup.Size(body.Element);
                 SpriteRenderer image = Take(bodies, obstaclePrefab, bodyCount++);
                 image.name = "Obstacle-" + body.Definition.Id;
-                image.transform.localPosition = CellPosition(size == 1 ? cell.Coordinate : body.Definition.Coordinate) + new Vector3((size - 1) * 0.5f, -(size - 1) * 0.5f, 0);
-                    PuzzleCellView.Set(image, art.Get(PuzzleArtworkPaths.Obstacle(body)), size == 2 ? BoardArtworkLayout.LargeObstacleSize : 0.96f);
+                ElementVisualFrame frame = art.Visuals.Obstacle(body);
+                PuzzleCellView.SetVisual(image, art.GetVisual(frame), frame);
+                image.transform.localPosition += CellPosition(size == 1 ? cell.Coordinate : body.Definition.Coordinate) + new Vector3((size - 1) * 0.5f, -(size - 1) * 0.5f, 0);
                 if (size == 1) occupants[cell.Coordinate] = image;
             }
             foreach (BoardEdge wall in state.Flow.Walls)
@@ -176,8 +179,10 @@ namespace GameScreen
             foreach (BoardCoordinate arrival in state.Flow.Arrivals)
                 Add("Recovery-exit", art.Get(PuzzleArtworkPaths.Arrival), CellPosition(arrival), 1, 4);
             DrawConnections(state, art);
-            for (int i = bodyCount; i < bodies.Count; i++) bodies[i].gameObject.SetActive(false);
-            for (int i = decorationCount; i < decorations.Count; i++) decorations[i].gameObject.SetActive(false);
+            for (int i = bodyCount; i < bodies.Count; i++)
+            { PuzzleCellView.ResetImage(bodies[i]); bodies[i].gameObject.SetActive(false); }
+            for (int i = decorationCount; i < decorations.Count; i++)
+            { PuzzleCellView.ResetImage(decorations[i]); decorations[i].gameObject.SetActive(false); }
         }
 
         private void DrawConnections(LevelRuntimeState state, PuzzleArtwork art)
@@ -218,6 +223,7 @@ namespace GameScreen
         private SpriteRenderer Take(List<SpriteRenderer> pool, SpriteRenderer prefab, int index)
         {
             if (index == pool.Count) pool.Add(Instantiate(prefab, transform));
+            PuzzleCellView.ResetImage(pool[index]);
             pool[index].gameObject.SetActive(true);
             return pool[index];
         }

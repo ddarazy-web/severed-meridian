@@ -256,12 +256,15 @@ namespace GameScreen.Editor
                         // 정상 로드된 다른 아틀라스를 넣어 필요한 효과 프레임 누락을 재현한다. 에셋은 수정하지 않는다.
                         var atlases = (System.Collections.Generic.Dictionary<string, BoardSpriteAtlas>)typeof(PuzzleArtwork).GetField("atlases", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(lifetimeArt);
                         BoardSpriteAtlas wrongAtlas = new BoardSpriteAtlas(BoardSpriteAtlas.AddressFor("Blocks/"));
-                        await wrongAtlas.LoadAsync(); atlases.Add(BoardSpriteAtlas.AddressFor("Effects/Rocket/"), wrongAtlas);
+                        await wrongAtlas.LoadAsync();
+                        string effectAddress = BoardSpriteAtlas.AddressFor("Effects/Rocket/");
+                        BoardSpriteAtlas preparedAtlas = atlases[effectAddress];
+                        atlases[effectAddress] = wrongAtlas; preparedAtlas.Dispose();
                     }
                     Check(lifetimeSession.TryActivate(origin), "자원 실패/종료 파워 시작 " + missingSprite);
                     if (!missingSprite)
                     {
-                        Check((bool)preparing.GetValue(lifetimeSession), "씬 객체 제거 전 효과 준비 진행 중");
+                        Check(lifetimeSession.IsPresenting && lifetimeArt.AtlasCount > 0, "씬 객체 제거 전 효과 재생·아틀라스 소유권 유지");
                         UnityEngine.Object.DestroyImmediate(owner);
                     }
                     deadline = Time.realtimeSinceStartup + 20;

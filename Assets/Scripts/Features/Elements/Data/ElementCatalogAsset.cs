@@ -9,6 +9,9 @@ namespace Elements
     public sealed class ElementCatalogAsset : ScriptableObject
     {
         [SerializeField] private List<ElementDefinitionAsset> definitions = new List<ElementDefinitionAsset>();
+        [SerializeField] private ElementVisualCatalogAsset visuals;
+
+        public ElementVisualCatalog CreateVisualCatalog() => visuals != null ? visuals.CreateCatalog() : LegacyElementVisuals.Catalog;
 
         public ElementCatalog CreateCatalog()
         {

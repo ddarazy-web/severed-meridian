@@ -20,12 +20,14 @@ namespace Elements
         }
         private readonly Dictionary<ElementReactionBehavior, Behavior> queries;
 
-        internal ElementBehaviorRegistry(ReactionQuery durability, ReactionApply applyDurability, ReactionQuery charge, ReactionApply applyCharge)
+        internal ElementBehaviorRegistry(ReactionQuery durability, ReactionApply applyDurability, ReactionQuery charge, ReactionApply applyCharge,
+            ReactionQuery evenTurnDurability)
         {
             queries = new Dictionary<ElementReactionBehavior, Behavior>
             {
                 { ElementReactionBehavior.Durability, new Behavior(durability, applyDurability) },
-                { ElementReactionBehavior.GeneratorCharge, new Behavior(charge, applyCharge) }
+                { ElementReactionBehavior.GeneratorCharge, new Behavior(charge, applyCharge) },
+                { ElementReactionBehavior.EvenTurnDurability, new Behavior(evenTurnDurability, applyDurability) }
             };
         }
 

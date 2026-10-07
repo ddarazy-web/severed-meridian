@@ -86,7 +86,7 @@ namespace GameScreen
                 }
                 if (search.Status != StartingBoardStatus.Success) throw new InvalidOperationException(search.Message);
                 BoardActionExecutor candidateExecutor = new BoardActionExecutor(search.State);
-                candidateArtwork = new PuzzleArtwork();
+                candidateArtwork = new PuzzleArtwork(visualCatalog);
                 await candidateArtwork.PrepareAsync(candidateExecutor.State, linked.Token);
                 foreach (RuntimeMission mission in candidateExecutor.State.Missions)
                     candidateArtwork.Get(PuzzleArtworkPaths.Mission(mission.Definition));

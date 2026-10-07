@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Elements;
 
 namespace GameScreen.Editor
 {
@@ -34,6 +35,7 @@ namespace GameScreen.Editor
             SessionState.SetString(Key + "previousScene", AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene));
             SessionState.SetString(Key + "id", Guid.NewGuid().ToString("N"));
             SessionState.SetString(Key + "bytes", request.EncodedBytes);
+            SessionState.SetString(Key + "visuals", request.EncodedVisuals);
             SessionState.SetInt(Key + "number", request.LevelNumber);
             SessionState.SetInt(Key + "seed", request.Seed);
             SessionState.SetInt(Key + "source", (int)request.Source);
@@ -63,6 +65,8 @@ namespace GameScreen.Editor
             try
             {
                 PuzzleGameSession session = scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<PuzzleGameSession>(true)).Single();
+                string visualJson = SessionState.GetString(Key + "visuals", "");
+                if (visualJson != "") session.ConfigureVisuals(JsonUtility.FromJson<ElementVisualCatalogDto>(visualJson));
                 session.SetLevelAdvanceEnabled(SessionState.GetInt(Key + "source", (int)PuzzleEditorLevelSource.Asset) == (int)PuzzleEditorLevelSource.MemoryPack);
                 definition = LevelPackCodec.ReadLevel(Convert.FromBase64String(encoded), SessionState.GetInt(Key + "number", 0));
                 LevelDefinition owned = definition; definition = null;
@@ -109,7 +113,7 @@ namespace GameScreen.Editor
             int owner = SessionState.GetInt(Key + "owner", 0);
             string previous = SessionState.GetString(Key + "previousScene", "");
             EditorSceneManager.playModeStartScene = previous == "" ? null : AssetDatabase.LoadAssetAtPath<SceneAsset>(previous);
-            foreach (string field in new[] { "id", "bytes", "previousScene", "message" }) SessionState.EraseString(Key + field);
+            foreach (string field in new[] { "id", "bytes", "visuals", "previousScene", "message" }) SessionState.EraseString(Key + field);
             foreach (string field in new[] { "number", "seed", "owner", "source" }) SessionState.EraseInt(Key + field);
             SessionState.EraseFloat(Key + "requestedAt");
             Finished?.Invoke(owner, message);

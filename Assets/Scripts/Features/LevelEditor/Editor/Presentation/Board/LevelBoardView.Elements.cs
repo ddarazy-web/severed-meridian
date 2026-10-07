@@ -4,7 +4,6 @@ using System.Linq;
 using Board;
 using Elements;
 using Elements.Editor;
-using Simulation;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -12,36 +11,36 @@ namespace Levels.Editor
 {
     public sealed partial class LevelBoardView
     {
-        private static Sprite ElementArtwork(ElementDefinition definition, ElementPlacementDefinition placement)
+        private readonly Dictionary<ElementPlacementDefinition, ElementVisualFrame> elementFrames = new Dictionary<ElementPlacementDefinition, ElementVisualFrame>();
+        private readonly Dictionary<ElementPlacementDefinition, string> visualErrors = new Dictionary<ElementPlacementDefinition, string>();
+        private readonly Dictionary<(PlacementLayer, BoardCoordinate), ElementVisualFrame> legacyFrames = new Dictionary<(PlacementLayer, BoardCoordinate), ElementVisualFrame>();
+        private readonly Dictionary<BoardCoordinate, string> legacyVisualErrors = new Dictionary<BoardCoordinate, string>();
+        private string legacyCatalogError;
+        private void PrepareLegacyVisuals()
         {
-            if (definition.Layer != null) return definition.Layer.Behavior == ElementLayerBehavior.NormalConsumption
-                ? LevelBoardArtwork.Dust(placement.durability)
-                : LevelBoardArtwork.Cover(definition.Layer.Behavior == ElementLayerBehavior.CoverRemoval ? CoverKind.Mold : CoverKind.Web, placement.durability);
-            if (definition.ReactionBehavior.HasValue)
+            legacyFrames.Clear(); legacyVisualErrors.Clear(); legacyCatalogError = null;
+            if (level == null) return;
+            try
             {
-                // 기존 아트의 의미만 연결한다. 실제 크기·수치·실행 정의는 배치 원본에서 유지한다.
-                ObstacleKind kind = definition.ReactionBehavior == ElementReactionBehavior.GeneratorCharge ? ObstacleKind.Generator :
-                    definition.RemovalMissionProfile.Kind switch
-                    {
-                        MissionKind.Crate => ObstacleKind.Crate, MissionKind.Scrap => ObstacleKind.Scrap,
-                        MissionKind.Safe => ObstacleKind.Safe, MissionKind.ColorLock => ObstacleKind.ColorLock,
-                        MissionKind.Appliance => ObstacleKind.Appliance, _ => throw new ArgumentException("본체 표시 미션이 없습니다.")
-                    };
-                return LevelBoardArtwork.Obstacle(kind, placement.color, placement.requiredCharge, placement.durability);
+                ElementCatalog catalog = level.CreateElementCatalog();
+                ElementVisualLookup lookup = new ElementVisualLookup(ElementVisualLookup.ForLevel(level));
+                foreach (ElementPlacementDefinition placement in LegacyElementLevelAdapter.Preview(level))
+                {
+                    try { legacyFrames.TryAdd((placement.layer, placement.coordinate), lookup.Placement(catalog.Get(new ElementId(placement.definitionId)), placement)); }
+                    catch (ArgumentException error) { legacyVisualErrors[placement.coordinate] = error.Message; }
+                }
             }
-            if (definition.Supply?.Behavior == ElementSupplyBehavior.FixedNormal) return LevelBoardArtwork.Rabbit(placement.color);
-            if (definition.Supply?.Behavior == ElementSupplyBehavior.Recovery) return LevelBoardArtwork.Recovery;
-            return definition.Supply?.Content switch
-            {
-                RuntimeContent.Rocket => LevelBoardArtwork.Block(InitialBlockKind.Rocket, placement.rocketDirection),
-                RuntimeContent.Bomb => LevelBoardArtwork.Block(InitialBlockKind.Bomb, placement.rocketDirection),
-                RuntimeContent.Drone => LevelBoardArtwork.Block(InitialBlockKind.Drone, placement.rocketDirection),
-                RuntimeContent.Magnet => LevelBoardArtwork.Block(InitialBlockKind.Magnet, placement.rocketDirection), _ => null
-            };
+            catch (ArgumentException error) { legacyCatalogError = error.Message; }
+        }
+        private ElementVisualFrame LegacyFrame(PlacementLayer layer, BoardCoordinate coordinate)
+            => legacyFrames.TryGetValue((layer, coordinate), out ElementVisualFrame frame) ? frame : null;
+        private Sprite ElementArtwork(ElementDefinition definition, ElementPlacementDefinition placement)
+        {
+            return LevelBoardArtwork.Visual(elementFrames.TryGetValue(placement, out ElementVisualFrame frame) ? frame : null);
         }
         private void RedrawElements()
         {
-            bodies.Clear(); supplyMarks.Clear();
+            supplyMarks.Clear(); elementFrames.Clear(); visualErrors.Clear();
             Dictionary<PlacementLayer, Dictionary<BoardCoordinate, int>> occupied = Enum.GetValues(typeof(PlacementLayer)).Cast<PlacementLayer>()
                 .ToDictionary(layer => layer, layer => new Dictionary<BoardCoordinate, int>());
             Dictionary<int, ElementDefinition> definitions = new Dictionary<int, ElementDefinition>();
@@ -50,6 +49,7 @@ namespace Levels.Editor
             try
             {
                 ElementCatalog catalog = level.CreateElementCatalog();
+                ElementVisualLookup visuals = new ElementVisualLookup(ElementVisualLookup.ForLevel(level));
                 for (int i = 0; i < level.Elements.Count; i++)
                 {
                     ElementPlacementDefinition item = level.Elements[i];
@@ -59,6 +59,12 @@ namespace Levels.Editor
                         PackedElementDefinition.FromDefinition(definition).ToDefinition();
                         if (ElementCatalogViewModel.LayerOf(definition) != item.layer) throw new ArgumentException("정의 층이 다릅니다.");
                         definitions.Add(i, definition);
+                        try { elementFrames.Add(item, visuals.Placement(definition, item)); }
+                        catch (ArgumentException error)
+                        {
+                            visualErrors[item] = error.Message;
+                            foreach (BoardCoordinate coordinate in LevelPlacementRules.Footprint(item.coordinate, ElementPlacementEditing.Size(definition))) invalid.Add(coordinate);
+                        }
                         foreach (BoardCoordinate coordinate in LevelPlacementRules.Footprint(item.coordinate, ElementPlacementEditing.Size(definition)))
                             if (!occupied[item.layer].TryAdd(coordinate, i)) { invalid.Add(coordinate); occupied[item.layer][coordinate] = -2; }
                     }
@@ -81,9 +87,10 @@ namespace Levels.Editor
                 bool selectedCell = selected.HasValue && selected.Value.Equals(coordinate) || selectedArea.Contains(coordinate) || PlacementSelection.Contains(coordinate) || Brush == LevelBrush.SourceSelect && SourceSelection.Contains(coordinate);
                 bool highlighted = visited.Contains(coordinate) || preview.Contains(coordinate) && (Brush == LevelBrush.Placement || Brush == LevelBrush.Move);
                 bool conflict = invalid.Contains(coordinate) || errors.Contains(coordinate) || catalogError != null;
-                cell.Clear(); cell.text = ""; cell.style.backgroundImage = new StyleBackground(StyleKeyword.None);
+                cell.Clear(); cellAnnotations[i].Clear(); cell.text = ""; cell.style.backgroundImage = new StyleBackground(StyleKeyword.None);
                 cell.style.backgroundColor = (Color)(active ? new Color32(66, 72, 84, 255) : new Color32(35, 38, 45, 255));
                 cell.style.opacity = active ? 1 : 0.55f;
+                cellAnnotations[i].style.opacity = cell.style.opacity;
                 Color border = conflict || highlighted && placementError != null ? UnityEngine.Color.red : highlighted ? UnityEngine.Color.yellow : selectedCell ? UnityEngine.Color.white : new Color32(24, 27, 32, 255);
                 cell.style.borderLeftColor = cell.style.borderRightColor = cell.style.borderTopColor = cell.style.borderBottomColor = border;
                 cell.style.borderLeftWidth = cell.style.borderRightWidth = cell.style.borderTopWidth = cell.style.borderBottomWidth = selectedCell || highlighted ? 3 : 1;
@@ -95,6 +102,7 @@ namespace Levels.Editor
                     if (!occupied[layer].TryGetValue(coordinate, out int index) || index < 0) continue;
                     ElementPlacementDefinition item = level.Elements[index]; ElementDefinition definition = definitions[index];
                     tooltip += " / " + definition.DisplayName + " [" + item.definitionId + "]";
+                    if (visualErrors.TryGetValue(item, out string visualError)) tooltip += " / " + visualError;
                     int size = ElementPlacementEditing.Size(definition);
                     if (layer == PlacementLayer.Obstacle && size > 1) { badge = ""; continue; }
                     Sprite artwork = ElementArtwork(definition, item);
@@ -102,13 +110,8 @@ namespace Levels.Editor
                     SetArtworkLayer(cell, layerName, active ? artwork : null);
                     if (layer == PlacementLayer.Block || layer == PlacementLayer.Obstacle) badge = artwork == null ? definition.Supply?.Behavior == ElementSupplyBehavior.RandomNormal ? "?" : definition.DisplayName : "";
                     if (definition.Placement != null && (layer == PlacementLayer.Dust || layer == PlacementLayer.Cover || artwork == null)) badge += item.durability;
-                    if (layerName == "board-content-art")
-                    {
-                        VisualElement content = cell.Q<VisualElement>(layerName); float scale = BoardArtworkLayout.ContentScale(artwork);
-                        content.style.scale = new Scale(Vector3.one * scale);
-                        content.style.translate = new Translate(Length.Percent(100 * scale * BoardArtworkLayout.ContentOffsetX(artwork)),
-                            Length.Percent(-100 * scale * BoardArtworkLayout.ContentOffsetY(artwork)));
-                    }
+                    ElementVisualFrame frame = elementFrames.TryGetValue(item, out ElementVisualFrame chosen) ? chosen : null;
+                    ElementVisualStyle.Apply(ArtworkAt(cell, layerName), artwork, frame, frame?.Size ?? 1);
                 }
                 if (active && level.Flow?.Portals != null)
                     for (int pair = 0; pair < level.Flow.Portals.Count; pair++)
@@ -120,7 +123,7 @@ namespace Levels.Editor
                 Label label = new Label(badge + (conflict ? "!" : "")) { name = "board-art-badge", pickingMode = PickingMode.Ignore };
                 label.style.position = Position.Absolute; label.style.left = label.style.top = 1; label.style.color = UnityEngine.Color.white;
                 label.style.unityTextOutlineWidth = 1; label.style.unityTextOutlineColor = UnityEngine.Color.black;
-                cell.Add(label); cell.tooltip = tooltip;
+                cellAnnotations[i].Add(label); cell.tooltip = tooltip;
                 if (LevelSupplyRules.FindSource(level, coordinate) != -1)
                 {
                     Label sourceMark = new Label("생") { name = "supply-mark-" + i, pickingMode = PickingMode.Ignore };
@@ -135,14 +138,18 @@ namespace Levels.Editor
                 ElementPlacementDefinition item = level.Elements[entry.Key]; int size = ElementPlacementEditing.Size(entry.Value);
                 Label body = new Label(entry.Value.DisplayName + "\n" + (entry.Value.ChargePlacement != null ? item.requiredCharge : item.durability))
                     { name = "element-body-" + entry.Key, pickingMode = PickingMode.Ignore, tooltip = item.definitionId + " / " + item.instanceId };
+                if (visualErrors.TryGetValue(item, out string bodyVisualError)) body.tooltip += " / " + bodyVisualError;
                 body.style.position = Position.Absolute;
-                float extent = size == 2 ? BoardArtworkLayout.LargeObstacleSize : size - 0.1f; float inset = CellSize * (size - extent) * 0.5f;
+                float extent = elementFrames.TryGetValue(item, out ElementVisualFrame bodyFrame) && bodyFrame != null ? bodyFrame.Size : size - 0.1f;
+                float inset = CellSize * (size - extent) * 0.5f;
                 body.style.left = item.coordinate.Column * CellSize + inset; body.style.top = item.coordinate.Row * CellSize + inset;
                 body.style.width = body.style.height = CellSize * extent;
                 body.style.unityTextAlign = TextAnchor.MiddleCenter; body.style.color = UnityEngine.Color.white;
                 Sprite artwork = ElementArtwork(entry.Value, item);
                 if (artwork != null) { body.text = ""; body.style.backgroundImage = new StyleBackground(artwork); body.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain); }
                 bodies.Add(body);
+                artworkRoot.Add(body);
+                ElementVisualStyle.Apply(body, artwork, bodyFrame, 1);
             }
         }
     }

@@ -85,7 +85,9 @@ namespace GameScreen.Editor
                 Tick(session, .06f);
                 for (int frame = 0; frame < 1000 && session.IsPresenting; frame++) Tick(session, .02f);
                 Check(!session.IsPresenting, "제거 종료");
-                Check(initialScales.All(pair => pair.Key.transform.localScale == pair.Value && pair.Key.color.a == 1), "제거 종료 원래 축척·알파 복원");
+                Check(initialScales.All(pair => pair.Key.sprite == null
+                    ? !pair.Key.enabled && pair.Key.transform.localScale == Vector3.one && pair.Key.color == Color.white && pair.Key.sortingOrder == 0
+                    : pair.Key.transform.localScale == pair.Value && pair.Key.color.a == 1), "제거 종료 활성 그림 축척·알파 복원 및 빈 슬롯 초기화");
                 foreach (MatchedBlockChange change in executor.LastApplied.Changes.Where(change => change.IsTransformation))
                     Check(board.OccupantAt(change.Coordinate)?.sprite != null, "생성 파워 표시 보존");
                 Call(session, "Advance");

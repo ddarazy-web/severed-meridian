@@ -41,7 +41,9 @@ namespace GameScreen.Editor
                     await art.PrepareAsync(before, CancellationToken.None);
                     await (UniTask)playbackType.GetMethod("PrepareAsync", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(playback, new object[] { before, after, art, timeline, CancellationToken.None });
                     SceneCall(playback, "Begin", board); SceneCall(playback, "Tick", .06f);
-                    Check(board.GetComponentsInChildren<Transform>().Any(item => item.name == "match-" + colors[color]), "다섯 색상 실제 매칭 효과 " + color);
+                    Sprite matchFrame = art.Get("Effects/Match/Animations/match-" + colors[color] + "-frame-02-v1-256");
+                    Check(matchFrame != null && board.GetComponentsInChildren<SpriteRenderer>().Any(image => image.enabled &&
+                        image.sprite == matchFrame && image.transform.parent.name == "match"), "다섯 색상 실제 매칭 효과 " + color);
                     SceneCall(playback, "Tick", .07f);
                     LevelRuntimeState visual = (LevelRuntimeState)playbackType.GetField("visual", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(playback);
                     Check(visual.CellAt(spawn).Content == after.CellAt(spawn).Content && board.OccupantAt(spawn) != null && board.OccupantAt(spawn).color.a == 1,

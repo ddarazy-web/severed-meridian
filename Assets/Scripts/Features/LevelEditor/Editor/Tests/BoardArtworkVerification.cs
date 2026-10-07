@@ -32,9 +32,9 @@ namespace Levels.Editor
                     coldWindow.SetLevel(coldLevel);
                     LevelBoardView coldBoard = coldWindow.rootVisualElement.Q<LevelBoardView>();
                     double deadline = EditorApplication.timeSinceStartup + 15;
-                    while (coldBoard.CellAt(new BoardCoordinate(0, 0)).Q("board-content-art")?.style.backgroundImage.value.sprite == null && EditorApplication.timeSinceStartup < deadline)
+                    while (coldBoard.ArtworkAt(new BoardCoordinate(0, 0), "board-content-art")?.style.backgroundImage.value.sprite == null && EditorApplication.timeSinceStartup < deadline)
                         await UniTask.Delay(100, DelayType.Realtime);
-                    Require(coldBoard.CellAt(new BoardCoordinate(0, 0)).Q("board-content-art")?.style.backgroundImage.value.sprite != null,
+                    Require(coldBoard.ArtworkAt(new BoardCoordinate(0, 0), "board-content-art")?.style.backgroundImage.value.sprite != null,
                         "사전 로드 없이 편집 보드를 열면 일반 블록 이미지 표시", results);
                 }
                 finally
@@ -110,17 +110,17 @@ namespace Levels.Editor
                 string before = JsonUtility.ToJson(level);
                 board.Display(level, null);
                 for (int i = 0; i < 5; i++)
-                    Require(board.CellAt(new BoardCoordinate(0, i)).Q("board-content-art").style.backgroundImage.value.sprite != null, "파워 보드 표시 " + i, results);
+                    Require(board.ArtworkAt(new BoardCoordinate(0, i), "board-content-art").style.backgroundImage.value.sprite != null, "파워 보드 표시 " + i, results);
                 VisualElement web = board.CellAt(new BoardCoordinate(1, 0));
-                Require(web.Q("board-dust-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Dust(2), "먼지 내구도 2 바닥 이미지", results);
-                Require(web.Q<VisualElement>("board-content-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Rabbit(RabbitColor.Type1), "먼지 위 토끼 보존", results);
-                Require(web.Q<VisualElement>("board-cover-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Cover(CoverKind.Web, 2), "최신 거미줄 내구도 2 겹침", results);
-                Require(web.Q<Label>("board-art-badge").text == "2", "덮개 내구도 보존", results);
+                Require(board.ArtworkAt(web, "board-dust-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Dust(2), "먼지 내구도 2 바닥 이미지", results);
+                Require(board.ArtworkAt(web, "board-content-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Rabbit(RabbitColor.Type1), "먼지 위 토끼 보존", results);
+                Require(board.ArtworkAt(web, "board-cover-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Cover(CoverKind.Web, 2), "최신 거미줄 내구도 2 겹침", results);
+                Require(((Label)board.AnnotationAt(new BoardCoordinate(1, 0), "board-art-badge")).text == "2", "덮개 내구도 보존", results);
                 VisualElement mold = board.CellAt(new BoardCoordinate(1, 1));
-                Require(mold.style.backgroundImage.value.sprite == null && mold.Q<VisualElement>("board-cover-art").style.backgroundImage.value.sprite != null, "곰팡이 아래 블록 은폐", results);
-                Require(board.CellAt(new BoardCoordinate(2, 0)).Q("board-content-art").style.backgroundImage.value.sprite.name.Contains("recovery-capsule"), "금고를 열린 캡슐로 표시", results);
-                VisualElement bodies = board.Q<VisualElement>("large-bodies");
-                Require(bodies.childCount == 2 && bodies.Children().All(body => body.style.backgroundImage.value.sprite != null), "2×2 장애물별 이미지 하나", results);
+                Require(mold.style.backgroundImage.value.sprite == null && board.ArtworkAt(mold, "board-cover-art").style.backgroundImage.value.sprite != null, "곰팡이 아래 블록 은폐", results);
+                Require(board.ArtworkAt(new BoardCoordinate(2, 0), "board-content-art").style.backgroundImage.value.sprite.name.Contains("recovery-capsule"), "금고를 열린 캡슐로 표시", results);
+                IReadOnlyList<VisualElement> bodies = board.LargeBodies;
+                Require(bodies.Count == 2 && bodies.All(body => body.style.backgroundImage.value.sprite != null), "2×2 장애물별 이미지 하나", results);
                 Require(JsonUtility.ToJson(level) == before, "표시 전후 레벨 데이터 보존", results);
                 for (int durability = 1; durability <= 3; durability++)
                 {
@@ -129,8 +129,8 @@ namespace Levels.Editor
                 }
                 Require(LevelBoardArtwork.Floor(level, new BoardCoordinate(0, 0), 0)?.name.Contains("outer-top-left") == true, "활성 보드 외곽 모서리", results);
                 Require(LevelBoardArtwork.Floor(level, new BoardCoordinate(5, 5), 0)?.name.Contains("center") == true, "보드 내부 바닥", results);
-                Require(web.Q("board-floor-art").childCount == 4 && web.IndexOf(web.Q("board-floor-art")) < web.IndexOf(web.Q("board-dust-art")) &&
-                    web.IndexOf(web.Q("board-dust-art")) < web.IndexOf(web.Q("board-content-art")), "바닥·먼지·내용물 겹침 순서", results);
+                Require(web.Q("board-floor-art").childCount == 4 && board.IndexOf(web) < board.IndexOf(board.ArtworkAt(web, "board-dust-art").parent) &&
+                    board.ArtworkAt(web, "board-dust-art").parent.IndexOf(board.ArtworkAt(web, "board-dust-art")) < board.ArtworkAt(web, "board-content-art").parent.IndexOf(board.ArtworkAt(web, "board-content-art")), "바닥·먼지·내용물 겹침 순서", results);
                 for (int pair = 0; pair < 4; pair++)
                     Require(LevelBoardArtwork.Portal(pair, false) != null && LevelBoardArtwork.Portal(pair, true) != null, "포털 쌍 " + pair, results);
                 for (int frame = 0; frame < 4; frame++) Require(LevelBoardArtwork.ChargePulse(frame) != null, "충전 빛 프레임 " + frame, results);
@@ -138,16 +138,16 @@ namespace Levels.Editor
                 LevelFlowEditing.SetArrival(level, new BoardCoordinate(8, 7), false);
                 LevelFlowEditing.SetWalls(level, new[] { new BoardEdge(new BoardCoordinate(6, 0), new BoardCoordinate(6, 1)) }, false);
                 board.Display(level, null);
-                Require(board.CellAt(new BoardCoordinate(6, 6)).Q("board-portal-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Portal(0, false), "입구 보드 이미지", results);
-                Require(board.CellAt(new BoardCoordinate(7, 7)).Q("board-portal-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Portal(0, true), "출구 보드 이미지", results);
-                Require(board.CellAt(new BoardCoordinate(8, 7)).Q("board-arrival-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Arrival, "회수 도착 바닥", results);
+                Require(board.ArtworkAt(new BoardCoordinate(6, 6), "board-portal-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Portal(0, false), "입구 보드 이미지", results);
+                Require(board.ArtworkAt(new BoardCoordinate(7, 7), "board-portal-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Portal(0, true), "출구 보드 이미지", results);
+                Require(board.ArtworkAt(new BoardCoordinate(8, 7), "board-arrival-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Arrival, "회수 도착 바닥", results);
                 LevelFlowOverlay flow = new LevelFlowOverlay(); flow.Display(level, FlowTool.None);
                 Require(flow.Q("wall-art-0")?.style.backgroundImage.value.sprite != null && flow.Q("wall-art-0").pickingMode == PickingMode.Ignore, "벽 이미지와 입력 통과", results);
                 Require(LevelSupplyEditing.PlaceRecovery(level, new[] { new BoardCoordinate(8, 8) }) == null, "회수 부품 배치", results);
                 Require(LevelConnectionEditing.ConnectAuto(level, level.Obstacles[2].Id, level.Obstacles[1].Id, new BoardCoordinate(4, 4)) == null, "검사용 발전기 전선 연결", results);
                 before = JsonUtility.ToJson(level);
                 board.Display(level, null); flow.Display(level, FlowTool.None);
-                Require(board.CellAt(new BoardCoordinate(8, 8)).Q("board-content-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Recovery, "회수 부품 보드 이미지", results);
+                Require(board.ArtworkAt(new BoardCoordinate(8, 8), "board-content-art").style.backgroundImage.value.sprite == LevelBoardArtwork.Recovery, "회수 부품 보드 이미지", results);
                 Require(flow.Q("wire-art-0-0")?.style.backgroundImage.value.sprite != null && flow.Q("terminal-start-art-0")?.style.backgroundImage.value.sprite != null &&
                     flow.Q("charge-art-0")?.style.backgroundImage.value.sprite != null, "전선·단자·충전 미리보기 이미지", results);
                 LevelBoardEditing.Apply(level, LevelBrush.Deactivate, RabbitColor.Type1, new[] { new BoardCoordinate(7, 6) });
@@ -167,13 +167,13 @@ namespace Levels.Editor
                 }
                 finally { window.Close(); }
                 board.SetErrors(new[] { new BoardCoordinate(1, 0) });
-                Require(web.Q<Label>("board-art-badge").text.Contains("!"), "이미지 위 오류 표시", results);
+                Require(((Label)board.AnnotationAt(new BoardCoordinate(1, 0), "board-art-badge")).text.Contains("!"), "이미지 위 오류 표시", results);
                 LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Cover, Erase = true }, new[] { new BoardCoordinate(1, 0) });
                 LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = PlacementLayer.Dust, Erase = true }, new[] { new BoardCoordinate(1, 0) });
                 LevelBoardEditing.Apply(level, LevelBrush.Erase, RabbitColor.Type1, new[] { new BoardCoordinate(1, 0) });
                 board.Display(level, null);
-                Require(web.style.backgroundImage.value.sprite == null && web.Q<VisualElement>("board-cover-art").style.display.value == DisplayStyle.None &&
-                    web.Q<VisualElement>("board-content-art").style.display.value == DisplayStyle.None, "삭제 후 이전 이미지 제거", results);
+                Require(web.style.backgroundImage.value.sprite == null && board.ArtworkAt(web, "board-cover-art").style.display.value == DisplayStyle.None &&
+                    board.ArtworkAt(web, "board-content-art").style.display.value == DisplayStyle.None, "삭제 후 이전 이미지 제거", results);
             }
             catch (Exception error) { results.Add("FAIL " + error); }
             finally

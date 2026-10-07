@@ -93,7 +93,9 @@ namespace GameScreen
         private void SwapPresentationState(BoardCoordinate first, BoardCoordinate second)
         {
             RuntimeCell a = presentationBefore.CellAt(first), b = presentationBefore.CellAt(second);
+            Elements.ElementDefinition firstElement = a.ContentElement, secondElement = b.ContentElement;
             (a.Content, b.Content) = (b.Content, a.Content);
+            (a.ContentElement, b.ContentElement) = (secondElement, firstElement);
             (a.Color, b.Color) = (b.Color, a.Color);
             (a.RocketDirection, b.RocketDirection) = (b.RocketDirection, a.RocketDirection);
             (a.ObstacleIndex, b.ObstacleIndex) = (b.ObstacleIndex, a.ObstacleIndex);

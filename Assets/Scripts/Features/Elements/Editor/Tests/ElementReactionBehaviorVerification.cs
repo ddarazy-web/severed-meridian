@@ -90,7 +90,8 @@ namespace Elements.Editor
         private static void ContractChecks()
         {
             Type keyType = BehaviorType;
-            Check(keyType != null && keyType.IsEnum && Enum.GetNames(keyType).SequenceEqual(new[] { "Durability", "GeneratorCharge" }), "작은 행동2종 계약");
+            Check(keyType != null && keyType.IsEnum && Enum.GetNames(keyType).SequenceEqual(new[] { "Durability", "GeneratorCharge", "EvenTurnDurability" }),
+                "기존2종과 추가 행동1종의 명시적 키 계약");
             PropertyInfo property = typeof(ElementDefinition).GetProperty("ReactionBehavior");
             MethodInfo require = typeof(ElementDefinition).GetMethod("RequireReactionBehavior");
             Check(property != null && property.SetMethod == null && property.PropertyType == typeof(Nullable<>).MakeGenericType(keyType) && require != null, "불변 nullable 행동 키/필수 조회");
@@ -113,7 +114,8 @@ namespace Elements.Editor
             Check(registry.GetType().FullName == "Elements.ElementBehaviorRegistry" && registry.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Length == 0,
                 "명시적 등록표/등록 수정 공개 API 없음");
             System.Collections.IDictionary entries = (System.Collections.IDictionary)registry.GetType().GetField("queries", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(registry);
-            Check(entries.Count == 2 && entries.Contains(Enum.Parse(keyType, "Durability")) && entries.Contains(Enum.Parse(keyType, "GeneratorCharge")), "전체 순회 없는 정확한 두 조회 등록");
+            Check(entries.Count == 3 && entries.Contains(Enum.Parse(keyType, "Durability")) && entries.Contains(Enum.Parse(keyType, "GeneratorCharge")) &&
+                entries.Contains(Enum.Parse(keyType, "EvenTurnDurability")), "전체 순회 없는 기존2개/추가1개 조회 등록");
         }
         private static void DispatchChecks()
         {

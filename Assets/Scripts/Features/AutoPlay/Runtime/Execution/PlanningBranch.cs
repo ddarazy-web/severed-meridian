@@ -4,6 +4,7 @@ using System.Linq;
 using Board;
 using Levels;
 using Simulation;
+using Elements;
 
 namespace AutoPlay
 {
@@ -37,6 +38,19 @@ namespace AutoPlay
                 Put(cell.Coordinate.Row); Put(cell.Coordinate.Column); Put(cell.IsActive ? 1 : 0); Put((int)cell.Content);
                 Put(cell.Color.HasValue ? (int)cell.Color.Value : -1); Put(cell.RocketDirection.HasValue ? (int)cell.RocketDirection.Value : -1);
                 Put(cell.Cover.HasValue ? (int)cell.Cover.Value : -1); Put(cell.CoverDurability); Put(cell.DustDurability); Put(cell.BodyKey ?? -1);
+                if (cell.CoverUsesDurability != (cell.Cover == CoverKind.Web) ||
+                    cell.CoverDamage != (cell.Cover.HasValue ? 1 : 0) ||
+                    cell.CoverMission != (cell.Cover.HasValue ? (cell.Cover == CoverKind.Web ? MissionKind.Web : MissionKind.Mold) : (MissionKind?)null) ||
+                    cell.CoverSpreads != (cell.Cover == CoverKind.Mold) ||
+                    cell.SpreadDurability != (cell.Cover == CoverKind.Mold ? 1 : 0) ||
+                    cell.DustDamage != (cell.DustDurability > 0 ? 1 : 0) ||
+                    cell.DustMission != (cell.DustDurability > 0 ? MissionKind.Dust : (MissionKind?)null))
+                {
+                    Put(-3); Put(cell.CoverUsesDurability ? 1 : 0); Put(cell.CoverDamage);
+                    Put(cell.CoverMission.HasValue ? (int)cell.CoverMission.Value : -1);
+                    Put(cell.CoverSpreads ? 1 : 0); Put(cell.SpreadDurability); Put(cell.DustDamage);
+                    Put(cell.DustMission.HasValue ? (int)cell.DustMission.Value : -1);
+                }
             }
             foreach (BotBody body in board.Bodies.OrderBy(b => b.Key))
             {
@@ -44,6 +58,23 @@ namespace AutoPlay
                 Put(body.Charge); Put(body.RequiredCharge); Put(body.Cells.Count);
                 foreach (BoardCoordinate at in body.Cells.OrderBy(c => c.Row).ThenBy(c => c.Column)) { Put(at.Row); Put(at.Column); }
                 Put(body.ConnectedTargets.Count); foreach (int target in body.ConnectedTargets.OrderBy(t => t)) Put(target);
+                // 구형 공개 값의 가정 시드는 보존하고, 다른 공개 행동 값만 추가한다.
+                ElementDefinition legacy = LegacyElementDefinitions.Get(body.Kind);
+                ElementDamageSourcePolicy sources = legacy.RequireDamageSourcePolicy();
+                bool charge = legacy.RequireReactionBehavior() == ElementReactionBehavior.GeneratorCharge;
+                if (body.AcceptsAdjacentMatch != sources.AdjacentMatch || body.AcceptsPower != sources.Power ||
+                    body.AcceptsMagnetAdjacent != sources.MagnetAdjacent || body.AcceptsHammer != sources.Hammer ||
+                    body.RequiresAdjacentColor != (legacy.ColorMatchPolicy?.RequiresMatchingColor == true) ||
+                    body.PerHitCell != (legacy.DamageAggregationPolicy?.PerHitCell == true) || body.IsCharge != charge ||
+                    body.ChargePerHit != (charge ? legacy.RequireChargePlacement().ChargePerHit : 0) ||
+                    body.LogicalSize != (charge ? legacy.RequireChargePlacement().Size : legacy.RequirePlacement().Size) ||
+                    body.RemovalMission != legacy.RemovalMissionProfile?.Kind)
+                {
+                    Put(-2); Put(body.AcceptsAdjacentMatch ? 1 : 0); Put(body.AcceptsPower ? 1 : 0);
+                    Put(body.AcceptsMagnetAdjacent ? 1 : 0); Put(body.AcceptsHammer ? 1 : 0);
+                    Put(body.RequiresAdjacentColor ? 1 : 0); Put(body.PerHitCell ? 1 : 0); Put(body.IsCharge ? 1 : 0);
+                    Put(body.ChargePerHit); Put(body.LogicalSize); Put(body.RemovalMission.HasValue ? (int)body.RemovalMission.Value : -1);
+                }
             }
             foreach (BotMission mission in board.Missions.OrderBy(m => m.Kind).ThenBy(m => m.Color))
             { Put((int)mission.Kind); Put(mission.Color.HasValue ? (int)mission.Color.Value : -1); Put(mission.Remaining); }
@@ -71,7 +102,14 @@ namespace AutoPlay
             Dictionary<int, int> indices = bodies.Select((body, index) => (body.Key, index)).ToDictionary(item => item.Key, item => item.index);
             RuntimeObstacle[] obstacles = bodies.Select(body => new RuntimeObstacle(new ObstaclePlacementDefinition(
                 "visible-" + body.Key, body.Cells.OrderBy(c => c.Row).ThenBy(c => c.Column).First(), body.Kind,
-                body.Durability, body.Color ?? RabbitColor.Type1, body.RequiredCharge)) { Charge = body.Charge }).ToArray();
+                body.Durability, body.Color ?? RabbitColor.Type1, body.RequiredCharge),
+                new ElementDefinition(new ElementId("assumption.body." + body.Key), "공개 본체",
+                    body.IsCharge ? null : new ElementPlacementProfile(body.LogicalSize, Math.Max(1, body.Durability)),
+                    body.IsCharge ? new ElementChargePlacementProfile(body.LogicalSize, body.RequiredCharge, body.RequiredCharge, body.ChargePerHit) : null,
+                    new ElementDamageSourcePolicy(body.AcceptsAdjacentMatch, body.AcceptsPower, body.AcceptsMagnetAdjacent, body.AcceptsHammer),
+                    new ElementColorMatchPolicy(body.RequiresAdjacentColor), new ElementDamageAggregationPolicy(body.PerHitCell),
+                    body.RemovalMission.HasValue ? new ElementRemovalMissionProfile(body.RemovalMission.Value) : null,
+                    body.IsCharge ? ElementReactionBehavior.GeneratorCharge : ElementReactionBehavior.Durability)) { Charge = body.Charge }).ToArray();
             RuntimeCell[] cells = board.Cells.OrderBy(c => c.Coordinate.Row).ThenBy(c => c.Coordinate.Column).Select(cell =>
             {
                 RuntimeContent content = cell.Content switch {
@@ -81,6 +119,17 @@ namespace AutoPlay
                 return new RuntimeCell(cell.Coordinate, cell.IsActive) { Content = content,
                     Color = cell.Content == BotContent.Unknown ? colors[hidden.Next(colors.Length)] : cell.Color,
                     RocketDirection = cell.RocketDirection, Cover = cell.Cover, CoverDurability = cell.CoverDurability,
+                    CoverElement = cell.Cover.HasValue ? new ElementDefinition(
+                        new ElementId("assumption.cover." + cell.Coordinate.Row + "." + cell.Coordinate.Column), "공개 덮개",
+                        new ElementPlacementProfile(1, Math.Max(1, Math.Max(cell.CoverDurability, cell.SpreadDurability))),
+                        null, null, null, null, null, null,
+                        new ElementLayerProfile(cell.CoverUsesDurability ? ElementLayerBehavior.CoverDurability : ElementLayerBehavior.CoverRemoval,
+                            cell.CoverMission.Value, cell.CoverDamage),
+                        cell.CoverSpreads ? new ElementTurnProfile(ElementTurnBehavior.AdjacentCoverSpread, cell.SpreadDurability) : null) : null,
+                    DustElement = cell.DustDurability > 0 ? new ElementDefinition(
+                        new ElementId("assumption.dust." + cell.Coordinate.Row + "." + cell.Coordinate.Column), "공개 먼지",
+                        new ElementPlacementProfile(1, cell.DustDurability), null, null, null, null, null, null,
+                        new ElementLayerProfile(ElementLayerBehavior.NormalConsumption, cell.DustMission.Value, cell.DustDamage), null) : null,
                     DustDurability = cell.DustDurability, ObstacleIndex = cell.BodyKey.HasValue ? indices[cell.BodyKey.Value] : (int?)null };
             }).ToArray();
             RuntimeMission[] missions = board.Missions.Select(mission => new RuntimeMission(new LevelMissionDefinition(
@@ -92,7 +141,7 @@ namespace AutoPlay
                 if ((board.CellAt(above)?.IsActive != true || board.Walls.Contains(new BoardEdge(above, cell.Coordinate))) &&
                     !board.Portals.Any(p => p.HasExit && p.Exit.Equals(cell.Coordinate))) sources.Add(cell.Coordinate);
             }
-            RuntimeConnection[] connections = bodies.Where(b => b.Kind == ObstacleKind.Generator)
+            RuntimeConnection[] connections = bodies.Where(b => b.IsCharge)
                 .SelectMany(body => body.ConnectedTargets.Select(key => new RuntimeConnection("visible-" + body.Key, "visible-" + key))).ToArray();
             LevelRuntimeState state = new LevelRuntimeState(board.Rows, board.Columns, board.MovesRemaining, cells, obstacles, missions,
                 new RuntimeFlow(board.Walls, board.Portals, board.Arrivals), new RuntimeSupply(sources.OrderBy(c => c.Row).ThenBy(c => c.Column)), connections, seed);

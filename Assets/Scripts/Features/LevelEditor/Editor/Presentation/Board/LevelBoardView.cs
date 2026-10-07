@@ -11,7 +11,11 @@ namespace Levels.Editor
     {
         public const int CellSize = 44;
         private readonly Label[] cells = new Label[BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns];
-        private readonly VisualElement bodies = new VisualElement { name = "large-bodies", pickingMode = PickingMode.Ignore };
+        private readonly VisualElement artworkRoot = new VisualElement { name = "board-artwork", pickingMode = PickingMode.Ignore };
+        private readonly List<VisualElement> bodies = new List<VisualElement>();
+        private readonly Dictionary<(VisualElement cell, string name), VisualElement> artworkLayers = new Dictionary<(VisualElement, string), VisualElement>();
+        private readonly VisualElement annotations = new VisualElement { name = "board-annotations", pickingMode = PickingMode.Ignore };
+        private readonly VisualElement[] cellAnnotations = new VisualElement[BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns];
         private readonly VisualElement supplyMarks = new VisualElement { name = "supply-markers", pickingMode = PickingMode.Ignore };
         private readonly HashSet<BoardCoordinate> visited = new HashSet<BoardCoordinate>();
         private readonly HashSet<BoardCoordinate> errors = new HashSet<BoardCoordinate>();
@@ -70,10 +74,19 @@ namespace Levels.Editor
                 Add(cell);
             }
             RegisterCallback<PointerDownEvent>(OnPointerDown);
-            bodies.style.position = Position.Absolute;
-            bodies.style.left = bodies.style.top = 0;
-            bodies.style.width = bodies.style.height = CellSize * BoardDefinition.DefaultColumns;
-            Add(bodies);
+            artworkRoot.style.position = annotations.style.position = Position.Absolute;
+            artworkRoot.style.left = artworkRoot.style.top = annotations.style.left = annotations.style.top = 0;
+            artworkRoot.style.width = artworkRoot.style.height = annotations.style.width = annotations.style.height = CellSize * BoardDefinition.DefaultColumns;
+            Add(artworkRoot); Add(annotations);
+            for (int i = 0; i < cellAnnotations.Length; i++)
+            {
+                VisualElement marks = new VisualElement { pickingMode = PickingMode.Ignore };
+                marks.style.position = Position.Absolute;
+                marks.style.left = i % BoardDefinition.DefaultColumns * CellSize;
+                marks.style.top = i / BoardDefinition.DefaultColumns * CellSize;
+                marks.style.width = marks.style.height = CellSize;
+                cellAnnotations[i] = marks; annotations.Add(marks);
+            }
             supplyMarks.style.position = Position.Absolute;
             supplyMarks.style.left = supplyMarks.style.top = 0;
             supplyMarks.style.width = supplyMarks.style.height = CellSize * BoardDefinition.DefaultColumns;
@@ -104,6 +117,10 @@ namespace Levels.Editor
         }
 
         public VisualElement CellAt(BoardCoordinate coordinate) => cells[coordinate.Row * BoardDefinition.DefaultColumns + coordinate.Column];
+        internal VisualElement ArtworkAt(BoardCoordinate coordinate, string name) => ArtworkAt(CellAt(coordinate), name);
+        internal VisualElement ArtworkAt(VisualElement cell, string name) => artworkLayers.TryGetValue((cell, name), out VisualElement image) ? image : null;
+        internal VisualElement AnnotationAt(BoardCoordinate coordinate, string name) => cellAnnotations[coordinate.Row * BoardDefinition.DefaultColumns + coordinate.Column].Q(name);
+        internal IReadOnlyList<VisualElement> LargeBodies => bodies;
 
         public void BeginMove(int index)
         {
@@ -269,8 +286,17 @@ namespace Levels.Editor
 
         private void Redraw()
         {
+            foreach (VisualElement body in bodies) body.RemoveFromHierarchy();
+            bodies.Clear();
+            foreach (VisualElement image in artworkLayers.Values)
+            {
+                image.style.display = DisplayStyle.None;
+                image.style.backgroundImage = new StyleBackground(StyleKeyword.None);
+                image.userData = null;
+            }
             if (level != null && level.SchemaVersion == LevelDefinition.CurrentSchemaVersion)
-            { RedrawElements(); return; }
+            { RedrawElements(); SortArtwork(); return; }
+            PrepareLegacyVisuals();
             int selectedObstacle = Layer == PlacementLayer.Obstacle && selected.HasValue
                 ? LevelPlacementRules.Find(level, PlacementLayer.Obstacle, selected.Value) : -1;
             HashSet<BoardCoordinate> selectedArea = selectedObstacle >= 0
@@ -304,14 +330,12 @@ namespace Levels.Editor
                         text = ((int)block.FixedColor.Value + 1).ToString();
                         background = Swatches[(int)block.FixedColor.Value];
                         colored = true;
-                        rabbitTexture = LevelBoardArtwork.Rabbit(block.FixedColor.Value);
                     }
                     else text = block.Kind switch
                     {
                         InitialBlockKind.Rocket => block.RocketDirection == RocketDirection.Horizontal ? "↔" : block.RocketDirection == RocketDirection.Vertical ? "↕" : "!",
                         InitialBlockKind.Bomb => "폭", InitialBlockKind.Drone => "드", InitialBlockKind.Magnet => "자", _ => "!"
                     };
-                    if (!LevelPlacementRules.IsNormal(block.Kind)) rabbitTexture = LevelBoardArtwork.Block(block);
                 }
                 int obstacleIndex = LevelPlacementRules.Find(level, PlacementLayer.Obstacle, coordinate);
                 int coverIndex = LevelPlacementRules.Find(level, PlacementLayer.Cover, coordinate);
@@ -335,7 +359,6 @@ namespace Levels.Editor
                         colored = true;
                     }
                     if (LevelPlacementRules.Size(obstacle.Kind) == 2) text = "";
-                    rabbitTexture = LevelPlacementRules.Size(obstacle.Kind) == 1 ? LevelBoardArtwork.Obstacle(obstacle) : null;
                 }
                 if (coverIndex >= 0)
                 {
@@ -350,8 +373,10 @@ namespace Levels.Editor
                     conflict |= index != -1 || obstacleIndex != -1 || coverIndex != -1;
                     text = "부";
                     background = new Color32(77, 103, 117, 255);
-                    rabbitTexture = LevelBoardArtwork.Recovery;
                 }
+                Elements.ElementVisualFrame contentFrame = LegacyFrame(obstacleIndex >= 0 ? PlacementLayer.Obstacle : PlacementLayer.Block, coordinate);
+                rabbitTexture = obstacleIndex >= 0 && LevelPlacementRules.Size(level.Obstacles[obstacleIndex].Kind) == 2
+                    ? null : LevelBoardArtwork.Visual(contentFrame);
                 bool isSelected = PlacementSelection.Contains(coordinate) || selectedArea.Contains(coordinate) || (selected.HasValue && selected.Value.Equals(coordinate)) ||
                     (Brush == LevelBrush.SourceSelect && SourceSelection.Contains(coordinate));
                 Color border = preview ? previewError != null ? new Color32(255, 78, 78, 255) : new Color32(255, 225, 90, 255) :
@@ -387,7 +412,9 @@ namespace Levels.Editor
                 cell.tooltip = coordinate + (active ? " 활성" : " 비활성") + (index == -2 ? " / 중복 배치" : "") +
                     (obstacleIndex >= 0 ? " / " + LevelPlacementRules.Name(level.Obstacles[obstacleIndex].Kind) + " 기준 " + level.Obstacles[obstacleIndex].Coordinate : "") +
                     (coverIndex >= 0 ? " / 덮개 아래 블록 보존" : "") +
-                    (dustIndex >= 0 ? " / 먼지 " + level.Dust[dustIndex].Durability : "") + (preview && previewError != null ? " / " + previewError : "");
+                    (dustIndex >= 0 ? " / 먼지 " + level.Dust[dustIndex].Durability : "") + (preview && previewError != null ? " / " + previewError : "") +
+                    (legacyVisualErrors.TryGetValue(coordinate, out string visualError) ? " / " + visualError : "") +
+                    (legacyCatalogError != null ? " / " + legacyCatalogError : "");
                 cell.style.backgroundColor = background;
                 cell.style.opacity = active || (index < 0 && obstacleIndex < 0 && coverIndex < 0 && dustIndex < 0) ? 1 : 0.55f;
                 cell.style.color = colored
@@ -397,14 +424,16 @@ namespace Levels.Editor
                 float width = preview || isSelected || errors.Contains(coordinate) ? 3 : 1;
                 cell.style.borderLeftWidth = cell.style.borderRightWidth = width;
                 cell.style.borderTopWidth = cell.style.borderBottomWidth = width;
-                VisualElement coverOutline = cell.Q<VisualElement>("cover-outline");
+                VisualElement marks = cellAnnotations[i];
+                marks.style.opacity = cell.style.opacity;
+                VisualElement coverOutline = marks.Q<VisualElement>("cover-outline");
                 if (coverOutline == null)
                 {
                     coverOutline = new VisualElement { name = "cover-outline", pickingMode = PickingMode.Ignore };
                     coverOutline.style.position = Position.Absolute;
                     coverOutline.style.left = coverOutline.style.right = coverOutline.style.top = coverOutline.style.bottom = 1;
                     coverOutline.style.borderLeftWidth = coverOutline.style.borderRightWidth = coverOutline.style.borderTopWidth = coverOutline.style.borderBottomWidth = 1;
-                    cell.Add(coverOutline);
+                    marks.Add(coverOutline);
                 }
                 coverOutline.style.display = coverIndex >= 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 Color coverColor = coverIndex >= 0 && level.Covers[coverIndex].Kind == CoverKind.Mold
@@ -418,7 +447,7 @@ namespace Levels.Editor
                     cell.style.borderTopWidth = coordinate.Row == origin.Row ? 3 : 0;
                     cell.style.borderBottomWidth = coordinate.Row == origin.Row + 1 ? 3 : 0;
                 }
-                Label dustLabel = cell.Q<Label>("dust-mark");
+                Label dustLabel = marks.Q<Label>("dust-mark");
                 if (dustLabel == null)
                 {
                     dustLabel = new Label { name = "dust-mark", pickingMode = PickingMode.Ignore };
@@ -431,13 +460,14 @@ namespace Levels.Editor
                     dustLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
                     dustLabel.style.color = UnityEngine.Color.white;
                     dustLabel.style.backgroundColor = (Color)new Color32(89, 69, 41, 255);
-                    cell.Add(dustLabel);
+                    marks.Add(dustLabel);
                 }
                 dustLabel.text = dustIndex >= 0 ? level.Dust[dustIndex].Durability.ToString() : "";
                 dustLabel.style.display = dustIndex >= 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 // 먼지는 바닥, 내용물은 그 위, 덮개는 최상단 순서로 겹친다.
-                Sprite dustTexture = active && dustIndex >= 0 && !conflict ? LevelBoardArtwork.Dust(level.Dust[dustIndex].Durability) : null;
-                Sprite coverTexture = active && coverIndex >= 0 && !conflict ? LevelBoardArtwork.Cover(level.Covers[coverIndex].Kind, level.Covers[coverIndex].Durability) : null;
+                Elements.ElementVisualFrame dustFrame = LegacyFrame(PlacementLayer.Dust, coordinate), coverFrame = LegacyFrame(PlacementLayer.Cover, coordinate);
+                Sprite dustTexture = active && dustIndex >= 0 && !conflict ? LevelBoardArtwork.Visual(dustFrame) : null;
+                Sprite coverTexture = active && coverIndex >= 0 && !conflict ? LevelBoardArtwork.Visual(coverFrame) : null;
                 SetFloor(cell, coordinate, active);
                 SetArtworkLayer(cell, "board-arrival-art", active && level.Flow != null && level.Flow.Arrivals.Contains(coordinate) ? LevelBoardArtwork.Arrival : null);
                 SetArtworkLayer(cell, "board-dust-art", dustTexture);
@@ -452,22 +482,20 @@ namespace Levels.Editor
                     }
                 SetArtworkLayer(cell, "board-portal-art", portalTexture);
                 // 통로와 블록이 함께 있는 칸에서는 내용물을 작게 올려 양쪽 역할을 보존한다.
-                if (portalTexture != null && showRabbit) cell.Q<VisualElement>("board-content-art").BringToFront();
-                VisualElement contentArt = cell.Q<VisualElement>("board-content-art");
-                contentArt.style.left = contentArt.style.right = contentArt.style.top = contentArt.style.bottom = portalTexture != null ? 9 : 0;
+                VisualElement contentArt = ArtworkAt(cell, "board-content-art");
+                PositionArtwork(contentArt, coordinate, portalTexture != null ? 9 : 0);
                 Sprite contentSprite = showRabbit ? rabbitTexture : null;
-                float contentScale = BoardArtworkLayout.ContentScale(contentSprite);
-                contentArt.style.scale = new Scale(Vector3.one * contentScale);
-                contentArt.style.translate = new Translate(Length.Percent(100 * contentScale * BoardArtworkLayout.ContentOffsetX(contentSprite)),
-                    Length.Percent(-100 * contentScale * BoardArtworkLayout.ContentOffsetY(contentSprite)));
+                ElementVisualStyle.Apply(contentArt, contentSprite, contentFrame, contentFrame?.Size ?? 1);
                 SetArtworkLayer(cell, "board-cover-art", coverTexture);
+                ElementVisualStyle.Apply(ArtworkAt(cell, "board-dust-art"), dustTexture, dustFrame, dustFrame?.Size ?? 1);
+                ElementVisualStyle.Apply(ArtworkAt(cell, "board-cover-art"), coverTexture, coverFrame, coverFrame?.Size ?? 1);
                 if (coverTexture != null)
                 {
                     cell.text = level.Covers[coverIndex].Durability.ToString() + (errors.Contains(coordinate) ? "!" : "");
                     coverOutline.style.display = DisplayStyle.None;
                 }
                 // 이미지 앞에 수치와 오류를 남기고, 이미지 자체는 입력을 받지 않는다.
-                Label artworkBadge = cell.Q<Label>("board-art-badge");
+                Label artworkBadge = marks.Q<Label>("board-art-badge");
                 if (artworkBadge == null)
                 {
                     artworkBadge = new Label { name = "board-art-badge", pickingMode = PickingMode.Ignore };
@@ -477,7 +505,7 @@ namespace Levels.Editor
                     artworkBadge.style.color = UnityEngine.Color.white;
                     artworkBadge.style.unityTextOutlineWidth = 1;
                     artworkBadge.style.unityTextOutlineColor = UnityEngine.Color.black;
-                    cell.Add(artworkBadge);
+                    marks.Add(artworkBadge);
                 }
                 artworkBadge.text = cell.text;
                 artworkBadge.style.right = artworkBadge.style.bottom = 1;
@@ -489,8 +517,7 @@ namespace Levels.Editor
                 artworkBadge.BringToFront();
                 dustLabel.BringToFront();
             }
-            bodies.Clear();
-            if (level?.Obstacles == null) return;
+            if (level?.Obstacles == null) { SortArtwork(); return; }
             for (int index = 0; index < level.Obstacles.Count; index++)
             {
                 ObstaclePlacementDefinition obstacle = level.Obstacles[index];
@@ -510,20 +537,26 @@ namespace Levels.Editor
                 label.style.color = UnityEngine.Color.white;
                 label.style.opacity = LevelPlacementRules.Footprint(obstacle.Coordinate, 2).All(cell =>
                     level.Board != null && level.Board.TryGetCell(cell, out CellDefinition definition) && definition.IsActive) ? 1 : 0.55f;
-                Sprite bodyTexture = LevelBoardArtwork.Obstacle(obstacle);
+                Elements.ElementVisualFrame bodyFrame = LegacyFrame(PlacementLayer.Obstacle, obstacle.Coordinate);
+                Sprite bodyTexture = LevelBoardArtwork.Visual(bodyFrame);
                 if (bodyTexture != null)
                 {
                     label.tooltip = label.text;
                     label.text = "";
                     label.style.backgroundImage = new StyleBackground(bodyTexture);
                     label.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
-                    float inset = CellSize * (2 - BoardArtworkLayout.LargeObstacleSize) * 0.5f;
+                    float extent = bodyFrame.Size;
+                    float inset = CellSize * (2 - extent) * 0.5f;
                     label.style.left = obstacle.Coordinate.Column * CellSize + inset;
                     label.style.top = obstacle.Coordinate.Row * CellSize + inset;
-                    label.style.width = label.style.height = CellSize * BoardArtworkLayout.LargeObstacleSize;
+                    label.style.width = label.style.height = CellSize * extent;
                 }
+                if (legacyVisualErrors.TryGetValue(obstacle.Coordinate, out string bodyError)) label.tooltip += " / " + bodyError;
                 bodies.Add(label);
+                artworkRoot.Add(label);
+                ElementVisualStyle.Apply(label, bodyTexture, bodyFrame, 1);
             }
+            SortArtwork();
         }
 
         private void SetFloor(VisualElement cell, BoardCoordinate coordinate, bool active)
@@ -558,20 +591,38 @@ namespace Levels.Editor
             floor.SendToBack();
         }
 
-        private static void SetArtworkLayer(VisualElement cell, string name, Sprite texture)
+        private void SetArtworkLayer(VisualElement cell, string name, Sprite texture)
         {
-            VisualElement image = cell.Q<VisualElement>(name);
+            VisualElement image = ArtworkAt(cell, name);
             if (image == null)
             {
                 image = new VisualElement { name = name, pickingMode = PickingMode.Ignore };
                 image.style.position = Position.Absolute;
-                image.style.left = image.style.right = image.style.top = image.style.bottom = 0;
                 image.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
-                cell.Add(image);
+                artworkLayers.Add((cell, name), image); artworkRoot.Add(image);
             }
+            int index = Array.IndexOf(cells, cell);
+            PositionArtwork(image, new BoardCoordinate(index / BoardDefinition.DefaultColumns, index % BoardDefinition.DefaultColumns), 0);
+            image.style.opacity = cell.style.opacity;
             image.style.backgroundImage = texture != null ? new StyleBackground(texture) : new StyleBackground(StyleKeyword.None);
             image.style.display = texture != null ? DisplayStyle.Flex : DisplayStyle.None;
             image.BringToFront();
+        }
+        private void PositionArtwork(VisualElement image, BoardCoordinate coordinate, float inset)
+        {
+            VisualElement cell = CellAt(coordinate);
+            float left = cell.style.borderLeftWidth.value, right = cell.style.borderRightWidth.value;
+            float top = cell.style.borderTopWidth.value, bottom = cell.style.borderBottomWidth.value;
+            image.style.left = coordinate.Column * CellSize + left + inset;
+            image.style.top = coordinate.Row * CellSize + top + inset;
+            image.style.width = CellSize - left - right - inset * 2;
+            image.style.height = CellSize - top - bottom - inset * 2;
+        }
+        private void SortArtwork()
+        {
+            // 평면 아트 층에서 정렬해야 확장된 본체와 이웃 칸의 덮개도 같은 순서를 따른다.
+            foreach (VisualElement image in artworkRoot.Children().OrderBy(image => image.userData is Elements.ElementVisualFrame frame
+                ? frame.Order : image.name == "board-arrival-art" ? 1 : image.name == "board-portal-art" ? 3 : 10).ToArray()) image.BringToFront();
         }
     }
 }

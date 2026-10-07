@@ -35,6 +35,9 @@ namespace Elements.Editor
                         Results.Add((flights.Length == action.PowerTrace.Flights.Count && flights.Length > 0 ? "PASS " : "FAIL ") + "모든 조합의 예약 비행 표시 연결 " + pair);
                         Type playbackType = typeof(PuzzleGameSession).Assembly.GetType("GameScreen.PuzzlePowerPlayback");
                         object playback = Activator.CreateInstance(playbackType, true);
+                        // 실제 Begin과 같이 등록 시각 조회를 제공한다. 이미지 로드는 이 비행 구간 검사에 필요하지 않다.
+                        using PuzzleArtwork artwork = new PuzzleArtwork();
+                        playbackType.GetField("art", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(playback, artwork);
                         playbackType.GetField("timeline", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(playback, timeline);
                         playbackType.GetField("final", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(playback, executor.State);
                         playbackType.GetMethod("BuildClips", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(playback, new object[] { source });

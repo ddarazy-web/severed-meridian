@@ -3,6 +3,7 @@ using System.IO;
 using Levels;
 using Levels.Editor;
 using UnityEngine;
+using Elements;
 
 namespace GameScreen.Editor
 {
@@ -11,13 +12,15 @@ namespace GameScreen.Editor
     public sealed class PuzzleEditorLaunchRequest
     {
         private readonly byte[] bytes;
+        private readonly string visualJson;
         public int LevelNumber { get; }
         public int Seed { get; }
         public PuzzleEditorLevelSource Source { get; }
         internal string EncodedBytes => Convert.ToBase64String(bytes);
+        internal string EncodedVisuals => visualJson;
 
-        private PuzzleEditorLaunchRequest(byte[] snapshot, int number, int seed, PuzzleEditorLevelSource source)
-        { bytes = snapshot; LevelNumber = number; Seed = seed; Source = source; }
+        private PuzzleEditorLaunchRequest(byte[] snapshot, int number, int seed, PuzzleEditorLevelSource source, ElementVisualCatalog visuals)
+        { bytes = snapshot; LevelNumber = number; Seed = seed; Source = source; visualJson = JsonUtility.ToJson(visuals.ToDto()); }
 
         public static PuzzleEditorLaunchRequest Capture(LevelDefinition source, PuzzleEditorLevelSource mode, int seed)
         {
@@ -34,9 +37,10 @@ namespace GameScreen.Editor
             else throw new ArgumentOutOfRangeException(nameof(mode));
             LevelDefinition validation = LevelPackCodec.ReadLevel(snapshot, source.LevelNumber);
             UnityEngine.Object.DestroyImmediate(validation);
-            return new PuzzleEditorLaunchRequest(snapshot, source.LevelNumber, seed, mode);
+            return new PuzzleEditorLaunchRequest(snapshot, source.LevelNumber, seed, mode, ElementVisualLookup.ForLevel(source));
         }
 
         public LevelDefinition CreateDefinition() => LevelPackCodec.ReadLevel(bytes, LevelNumber);
+        public ElementVisualCatalog CreateVisualCatalog() => ElementVisualCatalog.FromDto(JsonUtility.FromJson<ElementVisualCatalogDto>(visualJson));
     }
 }

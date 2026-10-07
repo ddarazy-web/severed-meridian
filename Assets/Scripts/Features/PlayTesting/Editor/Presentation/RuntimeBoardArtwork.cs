@@ -2,6 +2,7 @@ using Board;
 using Simulation;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Elements;
 
 namespace Levels.Editor
 {
@@ -9,7 +10,11 @@ namespace Levels.Editor
     internal static class RuntimeBoardArtwork
     {
         internal static void Bind(TextElement target, RuntimeCell cell, LevelRuntimeState state)
+            => Bind(target, cell, state, LegacyElementVisuals.Catalog);
+
+        internal static void Bind(TextElement target, RuntimeCell cell, LevelRuntimeState state, ElementVisualCatalog catalog)
         {
+            ElementVisualLookup lookup = new ElementVisualLookup(catalog);
             VisualElement art = new VisualElement { name = "runtime-art", pickingMode = PickingMode.Ignore };
             art.style.position = Position.Absolute;
             art.style.left = art.style.right = art.style.top = art.style.bottom = 0;
@@ -22,45 +27,53 @@ namespace Levels.Editor
             void Refresh()
             {
                 if (!cell.IsActive) return;
+                content.style.width = content.style.height = Length.Percent(100);
+                content.style.left = content.style.top = 0;
                 Sprite sprite = null;
                 string token = null;
+                ElementVisualFrame frame = null;
                 if (cell.Cover != CoverKind.Mold)
                 {
                     switch (cell.Content)
                     {
                         case RuntimeContent.Normal:
-                            if (cell.Color.HasValue) { sprite = LevelBoardArtwork.Rabbit(cell.Color.Value); token = "토" + ((int)cell.Color.Value + 1); }
+                            if (cell.Color.HasValue) { frame = lookup.Content(cell); token = "토" + ((int)cell.Color.Value + 1); }
                             break;
                         case RuntimeContent.Rocket:
-                            sprite = LevelBoardArtwork.Block(InitialBlockKind.Rocket, cell.RocketDirection ?? RocketDirection.Horizontal);
+                            frame = lookup.Content(cell);
                             token = cell.RocketDirection == RocketDirection.Horizontal ? "로↔" : "로↕";
                             break;
-                        case RuntimeContent.Bomb: sprite = LevelBoardArtwork.Block(InitialBlockKind.Bomb, default); token = "폭탄"; break;
-                        case RuntimeContent.Drone: sprite = LevelBoardArtwork.Block(InitialBlockKind.Drone, default); token = "드론"; break;
-                        case RuntimeContent.Magnet: sprite = LevelBoardArtwork.Block(InitialBlockKind.Magnet, default); token = "자석"; break;
-                        case RuntimeContent.Recovery: sprite = LevelBoardArtwork.Recovery; token = "회수"; break;
+                        case RuntimeContent.Bomb: frame = lookup.Content(cell); token = "폭탄"; break;
+                        case RuntimeContent.Drone: frame = lookup.Content(cell); token = "드론"; break;
+                        case RuntimeContent.Magnet: frame = lookup.Content(cell); token = "자석"; break;
+                        case RuntimeContent.Recovery: frame = lookup.Content(cell); token = "회수"; break;
                         case RuntimeContent.Obstacle:
                             RuntimeObstacle body = state.Obstacles[cell.ObstacleIndex.Value];
-                            sprite = LevelBoardArtwork.Obstacle(body.Definition, body.Durability, body.Charge);
-                            if (LevelPlacementRules.Size(body.Definition.Kind) == 2)
+                            frame = lookup.Obstacle(body);
+                            int size = ElementVisualLookup.Size(body.Element);
+                            if (size > 1 && frame != null)
                             {
-                                float inset = (2 - BoardArtworkLayout.LargeObstacleSize) * 50;
-                                content.style.width = content.style.height = Length.Percent(BoardArtworkLayout.LargeObstacleSize * 100);
+                                float inset = (size - frame.Size) * 50;
+                                content.style.width = content.style.height = Length.Percent(frame.Size * 100);
                                 content.style.left = Length.Percent(inset - 100 * (cell.Coordinate.Column - body.Definition.Coordinate.Column));
                                 content.style.top = Length.Percent(inset - 100 * (cell.Coordinate.Row - body.Definition.Coordinate.Row));
                             }
                             break;
                     }
                 }
+                sprite = LevelBoardArtwork.Visual(frame);
                 content.style.backgroundImage = sprite != null ? new StyleBackground(sprite) : new StyleBackground(StyleKeyword.None);
-                float contentScale = BoardArtworkLayout.ContentScale(sprite);
-                content.style.scale = new Scale(Vector3.one * contentScale);
-                content.style.translate = new Translate(Length.Percent(100 * contentScale * BoardArtworkLayout.ContentOffsetX(sprite)),
-                    Length.Percent(-100 * contentScale * BoardArtworkLayout.ContentOffsetY(sprite)));
-                Sprite dustSprite = LevelBoardArtwork.Dust(cell.DustDurability);
+                bool extended = cell.Content == RuntimeContent.Obstacle && cell.ObstacleIndex.HasValue &&
+                    ElementVisualLookup.Size(state.Obstacles[cell.ObstacleIndex.Value].Element) > 1;
+                ElementVisualStyle.Apply(content, sprite, frame, extended ? 1 : frame?.Size ?? 1);
+                ElementVisualFrame dustFrame = lookup.Dust(cell);
+                Sprite dustSprite = LevelBoardArtwork.Visual(dustFrame);
                 dust.style.backgroundImage = dustSprite != null ? new StyleBackground(dustSprite) : new StyleBackground(StyleKeyword.None);
-                Sprite coverSprite = cell.Cover.HasValue ? LevelBoardArtwork.Cover(cell.Cover.Value, cell.CoverDurability) : null;
+                ElementVisualStyle.Apply(dust, dustSprite, dustFrame, dustFrame?.Size ?? 1);
+                ElementVisualFrame coverFrame = lookup.Cover(cell);
+                Sprite coverSprite = LevelBoardArtwork.Visual(coverFrame);
                 cover.style.backgroundImage = coverSprite != null ? new StyleBackground(coverSprite) : new StyleBackground(StyleKeyword.None);
+                ElementVisualStyle.Apply(cover, coverSprite, coverFrame, coverFrame?.Size ?? 1);
                 target.text = sprite != null && token != null ? original.Replace(token, "").Trim() : original;
                 target.tooltip = cell.Coordinate + " / " + original.Replace("\n", " / ");
                 target.AddToClassList("rabbit-artwork");

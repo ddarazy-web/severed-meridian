@@ -34,8 +34,12 @@ namespace AutoPlay
                 if (occupant.Content == BotContent.Normal && !occupant.Cover.HasValue)
                 {
                     Add(MissionKind.Color, occupant.Color);
-                    int dust = board.CellAt(at).DustDurability;
-                    if (dust > 0 && Has(MissionKind.Dust)) { if (dust == 1) Add(MissionKind.Dust); else partial++; }
+                    BotCell floor = board.CellAt(at);
+                    if (floor.DustDurability > 0 && Has(floor.DustMission))
+                    {
+                        if (floor.DustDurability <= floor.DustDamage) Add(floor.DustMission.Value);
+                        else partial += Math.Min(floor.DustDurability, floor.DustDamage);
+                    }
                 }
                 if (!matching && !magnet && occupant.BodyKey.HasValue) Body(occupant, at, true, null);
                 // 파워의 일반 제거에는 인접 피해가 없다. 일반 매칭과 자석의 색 자물쇠 예외만 본다.
@@ -50,27 +54,27 @@ namespace AutoPlay
                     else if (target.BodyKey.HasValue)
                     {
                         BotBody body = board.Bodies.First(item => item.Key == target.BodyKey.Value);
-                        if (!magnet || body.Kind == ObstacleKind.ColorLock) Body(target, location.Coordinate, false, color ?? occupant.Color);
+                        if (!magnet || body.AcceptsMagnetAdjacent && !body.IsCharge) Body(target, location.Coordinate, false, color ?? occupant.Color);
                     }
                 }
             }
             foreach (var hit in bodyHits)
             {
                 BotBody body = board.Bodies.First(item => item.Key == hit.Key);
-                if (body.Kind == ObstacleKind.Generator)
+                if (body.IsCharge)
                 {
                     BotBody[] targets = board.Bodies.Where(item => body.ConnectedTargets.Contains(item.Key)).ToArray();
-                    if (body.Charge + 1 >= body.RequiredCharge) foreach (BotBody target in targets) completedBodies.Add(target.Key);
-                    else if (targets.Any(target => Has(Kind(target.Kind)))) partial++;
+                    if (body.Charge + body.ChargePerHit >= body.RequiredCharge) foreach (BotBody target in targets) completedBodies.Add(target.Key);
+                    else if (targets.Any(target => Has(target.RemovalMission))) partial++;
                     continue;
                 }
-                MissionKind kind = Kind(body.Kind);
+                MissionKind? kind = body.RemovalMission;
                 if (!Has(kind)) continue;
-                int damage = body.Kind == ObstacleKind.Appliance ? Math.Min(4, hit.Value.Count) : 1;
+                int damage = body.PerHitCell ? Math.Min(body.LogicalSize * body.LogicalSize, hit.Value.Count) : 1;
                 if (damage >= body.Durability) completedBodies.Add(body.Key); else partial += damage;
             }
             // 직접 파괴와 발전기 연결 해제가 같은 본체를 가리켜도 완료량은 한 개다.
-            foreach (BotBody body in board.Bodies.Where(body => completedBodies.Contains(body.Key))) Add(Kind(body.Kind));
+            foreach (BotBody body in board.Bodies.Where(body => completedBodies.Contains(body.Key) && body.RemovalMission.HasValue)) Add(body.RemovalMission.Value);
             // 도착 칸으로 직접 교환하는 회수는 확정 기여다. 숨은 낙하 경로를 가정하지 않는다.
             if (action.Second.HasValue)
                 foreach (BoardCoordinate at in new[] { action.First, action.Second.Value })
@@ -79,7 +83,7 @@ namespace AutoPlay
                 progress.TryGetValue((mission.Kind, mission.Color), out int amount) ? amount : 0));
             return completed * 8 + partial;
 
-            bool Has(MissionKind kind) => board.Missions.Any(mission => mission.Kind == kind && mission.Remaining > 0);
+            bool Has(MissionKind? kind) => kind.HasValue && board.Missions.Any(mission => mission.Kind == kind.Value && mission.Remaining > 0);
             void Add(MissionKind kind, RabbitColor? targetColor = null)
             {
                 var key = (kind, kind == MissionKind.Color ? targetColor : null);
@@ -88,24 +92,19 @@ namespace AutoPlay
             void Cover(BotCell target, BoardCoordinate at)
             {
                 if (!covers.Add(at)) return;
-                MissionKind kind = target.Cover == CoverKind.Mold ? MissionKind.Mold : MissionKind.Web;
-                if (!Has(kind)) return;
-                if (target.Cover == CoverKind.Mold || target.CoverDurability == 1) Add(kind); else partial++;
+                if (!Has(target.CoverMission)) return;
+                if (!target.CoverUsesDurability || target.CoverDurability <= target.CoverDamage) Add(target.CoverMission.Value);
+                else partial += Math.Min(target.CoverDurability, target.CoverDamage);
             }
             void Body(BotCell target, BoardCoordinate at, bool directPower, RabbitColor? sourceColor)
             {
                 BotBody body = board.Bodies.First(item => item.Key == target.BodyKey.Value);
-                if (!directPower && (body.Kind == ObstacleKind.Safe || body.Kind == ObstacleKind.ColorLock && body.Color != sourceColor)) return;
+                if (directPower ? !body.AcceptsPower : !(magnet ? body.AcceptsMagnetAdjacent : body.AcceptsAdjacentMatch)) return;
+                if (!directPower && body.RequiresAdjacentColor && body.Color != sourceColor) return;
                 if (!bodyHits.TryGetValue(body.Key, out HashSet<BoardCoordinate> cells)) bodyHits.Add(body.Key, cells = new HashSet<BoardCoordinate>());
                 cells.Add(at);
             }
         }
 
-        /// <param name="kind">공개 장애물 종류. 발전기는 별도 충전 분기에서 처리한다.</param><returns>대응 제거 미션.</returns>
-        private static MissionKind Kind(ObstacleKind kind) => kind switch
-        {
-            ObstacleKind.Scrap => MissionKind.Scrap, ObstacleKind.Safe => MissionKind.Safe,
-            ObstacleKind.ColorLock => MissionKind.ColorLock, ObstacleKind.Appliance => MissionKind.Appliance, _ => MissionKind.Crate
-        };
     }
 }

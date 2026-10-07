@@ -6,7 +6,8 @@ namespace Simulation
 {
     internal static class ObstacleDamageRules
     {
-        private static readonly ElementBehaviorRegistry reactionBehaviors = new ElementBehaviorRegistry(QueryDurability, ApplyDurability, QueryCharge, ApplyCharge);
+        private static readonly ElementBehaviorRegistry reactionBehaviors = new ElementBehaviorRegistry(QueryDurability, ApplyDurability, QueryCharge, ApplyCharge,
+            QueryEvenTurnDurability);
         internal static bool Supports(ObstacleKind kind) => kind >= ObstacleKind.Crate && kind <= ObstacleKind.Generator;
         internal static int ReservedDamage(RuntimeObstacle body, int cells)
         {
@@ -49,6 +50,15 @@ namespace Simulation
             if (definition.Placement != null)
                 throw new System.InvalidOperationException($"요소 '{definition.Id.Value}'의 충전 행동에 내구도 배치가 함께 있습니다.");
             return GeneratorRules.QueryDefinition(definition, state, cell.ObstacleIndex.Value, context);
+        }
+
+        // 추가 행동은 조회 조건만 변경하고 기존 내구도 적용/제거/미션 실행을 공유한다.
+        private static DamageReaction QueryEvenTurnDurability(ElementDefinition definition, LevelRuntimeState state, RuntimeCell cell,
+            DamageCause cause, RabbitColor? sourceColor, TurnEffectContext context, int hit)
+        {
+            DamageReaction reaction = QueryDurability(definition, state, cell, cause, sourceColor, context, hit);
+            return reaction.Response == DamageResponse.Damage && context != null && context.Turn % 2 != 0
+                ? new DamageReaction(DamageResponse.Protected, "홀수 턴 보호") : reaction;
         }
 
         private static DamageReaction QueryDurability(ElementDefinition definition, LevelRuntimeState state, RuntimeCell cell,

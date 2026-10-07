@@ -146,7 +146,7 @@ namespace Elements
         internal static ObstacleKind ViewKind(ElementDefinition definition) => definition.RequireReactionBehavior() switch
         {
             ElementReactionBehavior.GeneratorCharge => ObstacleKind.Generator,
-            ElementReactionBehavior.Durability => definition.RequireRemovalMissionProfile().Kind switch
+            ElementReactionBehavior.Durability or ElementReactionBehavior.EvenTurnDurability => definition.RequireRemovalMissionProfile().Kind switch
             {
                 MissionKind.Crate => ObstacleKind.Crate, MissionKind.Scrap => ObstacleKind.Scrap, MissionKind.Safe => ObstacleKind.Safe,
                 MissionKind.ColorLock => ObstacleKind.ColorLock, MissionKind.Appliance => ObstacleKind.Appliance,

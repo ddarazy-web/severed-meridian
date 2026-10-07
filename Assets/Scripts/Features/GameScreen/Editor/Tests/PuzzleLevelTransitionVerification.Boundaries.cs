@@ -122,11 +122,13 @@ namespace GameScreen.Editor
                 background.Invoke(session, new object[] { true });
                 await UniTask.Delay(500, ignoreTimeScale: true);
                 int changed = 0; session.Changed += () => changed++;
+                Transform[] dyingObjects = UnityEngine.Object.FindFirstObjectByType<PuzzleWorldBoard>().GetComponentsInChildren<Transform>(true);
                 // 원본 씬을 저장하지 않고 실제 Single 로드로 이전 씬과 후보 수명을 종료한다.
                 await UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(PuzzleGameAssets.ScenePath,
                     new UnityEngine.SceneManagement.LoadSceneParameters(UnityEngine.SceneManagement.LoadSceneMode.Single));
                 Check(!await dying && changed == 0 && art.AtlasCount == 0 && session == null,
                     "후보 준비 중 실제 씬 종료·세션 파괴·늦은 화면 갱신0·기존 자원 반환");
+                Check(dyingObjects.All(value => value == null), "전환 후보 준비 중 씬 종료의 이전 보드/공급/효과/마스크 객체 잔류0");
                 await ReadyOrResult(UnityEngine.Object.FindFirstObjectByType<PuzzleGameSession>(), false);
             }
             finally

@@ -24,12 +24,14 @@ namespace Simulation
         public int ConsumedBefore { get; }
         public int ItemAfter { get; }
         public int ConsumedAfter { get; }
+        internal Elements.ElementDefinition ContentElement { get; }
         internal SettlementRecord(int batch, MovementKind kind, BoardCoordinate source, RuntimeCell cell, bool protectedPower,
             int itemBefore = 0, int consumedBefore = 0, int itemAfter = 0, int consumedAfter = 0)
         {
             Batch = batch; Kind = kind; Source = source; Target = cell.Coordinate; Content = cell.Content; Color = cell.Color;
             Direction = cell.RocketDirection; Protected = protectedPower; ItemBefore = itemBefore; ConsumedBefore = consumedBefore; ItemAfter = itemAfter; ConsumedAfter = consumedAfter;
             ObstacleIndex = cell.ObstacleIndex;
+            ContentElement = cell.ContentElement;
         }
     }
 

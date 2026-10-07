@@ -16,13 +16,14 @@ namespace GameScreen
         [SerializeField] private UnityEngine.UI.Text level, message, descriptionText;
         [SerializeField] private RectTransform selection;
         private PuzzlePopupBinding popupBinding;
+        private PuzzleHudPresenter hudPresenter;
         private UnityEngine.Events.UnityAction onPause, onCancel;
         private System.Action<string> onDescribe;
         private int bindRevision;
         public void SetSelectionView(RectTransform rect) => selection = rect;
         private void LateUpdate()
         {
-            if (hud != null && session != null) hud.Frame(session);
+            hudPresenter?.Frame();
             if (selection == null || session == null || input == null) return;
             Vector3? position = input.SelectedWorldPosition;
             selection.gameObject.SetActive(position.HasValue && session.CanAcceptInput);
@@ -47,8 +48,9 @@ namespace GameScreen
         private void OnDisable() { Unsubscribe(); popupBinding?.Release(); if (input != null) input.SetScreenUIBlocked(false); }
         private void Unsubscribe()
         {
+            hudPresenter?.Dispose(); hudPresenter = null;
             bindRevision++;
-            if (session != null) session.Changed -= Refresh; if (input != null) input.SelectionChanged -= Refresh;
+            if (session != null) session.Changed -= RefreshScreen; if (input != null) input.SelectionChanged -= Refresh;
             if (pauseButton != null && onPause != null) pauseButton.onClick.RemoveListener(onPause);
             if (cancel != null && onCancel != null) cancel.onClick.RemoveListener(onCancel);
             if (hud != null && hud.Describe == onDescribe) hud.Describe = null;
@@ -56,7 +58,8 @@ namespace GameScreen
         }
         private void Bind()
         {
-            Unsubscribe(); session.Changed += Refresh; input.SelectionChanged += Refresh;
+            Unsubscribe(); session.Changed += RefreshScreen; input.SelectionChanged += Refresh;
+            hudPresenter = new PuzzleHudPresenter(session, hud);
             layout.Bind(session, input); items.Bind(input);
             popupBinding = GetComponent<PuzzlePopupBinding>();
             if (popupBinding != null) popupBinding.Configure(session, input, null, null);
@@ -72,9 +75,11 @@ namespace GameScreen
             popupBinding?.NextLevel();
         }
         private void Refresh()
+        { hudPresenter?.Refresh(); RefreshScreen(); }
+        private void RefreshScreen()
         {
             if (session == null) return;
-            hud.Refresh(session); layout.RefreshIfNeeded(); items.Refresh(session, input);
+            layout.RefreshIfNeeded(); items.Refresh(session, input);
             level.text = session.State == null ? "달토끼 고물상" : "LEVEL " + session.State.LevelNumber;
             bool selected = input.SelectedItem.HasValue;
             message.text = input.SelectionMessage ?? session.FeedbackStatus ?? (selected ? (input.SelectedItem == BoardItem.Hammer ? "제거할 칸을 고르세요" : input.Selected.HasValue ? "인접한 두 번째 칸을 고르세요" : "바꿀 두 칸을 고르세요")

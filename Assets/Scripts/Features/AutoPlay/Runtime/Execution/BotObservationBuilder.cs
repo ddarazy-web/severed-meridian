@@ -33,19 +33,32 @@ namespace AutoPlay
             foreach (var pair in occupied.OrderBy(pair => keys[pair.Key]))
             {
                 RuntimeObstacle body = state.Obstacles[pair.Key];
-                IEnumerable<int> targets = body.Definition.Kind == ObstacleKind.Generator
+                Elements.ElementDefinition definition = body.Element;
+                Elements.ElementDamageSourcePolicy sources = definition.RequireDamageSourcePolicy();
+                bool charge = definition.RequireReactionBehavior() == Elements.ElementReactionBehavior.GeneratorCharge;
+                bool requiresColor = definition.ColorMatchPolicy?.RequiresMatchingColor == true;
+                IEnumerable<int> targets = charge
                     ? GeneratorRules.ActiveConnections(state).Where(connection => connection.GeneratorId == body.Definition.Id)
                         .Select(connection => GeneratorRules.Find(state, connection.TargetId)).Where(keys.ContainsKey)
                         .Select(index => keys[index]).Distinct().OrderBy(key => key)
                     : Enumerable.Empty<int>();
                 bodies.Add(new BotBody(keys[pair.Key], body.Definition.Kind, body.Durability,
-                    body.Definition.Kind == ObstacleKind.ColorLock ? body.Definition.Color : (RabbitColor?)null,
-                    body.Definition.Kind == ObstacleKind.Generator ? body.Charge : 0,
-                    body.Definition.Kind == ObstacleKind.Generator ? body.Definition.RequiredCharge : 0, pair.Value, targets));
+                    requiresColor ? body.Definition.Color : (RabbitColor?)null,
+                    charge ? body.Charge : 0, charge ? body.Definition.RequiredCharge : 0, pair.Value, targets,
+                    sources.AdjacentMatch, sources.Power, sources.MagnetAdjacent, sources.Hammer, requiresColor,
+                    definition.DamageAggregationPolicy?.PerHitCell == true, charge,
+                    charge ? definition.RequireChargePlacement().ChargePerHit : 0,
+                    charge ? definition.RequireChargePlacement().Size : definition.RequirePlacement().Size,
+                    definition.RemovalMissionProfile?.Kind));
             }
             BotCell[] cells = state.Cells.Select(cell =>
             {
                 bool hidden = cell.Cover == CoverKind.Mold;
+                Elements.ElementDefinition cover = cell.Cover.HasValue
+                    ? cell.CoverElement ?? Elements.LegacyElementDefinitions.Get(cell.Cover.Value) : null;
+                Elements.ElementLayerProfile coverLayer = cover?.RequireLayer();
+                Elements.ElementLayerProfile dustLayer = cell.DustDurability > 0
+                    ? (cell.DustElement ?? Elements.LegacyElementDefinitions.GetDust()).RequireLayer() : null;
                 BotContent content = hidden ? BotContent.Unknown : cell.Content switch
                 {
                     RuntimeContent.Normal => BotContent.Normal, RuntimeContent.Rocket => BotContent.Rocket,
@@ -57,7 +70,10 @@ namespace AutoPlay
                     !hidden && cell.Content == RuntimeContent.Normal ? cell.Color : null,
                     !hidden && cell.Content == RuntimeContent.Rocket ? cell.RocketDirection : null,
                     cell.Cover, cell.CoverDurability, cell.DustDurability,
-                    !hidden && cell.ObstacleIndex.HasValue && keys.TryGetValue(cell.ObstacleIndex.Value, out int key) ? key : (int?)null);
+                    !hidden && cell.ObstacleIndex.HasValue && keys.TryGetValue(cell.ObstacleIndex.Value, out int key) ? key : (int?)null,
+                    coverLayer?.Behavior == Elements.ElementLayerBehavior.CoverDurability,
+                    coverLayer?.Damage ?? 0, coverLayer?.Mission, cover?.Turn != null,
+                    cover?.Turn?.InitialDurability ?? 0, dustLayer?.Damage ?? 0, dustLayer?.Mission);
             }).ToArray();
             // ActionQuery는 벽·이동 제한·일반 색으로 유효성을 판정한다.
             // MatchQuery/HasMagnetTarget은 곰팡이 내부를 제외한다. 원본 ActionCandidate 대신
