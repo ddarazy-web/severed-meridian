@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2d36bfb87ba4833b6d1fef731bca5c0, type: 3}
+  m_Name: supply.scrap
+  m_EditorClassIdentifier: Assembly-CSharp::Elements.ElementDefinitionAsset
+  definition:
+    id: supply.scrap
+    displayName: "\uACE0\uCCA0 \uACF5\uAE09"
+    placement:
+      size: 1
+      maxDurability: 1
+      enabled: 0
+    charge:
+      size: 2
+      minRequired: 3
+      maxRequired: 5
+      perHit: 1
+      enabled: 0
+    damage:
+      adjacentMatch: 0
+      power: 0
+      magnetAdjacent: 0
+      hammer: 0
+      enabled: 0
+    color:
+      requiresMatchingColor: 0
+      enabled: 0
+    aggregation:
+      perHitCell: 0
+      enabled: 0
+    removal:
+      kind: 0
+      enabled: 0
+    reaction: 0
+    layer:
+      behavior: 0
+      mission: 0
+      damage: 1
+      enabled: 0
+    turn:
+      behavior: 0
+      initialDurability: 1
+      enabled: 0
+    supply:
+      behavior: 5
+      content: 6
+      hasObstacle: 1
+      obstacle: 1
+      bodyIdPrefix: supply-scrap-
+      choices: 
+      enabled: 1
+      obstacleDefinitionId: 
+      choiceDefinitionIds: []
+  planningDocument: "Docs/Contents/MoonRabbitJunkyard/04_\uAC8C\uC784\uADDC\uCE59.md"
+  planningSection: "\uACE0\uCCA0 \uACF5\uAE09 \u2014 \uD655\uC815 \uC218\uCE58/\uD589\uB3D9\uACFC
+    \uAE30\uC874 \uAD6C\uD604\uC744 \uB300\uC870"

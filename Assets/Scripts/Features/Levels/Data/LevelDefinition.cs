@@ -54,16 +54,23 @@ namespace Levels
         public ElementLevelSupplyDefinition ElementSupply => elementSupply;
 
         [System.NonSerialized] private Elements.ElementCatalog runtimeCatalog;
+        public Elements.ElementVisualCatalog PackedVisuals { get; private set; }
+
+        internal void BindContentData(Elements.ElementContentData content)
+        {
+            if (SchemaVersion == LegacySchemaVersion) runtimeCatalog = content.Definitions;
+            PackedVisuals = content.Visuals;
+        }
         public Elements.ElementCatalog CreateElementCatalog()
         {
             if (runtimeCatalog != null) return runtimeCatalog;
             if (elementCatalog == null) return embeddedDefinitions == null || embeddedDefinitions.Length == 0
-                ? global::Elements.LegacyElementDefinitions.DefaultCatalog
+                ? global::Elements.ElementAuthoringDefaults.Definitions
                 : new Elements.ElementCatalog(embeddedDefinitions.Select(value => value.ToDefinition()));
             Elements.ElementCatalog authored = elementCatalog.CreateCatalog();
             // 제작 카탈로그에 없는 기본 블록만 보충한다. 같은 ID의 제작 정의는 그대로 유지한다.
             HashSet<Elements.ElementId> ids = new HashSet<Elements.ElementId>(authored.Definitions.Select(value => value.Id));
-            return new Elements.ElementCatalog(authored.Definitions.Concat(global::Elements.LegacyElementDefinitions.DefaultCatalog.Definitions
+            return new Elements.ElementCatalog(authored.Definitions.Concat(global::Elements.ElementAuthoringDefaults.Definitions.Definitions
                 .Where(value => !ids.Contains(value.Id))));
         }
 

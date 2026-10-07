@@ -11,8 +11,16 @@ namespace Levels
     {
         private static readonly byte[] ElementMagic = { 0x45, 0x46, 0x50, 0x4b };
 
+        public static LevelDefinition ReadLevel(byte[] bytes, int number, ElementContentData content)
+        {
+            if (content == null) throw new ArgumentNullException(nameof(content));
+            LevelDefinition level = ReadLevel(bytes, number);
+            level.BindContentData(content);
+            return level;
+        }
+
         // 기존 1인자 Encode는 팩1의 명시적 쓰기 계약으로 보존한다.
-        public static byte[] Snapshot(LevelDefinition level) => level.SchemaVersion == LevelDefinition.LegacySchemaVersion
+        public static byte[] Snapshot(LevelDefinition level) => level.SchemaVersion == LevelDefinition.LegacySchemaVersion && level.ElementCatalog == null
             ? Encode(new[] { level }) : Encode(new[] { level }, level.CreateElementCatalog());
 
         public static LevelDefinition Copy(LevelDefinition source)

@@ -4,6 +4,8 @@
 
 ## 기능별 문서
 
+- [요소 ScriptableObject 제작 원본과 MemoryPack 배포](project-wide/2026-10-07-element-content-authoring.md)
+
 - [공통 팝업과 선택적 씬 복원 — ADR-2026-10-02-01](project-wide/2026-10-02-popup-framework.md)
 
 - [Match 통합 작업창](MoonRabbitJunkyard/61_Match통합작업창_설계결정.md)

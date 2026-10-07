@@ -10,6 +10,8 @@ namespace Elements
     {
         [SerializeField] private List<ElementDefinitionAsset> definitions = new List<ElementDefinitionAsset>();
         [SerializeField] private ElementVisualCatalogAsset visuals;
+        public IReadOnlyList<ElementDefinitionAsset> DefinitionAssets => definitions;
+        public ElementVisualCatalogAsset VisualAsset => visuals;
 
         public ElementVisualCatalog CreateVisualCatalog() => visuals != null ? visuals.CreateCatalog() : LegacyElementVisuals.Catalog;
 

@@ -667,3 +667,14 @@ MonoBehaviour:
   - kind: 0
     color: 1
     count: 30
+  elements: []
+  elementCatalog: {fileID: 11400000, guid: b645b207797cb83418ae4bdd2a95385e, type: 2}
+  elementSupply:
+    sources: []
+    scrapTarget: 0
+    scrapLimit: 0
+    scrapDurability: 1
+    recoveryTarget: 0
+    scrapDefinitionId: supply.scrap
+    recoveryDefinitionId: supply.recovery
+  embeddedDefinitions: []

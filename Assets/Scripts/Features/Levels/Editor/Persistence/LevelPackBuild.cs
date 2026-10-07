@@ -10,6 +10,7 @@ using UnityEditor.Build;
 using UnityEngine;
 using Elements;
 using MemoryPack;
+using Elements.Editor;
 
 namespace Levels.Editor
 {
@@ -28,10 +29,14 @@ namespace Levels.Editor
             LevelDefinition[] levels = AssetDatabase.FindAssets("t:LevelDefinition", new[] { LevelAssetOperations.DefaultFolder })
                 .Select(AssetDatabase.GUIDToAssetPath).Select(AssetDatabase.LoadAssetAtPath<LevelDefinition>).ToArray();
             Dictionary<string, byte[]> outputs = CreatePackBytes(levels);
+            byte[] contentBytes = ElementContentPackBuild.CreateDefaultBytes();
+            foreach (ElementCatalogAsset catalog in levels.Select(level => level.ElementCatalog).Where(value => value != null).Distinct())
+                ElementContentAuthoring.ValidatePlanning(catalog);
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
             ValidateExclusion(settings, true);
             foreach (string guid in AuthoringGuids()) settings.RemoveAssetEntry(guid);
             ValidateExclusion(settings);
+            ElementContentPackBuild.WriteAndRegister(contentBytes, settings);
             Directory.CreateDirectory(OutputFolder);
             foreach (var output in outputs)
                 if (!File.Exists(output.Key) || !File.ReadAllBytes(output.Key).SequenceEqual(output.Value)) File.WriteAllBytes(output.Key, output.Value);
@@ -88,8 +93,8 @@ namespace Levels.Editor
             if (originals.Length > 0) throw new BuildFailedException("레벨/요소 제작 원본이 빌드 리소스에서 참조됩니다. 씬/프리팹/Resources/Addressables 폴더 참조를 제거하고 팩으로 로드하세요:\n" + string.Join("\n", originals));
         }
 
-        internal static bool IsAuthoringType(Type type) => type == typeof(LevelDefinition) || type == typeof(ElementCatalogAsset) || type == typeof(ElementDefinitionAsset);
-        private static IEnumerable<string> AuthoringGuids() => new[] { "t:LevelDefinition", "t:ElementCatalogAsset", "t:ElementDefinitionAsset" }
+        internal static bool IsAuthoringType(Type type) => type == typeof(LevelDefinition) || type == typeof(ElementCatalogAsset) || type == typeof(ElementDefinitionAsset) || type == typeof(ElementVisualCatalogAsset);
+        private static IEnumerable<string> AuthoringGuids() => new[] { "t:LevelDefinition", "t:ElementCatalogAsset", "t:ElementDefinitionAsset", "t:ElementVisualCatalogAsset" }
             .SelectMany(filter => AssetDatabase.FindAssets(filter)).Distinct();
 
         // 선검증과 메모리 인코딩만 수행한다. 디스크/Addressables 변경은 Generate가 별도로 소유한다.
@@ -98,8 +103,7 @@ namespace Levels.Editor
             return levels.GroupBy(level => LevelPackCodec.FirstLevel(level.LevelNumber)).ToDictionary(group => FilePath(group.Key), group =>
             {
                 Dictionary<ElementId, ElementDefinition> definitions = new Dictionary<ElementId, ElementDefinition>();
-                foreach (ElementDefinition definition in group.SelectMany(level => (level.SchemaVersion == LevelDefinition.LegacySchemaVersion
-                    ? LegacyElementDefinitions.DefaultCatalog : level.CreateElementCatalog()).Definitions))
+                foreach (ElementDefinition definition in group.SelectMany(level => level.CreateElementCatalog().Definitions))
                 {
                     if (definitions.TryGetValue(definition.Id, out ElementDefinition previous))
                     {

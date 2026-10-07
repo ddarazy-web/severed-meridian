@@ -1,5 +1,7 @@
 # 퍼즐 요소 콘텐츠·행동·드론 정책 추가 안내
 
+현재18종의 실제 제작 SO, 기획 출처 및 배포 MemoryPack 사용법은 [요소 제작 원본과 MemoryPack 안내](element-content-authoring.md)를 따른다. 아래 단계별 사례의 임시 입력과 현재 출시 제작 원본은 구분한다.
+
 2026-10-07. Unity 6000.3.10f1의 현재 제작·실행 경계를 기준으로 한다. [통합 가이드](../../../Planning/MoonRabbitJunkyard/ElementFramework/integration-guideline.md)와 [5단계 검증 기록](../../../Verification/MoonRabbitJunkyard/ElementFramework/phase-05-progress.md)을 함께 확인한다. 최종85종692682 PASS/FAIL0·각 실제 종료0과 전량 논리/원본 보존 감사를 완료했다. 미검증 플랫폼과 새 행동의 공식 출시 경계는 아래에 구분한다.
 
 ## 같은 행동의 새 콘텐츠

@@ -1,39 +1,40 @@
 using System;
+using MemoryPack;
 
 namespace Elements
 {
     /// <summary>규칙 팩과 별도로 전달하는 표현 값. Unity 제작 원본 참조를 포함하지 않는다.</summary>
-    [Serializable]
-    public sealed class ElementVisualCatalogDto
+    [Serializable, MemoryPackable]
+    public sealed partial class ElementVisualCatalogDto
     {
         public ElementVisualDefinitionDto[] definitions = Array.Empty<ElementVisualDefinitionDto>();
         public ElementVisualBindingDto[] bindings = Array.Empty<ElementVisualBindingDto>();
     }
 
-    [Serializable]
-    public sealed class ElementVisualBindingDto
+    [Serializable, MemoryPackable]
+    public sealed partial class ElementVisualBindingDto
     {
         public string id;
         public string visualKey;
     }
 
-    [Serializable]
-    public sealed class ElementVisualDefinitionDto
+    [Serializable, MemoryPackable]
+    public sealed partial class ElementVisualDefinitionDto
     {
         public string key;
         public ElementVisualFrameDto[] states = Array.Empty<ElementVisualFrameDto>();
         public string[] generates = Array.Empty<string>();
     }
 
-    [Serializable]
-    public sealed class ElementVisualEffectDto
+    [Serializable, MemoryPackable]
+    public sealed partial class ElementVisualEffectDto
     {
         public string key;
         public ElementVisualFrameDto[] frames = Array.Empty<ElementVisualFrameDto>();
     }
 
-    [Serializable]
-    public sealed class ElementVisualFrameDto
+    [Serializable, MemoryPackable]
+    public sealed partial class ElementVisualFrameDto
     {
         // -1은 해당 축과 무관한 그림이다. frame은 기본 정지 프레임0만 허용한다.
         public int color = -1;

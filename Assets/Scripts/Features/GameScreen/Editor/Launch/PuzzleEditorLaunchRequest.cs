@@ -35,9 +35,15 @@ namespace GameScreen.Editor
                 snapshot = File.ReadAllBytes(path);
             }
             else throw new ArgumentOutOfRangeException(nameof(mode));
-            LevelDefinition validation = LevelPackCodec.ReadLevel(snapshot, source.LevelNumber);
-            UnityEngine.Object.DestroyImmediate(validation);
-            return new PuzzleEditorLaunchRequest(snapshot, source.LevelNumber, seed, mode, ElementVisualLookup.ForLevel(source));
+            LevelDefinition validation = mode == PuzzleEditorLevelSource.MemoryPack
+                ? LevelPackCodec.ReadLevel(snapshot, source.LevelNumber, ElementContentPackCodec.Decode(File.ReadAllBytes(Elements.Editor.ElementContentPackBuild.OutputPath)))
+                : LevelPackCodec.ReadLevel(snapshot, source.LevelNumber);
+            try
+            {
+                return new PuzzleEditorLaunchRequest(snapshot, source.LevelNumber, seed, mode,
+                    ElementVisualLookup.ForLevel(mode == PuzzleEditorLevelSource.MemoryPack ? validation : source));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(validation); }
         }
 
         public LevelDefinition CreateDefinition() => LevelPackCodec.ReadLevel(bytes, LevelNumber);

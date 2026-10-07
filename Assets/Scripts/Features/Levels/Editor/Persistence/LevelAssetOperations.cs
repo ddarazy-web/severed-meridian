@@ -54,6 +54,13 @@ namespace Levels.Editor
                 {
                     ElementLevelSupplyDefinition supply = ElementLevelSupplyDefinition.FromLegacy(level.Supply);
                     JsonUtility.FromJsonOverwrite("{\"schemaVersion\":5,\"supply\":{\"sources\":[]},\"elementSupply\":" + JsonUtility.ToJson(supply) + "}", level);
+                    Elements.ElementCatalogAsset defaults = AssetDatabase.LoadAssetAtPath<Elements.ElementCatalogAsset>(Elements.Editor.ElementContentAuthoring.CatalogPath);
+                    if (defaults != null)
+                    {
+                        SerializedObject input = new SerializedObject(level);
+                        input.FindProperty("elementCatalog").objectReferenceValue = defaults;
+                        input.ApplyModifiedPropertiesWithoutUndo();
+                    }
                 }
                 AssetDatabase.CreateAsset(level, path);
                 AssetDatabase.SaveAssetIfDirty(level);

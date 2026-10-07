@@ -64,7 +64,7 @@ namespace GameScreen
             try
             {
                 linked.Token.ThrowIfCancellationRequested();
-                if (definition == null) definition = await LevelPackLoader.LoadAsync(number);
+                if (definition == null) definition = await LevelPackLoader.LoadAsync(number, linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
                 visualCatalog ??= visualConfiguration != null ? LegacyElementVisuals.WithOverrides(visualConfiguration) : ElementVisualLookup.ForLevel(definition);
                 initialBytes = LevelPackCodec.Snapshot(definition);

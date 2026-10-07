@@ -170,11 +170,15 @@ namespace Elements.Editor
             Check(JsonUtility.ToJson(settings) == before, "원본 배포 제외 검사는 Addressables 원본을 변경하지 않음");
             foreach (string path in Directory.GetFiles("Assets/Data/LevelPacks", "levels-*.bytes"))
             {
-                byte[] disk = File.ReadAllBytes(path); LevelPack pack = LevelPackCodec.Decode(disk);
-                LevelDefinition diskLevel = LevelPackCodec.ReadLegacyLevel(disk, pack.Levels[0].LevelNumber); Owned.Add(diskLevel);
-                byte[] upgraded = LevelPackCodec.Encode(new[] { diskLevel }, LegacyElementDefinitions.DefaultCatalog);
+                byte[] disk = File.ReadAllBytes(path);
+                // 제작 데이터 내보내기 이후 디스크에도 팩2가 저장된다. 구형 팩1 입력 검사는 위에서 별도로 유지한다.
+                bool elements = disk.Take(4).SequenceEqual(new byte[] { 0x45, 0x46, 0x50, 0x4b });
+                int number = elements ? LevelPackCodec.DecodeElements(disk).Levels[0].LevelNumber : LevelPackCodec.DecodeLegacy(disk).Levels[0].LevelNumber;
+                LevelWithCatalog loaded = LevelPackCodec.ReadLevelWithCatalog(disk, number);
+                LevelDefinition diskLevel = loaded.Level; Owned.Add(diskLevel);
+                byte[] upgraded = LevelPackCodec.Encode(new[] { diskLevel }, loaded.Catalog);
                 LevelDefinition upgradedLevel = LevelPackCodec.ReadLevel(upgraded, diskLevel.LevelNumber); Owned.Add(upgradedLevel);
-                Check(State(LevelStateBuilder.Build(diskLevel, 9837).State) == State(LevelStateBuilder.Build(upgradedLevel, 9837).State), "기존 디스크 팩1과 메모리 팩2 실제 입력 동일 " + Path.GetFileName(path));
+                Check(State(LevelStateBuilder.Build(diskLevel, 9837).State) == State(LevelStateBuilder.Build(upgradedLevel, 9837).State), "디스크 팩1/2와 메모리 팩2 실제 입력 동일 " + Path.GetFileName(path));
                 Check(disk.SequenceEqual(File.ReadAllBytes(path)), "디스크 팩 원문 보존 " + Path.GetFileName(path));
             }
         }

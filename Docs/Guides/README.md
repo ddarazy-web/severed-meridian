@@ -25,3 +25,5 @@
 - [11단계 반복 플레이·성능 안정화 사용 안내](MoonRabbitJunkyard/WorldGameScreen/stage-11-stability-usage.md)
 - [12단계 실제 화면·연출 검수 자료 사용 안내](MoonRabbitJunkyard/WorldGameScreen/stage-12-presentation-usage.md)
 - [13단계 승리 후 다음 레벨 사용 안내](MoonRabbitJunkyard/WorldGameScreen/stage-13-level-transition-usage.md)
+
+- [퍼즐 요소 ScriptableObject 제작·MemoryPack 변환 안내](MoonRabbitJunkyard/ElementFramework/element-content-authoring.md)

@@ -2,6 +2,8 @@
 
 [전체 문서 분류](../README.md)
 
+- [요소 ScriptableObject 제작·MemoryPack 검증](project-wide/2026-10-07-element-content-authoring.md)
+
 - [요소 확장 EF-01 — 고정 장애물 피해 기준 확보 완료](MoonRabbitJunkyard/ElementFramework/stage-01-progress.md)
 - [요소 확장 EF-02 — 드론 선택·예약·효과 타임라인 기준 확보 완료](MoonRabbitJunkyard/ElementFramework/stage-02-progress.md)
 

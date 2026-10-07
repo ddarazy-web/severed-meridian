@@ -10,7 +10,8 @@ namespace Elements
         public ElementVisualResolver Resolver { get; }
         public ElementVisualLookup(ElementVisualCatalog catalog) { Resolver = new ElementVisualResolver(catalog); }
         public static ElementVisualCatalog ForLevel(LevelDefinition level)
-            => level != null && level.ElementCatalog != null ? level.ElementCatalog.CreateVisualCatalog() : LegacyElementVisuals.Catalog;
+            => level?.PackedVisuals ?? (level != null && level.ElementCatalog != null
+                ? level.ElementCatalog.CreateVisualCatalog() : ElementAuthoringDefaults.Visuals);
 
         public ElementVisualFrame Content(RuntimeCell cell)
         {

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Element Data Packs
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Element Data Packs
+  m_GUID: 43a7a2d7a536a4948b1bd4b9118d3a44
+  m_SerializeEntries:
+  - m_GUID: f782e79d7cf48b3458312625dbe9b172
+    m_Address: Elements/default-content
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 8062bda50f3a08846b6ec88fa4c6cfcc, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 3ea28434f141da04e92ce84df17ecf4d, type: 2}
+    - {fileID: 11400000, guid: cea7b7573e6999040a36aca0cb03f7b4, type: 2}
+    m_SchemaDisplayOrder:
+    - Element Data Packs_BundledAssetGroupSchema
+    - Element Data Packs_ContentUpdateGroupSchema
+  m_IncludeInBuild: 1
+  m_IncludeInBuildMigrated: 1

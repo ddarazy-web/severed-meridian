@@ -88,7 +88,18 @@ namespace Levels.Editor
         {
             string before = JsonUtility.ToJson(level); byte[] bytes = LevelPackCodec.Encode(new[] { level });
             LevelDefinition copy = LevelPackCodec.ReadLevel(bytes, level.LevelNumber); Owned.Add(copy);
-            Check(JsonUtility.ToJson(copy) == before && JsonUtility.ToJson(level) == before, name + " 전체 JSON 왕복/원본 보존");
+            string copiedJson = JsonUtility.ToJson(copy);
+            if (level.ElementCatalog != null)
+            {
+                // 제작 SO 참조는 팩1 값에 포함하지 않는다. 모든 다른 필드는 그대로 비교한다.
+                LevelDefinition comparable = LevelPackCodec.Copy(level); Owned.Add(comparable);
+                SerializedObject authoring = new SerializedObject(comparable);
+                authoring.FindProperty("elementCatalog").objectReferenceValue = null;
+                authoring.ApplyModifiedPropertiesWithoutUndo();
+                Check(copiedJson == JsonUtility.ToJson(comparable) && JsonUtility.ToJson(level) == before,
+                    name + " 제작 참조 제외 전체 JSON 왕복/원본 보존");
+            }
+            else Check(copiedJson == before && JsonUtility.ToJson(level) == before, name + " 전체 JSON 왕복/원본 보존");
             Check(bytes.SequenceEqual(LevelPackCodec.Encode(new[] { copy })), name + " 재인코딩 바이트 동일");
             LevelStateBuildResult a = LevelStateBuilder.Build(level, 12345), b = LevelStateBuilder.Build(copy, 12345);
             Check(a.IsBuilt == b.IsBuilt && LevelStateBuilder.Fingerprint(level) == LevelStateBuilder.Fingerprint(copy), name + " 같은 시드 결과/fingerprint");
@@ -148,25 +159,36 @@ namespace Levels.Editor
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             foreach (string path in Directory.GetFiles("Assets/Data/LevelPacks", "levels-*.bytes").OrderBy(s => s))
             {
-                byte[] bytes = File.ReadAllBytes(path); LevelPack pack = LevelPackCodec.Decode(bytes);
-                LevelDefinition[] source = levels.Where(l => LevelPackCodec.FirstLevel(l.LevelNumber) == pack.FirstLevel).ToArray();
-                bool sameBytes = bytes.SequenceEqual(LevelPackCodec.Encode(source));
+                byte[] bytes = File.ReadAllBytes(path);
+                bool elements = bytes.Take(4).SequenceEqual(new byte[] { 0x45, 0x46, 0x50, 0x4b });
+                int first = elements ? LevelPackCodec.DecodeElements(bytes).FirstLevel : LevelPackCodec.DecodeLegacy(bytes).FirstLevel;
+                int[] numbers = elements ? LevelPackCodec.DecodeElements(bytes).Levels.Select(item => item.LevelNumber).ToArray()
+                    : LevelPackCodec.DecodeLegacy(bytes).Levels.Select(item => item.LevelNumber).ToArray();
+                LevelDefinition[] source = levels.Where(l => LevelPackCodec.FirstLevel(l.LevelNumber) == first).ToArray();
+                bool sameBytes = bytes.SequenceEqual(elements ? LevelPackBuild.CreatePackBytes(source).Values.Single() : LevelPackCodec.Encode(source));
                 string guid = AssetDatabase.AssetPathToGUID(path);
                 var entry = settings == null ? null : settings.FindAssetEntry(guid);
                 string address = entry == null ? "<missing>" : entry.address;
                 string[] dependencies = AssetDatabase.GetDependencies(path, true);
                 List<string> matches = new List<string>();
-                foreach (PackedLevel item in pack.Levels)
+                foreach (int number in numbers)
                 {
-                    LevelDefinition loaded = LevelPackCodec.ReadLevel(bytes, item.LevelNumber); Owned.Add(loaded);
-                    LevelDefinition original = source.SingleOrDefault(l => l.LevelNumber == item.LevelNumber);
+                    LevelDefinition loaded = LevelPackCodec.ReadLevel(bytes, number); Owned.Add(loaded);
+                    LevelDefinition original = source.SingleOrDefault(l => l.LevelNumber == number);
                     bool same = original != null && JsonUtility.ToJson(loaded) == JsonUtility.ToJson(original);
-                    matches.Add(item.LevelNumber + ":jsonMatch=" + same);
+                    LevelStateBuildResult sourceState = original == null ? null : LevelStateBuilder.Build(original, 12345);
+                    LevelStateBuildResult packedState = LevelStateBuilder.Build(loaded, 12345);
+                    // 스키마와 저장 지문은 포맷 전환으로 다르다. 실행 값과 다음 난수까지 비교한다.
+                    bool logical = sourceState?.IsBuilt == true && packedState.IsBuilt &&
+                        Equals(Invoke(typeof(Elements.Editor.ElementPackVerification), "State", sourceState.State),
+                            Invoke(typeof(Elements.Editor.ElementPackVerification), "State", packedState.State));
+                    Check(logical, "기존 제작 레벨과 디스크 팩의 논리 상태 동일 " + number);
+                    matches.Add(number + ":jsonMatch=" + same + ":logicalMatch=" + logical);
                 }
-                Record("existing-pack-" + pack.FirstLevel, source.FirstOrDefault(), bytes, null, path,
+                Record("existing-pack-" + first, source.FirstOrDefault(), bytes, null, path,
                     "byteMatch=" + sameBytes + "; " + string.Join(";", matches) + "; address=" + address + "; dependencies=" + string.Join(",", dependencies));
-                Check(Hash(bytes) == Hash(File.ReadAllBytes(path)), "기존 팩 디스크 보존 " + pack.FirstLevel);
-                Check(pack.Levels.Length > 0, "기존 팩 디코드/실제 비교 기록 " + pack.FirstLevel);
+                Check(Hash(bytes) == Hash(File.ReadAllBytes(path)), "기존 팩 디스크 보존 " + first);
+                Check(numbers.Length > 0, "기존 팩 디코드/실제 비교 기록 " + first);
                 foreach (LevelDefinition original in source)
                 {
                     string assetPath = AssetDatabase.GetAssetPath(original);

@@ -46,7 +46,8 @@ namespace Levels.Editor
             {
                 string path = LevelPackBuild.FilePath(sourceLevel.LevelNumber);
                 if (!File.Exists(path)) throw new FileNotFoundException("생성 파일이 없습니다. MemoryPack 갱신을 누르세요.", path);
-                packedLevel = LevelPackCodec.ReadLevel(File.ReadAllBytes(path), sourceLevel.LevelNumber);
+                var content = Elements.ElementContentPackCodec.Decode(File.ReadAllBytes(Elements.Editor.ElementContentPackBuild.OutputPath));
+                packedLevel = LevelPackCodec.ReadLevel(File.ReadAllBytes(path), sourceLevel.LevelNumber, content);
                 return true;
             }
             catch (Exception error)
