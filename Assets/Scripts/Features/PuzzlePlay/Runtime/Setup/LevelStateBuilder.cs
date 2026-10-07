@@ -27,6 +27,11 @@ namespace Simulation
         private static string Fingerprint(LevelDefinition definition, ElementCatalog catalog)
         {
             if (definition == null) return null;
+            if (definition.HasTutorial)
+            {
+                using (SHA256 hash = SHA256.Create())
+                    return BitConverter.ToString(hash.ComputeHash(LevelPackCodec.EncodeWithTutorial(new[] { definition }, catalog ?? definition.CreateElementCatalog()))).Replace("-", "");
+            }
             if (definition.SchemaVersion == 5)
             {
                 using (SHA256 hash = SHA256.Create())
@@ -54,7 +59,7 @@ namespace Simulation
                     "ID 배치의 정의 카탈로그가 없습니다.", "elementCatalog") });
             using (ElementLevelLayout layout = new ElementLevelLayout(definition, catalog))
             {
-                System.Collections.Generic.List<LevelValidationIssue> issues = LevelDefinitionValidator.ValidateElements(definition, layout);
+                System.Collections.Generic.List<LevelValidationIssue> issues = LevelDefinitionValidator.ValidateElements(definition, layout, catalog);
                 if (issues.Count > 0) return new LevelStateBuildResult(null, issues.ToArray());
                 LevelRuntimeState state = BuildValidated(layout.Level, seed, Fingerprint(definition, catalog), layout.Bodies, 5).State;
                 state.ElementCatalog = catalog;

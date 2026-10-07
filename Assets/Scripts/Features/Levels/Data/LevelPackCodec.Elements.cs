@@ -20,8 +20,10 @@ namespace Levels
         }
 
         // 기존 1인자 Encode는 팩1의 명시적 쓰기 계약으로 보존한다.
-        public static byte[] Snapshot(LevelDefinition level) => level.SchemaVersion == LevelDefinition.LegacySchemaVersion && level.ElementCatalog == null
-            ? Encode(new[] { level }) : Encode(new[] { level }, level.CreateElementCatalog());
+        public static byte[] Snapshot(LevelDefinition level) => level.HasTutorial
+            ? EncodeWithTutorial(new[] { level }, level.CreateElementCatalog())
+            : level.SchemaVersion == LevelDefinition.LegacySchemaVersion && level.ElementCatalog == null
+                ? Encode(new[] { level }) : Encode(new[] { level }, level.CreateElementCatalog());
 
         public static LevelDefinition Copy(LevelDefinition source)
         {
@@ -43,6 +45,14 @@ namespace Levels
         public static byte[] Encode(IEnumerable<LevelDefinition> levels, ElementCatalog catalog)
         {
             if (levels == null) throw new ArgumentNullException(nameof(levels));
+            LevelDefinition[] source = levels.ToArray();
+            if (source.Any(level => level.HasTutorial)) throw new InvalidOperationException("튜토리얼 레벨은 팩3으로 저장해야 합니다.");
+            return EncodeElements(source, catalog, Array.Empty<string>());
+        }
+
+        private static byte[] EncodeElements(IEnumerable<LevelDefinition> levels, ElementCatalog catalog, IEnumerable<string> references)
+        {
+            if (levels == null) throw new ArgumentNullException(nameof(levels));
             if (catalog == null) throw new ArgumentNullException(nameof(catalog));
             LevelDefinition[] source = levels.OrderBy(level => level.LevelNumber).ToArray();
             if (source.Length == 0) throw new ArgumentException("빈 레벨 팩입니다.");
@@ -55,7 +65,7 @@ namespace Levels
             ElementLevelPack pack = new ElementLevelPack
             {
                 FirstLevel = FirstLevel(data[0].LevelNumber), Levels = data,
-                Definitions = DefinitionClosure(data, catalog, true).Select(PackedElementDefinition.FromDefinition).ToArray()
+                Definitions = DefinitionClosure(data, catalog, true, references).Select(PackedElementDefinition.FromDefinition).ToArray()
             };
             ValidateElements(pack);
             byte[] payload = MemoryPackSerializer.Serialize(pack), bytes = new byte[payload.Length + 8];
@@ -73,6 +83,7 @@ namespace Levels
 
         public static LevelWithCatalog ReadLevelWithCatalog(byte[] bytes, int number)
         {
+            if (IsTutorialPack(bytes)) return ReadTutorialLevel(bytes, number);
             if (!IsElementPack(bytes)) return new LevelWithCatalog(ReadLegacyLevel(bytes, number), LegacyElementDefinitions.DefaultCatalog);
             ElementLevelPack pack = DecodeElements(bytes);
             if (pack.FirstLevel != FirstLevel(number)) throw new InvalidOperationException("요청한 레벨 구간과 파일이 다릅니다.");
@@ -85,12 +96,13 @@ namespace Levels
         private static bool IsElementPack(byte[] bytes) => bytes != null && bytes.Length >= 4 &&
             Enumerable.Range(0, 4).All(index => bytes[index] == ElementMagic[index]);
 
-        private static ElementDefinition[] DefinitionClosure(IEnumerable<PackedElementLevel> levels, ElementCatalog catalog, bool includeBuiltins = false)
+        private static ElementDefinition[] DefinitionClosure(IEnumerable<PackedElementLevel> levels, ElementCatalog catalog, bool includeBuiltins = false, IEnumerable<string> references = null)
         {
             HashSet<ElementId> used = new HashSet<ElementId>(); Queue<ElementId> pending = new Queue<ElementId>();
             Dictionary<ElementId, ElementDefinition> resolved = new Dictionary<ElementId, ElementDefinition>();
             Dictionary<ElementId, ElementDefinition> builtins = new Dictionary<ElementId, ElementDefinition>();
             void Include(string id) { ElementId value = new ElementId(id); if (used.Add(value)) pending.Enqueue(value); }
+            if (references != null) foreach (string id in references) Include(id);
             // 매칭·연쇄·아이템은 이 생성 정의를 사용한다. 장애물 종류 전체는 포함하지 않는다.
             foreach (SupplyKind kind in new[] { SupplyKind.RandomNormal, SupplyKind.Rocket, SupplyKind.Bomb, SupplyKind.Drone, SupplyKind.Magnet })
             {

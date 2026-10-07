@@ -113,7 +113,7 @@ namespace Levels.Editor
                     }
                     else definitions.Add(definition.Id, definition);
                 }
-                return LevelPackCodec.Encode(group, new ElementCatalog(definitions.Values));
+                return LevelPackCodec.EncodeWithTutorial(group, new ElementCatalog(definitions.Values));
             });
         }
 

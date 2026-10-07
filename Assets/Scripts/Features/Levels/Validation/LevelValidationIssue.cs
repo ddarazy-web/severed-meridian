@@ -40,7 +40,8 @@ namespace Levels
         SupplyConflict,
         InvalidRecovery,
         InvalidMission,
-        InsufficientSupply
+        InsufficientSupply,
+        InvalidTutorial
     }
 
     public sealed class LevelValidationIssue

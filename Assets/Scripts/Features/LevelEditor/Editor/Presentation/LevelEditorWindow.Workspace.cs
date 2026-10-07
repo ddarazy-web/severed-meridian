@@ -38,6 +38,7 @@ namespace Levels.Editor
 
         public void CreateGUI()
         {
+            tutorialPanel?.Dispose(); tutorialPanel = null;
             // Unity의 코드 재컴파일 뒤에도 이 메서드가 다시 호출된다. 이전 패널의 예약 작업과
             // 바인딩을 먼저 해제한다. 직렬화된 레벨·탭 선택은 유지하지만 UI 객체는 재사용하지 않는다.
             recordManagement?.Dispose(); recordManagement = null;

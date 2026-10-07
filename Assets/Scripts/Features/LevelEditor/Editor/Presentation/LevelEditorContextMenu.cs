@@ -11,7 +11,7 @@ namespace Levels.Editor
     {
         private void BuildBoardContextMenu(ContextualMenuPopulateEvent evt)
         {
-            if (!LevelBoardEditing.CanEdit(level) || board.IsDragging) return;
+            if (!LevelBoardEditing.CanEdit(level) || board.IsDragging || board.TutorialTargetPicked != null) return;
             Vector2 point = board.WorldToLocal(evt.mousePosition);
             if (point.x < 0 || point.y < 0 || point.x >= (LevelBoardView.CellSize * BoardDefinition.DefaultColumns) || point.y >= (LevelBoardView.CellSize * BoardDefinition.DefaultRows)) return;
             BoardCoordinate coordinate = new BoardCoordinate((int)(point.y / LevelBoardView.CellSize), (int)(point.x / LevelBoardView.CellSize));

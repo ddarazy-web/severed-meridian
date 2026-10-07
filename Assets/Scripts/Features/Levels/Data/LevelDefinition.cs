@@ -34,6 +34,11 @@ namespace Levels
         [SerializeField] private ElementLevelSupplyDefinition elementSupply = new ElementLevelSupplyDefinition();
         // 팩에서 만든 메모리 레벨의 JSON 시험 사본용 값이다. 제작 에셋에는 자동으로 쓰지 않는다.
         [SerializeField, HideInInspector] private Elements.PackedElementDefinition[] embeddedDefinitions;
+        [SerializeField] private Tutorial.LevelTutorialDefinition tutorial = new Tutorial.LevelTutorialDefinition();
+
+        public Tutorial.LevelTutorialDefinition Tutorial => tutorial;
+        public bool HasTutorial => tutorial?.steps?.Count > 0;
+        internal void RestoreTutorial(Tutorial.LevelTutorialDefinition value) => tutorial = value ?? new Tutorial.LevelTutorialDefinition();
 
         public int SchemaVersion => schemaVersion;
         public int LevelNumber => levelNumber;
@@ -76,6 +81,7 @@ namespace Levels
 
         public PackedLevel ToPacked()
         {
+            if (HasTutorial) throw new System.InvalidOperationException("튜토리얼 레벨은 팩3으로 저장해야 합니다.");
             if (schemaVersion >= CurrentSchemaVersion) throw new System.InvalidOperationException("신형 ID 레벨은 구형 DTO로 저장할 수 없습니다. 팩2를 사용하세요.");
             return LegacyProjection();
         }

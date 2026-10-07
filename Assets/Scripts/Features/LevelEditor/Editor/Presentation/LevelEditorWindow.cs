@@ -28,6 +28,8 @@ namespace Levels.Editor
         private Elements.Editor.ElementCatalogViewModel elementCatalogModel;
         private Elements.Editor.ElementCatalogView elementCatalogView;
         private LevelDefinition catalogOwner;
+        private Tutorial.Editor.LevelTutorialEditorPanel tutorialPanel;
+        [SerializeField] private int selectedTutorialStep;
 
         public LevelDefinition CurrentLevel => level;
 
@@ -54,6 +56,7 @@ namespace Levels.Editor
 
         private void OnDisable()
         {
+            tutorialPanel?.Dispose(); tutorialPanel = null;
             elementCatalogView?.Dispose(); elementCatalogView = null;
             elementCatalogModel?.Dispose(); elementCatalogModel = null; catalogOwner = null;
             recordManagement?.Dispose(); recordManagement = null;
@@ -229,6 +232,7 @@ namespace Levels.Editor
         public void SetLevel(LevelDefinition target)
         {
             if (level == target && data != null) return;
+            tutorialPanel?.Dispose(); tutorialPanel = null; selectedTutorialStep = 0;
             board?.CancelStroke();
             elementCatalogView?.Dispose(); elementCatalogView = null;
             elementCatalogModel?.Dispose(); elementCatalogModel = null; catalogOwner = null;
@@ -301,6 +305,7 @@ namespace Levels.Editor
 
         private void Refresh()
         {
+            tutorialPanel?.Dispose(); tutorialPanel = null;
             // 이 창은 실제 레벨 에셋을 SerializedObject로 편집한다. 기존 바인딩부터 해제하고
             // 새 속성 UI를 만들어야, 사라진 필드가 과거 선택 대상에 값을 기록하지 않는다.
             // 원본 변경·Undo·도구 변경이 모두 이 경로로 들어오므로 화면과 보드 상태를 함께 갱신한다.
@@ -355,6 +360,11 @@ namespace Levels.Editor
                 properties.Add(field);
             }
             BuildMissionSettings();
+            if (editable)
+            {
+                tutorialPanel = new Tutorial.Editor.LevelTutorialEditorPanel(level, board, selectedTutorialStep, index => selectedTutorialStep = index);
+                properties.Add(tutorialPanel);
+            }
             selectedProperties = new VisualElement { name = "selected-cell-properties" };
             selectedProperties.tooltip = "우클릭: 설정 및 공급 목록 복사·붙여넣기";
             selectedProperties.AddManipulator(new ContextualMenuManipulator(BuildSelectionContextMenu));

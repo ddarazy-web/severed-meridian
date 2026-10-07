@@ -73,6 +73,7 @@ namespace Levels.Editor
                 cells[i] = cell;
                 Add(cell);
             }
+            RegisterCallback<PointerDownEvent>(OnTutorialPointerDown, TrickleDown.TrickleDown);
             RegisterCallback<PointerDownEvent>(OnPointerDown);
             artworkRoot.style.position = annotations.style.position = Position.Absolute;
             artworkRoot.style.left = artworkRoot.style.top = annotations.style.left = annotations.style.top = 0;
@@ -155,6 +156,10 @@ namespace Levels.Editor
             Vector2 local = this.WorldToLocal(evt.position);
             if (!TryCoordinate(local, out BoardCoordinate coordinate))
                 return;
+            if (TutorialTargetPicked != null)
+            {
+                TutorialTargetPicked.Invoke(coordinate); evt.StopImmediatePropagation(); return;
+            }
             if (Brush == LevelBrush.Move && JsonUtility.ToJson(level) != moveSource) { CancelStroke(); return; }
             Focus();
             if (Brush == LevelBrush.SourceSelect)

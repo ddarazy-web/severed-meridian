@@ -6,7 +6,7 @@ namespace Levels
 {
     public static class LevelDefinitionValidator
     {
-        internal static List<LevelValidationIssue> ValidateElements(LevelDefinition source, Elements.ElementLevelLayout layout)
+        internal static List<LevelValidationIssue> ValidateElements(LevelDefinition source, Elements.ElementLevelLayout layout, Elements.ElementCatalog catalog = null)
         {
             List<LevelValidationIssue> issues = new List<LevelValidationIssue>(layout.Issues);
             if (source.LevelNumber <= 0) issues.Add(new LevelValidationIssue(LevelValidationCode.InvalidLevelNumber, "레벨 번호는 양수여야 합니다.", "levelNumber"));
@@ -21,6 +21,7 @@ namespace Levels
                     issue.PropertyPath.StartsWith("supply", StringComparison.Ordinal) ? "elementSupply" + issue.PropertyPath.Substring(6) : issue.PropertyPath,
                     issue.Coordinate));
             LevelMissionRules.Validate(layout.Level, issues, layout.MissionSupply);
+            issues.AddRange(Tutorial.LevelTutorialValidator.Validate(source, catalog));
             return issues;
         }
         public static List<LevelValidationIssue> Validate(LevelDefinition level)
@@ -63,6 +64,7 @@ namespace Levels
             LevelConnectionRules.Validate(level, issues);
             LevelSupplyRules.Validate(level, issues);
             LevelMissionRules.Validate(level, issues);
+            issues.AddRange(Tutorial.LevelTutorialValidator.Validate(level));
             return issues;
         }
 
