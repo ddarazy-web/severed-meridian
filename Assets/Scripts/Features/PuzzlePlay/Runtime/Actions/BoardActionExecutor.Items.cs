@@ -36,12 +36,20 @@ namespace Simulation
     {
         private readonly List<ItemUseResult> itemUses = new List<ItemUseResult>();
         public ReadOnlyCollection<ItemUseResult> ItemUses => itemUses.AsReadOnly();
-        public bool CanUseItems => Outcome == null && Phase == BoardActionPhase.Ready && State.MovesRemaining > 0;
+        public bool CanUseItems => CanUseItem(false);
+        private bool CanUseItem(bool approvedFree) => Outcome == null && Phase == BoardActionPhase.Ready &&
+            (State.MovesRemaining > 0 || approvedFree && endingDeferred);
 
         // 선택 화면과 실행이 같은 대상 조건을 사용한다. 조회는 턴·난수를 변경하지 않는다.
         public bool CanSelectItemTarget(BoardItem item, BoardCoordinate coordinate)
+            => CanSelectItemTarget(item, coordinate, false);
+
+        internal bool CanSelectApprovedItemTarget(BoardItem item, BoardCoordinate coordinate)
+            => CanSelectItemTarget(item, coordinate, true);
+
+        private bool CanSelectItemTarget(BoardItem item, BoardCoordinate coordinate, bool approvedFree)
         {
-            if (!CanUseItems || !new BoardQueryView(State).Contains(coordinate)) return false;
+            if (!CanUseItem(approvedFree) || !new BoardQueryView(State).Contains(coordinate)) return false;
             RuntimeCell cell = State.CellAt(coordinate);
             if (!cell.IsActive) return false;
             if (item == BoardItem.Swap) return ActionQuery.Movable(State, cell);
@@ -56,14 +64,22 @@ namespace Simulation
             new BoardEdge(first, second).IsAdjacent && !new BoardQueryView(State).Wall(first, second);
 
         public ItemUseResult UseItem(BoardItem item, BoardCoordinate? first = null, BoardCoordinate? second = null)
+            => ExecuteItem(item, first, second, false);
+
+        // 게임 연결부가 지정 무료 체험을 승인한 경우에만 사용한다. 일반 아이템의 0회 제한은 유지한다.
+        internal ItemUseResult UseApprovedFreeItem(BoardItem item, BoardCoordinate? first = null, BoardCoordinate? second = null)
+            => ExecuteItem(item, first, second, true);
+
+        private ItemUseResult ExecuteItem(BoardItem item, BoardCoordinate? first, BoardCoordinate? second, bool approvedFree)
         {
             int before = State.Random.DrawCount;
             ItemUseResult Reject(string message, ShuffleResult shuffle = null) =>
                 new ItemUseResult(item, false, message, first, second, Turn, State.MovesRemaining, before, before, shuffle: shuffle);
-            if (!CanUseItems) return Reject("안정된 진행 중 보드에서만 아이템을 사용할 수 있습니다.");
+            if (!CanUseItem(approvedFree)) return Reject("안정된 진행 중 보드에서만 아이템을 사용할 수 있습니다.");
             if (item != BoardItem.Hammer && item != BoardItem.Swap && item != BoardItem.Shuffle) return Reject("지원하지 않는 아이템입니다.");
-            if (item != BoardItem.Shuffle && (!first.HasValue || !CanSelectItemTarget(item, first.Value))) return Reject("사용 가능한 대상 칸을 선택하세요.");
-            if (item == BoardItem.Swap && (!second.HasValue || !CanSwapItemTargets(first.Value, second.Value))) return Reject("벽으로 막히지 않은 인접 블록을 선택하세요.");
+            if (item != BoardItem.Shuffle && (!first.HasValue || !CanSelectItemTarget(item, first.Value, approvedFree))) return Reject("사용 가능한 대상 칸을 선택하세요.");
+            if (item == BoardItem.Swap && (!second.HasValue || !CanSelectItemTarget(item, second.Value, approvedFree) ||
+                !new BoardEdge(first.Value, second.Value).IsAdjacent || new BoardQueryView(State).Wall(first.Value, second.Value))) return Reject("벽으로 막히지 않은 인접 블록을 선택하세요.");
 
             LevelRuntimeState work = new LevelRuntimeState(State);
             TurnEffectContext context = TurnEffects?.NextTurn(Turn + 1) ?? new TurnEffectContext(Turn + 1, Array.Empty<MatchedBlockChange>());
@@ -87,8 +103,10 @@ namespace Simulation
                 HashSet<string> previous = new HashSet<string>(MatchQuery.Find(State).Select(pattern => pattern.Key));
                 RuntimeCell left = work.CellAt(first.Value), right = work.CellAt(second.Value);
                 Elements.ElementDefinition leftElement = left.ContentElement, rightElement = right.ContentElement;
+                long leftOccurrence = left.ContentOccurrence, rightOccurrence = right.ContentOccurrence;
                 (left.Content, right.Content) = (right.Content, left.Content);
                 left.ContentElement = rightElement; right.ContentElement = leftElement;
+                left.ContentOccurrence = rightOccurrence; right.ContentOccurrence = leftOccurrence;
                 (left.Color, right.Color) = (right.Color, left.Color);
                 (left.RocketDirection, right.RocketDirection) = (right.RocketDirection, left.RocketDirection);
                 (left.ObstacleIndex, right.ObstacleIndex) = (right.ObstacleIndex, left.ObstacleIndex);
@@ -103,6 +121,7 @@ namespace Simulation
             }
             ItemUseResult result = new ItemUseResult(item, true, "아이템 사용 완료 · 후속 처리 대기", first, second, Turn + 1,
                 work.MovesRemaining, before, work.Random.DrawCount, changes, effects, shuffled, context.PowerTrace);
+            hasDeferredEnding = false;
             State = work; TurnEffects = context; Turn++; itemUses.Add(result);
             Phase = item == BoardItem.Shuffle ? BoardActionPhase.WaitingForAutomaticMatch : BoardActionPhase.WaitingForFall;
             CascadeRounds = 0; LastApplied = null; LastSettlement = null; LastCascadeStep = null;

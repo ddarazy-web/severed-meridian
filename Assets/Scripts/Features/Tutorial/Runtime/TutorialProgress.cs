@@ -17,7 +17,7 @@ namespace Tutorial
         private TutorialActionTicket pending;
         private TutorialInput approvedInput;
         private long attempt;
-        private bool hasPending, success, completionReceived, presented, freeUsed;
+        private bool hasPending, success, completionReceived, presented, freeUsed, resultsComplete;
         public TutorialProgressState State { get; private set; }
         public int StepIndex { get; private set; }
         public bool IsPaused { get; private set; }
@@ -55,14 +55,20 @@ namespace Tutorial
             EnterStep();
         }
 
+        /// <summary>선택 미리보기에서 승인 권한을 소비하지 않고 실제 승인과 같은 규칙을 조회한다.</summary>
+        /// <param name="input">조회할 입력 의도.</param><returns>현재 입력 허용 여부.</returns>
+        public bool CanApprove(TutorialInput input)
+        {
+            if (IsPaused || hasPending || handler == null || State != TutorialProgressState.AwaitAction && State != TutorialProgressState.AwaitDescription) return false;
+            return !freeUsed && handler.Allows(steps[StepIndex], input);
+        }
+
         /// <summary>허용된 입력만 예약한다. 설명 다음은 즉시 진행하고 조작은 실행 완료를 기다린다.</summary>
         /// <param name="input">실행 전 입력 의도.</param><param name="ticket">관련 결과에 부여할 식별값.</param><returns>입력 허용 여부.</returns>
         public bool TryApprove(TutorialInput input, out TutorialActionTicket ticket)
         {
             ticket = default;
-            if (IsPaused || hasPending || handler == null || State != TutorialProgressState.AwaitAction && State != TutorialProgressState.AwaitDescription) return false;
-            TutorialStepDefinition step = steps[StepIndex];
-            if (freeUsed || !handler.Allows(step, input)) return false;
+            if (!CanApprove(input)) return false;
             ticket = new TutorialActionTicket(session, StepIndex, ++attempt);
             if (handler.IsDescription) { StepIndex++; EnterStep(); return true; }
             pending = ticket; approvedInput = input; hasPending = true;
@@ -77,7 +83,7 @@ namespace Tutorial
             if (!Accepts(ticket) || completionReceived) return;
             if (!succeeded)
             {
-                hasPending = false; presented = false; success = false;
+                hasPending = false; presented = false; success = false; resultsComplete = false;
                 foreach (HashSet<string> set in occurrences) set.Clear();
                 Array.Clear(counts, 0, counts.Length);
                 State = TutorialProgressState.AwaitAction; Message = "행동 실패: 같은 단계에서 재시도"; return;
@@ -92,7 +98,7 @@ namespace Tutorial
         /// <param name="ticket">관련 시도.</param><param name="records">실제 기록에서 변환한 결과.</param>
         public void ReportResults(TutorialActionTicket ticket, IEnumerable<TutorialResultRecord> records)
         {
-            if (!Accepts(ticket) || records == null) return;
+            if (!Accepts(ticket) || resultsComplete || records == null) return;
             TutorialStepDefinition step = steps[StepIndex];
             foreach (TutorialResultRecord record in records)
                 if (record != null)
@@ -100,6 +106,11 @@ namespace Tutorial
                         if (evaluators[i].Matches(step.results[i], record) && occurrences[i].Add(record.OccurrenceId)) counts[i]++;
             TryAdvance();
         }
+        /// <summary>실제 논리 연쇄가 끝났음을 보고한다. 결과가 부족하면 무기한 기다리지 않고 진단한다.</summary>
+        /// <param name="ticket">논리 처리가 끝난 시도.</param>
+        public void ReportResultsComplete(TutorialActionTicket ticket)
+        { if (Accepts(ticket)) { resultsComplete = true; TryAdvance(); } }
+
         public void ReportPresentationComplete(TutorialActionTicket ticket)
         { if (!Accepts(ticket)) return; presented = true; TryAdvance(); }
         public void SetPaused(bool paused)
@@ -123,14 +134,19 @@ namespace Tutorial
             if (!hasPending) return;
             if (!success) { Message = "행동 결과 대기"; return; }
             for (int i = 0; i < counts.Length; i++)
-                if (counts[i] < steps[StepIndex].results[i].count) { Message = $"결과 조건 {i + 1} 대기"; return; }
+                if (counts[i] < steps[StepIndex].results[i].count)
+                {
+                    if (resultsComplete) Fail($"tutorial.steps.Array.data[{StepIndex}].results.Array.data[{i}]: 실제 결과 부족 {counts[i]}/{steps[StepIndex].results[i].count}");
+                    else Message = $"결과 조건 {i + 1} 대기";
+                    return;
+                }
             if (!presented) { Message = "관련 보드 연출 대기"; return; }
             if (IsPaused) { Message = "일시정지: 진행 보류"; return; }
             StepIndex++; EnterStep();
         }
         private void EnterStep()
         {
-            hasPending = false; success = false; completionReceived = false; presented = false; freeUsed = false;
+            hasPending = false; success = false; completionReceived = false; presented = false; freeUsed = false; resultsComplete = false;
             if (StepIndex >= steps.Count)
             {
                 handler = null; evaluators = Array.Empty<ITutorialResultEvaluator>(); occurrences = Array.Empty<HashSet<string>>(); counts = Array.Empty<int>();

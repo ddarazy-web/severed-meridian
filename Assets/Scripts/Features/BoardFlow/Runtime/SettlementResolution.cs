@@ -133,6 +133,7 @@ namespace Simulation
                         context.RecordArrival(move.Source, move.Target, batch, source.Content == RuntimeContent.Normal);
                         target.Content = source.Content; target.Color = source.Color; target.RocketDirection = source.RocketDirection;
                         target.ContentElement = source.ContentElement;
+                        target.ContentOccurrence = source.ContentOccurrence;
                         target.ObstacleIndex = source.ObstacleIndex;
                         source.Content = RuntimeContent.Empty; source.Color = null; source.RocketDirection = null;
                         source.ObstacleIndex = null;
@@ -238,6 +239,8 @@ namespace Simulation
                 // 자석은 기존 개별 공급만 지원하며 랜덤 후보에는 포함하지 않는다.
                 Elements.ElementDefinition selected = fixedItem ? source.ItemDefinitions?[source.ItemIndex] : source.RandomDefinition;
                 Elements.ElementSupplyBehaviorRegistry.Apply(selected ?? Elements.LegacyElementDefinitions.GetSupply(item.Kind), work, cell, item);
+                context.RecordElement(ElementExecutionKind.Generated, cell.Content == RuntimeContent.Obstacle ? work.Obstacles[cell.ObstacleIndex.Value].Element : cell.ContentElement,
+                    cell.Content == RuntimeContent.Obstacle ? work.Obstacles[cell.ObstacleIndex.Value].Occurrence : cell.ContentOccurrence, cell.Coordinate);
                 context.RecordArrival(source.Coordinate, source.Coordinate, batch, cell.Content == RuntimeContent.Normal);
                 if (fixedItem && ++source.ItemConsumed == item.Count) { source.ItemIndex++; source.ItemConsumed = 0; }
                 records.Add(new SettlementRecord(batch, MovementKind.Supply, source.Coordinate, cell, false, beforeIndex, beforeConsumed, source.ItemIndex, source.ItemConsumed));

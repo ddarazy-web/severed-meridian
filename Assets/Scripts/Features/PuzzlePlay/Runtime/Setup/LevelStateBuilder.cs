@@ -121,6 +121,8 @@ namespace Simulation
                     _ => throw new InvalidOperationException("검증되지 않은 초기 블록 종류입니다.")
                 };
                 cell.Color = block.FixedColor;
+                cell.ContentElement = block.Kind == InitialBlockKind.FixedNormal ? Elements.LegacyElementDefinitions.GetSupply(SupplyKind.FixedNormal) :
+                    Elements.LegacyElementDefinitions.GetContent(cell.Content, state.ElementCatalog);
                 if (block.Kind == InitialBlockKind.Rocket) cell.RocketDirection = block.RocketDirection;
             }
             // 후보의 직접 구성이다. 플레이 중 낙하/공급이나 고정 공급 목록 소비에 사용하지 않는다.

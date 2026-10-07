@@ -16,6 +16,9 @@ namespace Simulation
         private readonly HashSet<int> damagedObstacles = new HashSet<int>();
         private readonly HashSet<int> chargedGenerators = new HashSet<int>();
         private readonly List<GeneratorRecord> generators = new List<GeneratorRecord>();
+        internal List<ElementExecutionRecord> ElementRecords { get; } = new List<ElementExecutionRecord>();
+        internal void RecordElement(ElementExecutionKind kind, Elements.ElementDefinition definition, long occurrence, BoardCoordinate coordinate)
+            => ElementRecords.Add(new ElementExecutionRecord(kind, definition.Id.Value, occurrence, coordinate));
         public System.Collections.ObjectModel.ReadOnlyCollection<GeneratorRecord> Generators => generators.AsReadOnly();
         public bool HasCharged(int index) => chargedGenerators.Contains(index);
         internal void RegisterCharge(int index) => chargedGenerators.Add(index);
@@ -92,6 +95,7 @@ namespace Simulation
         {
             TurnEffectContext copy = new TurnEffectContext(Turn, System.Array.Empty<MatchedBlockChange>());
             copy.ConsumesMove = ConsumesMove;
+            copy.ElementRecords.AddRange(ElementRecords);
             copy.protectedPowers.UnionWith(protectedPowers); copy.damagedObstacles.UnionWith(damagedObstacles);
             copy.chargedGenerators.UnionWith(chargedGenerators); copy.generators.AddRange(generators);
             copy.firedPowers.UnionWith(firedPowers); copy.SettlementCount = SettlementCount;

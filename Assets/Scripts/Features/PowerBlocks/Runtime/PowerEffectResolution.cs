@@ -179,6 +179,8 @@ namespace Simulation
                 int? originalBody = cell.ObstacleIndex;
                 int generatorRecordStart = context.Generators.Count;
                 RuntimeContent original = cell.Content;
+                Elements.ElementDefinition originalDefinition = cell.ContentElement ?? Elements.LegacyElementDefinitions.GetContent(original, work.ElementCatalog);
+                long originalOccurrence = cell.ContentOccurrence;
                 RabbitColor? originalColor = cell.Color;
                 int coverBefore = cell.CoverDurability, dustBefore = cell.DustDurability;
                 int before = cell.ObstacleIndex.HasValue ? work.Obstacles[cell.ObstacleIndex.Value].Durability : 0, after = before;
@@ -192,6 +194,7 @@ namespace Simulation
                 }
                 if (reaction.Response == DamageResponse.Activate)
                 {
+                    context.RecordElement(ElementExecutionKind.Activated, originalDefinition, originalOccurrence, hit.target);
                     IEnumerable<BoardCoordinate> range = Range(work, hit.target);
                     if (original == RuntimeContent.Drone)
                         pending.Push((hit.target, hit.target, DamageCause.Power, true, null, PowerArea.Point, 0, false));
@@ -223,7 +226,11 @@ namespace Simulation
                 }
                 if (reaction.Response == DamageResponse.Remove || reaction.Response == DamageResponse.Activate ||
                     (reaction.Response == DamageResponse.Damage && after == 0))
-                { cell.Content = RuntimeContent.Empty; cell.Color = null; cell.RocketDirection = null; cell.ObstacleIndex = null; }
+                {
+                    if (reaction.Response == DamageResponse.Remove || reaction.Response == DamageResponse.Activate)
+                        context.RecordElement(ElementExecutionKind.Removed, originalDefinition, originalOccurrence, hit.target);
+                    cell.Content = RuntimeContent.Empty; cell.Color = null; cell.RocketDirection = null; cell.ObstacleIndex = null;
+                }
                 if (reaction.Response == DamageResponse.Remove || reaction.Response == DamageResponse.Activate || reaction.Response == DamageResponse.Damage || reaction.Response == DamageResponse.CoverDamage)
                     targets.Invalidate();
                 HashSet<int> removedBodies = new HashSet<int>();
@@ -235,6 +242,15 @@ namespace Simulation
                 }
                 records.Add(new EffectRecord(hit.source, hit.target, hit.cause, reaction, original, before, after, originalColor, coverBefore, cell.CoverDurability, dustBefore, cell.DustDurability)
                 { HitGroup = hit.hit, ChargeBefore = chargeBefore, ChargeAfter = chargeAfter, RemovedObstacleIndices = removedBodies.OrderBy(index => index).ToList().AsReadOnly() });
+                foreach (int index in removedBodies)
+                {
+                    RuntimeObstacle body = work.Obstacles[index];
+                    int size = body.Element.Placement?.Size ?? body.Element.ChargePlacement?.Size ?? 1;
+                    // 모든 점유 칸은 같은 본체 식별을 가진다. 위치 조건으로는 어느 칸이든 조회할 수 있다.
+                    for (int row = 0; row < size; row++) for (int column = 0; column < size; column++)
+                        context.RecordElement(ElementExecutionKind.Removed, body.Element, body.Occurrence,
+                            new BoardCoordinate(body.Definition.Coordinate.Row + row, body.Definition.Coordinate.Column + column));
+                }
                 // 착탄 전에도 실제 효과마다 예약을 검증한다. 재선택은 동일 정책·예약·규칙 난수를 사용한다.
                 foreach (var flying in landings)
                 {

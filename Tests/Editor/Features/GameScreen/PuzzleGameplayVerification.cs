@@ -53,6 +53,9 @@ namespace GameScreen.Editor
                 camera.orthographic = true; camera.orthographicSize = (PuzzleWorldBoard.HalfHeight + 0.7f);
                 PuzzleGameSession loaded = NewSession();
                 await loaded.InitializeAsync(1, 12345, CancellationToken.None);
+                // 초기화 완료와 기존 시작 표시 완료는 서로 다른 경계다.
+                using (CancellationTokenSource startTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+                    await UniTask.WaitUntil(() => !loaded.IsStartingFeedback, cancellationToken: startTimeout.Token);
                 Check(loaded.CanAcceptInput && loaded.State.LevelNumber == 1, "MemoryPack 시작 탐색 및 콜드 이미지 로드");
                 Check(board.GetComponentsInChildren<SpriteRenderer>().Any(r => r.sprite != null && r.sprite.name.StartsWith("rabbit-")), "실제 일반 블록 스프라이트");
                 UnityEngine.Object.Destroy(loaded.gameObject); await UniTask.Yield();
@@ -70,8 +73,10 @@ namespace GameScreen.Editor
                 baseline.Swap(first, second);
                 Check(Snapshot(session.State) == Snapshot(baseline.State), "실행기 행동 직후 상태 동일");
                 Present(session);
+                using (CancellationTokenSource artworkTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+                    await UniTask.WaitUntil(() => board.GetComponentsInChildren<SpriteRenderer>().Any(renderer => renderer.sprite != null && renderer.sprite.name.StartsWith("cleaning-rocket")), cancellationToken: artworkTimeout.Token);
                 Check(board.GetComponentsInChildren<SpriteRenderer>().Any(r => r.sprite != null && r.sprite.name.StartsWith("cleaning-rocket")), "ColdPowerSpawnHasArtwork");
-                Finish(session, baseline);
+                await Finish(session, baseline);
                 Check(JsonUtility.ToJson(rocket) == original, "원본 레벨 보존");
                 UnityEngine.Object.Destroy(session.gameObject); UnityEngine.Object.Destroy(rocket); await UniTask.Yield();
                 LevelDefinition win = (LevelDefinition)Invoke(typeof(RecoveryVerification), "PlayFixture");
@@ -80,11 +85,13 @@ namespace GameScreen.Editor
                 Check(session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)), "파워 제자리 발동");
                 baseline.Activate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0));
                 bool sawWinningCascade = false;
-                for (int step = 0; step < 1000 && baseline.HasPendingCascade; step++)
+                for (int step = 0; step < 1000 && baseline.HasPendingCascade; step++) baseline.AdvanceCascade();
+                float endingDeadline = Time.realtimeSinceStartup + 30f;
+                while (session.Phase != BoardActionPhase.Stopped && Time.realtimeSinceStartup < endingDeadline)
                 {
-                    Advance(session); baseline.AdvanceCascade();
                     if (session.Outcome?.Kind == BoardOutcomeKind.Won && session.Phase != BoardActionPhase.Stopped)
                     { sawWinningCascade = true; Check(!session.CanAcceptInput, "라스트팡 입력 차단"); }
+                    await UniTask.Yield();
                 }
                 Check(sawWinningCascade && session.Outcome?.Kind == BoardOutcomeKind.Won && session.Phase == BoardActionPhase.Stopped, "WonFinishesLastPang");
                 Check(Snapshot(session.State) == Snapshot(baseline.State), "회수 미션·라스트팡 최종 상태 동일");
@@ -94,7 +101,7 @@ namespace GameScreen.Editor
                 JsonUtility.FromJsonOverwrite("{\"moveCount\":1,\"missions\":[{\"kind\":0,\"color\":0,\"count\":100}]}", lose);
                 session = await FromState(LevelStateBuilder.Build(lose, 12345).State);
                 baseline = new BoardActionExecutor(session.State);
-                session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)); baseline.Activate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)); Finish(session, baseline);
+                session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)); baseline.Activate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)); await Finish(session, baseline);
                 Check(session.Outcome?.Kind == BoardOutcomeKind.MovesExhausted && !session.CanAcceptInput, "이동 소진 및 종료 입력 차단");
                 UnityEngine.Object.Destroy(session.gameObject); UnityEngine.Object.Destroy(lose); await UniTask.Yield();
                 PuzzleGameSession pending = NewSession();
@@ -136,7 +143,7 @@ namespace GameScreen.Editor
                 Check(session.TryActivate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0)), "장애물 피해용 로켓 발동");
                 baseline.Activate(new BoardCoordinate(BoardDefinition.DefaultRows - 1, 0));
                 Check(session.State.Obstacles[0].Durability < 3 && Snapshot(session.State) == Snapshot(baseline.State), "장애물 내구도와 미션 변화 일치");
-                Finish(session, baseline);
+                await Finish(session, baseline);
                 UnityEngine.Object.Destroy(session.gameObject); UnityEngine.Object.Destroy(damage); await UniTask.Yield();
                 foreach (int count in new[] { 2, 9 })
                 {
@@ -171,12 +178,15 @@ namespace GameScreen.Editor
             PuzzleGameSession session = NewSession(); Set(session, "started", true);
             PuzzleArtwork art = new PuzzleArtwork(); await art.PrepareAsync(state, CancellationToken.None);
             Set(session, "artwork", art); Set(session, "executor", new BoardActionExecutor(state)); Set(session, "ready", true);
+            typeof(PuzzleGameSession).GetMethod("InitializeProgress", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(session, null);
             board.Draw(session.State, art); return session;
         }
-        private static void Finish(PuzzleGameSession session, BoardActionExecutor baseline)
+        private static async UniTask Finish(PuzzleGameSession session, BoardActionExecutor baseline)
         {
-            Present(session);
-            for (int i = 0; i < 1000 && baseline.HasPendingCascade; i++) { Advance(session); baseline.AdvanceCascade(); }
+            for (int i = 0; i < 1000 && baseline.HasPendingCascade; i++) baseline.AdvanceCascade();
+            // 실제 로드·표시·Update 연쇄를 기다린다. 논리 호출만 반복하면 비동기 연출을 건너뛰게 된다.
+            using (CancellationTokenSource timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+                await UniTask.WaitUntil(() => !session.IsPresenting && (session.Phase == BoardActionPhase.Ready || session.Phase == BoardActionPhase.Stopped), cancellationToken: timeout.Token);
             Check(!baseline.HasPendingCascade && session.Phase == baseline.Phase && Snapshot(session.State) == Snapshot(baseline.State), "연쇄 종료 및 실행기 상태 일치");
         }
         private static void Advance(PuzzleGameSession session) => typeof(PuzzleGameSession).GetMethod("Advance", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(session, null);

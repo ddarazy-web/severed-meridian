@@ -1,6 +1,6 @@
 # 레벨 튜토리얼 — 통합 개발 가이드라인
 
-상태: 1·2단계 완료, 3단계 준비. 2026-10-07 확장 구조 구현·검증 반영.
+상태: 1~3단계 완료, 4단계 준비. 2026-10-07 실제 게임 연결·재생·수명 검증 반영.
 
 [확정 기획](../../../Contents/MoonRabbitJunkyard/13_레벨튜토리얼.md) · [확장 구조 결정](../../../Decisions/MoonRabbitJunkyard/2026-10-07-tutorial-extension.md) · [1단계 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-01-progress.md).
 
@@ -90,4 +90,6 @@ Unity6000.3.10f1과 기존 패키지/asmdef를 유지한다. Tests/Editor와 Too
 
 [2단계 계획](stage-02-runtime-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-02-runtime-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-02-command.md).
 
-[2단계 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-02-progress.md) · [3단계 계획](stage-03-game-integration-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-03-game-integration-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-03-command.md). 3단계 구현은 미착수다.
+[2단계 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-02-progress.md) · [3단계 계획](stage-03-game-integration-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-03-game-integration-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-03-command.md) · [3단계 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-03-progress.md).
+
+[4단계 계획](stage-04-guidance-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-04-guidance-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-04-command.md). 4단계 소스는 미착수다. 현재 1레벨 기본 매칭만 대표 적용하고, 없는 2~5/9 출시 레벨의 제작은 별도로 남긴다.

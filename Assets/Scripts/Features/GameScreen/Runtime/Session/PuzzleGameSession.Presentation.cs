@@ -30,13 +30,14 @@ namespace GameScreen
 
         public bool TrySwap(BoardCoordinate first, BoardCoordinate second)
         {
-            if (!CanAcceptInput) return false;
+            if (!CanAcceptInput || !TryBeginTutorial(Tutorial.TutorialInput.Swap(first, second))) return false;
             ActionCandidate candidate = ActionQuery.Swap(State, first, second);
             CapturePresentation();
             SpriteRenderer a = board.OccupantAt(first), b = board.OccupantAt(second);
             Vector3 direction = PuzzleWorldBoard.CellPosition(second) - PuzzleWorldBoard.CellPosition(first);
             Vector3 worldDelta = board.transform.TransformVector(direction);
             BoardActionResult result = executor.Swap(first, second);
+            tutorial?.ReportAction(result.IsApplied);
             ObserveMoves();
             pendingSwap = result;
             Message = result.Message;

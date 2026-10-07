@@ -17,7 +17,7 @@ namespace GameScreen
         public bool IsRestarting { get; private set; }
         public bool HasScreenLayout { get; set; }
         public Camera BoardCamera => boardCamera;
-        public bool CanUseItems => CanAcceptInput && executor.CanUseItems;
+        public bool CanUseItems => CanAcceptInput && (TutorialActive ? tutorial.Progress.Snapshot.FreeItemAvailable : executor.CanUseItems);
         public bool HasFailed => failed;
         public bool IsReady => ready;
         public Sprite MissionSprite(int index) => ready && !failed && artwork != null
@@ -39,18 +39,20 @@ namespace GameScreen
             bool paused = externalPaused || popupPaused;
             if (IsPaused == paused) return;
             IsPaused = paused; audioPlayback?.SetPaused(paused);
+            tutorial?.Progress.SetPaused(paused);
             if (!paused) PlayResultFeedback();
             Changed?.Invoke();
         }
 
         public bool CanSelectItemTarget(BoardItem item, BoardCoordinate at)
-            => CanUseItems && executor.CanSelectItemTarget(item, at);
+            => CanUseItems && (TutorialActive ? tutorial.CanSelectItemTarget(item, at) : executor.CanSelectItemTarget(item, at));
 
         public bool TryUseItem(BoardItem item, BoardCoordinate? first = null, BoardCoordinate? second = null)
         {
-            if (!CanUseItems) return false;
+            if (!CanUseItems || !TryBeginTutorial(Tutorial.TutorialInput.UseItem(item, first, second))) return false;
             CapturePresentation();
-            ItemUseResult result = executor.UseItem(item, first, second);
+            ItemUseResult result = TutorialActive ? executor.UseApprovedFreeItem(item, first, second) : executor.UseItem(item, first, second);
+            tutorial?.ReportAction(result.IsApplied);
             ObserveMoves();
             Message = result.Message;
             if (result.IsApplied && item != BoardItem.Shuffle)
@@ -70,13 +72,15 @@ namespace GameScreen
             string previousMessage = Message;
             LevelDefinition definition = null;
             PuzzleArtwork candidateArtwork = null;
+            Tutorial.TutorialBoardAdapter candidateTutorial = null;
             using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(token, lifetime.Token);
             try
             {
                 Message = "다시 시작하는 중"; Changed?.Invoke();
                 linked.Token.ThrowIfCancellationRequested();
                 definition = LevelPackCodec.ReadLevel(initialBytes, levelNumber);
-                StartingBoardSearch search = new StartingBoardSearch(definition, seed);
+                CheckTutorialReplay(definition);
+                StartingBoardSearch search = new StartingBoardSearch(definition, definition.HasTutorial ? definition.Tutorial.seed : seed);
                 while (!search.IsDone)
                 {
                     linked.Token.ThrowIfCancellationRequested();
@@ -85,7 +89,8 @@ namespace GameScreen
                     await UniTask.Yield(PlayerLoopTiming.Update, linked.Token);
                 }
                 if (search.Status != StartingBoardStatus.Success) throw new InvalidOperationException(search.Message);
-                BoardActionExecutor candidateExecutor = new BoardActionExecutor(search.State);
+                candidateTutorial = definition.HasTutorial ? Tutorial.TutorialBoardAdapter.Prepare(definition, search.State) : null;
+                BoardActionExecutor candidateExecutor = candidateTutorial?.Executor ?? new BoardActionExecutor(search.State);
                 candidateArtwork = new PuzzleArtwork(visualCatalog);
                 await candidateArtwork.PrepareAsync(candidateExecutor.State, linked.Token);
                 foreach (RuntimeMission mission in candidateExecutor.State.Missions)
@@ -103,6 +108,8 @@ namespace GameScreen
 
                 PuzzleArtwork previousArtwork = artwork;
                 ClearProgress(); ResetPresentation();
+                DisposeTutorial(); tutorialFinalState = null;
+                tutorial = candidateTutorial; candidateTutorial = null;
                 executor = candidateExecutor; artwork = candidateArtwork; candidateArtwork = null;
                 ready = true; failed = false; LogicalSessionId = Guid.NewGuid().ToString("N");
                 previousArtwork?.Dispose();
@@ -116,6 +123,7 @@ namespace GameScreen
             finally
             {
                 candidateArtwork?.Dispose();
+                candidateTutorial?.Dispose();
                 if (definition != null) Destroy(definition);
                 IsRestarting = false;
                 if (this != null && !lifetime.IsCancellationRequested)

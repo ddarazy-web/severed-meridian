@@ -139,8 +139,10 @@ namespace Simulation
                 RuntimeCell a = work.CellAt(first), b = work.CellAt(second);
                 // 점유자만 이동하고 바닥/중력과 좌표는 유지한다. 조합 중심은 두 번째 입력 칸이다.
                 Elements.ElementDefinition firstElement = a.ContentElement, secondElement = b.ContentElement;
+                long firstOccurrence = a.ContentOccurrence, secondOccurrence = b.ContentOccurrence;
                 (a.Content, b.Content) = (b.Content, a.Content);
                 a.ContentElement = secondElement; b.ContentElement = firstElement;
+                a.ContentOccurrence = secondOccurrence; b.ContentOccurrence = firstOccurrence;
                 (a.Color, b.Color) = (b.Color, a.Color);
                 (a.RocketDirection, b.RocketDirection) = (b.RocketDirection, a.RocketDirection);
                 (a.ObstacleIndex, b.ObstacleIndex) = (b.ObstacleIndex, a.ObstacleIndex);
@@ -170,6 +172,7 @@ namespace Simulation
             work.MovesRemaining--;
             LastApplied = new BoardActionResult(BoardActionReason.Applied, "매칭·효과 처리 완료 · 낙하 대기", first, second,
                 State.MovesRemaining, work.MovesRemaining, State.Random.DrawCount, work.Random.DrawCount, Turn + 1, decisions, changes, effects, activation, context.PowerTrace);
+            hasDeferredEnding = false;
             State = work; TurnEffects = context; Turn++; Phase = BoardActionPhase.WaitingForFall;
             CascadeRounds = 0; LastSettlement = null; LastCascadeStep = null; cascadeHistory.Clear(); seenCascadeStates.Clear();
             return LastApplied;

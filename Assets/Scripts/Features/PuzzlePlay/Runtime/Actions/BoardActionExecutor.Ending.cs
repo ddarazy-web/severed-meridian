@@ -15,6 +15,22 @@ namespace Simulation
         public int LastPangWaves { get; private set; }
         public string LastPangMessage { get; private set; }
         public bool IsLastPang => Outcome?.Kind == BoardOutcomeKind.Won && Phase != BoardActionPhase.Stopped;
+        private bool endingDeferred;
+        private bool hasDeferredEnding;
+
+        /// <summary>외부 진행 흐름이 끝날 때까지 승패와 자동 재배치의 판단만 보류한다.</summary>
+        /// <param name="deferred">종료 판단을 보류할지 여부.</param>
+        public void SetEndingDeferred(bool deferred) => endingDeferred = deferred;
+
+        /// <summary>이미 처리한 턴 효과를 반복하지 않고 보류했던 종료 판단을 한 번 재개한다.</summary>
+        /// <returns>재개한 종료 기록. 아직 보류 중이거나 재개할 판단이 없으면 null.</returns>
+        public CascadeStepResult ResumeDeferredEnding()
+        {
+            if (endingDeferred || !hasDeferredEnding || Outcome != null || Phase != BoardActionPhase.Ready) return null;
+            CascadeStepResult result = DecideStableEnding(State, TurnEffects, "종료 보류 해제", State.Random.DrawCount);
+            hasDeferredEnding = false;
+            return result;
+        }
 
         private void AbortExecution(string message)
         {
@@ -41,6 +57,17 @@ namespace Simulation
             TurnEffectContext context = TurnEffects.Copy();
             MoldSpreadRecord spread = MoldRules.FinishTurn(work, context);
             State = work; TurnEffects = context;
+            if (endingDeferred)
+            {
+                hasDeferredEnding = true;
+                Phase = BoardActionPhase.Ready;
+                return RecordEnding(CascadeStepReason.Stable, "연쇄 완료 · 종료 판단 보류 · " + spread.Message, before);
+            }
+            return DecideStableEnding(previousState, previousContext, spread.Message, before);
+        }
+
+        private CascadeStepResult DecideStableEnding(LevelRuntimeState previousState, TurnEffectContext previousContext, string turnMessage, int before)
+        {
             if (State.Missions.All(m => m.Remaining == 0))
             {
                 Outcome = new BoardOutcome(BoardOutcomeKind.Won, "목표 달성 · 성공", State, Turn);
@@ -52,7 +79,7 @@ namespace Simulation
             {
                 Outcome = new BoardOutcome(BoardOutcomeKind.MovesExhausted, "이동 수 소진 · 목표 미달성", State, Turn);
                 Phase = BoardActionPhase.Stopped;
-                return RecordEnding(CascadeStepReason.MovesExhausted, Outcome.Message + " · " + spread.Message, before);
+                return RecordEnding(CascadeStepReason.MovesExhausted, Outcome.Message + " · " + turnMessage, before);
             }
             StartBooster[] previousBoosters = pendingBoosters.ToArray();
             int previousPlacementCount = boosterPlacements.Count;
@@ -64,7 +91,7 @@ namespace Simulation
                 if (ActionQuery.Find(State).Count > 0)
                 {
                     Phase = BoardActionPhase.Ready;
-                    return RecordEnding(CascadeStepReason.Stable, "연쇄 완료 · 다음 행동 대기 · " + spread.Message, before);
+                    return RecordEnding(CascadeStepReason.Stable, "연쇄 완료 · 다음 행동 대기 · " + turnMessage, before);
                 }
                 LastShuffle = ShuffleResolution.Resolve(State);
                 if (LastShuffle.Reason == ShuffleReason.Applied)

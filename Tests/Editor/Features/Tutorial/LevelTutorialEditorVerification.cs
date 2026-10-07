@@ -118,6 +118,14 @@ namespace Tutorial.Editor
             using (SerializedObject data = new SerializedObject(level)) { data.FindProperty("tutorial").FindPropertyRelative("steps").GetArrayElementAtIndex(0).FindPropertyRelative("first").FindPropertyRelative("row").intValue = 12; data.ApplyModifiedProperties(); }
             yield return null; yield return null;
             Check(window.rootVisualElement.Q("tutorial-error") != null, "단계별 정적 오류 실제 표시");
+            LevelDefinition replay = (LevelDefinition)typeof(TutorialGameIntegrationVerification).GetMethod("RocketTutorial", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic).Invoke(null, new object[] { false });
+            window.SetLevel(replay); yield return null; yield return null; Click("inspector-tab-1");
+            string replayBefore = JsonUtility.ToJson(replay);
+            Click("tutorial-replay");
+            Check(window.rootVisualElement.Q<Label>("tutorial-replay-status").text.Contains("논리 재생 통과") && JsonUtility.ToJson(replay) == replayBefore, "실제 에디터 버튼의 로켓 연속 재생·원본 보존");
+            replay.Tutorial.supply.sources.Clear(); Click("tutorial-replay");
+            Check(window.rootVisualElement.Q<Label>("tutorial-replay-status").text.Contains("공급"), "에디터 버튼의 실제 후속 공급 오류 표시");
+            window.SetLevel(level); UnityEngine.Object.DestroyImmediate(replay); yield return null; yield return null; Click("inspector-tab-1");
             LevelTutorialEditorPanel panel = window.rootVisualElement.Q<LevelTutorialEditorPanel>(); panel.Dispose(); panel.Dispose();
             Check(window.rootVisualElement.Q<LevelBoardView>().TutorialTargetPicked == null, "패널 Dispose 반복 안전·구독 정리");
         }

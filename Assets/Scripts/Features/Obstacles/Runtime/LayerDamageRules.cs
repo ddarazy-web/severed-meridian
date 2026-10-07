@@ -23,7 +23,8 @@ namespace Simulation
             context.RegisterWeb(cell.Coordinate);
             cell.CoverDurability = System.Math.Max(0, cell.CoverDurability - definition.RequireLayer().Damage);
             if (cell.CoverDurability == 0)
-            { cell.Cover = null; cell.CoverElement = null; MissionProgressRules.Complete(state, definition.RequireLayer().Mission, cell.Coordinate); }
+            { context.RecordElement(ElementExecutionKind.Removed, definition, cell.CoverOccurrence, cell.Coordinate);
+                cell.Cover = null; cell.CoverElement = null; MissionProgressRules.Complete(state, definition.RequireLayer().Mission, cell.Coordinate); }
         }
     }
 
@@ -41,7 +42,9 @@ namespace Simulation
             if (!CanDamage(cell, context)) return;
             context.RegisterDust(cell.Coordinate);
             cell.DustDurability = System.Math.Max(0, cell.DustDurability - definition.RequireLayer().Damage);
-            if (cell.DustDurability == 0) MissionProgressRules.Complete(state, definition.RequireLayer().Mission, cell.Coordinate);
+            if (cell.DustDurability == 0)
+            { context.RecordElement(ElementExecutionKind.Removed, definition, cell.DustOccurrence, cell.Coordinate);
+                MissionProgressRules.Complete(state, definition.RequireLayer().Mission, cell.Coordinate); }
         }
     }
 }

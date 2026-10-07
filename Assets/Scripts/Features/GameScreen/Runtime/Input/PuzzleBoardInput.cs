@@ -35,7 +35,7 @@ namespace GameScreen
 
         public void SelectItem(BoardItem item)
         {
-            if (session == null || IsUIBlocked || !session.CanUseItems) return;
+            if (session == null || IsUIBlocked || !session.CanSelectItem(item)) return;
             CancelGesture();
             SelectionMessage = null;
             if (item == BoardItem.Shuffle)
@@ -114,6 +114,7 @@ namespace GameScreen
                 if (uiHits.Count > 0) { CancelGesture(); return; }
             }
             if (!TryGetCoordinate(position, out pressed) || !TryLocalPoint(position, out start)) { CancelGesture(); return; }
+            if (SelectedItem.HasValue ? !session.CanSelectItemTarget(SelectedItem.Value, pressed) : !session.CanSelectBlock(pressed)) return;
             if (!SelectedItem.HasValue && SelectionMessage != null)
             { SelectionMessage = null; SelectionChanged?.Invoke(); }
             pointer = id;
@@ -137,6 +138,9 @@ namespace GameScreen
             bool horizontal = Mathf.Abs(delta.x) >= Mathf.Abs(delta.y);
             float distance = horizontal ? delta.x : delta.y;
             Vector3 axis = horizontal ? Vector3.right : Vector3.up;
+            BoardCoordinate next = new BoardCoordinate(pressed.Row + (horizontal ? 0 : distance > 0 ? -1 : 1),
+                pressed.Column + (horizontal ? distance > 0 ? 1 : -1 : 0));
+            if (!session.CanPreviewSwap(pressed, next)) { session.EndSwipePreview(); return; }
             // 화면→보드 좌표 왕복의 부동소수점 오차만 허용한다.
             if (Mathf.Abs(distance) + 0.00001f < 0.25f)
             {
@@ -144,8 +148,6 @@ namespace GameScreen
                 if (ActionQuery.Movable(session.State, cell)) board.Preview(pressed, axis * Mathf.Clamp(distance, -0.24f, 0.24f));
                 return;
             }
-            BoardCoordinate next = new BoardCoordinate(pressed.Row + (horizontal ? 0 : distance > 0 ? -1 : 1),
-                pressed.Column + (horizontal ? distance > 0 ? 1 : -1 : 0));
             // 실행 결과가 거절이어도 이 포인터의 행동은 소비한다.
             committed = true; Selected = null;
             session.TrySwap(pressed, next);
@@ -186,7 +188,8 @@ namespace GameScreen
                 return;
             }
             RuntimeContent content = session.State.CellAt(released).Content;
-            if (content >= RuntimeContent.Rocket && content <= RuntimeContent.Magnet)
+            if (!session.CanSelectBlock(released)) return;
+            if (content >= RuntimeContent.Rocket && content <= RuntimeContent.Magnet && session.CanActivateBlock(released))
             { session.TryActivate(released); Selected = null; SelectionChanged?.Invoke(); return; }
             if (Selected.HasValue && Mathf.Abs(Selected.Value.Row - released.Row) + Mathf.Abs(Selected.Value.Column - released.Column) == 1)
             { session.TrySwap(Selected.Value, released); Selected = null; }

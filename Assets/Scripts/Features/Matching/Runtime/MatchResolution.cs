@@ -122,10 +122,12 @@ namespace Simulation
                     RuntimeContent content = !spawn ? RuntimeContent.Empty : decision.Selected.Kind switch
                     { MatchKind.Drone => RuntimeContent.Drone, MatchKind.Rocket => RuntimeContent.Rocket, MatchKind.Bomb => RuntimeContent.Bomb, _ => RuntimeContent.Magnet };
                     RocketDirection? direction = spawn ? decision.Selected.RocketDirection : null;
+                    context.RecordElement(ElementExecutionKind.Removed, cell.ContentElement ?? Elements.LegacyElementDefinitions.GetContent(cell.Content, work.ElementCatalog), cell.ContentOccurrence, coordinate);
                     changes.Add(new MatchedBlockChange(coordinate, cell.Color.Value, content, direction, turn) { HitGroup = hit });
                     DustRules.ConsumeNormal(work, cell, context);
                     cell.Content = content; cell.Color = null; cell.RocketDirection = direction; cell.ObstacleIndex = null;
                     cell.ContentElement = Elements.LegacyElementDefinitions.GetContent(content, work.ElementCatalog);
+                    if (spawn) context.RecordElement(ElementExecutionKind.Generated, cell.ContentElement, cell.ContentOccurrence, coordinate);
                 }
             }
             return changes.AsReadOnly();

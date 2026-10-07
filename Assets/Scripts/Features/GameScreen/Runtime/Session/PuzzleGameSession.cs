@@ -27,7 +27,7 @@ namespace GameScreen
         public BoardOutcome Outcome => executor?.Outcome;
         public BoardActionPhase Phase => executor?.Phase ?? BoardActionPhase.Stopped;
         public bool CanAcceptInput => isActiveAndEnabled && ready && !failed && !IsPaused && !IsRestarting && !IsChangingLevel &&
-            !IsPresenting && !IsStartingFeedback && Phase == BoardActionPhase.Ready && Outcome == null;
+            !IsPresenting && !IsStartingFeedback && Phase == BoardActionPhase.Ready && Outcome == null && TutorialAllowsBoardInput;
         public string Message { get; private set; } = "레벨 로딩 중";
         public event Action Changed;
 
@@ -71,7 +71,7 @@ namespace GameScreen
                 levelNumber = number; seed = randomSeed;
                 await PrepareAsync(definition, randomSeed, linked.Token);
             }
-            catch (OperationCanceledException) { ready = false; artwork?.Dispose(); }
+            catch (OperationCanceledException) { ready = false; DisposeTutorial(); artwork?.Dispose(); }
             catch (Exception error) { Fail("레벨 " + number + " 시작 실패: " + error.Message); }
             finally
             {
@@ -82,7 +82,8 @@ namespace GameScreen
         private async UniTask PrepareAsync(LevelDefinition definition, int randomSeed, CancellationToken token)
         {
             Message = "시작 보드 구성 중"; Changed?.Invoke();
-            StartingBoardSearch search = new StartingBoardSearch(definition, randomSeed);
+            CheckTutorialReplay(definition);
+            StartingBoardSearch search = new StartingBoardSearch(definition, definition.HasTutorial ? definition.Tutorial.seed : randomSeed);
             while (!search.IsDone)
             {
                 token.ThrowIfCancellationRequested();
@@ -91,7 +92,9 @@ namespace GameScreen
             }
             token.ThrowIfCancellationRequested();
             if (search.Status != StartingBoardStatus.Success) throw new InvalidOperationException(search.Message);
-            executor = new BoardActionExecutor(search.State);
+            tutorialFinalState = null;
+            tutorial = definition.HasTutorial ? Tutorial.TutorialBoardAdapter.Prepare(definition, search.State) : null;
+            executor = tutorial?.Executor ?? new BoardActionExecutor(search.State);
             InitializeProgress();
             artwork = new PuzzleArtwork(visualCatalog);
             await artwork.PrepareAsync(State, token);
@@ -106,9 +109,10 @@ namespace GameScreen
 
         public bool TryActivate(BoardCoordinate at)
         {
-            if (!CanAcceptInput) return false;
+            if (!CanAcceptInput || !TryBeginTutorial(Tutorial.TutorialInput.Activate(at))) return false;
             CapturePresentation();
             BoardActionResult result = executor.Activate(at);
+            tutorial?.ReportAction(result.IsApplied);
             ObserveMoves();
             Message = result.Message;
             if (result.IsApplied) BeginEffects(result.Changes, result.Effects, result.PowerTrace);
@@ -122,6 +126,7 @@ namespace GameScreen
             // 이 프레임에 새로 예약한 수집은 다음 보드 표시 시간부터 진행한다.
             TickProgress(Time.deltaTime);
             if (IsPresenting) AdvancePresentation(Time.deltaTime); else Advance();
+            TickTutorial();
         }
 
         private void Advance()
@@ -132,6 +137,7 @@ namespace GameScreen
                 CapturePresentation();
                 int recoveryBefore = State.Recoveries.Count;
                 CascadeStepResult step = executor.AdvanceCascade();
+                tutorial?.ObserveCascade(step);
                 ObserveCascadeStep(step);
                 Message = step.Message;
                 if (step.Settlement != null && step.Settlement.IsApplied)
@@ -156,6 +162,7 @@ namespace GameScreen
         private void Fail(string message)
         {
             failed = true; ready = false; Message = message;
+            DisposeTutorial();
             ClearProgress();
             ResetPresentation();
             artwork?.Dispose();
@@ -179,6 +186,7 @@ namespace GameScreen
         private void OnDestroy()
         {
             ready = false;
+            DisposeTutorial();
             ClearProgress();
             ResetPresentation();
             lifetime.Cancel(); artwork?.Dispose(); lifetime.Dispose();

@@ -45,7 +45,15 @@ namespace Tutorial.Editor
             CancelPicking(); fields.Unbind(); fields.Clear(); input.Update();
             SerializedProperty tutorial = input.FindProperty("tutorial"), steps = tutorial.FindPropertyRelative("steps");
             selected = Math.Clamp(selected, 0, Math.Max(0, steps.arraySize - 1)); selectionChanged(selected);
-            fields.Add(new HelpBox("정적 검사만 제공합니다. 지정 행동·후속 결과의 실행 재생은 다음 단계에서 검사합니다. 좌표 저장값은 0부터 시작합니다.", HelpBoxMessageType.Info));
+            fields.Add(new HelpBox("정적 검사는 작성 오류를 표시합니다. 논리 재생 검사로 후속 행동·결과·고정 공급을 확인하세요. 실제 화면 연출은 게임 플레이에서 확인합니다. 좌표 저장값은 0부터 시작합니다.", HelpBoxMessageType.Info));
+            Label replayStatus = new Label { name = "tutorial-replay-status" };
+            replayStatus.style.whiteSpace = WhiteSpace.Normal;
+            fields.Add(new Button(() =>
+            {
+                List<LevelValidationIssue> issues = LevelTutorialReplayValidator.Validate(owner);
+                replayStatus.text = issues.Count == 0 ? "논리 재생 통과 · 실제 화면 연출 검사는 별도입니다." : string.Join("\n", issues.Select(issue => issue.ToString()));
+            }) { text = "튜토리얼 논리 재생 검사", name = "tutorial-replay" });
+            fields.Add(replayStatus);
             fields.Add(new PropertyField(tutorial.FindPropertyRelative("seed"), "튜토리얼 고정 시드"));
             fields.Add(new PropertyField(tutorial.FindPropertyRelative("supply"), "튜토리얼 고정 공급"));
             fields.Add(new Button(() => Edit(value =>

@@ -33,6 +33,7 @@ namespace Simulation
             {
                 cells[destination].Content = contents[source].Content;
                 cells[destination].ContentElement = contents[source].ContentElement;
+                cells[destination].ContentOccurrence = contents[source].ContentOccurrence;
                 cells[destination].Color = contents[source].Color;
                 cells[destination].RocketDirection = contents[source].RocketDirection;
             }

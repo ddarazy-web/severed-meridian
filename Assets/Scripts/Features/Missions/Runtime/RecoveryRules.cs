@@ -10,8 +10,10 @@ namespace Simulation
         public BoardCoordinate Coordinate { get; }
         public int Turn { get; }
         public int Batch { get; }
-        internal RecoveryRecord(BoardCoordinate coordinate, int turn, int batch)
-        { Coordinate = coordinate; Turn = turn; Batch = batch; }
+        internal ElementExecutionRecord Removal { get; }
+        internal RecoveryRecord(BoardCoordinate coordinate, int turn, int batch, Elements.ElementDefinition definition, long occurrence)
+        { Coordinate = coordinate; Turn = turn; Batch = batch;
+            Removal = new ElementExecutionRecord(ElementExecutionKind.Removed, definition.Id.Value, occurrence, coordinate); }
     }
 
     public static class RecoveryRules
@@ -60,9 +62,11 @@ namespace Simulation
                 if (!MovementQuery.Active(state, coordinate)) continue;
                 RuntimeCell cell = state.CellAt(coordinate);
                 if (cell.Content != RuntimeContent.Recovery) continue;
+                RecoveryRecord record = new RecoveryRecord(coordinate, turn, batch,
+                    cell.ContentElement ?? Elements.LegacyElementDefinitions.GetContent(cell.Content, state.ElementCatalog), cell.ContentOccurrence);
                 cell.Content = RuntimeContent.Empty; cell.Color = null; cell.RocketDirection = null; cell.ObstacleIndex = null;
                 MissionProgressRules.Complete(state, MissionKind.Recovery, coordinate);
-                state.RecordRecovery(new RecoveryRecord(coordinate, turn, batch)); count++;
+                state.RecordRecovery(record); count++;
             }
             return count;
         }

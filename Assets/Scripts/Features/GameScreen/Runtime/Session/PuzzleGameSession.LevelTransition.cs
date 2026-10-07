@@ -40,6 +40,7 @@ namespace GameScreen
             string previousMessage = Message;
             LevelDefinition definition = null;
             PuzzleArtwork candidateArtwork = null;
+            Tutorial.TutorialBoardAdapter candidateTutorial = null;
             using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(token, lifetime.Token);
             try
             {
@@ -56,7 +57,8 @@ namespace GameScreen
                     linked.Token.ThrowIfCancellationRequested();
                     if (!isActiveAndEnabled) throw new OperationCanceledException();
                     candidateBytes = LevelPackCodec.Snapshot(definition);
-                    StartingBoardSearch search = new StartingBoardSearch(definition, seed);
+                    CheckTutorialReplay(definition);
+                    StartingBoardSearch search = new StartingBoardSearch(definition, definition.HasTutorial ? definition.Tutorial.seed : seed);
                     while (!search.IsDone)
                     {
                         linked.Token.ThrowIfCancellationRequested();
@@ -65,7 +67,8 @@ namespace GameScreen
                         await UniTask.Yield(PlayerLoopTiming.Update, linked.Token);
                     }
                     if (search.Status != StartingBoardStatus.Success) throw new InvalidOperationException(search.Message);
-                    candidateExecutor = new BoardActionExecutor(search.State);
+                    candidateTutorial = definition.HasTutorial ? Tutorial.TutorialBoardAdapter.Prepare(definition, search.State) : null;
+                    candidateExecutor = candidateTutorial?.Executor ?? new BoardActionExecutor(search.State);
                     candidateArtwork = new PuzzleArtwork(visualCatalog);
                     await candidateArtwork.PrepareAsync(candidateExecutor.State, linked.Token);
                     // 아틀라스 로드 성공만으로는 HUD 전용 미션 그림의 존재를 보장하지 않는다.
@@ -90,6 +93,8 @@ namespace GameScreen
 
                 PuzzleArtwork previousArtwork = artwork;
                 ClearProgress(); ResetPresentation();
+                DisposeTutorial(); tutorialFinalState = null;
+                tutorial = candidateTutorial; candidateTutorial = null;
                 executor = candidateExecutor; artwork = candidateArtwork; candidateArtwork = null;
                 initialBytes = candidateBytes; levelNumber = nextNumber;
                 LogicalSessionId = Guid.NewGuid().ToString("N");
@@ -104,6 +109,7 @@ namespace GameScreen
             finally
             {
                 candidateArtwork?.Dispose();
+                candidateTutorial?.Dispose();
                 if (definition != null) Destroy(definition);
                 IsChangingLevel = false;
                 if (this != null && ready)

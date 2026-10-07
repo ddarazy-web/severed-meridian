@@ -13,6 +13,10 @@ namespace Simulation
     public sealed class RuntimeCell
     {
         private RuntimeContent content;
+        private CoverKind? cover;
+        internal long ContentOccurrence { get; set; }
+        internal long CoverOccurrence { get; private set; }
+        internal long DustOccurrence { get; } = RuntimeElementOccurrence.Next();
         internal Elements.ElementDefinition ContentElement { get; set; }
         internal Elements.ElementDefinition CoverElement { get; set; }
         internal Elements.ElementDefinition DustElement { get; set; }
@@ -21,12 +25,16 @@ namespace Simulation
         public RuntimeContent Content
         {
             get => content;
-            internal set { content = value; ContentElement = null; }
+            internal set { content = value; ContentElement = null; ContentOccurrence = value == RuntimeContent.Empty ? 0 : RuntimeElementOccurrence.Next(); }
         }
         public RabbitColor? Color { get; internal set; }
         public RocketDirection? RocketDirection { get; internal set; }
         public int? ObstacleIndex { get; internal set; }
-        public CoverKind? Cover { get; internal set; }
+        public CoverKind? Cover
+        {
+            get => cover;
+            internal set { cover = value; CoverOccurrence = value.HasValue ? RuntimeElementOccurrence.Next() : 0; }
+        }
         public int CoverDurability { get; internal set; }
         public int DustDurability { get; internal set; }
         public GravityDirection Gravity { get; internal set; } = GravityDirection.Down;
@@ -36,6 +44,7 @@ namespace Simulation
 
     public sealed class RuntimeObstacle
     {
+        internal long Occurrence { get; } = RuntimeElementOccurrence.Next();
         private readonly Elements.ElementDefinition element;
         public Elements.ElementDefinition Element => element ?? Elements.LegacyElementDefinitions.Get(Definition.Kind);
         public ObstaclePlacementDefinition Definition { get; }
@@ -170,7 +179,7 @@ namespace Simulation
         public ReadOnlyCollection<RuntimeMission> Missions { get; }
         public ReadOnlyCollection<RuntimeConnection> Connections { get; }
         public RuntimeFlow Flow { get; }
-        public RuntimeSupply Supply { get; }
+        public RuntimeSupply Supply { get; internal set; }
         public SimulationRandom Random { get; }
         private readonly List<RecoveryRecord> recoveries = new List<RecoveryRecord>();
         private readonly List<MissionProgressRecord> missionProgressRecords = new List<MissionProgressRecord>();

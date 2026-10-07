@@ -33,6 +33,7 @@ namespace Simulation
 
         internal static void RemoveDefinition(Elements.ElementDefinition definition, LevelRuntimeState state, RuntimeCell cell, TurnEffectContext context)
         {
+            context.RecordElement(ElementExecutionKind.Removed, definition, cell.CoverOccurrence, cell.Coordinate);
             cell.Cover = null; cell.CoverElement = null; cell.CoverDurability = 0; context.RemovedMold = true;
             MissionProgressRules.Complete(state, definition.RequireLayer().Mission, cell.Coordinate);
         }
