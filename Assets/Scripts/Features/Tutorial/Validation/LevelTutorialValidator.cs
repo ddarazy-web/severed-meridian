@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Board;
 using Elements;
 using Levels;
@@ -39,10 +40,19 @@ namespace Tutorial
         public static List<LevelValidationIssue> Validate(LevelDefinition level, ElementCatalog catalog = null, TutorialHandlerRegistry registry = null)
         {
             List<LevelValidationIssue> issues = new List<LevelValidationIssue>();
-            LevelTutorialDefinition tutorial = level?.Tutorial;
+            LevelTutorialDefinition tutorial;
+            try { tutorial = level == null ? null : TutorialFlowResolver.Resolve(level); }
+            catch (ArgumentException error)
+            { issues.Add(new LevelValidationIssue(LevelValidationCode.InvalidTutorial, error.Message, "tutorial.bindings")); return issues; }
             if (tutorial == null) return issues;
             void Error(string path, string message, BoardCoordinate? coordinate = null) =>
                 issues.Add(new LevelValidationIssue(LevelValidationCode.InvalidTutorial, message, path, coordinate));
+            if (tutorial.previousLevelNumbers == null || tutorial.previousLevelNumbers.Any(number => number < 1) ||
+                tutorial.previousLevelNumbers.Distinct().Count() != tutorial.previousLevelNumbers.Count)
+                Error("tutorial.previousLevelNumbers", "이전 레벨 번호는 중복 없이 양수로 지정하세요.");
+            if (tutorial.completionId != null && tutorial.completionId.Length > 0 && tutorial.completionId.Trim() != tutorial.completionId ||
+                tutorial.previousLevelNumbers?.Count > 0 && string.IsNullOrWhiteSpace(tutorial.completionId))
+                Error("tutorial.completionId", "앞뒤 공백 없는 학습 완료 ID를 지정하세요. 이전 기록 승계에는 ID가 필요합니다.");
             if (tutorial.steps == null) { Error("tutorial.steps", "단계 목록이 없습니다."); return issues; }
             if (tutorial.steps.Count == 0) return issues;
             ValidateBindings(tutorial.steps, (path, message) => Error(path, message));

@@ -11,7 +11,7 @@ namespace Tutorial
         private readonly TutorialHandlerRegistry registry;
         private readonly List<TutorialStepDefinition> steps = new List<TutorialStepDefinition>();
         private ITutorialStepHandler handler;
-        private ITutorialResultEvaluator[] evaluators = Array.Empty<ITutorialResultEvaluator>();
+        private int legacyConditionCount;
         private HashSet<string>[] occurrences = Array.Empty<HashSet<string>>();
         private int[] counts = Array.Empty<int>();
         private ITutorialConditionState[] conditionStates = Array.Empty<ITutorialConditionState>();
@@ -51,18 +51,7 @@ namespace Tutorial
             foreach (TutorialStepDefinition source in definition.steps)
             {
                 if (source == null) { Fail("tutorial.steps: 단계가 null입니다."); return; }
-                steps.Add(new TutorialStepDefinition
-                {
-                    kind = source.kind, instructions = source.instructions, hasFirst = source.hasFirst, first = source.first,
-                    hasSecond = source.hasSecond, second = source.second, item = source.item, actionDefinitionId = source.actionDefinitionId,
-                    highlights = source.highlights == null ? null : new List<Board.BoardCoordinate>(source.highlights),
-                    combination = source.combination, automaticHighlights = source.automaticHighlights, freeItemCount = source.freeItemCount,
-                    actionArea = source.actionArea == null ? null : new List<Board.BoardCoordinate>(source.actionArea),
-                    firstBinding = source.firstBinding, secondBinding = source.secondBinding,
-                    conditions = source.conditions?.Select(condition => condition?.Copy()).ToList(),
-                    results = source.results?.Select(result => result == null ? null : new TutorialResultDefinition
-                    { kind = result.kind, definitionId = result.definitionId, hasCoordinate = result.hasCoordinate, coordinate = result.coordinate, count = result.count }).ToList()
-                });
+                steps.Add(source.Copy());
             }
             LevelTutorialValidator.ValidateBindings(steps, (path, message) => Fail(path + ": " + message));
             if (State == TutorialProgressState.Error) return;
@@ -128,11 +117,7 @@ namespace Tutorial
         public void ReportResults(TutorialActionTicket ticket, IEnumerable<TutorialResultRecord> records)
         {
             if (!Accepts(ticket) || resultsComplete || records == null) return;
-            TutorialStepDefinition step = steps[StepIndex];
-            foreach (TutorialResultRecord record in records)
-                if (record != null)
-                    for (int i = 0; i < evaluators.Length; i++)
-                        if (evaluators[i].Matches(step.results[i], record) && occurrences[i].Add(record.OccurrenceId)) counts[i]++;
+            ReportConditionEvents(ticket, records.Where(record => record != null).Select(record => new TutorialConditionEvent(record)));
             TryAdvance();
         }
         /// <summary>실제 논리 연쇄가 끝났음을 보고한다. 결과가 부족하면 무기한 기다리지 않고 진단한다.</summary>
@@ -146,8 +131,8 @@ namespace Tutorial
             foreach (TutorialConditionEvent record in records)
                 for (int i = 0; i < conditionStates.Length; i++)
                 {
-                    int index = evaluators.Length + i;
-                    string key = ticket.Attempt + ":" + record.Id;
+                    int index = i;
+                    string key = record.LegacyResult == null ? ticket.Attempt + ":" + record.Id : record.Id;
                     if (!string.IsNullOrWhiteSpace(record.Id) && !occurrences[index].Contains(key) && conditionStates[i].Accept(record))
                     { occurrences[index].Add(key); counts[index] = conditionStates[i].Count; }
                 }
@@ -156,7 +141,7 @@ namespace Tutorial
         internal bool Contributes(IReadOnlyList<TutorialConditionEvent> records, IReadOnlyList<TutorialTargetEntity> current)
         {
             bool improves = false;
-            foreach (ITutorialConditionState original in conditionStates)
+            foreach (ITutorialConditionState original in conditionStates.Skip(legacyConditionCount))
             {
                 ITutorialConditionState copy = original.Fork();
                 var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -175,7 +160,7 @@ namespace Tutorial
             IReadOnlyList<TutorialTargetEntity> current = readTargets?.Invoke() ?? Array.Empty<TutorialTargetEntity>();
             for (int i = 0; i < conditionStates.Length; i++)
             {
-                try { conditionStates[i].Refresh(current); counts[evaluators.Length + i] = conditionStates[i].Count; }
+                try { conditionStates[i].Refresh(current); counts[i] = conditionStates[i].Count; }
                 catch (InvalidOperationException error) { Fail($"tutorial.steps.Array.data[{StepIndex}].conditions.Array.data[{i}]: {error.Message}"); return; }
             }
         }
@@ -190,7 +175,7 @@ namespace Tutorial
         }
 
         private bool ConditionsSatisfied => steps[StepIndex].combination == TutorialConditionCombination.All
-            ? conditionStates.All(condition => condition.IsSatisfied) : conditionStates.Any(condition => condition.IsSatisfied);
+            ? conditionStates.All(condition => condition.IsSatisfied) : conditionStates.Skip(legacyConditionCount).Any(condition => condition.IsSatisfied);
 
         public void ReportPresentationComplete(TutorialActionTicket ticket)
         { if (!Accepts(ticket)) return; presented = true; TryAdvance(); }
@@ -205,7 +190,7 @@ namespace Tutorial
         {
             if (State == TutorialProgressState.Completed || State == TutorialProgressState.Cancelled) return;
             State = TutorialProgressState.Cancelled; Message = reason; hasPending = false; handler = null;
-            evaluators = Array.Empty<ITutorialResultEvaluator>(); occurrences = Array.Empty<HashSet<string>>(); counts = Array.Empty<int>();
+            legacyConditionCount = 0; conditionStates = Array.Empty<ITutorialConditionState>(); occurrences = Array.Empty<HashSet<string>>(); counts = Array.Empty<int>();
             highlightTargets = Array.Empty<TutorialTargetSelection>(); targetHighlights = Array.Empty<Board.BoardCoordinate>();
         }
         public void Dispose() => Cancel();
@@ -217,8 +202,8 @@ namespace Tutorial
             if (!success) { Message = "행동 결과 대기"; return; }
             bool composed = steps[StepIndex].conditions.Count > 0;
             bool legacySatisfied = true;
-            for (int i = 0; i < evaluators.Length; i++)
-                if (counts[i] < steps[StepIndex].results[i].count)
+            for (int i = 0; i < legacyConditionCount; i++)
+                if (!conditionStates[i].IsSatisfied)
                 {
                     if (composed) { legacySatisfied = false; continue; }
                     if (resultsComplete) Fail($"tutorial.steps.Array.data[{StepIndex}].results.Array.data[{i}]: 실제 결과 부족 {counts[i]}/{steps[StepIndex].results[i].count}");
@@ -271,19 +256,19 @@ namespace Tutorial
                 highlightTargets = Array.Empty<TutorialTargetSelection>(); targetHighlights = Array.Empty<Board.BoardCoordinate>();
                 if (StepIndex >= steps.Count)
                 {
-                    handler = null; evaluators = Array.Empty<ITutorialResultEvaluator>(); occurrences = Array.Empty<HashSet<string>>(); counts = Array.Empty<int>();
+                    handler = null; legacyConditionCount = 0; conditionStates = Array.Empty<ITutorialConditionState>(); occurrences = Array.Empty<HashSet<string>>(); counts = Array.Empty<int>();
                     State = TutorialProgressState.Completed; Message = "튜토리얼 완료"; return;
                 }
                 TutorialStepDefinition step = steps[StepIndex];
                 IReadOnlyList<TutorialTargetEntity> current = readTargets?.Invoke() ?? Array.Empty<TutorialTargetEntity>();
                 if (!ResolveActionTargets(step, current)) return;
                 registry.TryGetStep(step, out handler);
-                evaluators = new ITutorialResultEvaluator[step.results.Count];
-                conditionStates = new ITutorialConditionState[step.conditions.Count];
+                legacyConditionCount = step.results.Count;
+                conditionStates = new ITutorialConditionState[legacyConditionCount + step.conditions.Count];
                 highlightTargets = new TutorialTargetSelection[step.conditions.Count];
                 occurrences = new HashSet<string>[step.results.Count + step.conditions.Count]; counts = new int[occurrences.Length];
                 for (int i = 0; i < step.results.Count; i++)
-                { registry.TryGetResult(step.results[i].kind, out evaluators[i]); occurrences[i] = new HashSet<string>(StringComparer.Ordinal); }
+                { conditionStates[i] = TutorialLegacyConditionAdapter.Create(step.results[i], registry); occurrences[i] = new HashSet<string>(StringComparer.Ordinal); }
                 TutorialConditionContext context = new TutorialConditionContext(current, bindings, (name, id) =>
                 {
                     if (bindings.TryGetValue(name, out long prior) && prior != id) throw new InvalidOperationException("생성 연결 이름이 중복됩니다: " + name);
@@ -295,7 +280,7 @@ namespace Tutorial
                     occurrences[step.results.Count + i] = new HashSet<string>(StringComparer.Ordinal);
                     try
                     {
-                        conditionStates[i] = evaluator.Create(step.conditions[i], context); counts[step.results.Count + i] = conditionStates[i].Count;
+                        conditionStates[legacyConditionCount + i] = evaluator.Create(step.conditions[i], context); counts[legacyConditionCount + i] = conditionStates[legacyConditionCount + i].Count;
                         TutorialConditionDefinition condition = step.conditions[i];
                         if (step.automaticHighlights && condition.kind >= TutorialConditionKind.DurabilityDecrease && condition.kind <= TutorialConditionKind.Combined)
                             highlightTargets[i] = TutorialTargetSelection.Bind(condition.target, current, bindings);
@@ -304,7 +289,7 @@ namespace Tutorial
                 }
                 State = handler.IsDescription ? TutorialProgressState.AwaitDescription : TutorialProgressState.AwaitAction;
                 Message = handler.IsDescription ? "설명 확인 대기" : "지정 행동 대기";
-                if (!handler.IsDescription && evaluators.Length == 0 && conditionStates.Length > 0 && ConditionsSatisfied)
+                if (!handler.IsDescription && legacyConditionCount == 0 && conditionStates.Length > 0 && ConditionsSatisfied)
                 { StepIndex++; continue; }
                 RefreshHighlights(current);
                 return;

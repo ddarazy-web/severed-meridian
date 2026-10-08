@@ -31,7 +31,9 @@ namespace Levels
             if (source.SchemaVersion != LevelDefinition.LegacySchemaVersion) return ReadLevel(Snapshot(source), source.LevelNumber);
             LevelDefinition copy = ScriptableObject.CreateInstance<LevelDefinition>();
             copy.hideFlags = HideFlags.HideAndDontSave;
-            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(source), copy); return copy;
+            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(source), copy);
+            if (source.Tutorial?.flow != null) copy.RestoreTutorial(Tutorial.TutorialFlowResolver.Resolve(source));
+            return copy;
         }
 
         public static string CaptureJson(LevelDefinition source)

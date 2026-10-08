@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Board;
 using System.Linq;
 using UnityEngine;
@@ -37,7 +37,7 @@ namespace Levels
         [SerializeField] private Tutorial.LevelTutorialDefinition tutorial = new Tutorial.LevelTutorialDefinition();
 
         public Tutorial.LevelTutorialDefinition Tutorial => tutorial;
-        public bool HasTutorial => tutorial?.steps?.Count > 0;
+        public bool HasTutorial => tutorial?.flow != null ? tutorial.flow.steps?.Count > 0 : tutorial?.steps?.Count > 0;
         internal void RestoreTutorial(Tutorial.LevelTutorialDefinition value) => tutorial = value ?? new Tutorial.LevelTutorialDefinition();
 
         public int SchemaVersion => schemaVersion;

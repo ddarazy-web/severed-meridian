@@ -13,6 +13,7 @@ namespace GameScreen
         private TutorialBoardAdapter tutorial;
         private TutorialProgressSnapshot tutorialFinalState;
         private TutorialExecutionContext tutorialContext;
+        private LevelTutorialDefinition completionTutorial;
         private bool tutorialCompletionRecorded;
         public bool CanShowTutorial => ready && !failed && !IsStartingFeedback && !IsRestarting && !IsChangingLevel && !IsPaused && !audioBackground;
         public Vector3 TutorialCellWorldPosition(BoardCoordinate at) => board.transform.TransformPoint(PuzzleWorldBoard.CellPosition(at));
@@ -25,7 +26,8 @@ namespace GameScreen
         private bool ShouldRunTutorial(LevelDefinition definition)
         {
             tutorialContext ??= TutorialExecutionContext.CreatePlayer();
-            return tutorialContext.ShouldRun(definition.LevelNumber, definition.HasTutorial);
+            completionTutorial = new LevelTutorialDefinition { completionId = definition.Tutorial?.completionId };
+            return tutorialContext.ShouldRun(definition);
         }
         public TutorialProgressSnapshot TutorialState => tutorial?.Progress.Snapshot ?? tutorialFinalState;
         private bool TutorialActive => tutorial != null && tutorial.Progress.State != TutorialProgressState.Completed;
@@ -82,7 +84,7 @@ namespace GameScreen
             }
             if (!tutorialCompletionRecorded && tutorial.Progress.State == TutorialProgressState.Completed && TutorialPresentationReady && !IsPaused)
             {
-                tutorialContext?.Complete(State.LevelNumber);
+                tutorialContext?.Complete(State.LevelNumber, completionTutorial);
                 tutorialCompletionRecorded = true;
             }
             if (tutorial.Progress.State == TutorialProgressState.Error || tutorial.Progress.State == TutorialProgressState.Cancelled)

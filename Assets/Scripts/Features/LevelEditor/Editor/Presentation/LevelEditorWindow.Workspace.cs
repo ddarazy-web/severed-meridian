@@ -81,6 +81,7 @@ namespace Levels.Editor
             if (temporaryTutorialSample != null)
                 workspaceContent.Add(new HelpBox("시험 보드 · " + tutorialSampleExpected + "\n현재 사본을 수정·검사할 수 있습니다. 게임 플레이는 입력 ‘에셋’으로 실행하세요. 출시 레벨과 팩은 변경하지 않습니다.", HelpBoxMessageType.Info)
                     { name = "tutorial-sample-notice" });
+            AddTutorialFlowControls(workspaceContent);
             VisualElement tabs = new VisualElement { name = "workspace-tabs" };
             string[] labels = { "레벨 편집", "플레이 테스트", "초기 보드·진단", "결과·이력", "여러 레벨 시험" };
             workspaceTabs = new Button[labels.Length];
@@ -123,6 +124,11 @@ namespace Levels.Editor
                     analysisPanel.Root.SetEnabled(!locked); multiPanel.Root.SetEnabled(!locked); });
             recordManagement.AddTo(analysisPanel.Root); recordManagement.AddTo(multiPanel.Root);
             CreateEditorGUI();
+            if (editingTutorialFlow != null)
+            {
+                rootVisualElement.Q<Button>("new-level")?.SetEnabled(false);
+                rootVisualElement.Q<Button>("duplicate-level")?.SetEnabled(false);
+            }
             SelectWorkspaceTab(workspaceTab);
             LevelEditorHelp.Apply(rootVisualElement);
         }

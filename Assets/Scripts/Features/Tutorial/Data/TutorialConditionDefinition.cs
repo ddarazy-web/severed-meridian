@@ -18,6 +18,7 @@ namespace Tutorial
     [Serializable, MemoryPackable(SerializeLayout.Explicit)]
     public partial class TutorialConditionDefinition
     {
+        [MemoryPackIgnore] public string authoringId = "";
         [MemoryPackOrder(0)] public TutorialConditionKind kind;
         [MemoryPackOrder(1)] public int requiredCount = 1;
         [MemoryPackOrder(2)] public int matchSize = 3;
@@ -43,7 +44,7 @@ namespace Tutorial
 
         public TutorialConditionDefinition Copy() => new TutorialConditionDefinition
         {
-            kind = kind, requiredCount = requiredCount, matchSize = matchSize, sizeComparison = sizeComparison,
+            authoringId = authoringId, kind = kind, requiredCount = requiredCount, matchSize = matchSize, sizeComparison = sizeComparison,
             origin = origin, anyColor = anyColor, color = color, aggregation = aggregation,
             powerDefinitionId = powerDefinitionId, anyDirection = anyDirection, rocketDirection = rocketDirection, bindGeneratedAs = bindGeneratedAs, item = item, missionIndex = missionIndex,
             missionKind = missionKind, missionColor = missionColor,

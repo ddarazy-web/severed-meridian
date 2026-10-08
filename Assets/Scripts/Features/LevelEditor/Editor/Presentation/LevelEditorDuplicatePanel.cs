@@ -14,6 +14,7 @@ namespace Levels.Editor
 
         private void ShowDuplicatePanel()
         {
+            if (editingTutorialFlow != null) return;
             board.CancelStroke();
             duplicatePanel.Clear();
             if (level == null) { operation.text = "복제할 레벨을 선택하세요."; return; }

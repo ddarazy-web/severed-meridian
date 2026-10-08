@@ -8,6 +8,9 @@ namespace Tutorial
     /// <summary>게임에서 이미 판정한 실제 사건. 같은 사건 ID는 같은 단계에서 한 번만 센다.</summary>
     public readonly struct TutorialConditionEvent
     {
+        public TutorialResultRecord LegacyResult { get; }
+        public TutorialConditionEvent(TutorialResultRecord record) : this()
+        { Kind = (TutorialConditionKind)(-1); Id = record.OccurrenceId; LegacyResult = record; }
         public TutorialConditionKind Kind { get; }
         public string Id { get; }
         public int MatchSize { get; }
@@ -25,7 +28,7 @@ namespace Tutorial
         { Kind = kind; Id = id; Entity = entity; Position = position; Amount = amount; Cause = cause; MatchSize = 0; Color = default; DirectSwap = directSwap; Item = null; }
         public TutorialConditionEvent(string id, BoardItem item) : this()
         { Kind = TutorialConditionKind.ItemUsed; Id = id; Entity = null; Position = default; Amount = 1; Cause = EffectOrigin.Unknown; MatchSize = 0; Color = default; DirectSwap = false; Item = item; }
-        public TutorialConditionEvent(string id, int missionIndex, int amount)
+        public TutorialConditionEvent(string id, int missionIndex, int amount) : this()
         { Kind = TutorialConditionKind.MissionProgress; Id = id; Entity = null; Position = default; Amount = amount; Cause = EffectOrigin.Unknown; MatchSize = 0; Color = default; DirectSwap = false; Item = null; MissionIndex = missionIndex; }
     }
 

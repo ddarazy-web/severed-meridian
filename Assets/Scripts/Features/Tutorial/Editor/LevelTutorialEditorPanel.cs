@@ -61,6 +61,7 @@ namespace Tutorial.Editor
             Foldout supply = new Foldout { text = "보드 시드와 신규 블록 공급", value = false };
             supply.Add(new PropertyField(tutorial.FindPropertyRelative("seed"), "튜토리얼 고정 시드"));
             supply.Add(new PropertyField(tutorial.FindPropertyRelative("supply"), "튜토리얼 고정 공급")); fields.Add(supply);
+            if (AddSharedControls(tutorial)) return;
             AddComposerControls();
             fields.Add(new Button(() => Edit(value =>
             {
@@ -160,7 +161,9 @@ namespace Tutorial.Editor
 
         private void ShowTargets()
         {
-            TutorialStepDefinition step = owner.Tutorial.steps?.ElementAtOrDefault(selected);
+            TutorialStepDefinition step;
+            try { step = (owner.Tutorial.flow == null ? owner.Tutorial : TutorialFlowResolver.Resolve(owner)).steps?.ElementAtOrDefault(selected); }
+            catch (ArgumentException) { board.ShowTutorialTargets(Array.Empty<BoardCoordinate>(), null, null); return; }
             if (step == null) { board.ShowTutorialTargets(Array.Empty<BoardCoordinate>(), null, null); return; }
             IEnumerable<BoardCoordinate> highlights = step.automaticHighlights ? PreviewTargetHighlights(step) : step.highlights;
             if (step.actionArea.Count > 0) board.ShowTutorialTargets(step.actionArea.Concat(highlights).Distinct().ToList(), null, null);
@@ -170,7 +173,7 @@ namespace Tutorial.Editor
 
         private void CancelPicking()
         {
-            fields.Q("tutorial-target-confirm")?.RemoveFromHierarchy();
+            fields.Q("tutorial-target-confirm")?.RemoveFromHierarchy(); fields.Q("tutorial-binding-confirm")?.RemoveFromHierarchy();
             fields.Q("tutorial-action-area-confirm")?.RemoveFromHierarchy();
             samplePreview?.Clear();
             if (board.TutorialTargetPicked == picker) board.TutorialTargetPicked = null;

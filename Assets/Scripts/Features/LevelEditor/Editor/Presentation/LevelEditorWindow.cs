@@ -65,6 +65,7 @@ namespace Levels.Editor
         {
             if (temporaryTutorialSample != null && !EditorUtility.IsPersistent(temporaryTutorialSample)) DestroyImmediate(temporaryTutorialSample);
             temporaryTutorialSample = null;
+            if (tutorialFlowDraft != null) DestroyImmediate(tutorialFlowDraft);
         }
 
         private void OnEnable()
@@ -258,6 +259,7 @@ namespace Levels.Editor
 
         public void SetLevel(LevelDefinition target)
         {
+            if (editingTutorialFlow != null && target != temporaryTutorialSample) return;
             if (level == target && data != null) return;
             tutorialPanel?.Dispose(); tutorialPanel = null; selectedTutorialStep = 0;
             board?.CancelStroke();

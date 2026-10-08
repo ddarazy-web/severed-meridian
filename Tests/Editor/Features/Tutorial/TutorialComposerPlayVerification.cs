@@ -20,7 +20,9 @@ namespace Tutorial.Editor
     {
         private const string Key = "Tutorial.Composer01.Play.";
         private static bool Samples => SessionState.GetBool(Key + "samples", false);
-        private static string Output => Samples ? "Logs/Tutorial/Composer02/Play/" : "Logs/Tutorial/Composer01/";
+        private static bool Shared => SessionState.GetBool(Key + "shared", false);
+        private static string SampleRecordKey => Shared ? "Puzzle.EditorLaunch.tutorialIdentity." + SessionState.GetString(Key + "identity", "") : "Puzzle.EditorLaunch.tutorialCompleted." + Number;
+        private static string Output => Shared ? "Logs/Tutorial/Composer03/Play/" : Samples ? "Logs/Tutorial/Composer02/Play/" : "Logs/Tutorial/Composer01/";
         private const int Number = 100001;
         static TutorialComposerPlayVerification()
         {
@@ -39,7 +41,13 @@ namespace Tutorial.Editor
         private static void Check(bool value, string message)
         { if (!value) throw new InvalidOperationException(message); File.AppendAllText(Output + "play-results.txt", "PASS " + message + "\n"); }
         public static void Run() => RunCases(false);
-        public static void RunSamples() => RunCases(true);
+        public static void RunSamples() { SessionState.SetBool(Key + "shared", false); RunCases(true); }
+        public static void RunSharedSamples()
+        {
+            SessionState.SetBool(Key + "shared", true);
+            SessionState.SetString(Key + "identity", "verification." + Guid.NewGuid().ToString("N"));
+            RunCases(true);
+        }
         private static void RunCases(bool samples)
         {
             if (!Application.isBatchMode) throw new InvalidOperationException("별도 검사 에디터에서만 실행합니다.");
@@ -135,6 +143,12 @@ namespace Tutorial.Editor
             string playerKey = "MoonRabbit.Tutorial.Completed." + Number;
             if (PlayerPrefs.HasKey(playerKey) != SessionState.GetBool(Key + "playerHas", false) || PlayerPrefs.GetInt(playerKey) != SessionState.GetInt(Key + "playerValue", 0))
                 error ??= new InvalidOperationException("실제 플레이어 완료 기록 변경");
+            if (Shared)
+            {
+                if (PlayerPrefs.HasKey("MoonRabbit.Tutorial.Identity." + SessionState.GetString(Key + "identity", "")))
+                    error ??= new InvalidOperationException("실제 플레이어 ID 기록 변경");
+                SessionState.EraseBool(SampleRecordKey);
+            }
             SessionState.SetBool(Key + "active", false);
             SessionState.SetBool("Tutorial.Composer01.FullRun", false);
             SessionState.SetBool("Puzzle.EditorLaunch.tutorialCompleted." + Number, SessionState.GetBool(Key + "oldRecord", false));

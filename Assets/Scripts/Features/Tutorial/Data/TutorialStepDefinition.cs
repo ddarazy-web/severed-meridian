@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Board;
 using MemoryPack;
 using Simulation;
@@ -12,6 +13,7 @@ namespace Tutorial
     [Serializable, MemoryPackable(SerializeLayout.Explicit)]
     public partial class TutorialStepDefinition
     {
+        [MemoryPackIgnore] public string authoringId = "";
         [MemoryPackOrder(0)] public TutorialStepKind kind;
         [MemoryPackOrder(1)] public string instructions = "";
         [MemoryPackOrder(2)] public List<BoardCoordinate> highlights = new List<BoardCoordinate>();
@@ -30,6 +32,18 @@ namespace Tutorial
         [MemoryPackIgnore] public List<BoardCoordinate> actionArea = new List<BoardCoordinate>();
         [MemoryPackIgnore] public string firstBinding = "";
         [MemoryPackIgnore] public string secondBinding = "";
+        public TutorialStepDefinition Copy() => new TutorialStepDefinition
+        {
+            authoringId = authoringId, kind = kind, instructions = instructions, hasFirst = hasFirst, first = first,
+            hasSecond = hasSecond, second = second, item = item, actionDefinitionId = actionDefinitionId,
+            highlights = highlights == null ? null : new List<BoardCoordinate>(highlights),
+            combination = combination, automaticHighlights = automaticHighlights, freeItemCount = freeItemCount,
+            actionArea = actionArea == null ? null : new List<BoardCoordinate>(actionArea),
+            firstBinding = firstBinding, secondBinding = secondBinding,
+            conditions = conditions?.Select(condition => condition?.Copy()).ToList(),
+            results = results?.Select(result => result == null ? null : new TutorialResultDefinition
+            { kind = result.kind, definitionId = result.definitionId, hasCoordinate = result.hasCoordinate, coordinate = result.coordinate, count = result.count }).ToList()
+        };
     }
 
     [Serializable, MemoryPackable(SerializeLayout.Explicit)]

@@ -12,6 +12,7 @@ namespace Levels.Editor
 
         internal void ShowLevelNamePanel(bool create)
         {
+            if (editingTutorialFlow != null) return;
             board?.CancelStroke(); data?.ApplyModifiedProperties();
             levelNamePanel.Clear(); levelNamePanel.style.display = DisplayStyle.Flex;
             LevelDefinition target = level;

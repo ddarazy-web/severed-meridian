@@ -69,10 +69,12 @@ namespace GameScreen.Editor
                 string visualJson = SessionState.GetString(Key + "visuals", "");
                 if (visualJson != "") session.ConfigureVisuals(JsonUtility.FromJson<ElementVisualCatalogDto>(visualJson));
                 session.SetLevelAdvanceEnabled(SessionState.GetInt(Key + "source", (int)PuzzleEditorLevelSource.Asset) == (int)PuzzleEditorLevelSource.MemoryPack);
-                session.ConfigureTutorial(Tutorial.TutorialExecutionContext.CreateEditor(
+                session.ConfigureTutorial(Tutorial.TutorialExecutionContext.CreateEditorWithIdentity(
                     (Tutorial.TutorialRunMode)SessionState.GetInt(Key + "tutorialMode", 0),
                     level => SessionState.GetBool(Key + "tutorialCompleted." + level, false),
-                    level => SessionState.SetBool(Key + "tutorialCompleted." + level, true)));
+                    level => SessionState.SetBool(Key + "tutorialCompleted." + level, true),
+                    id => SessionState.GetBool(Key + "tutorialIdentity." + id, false),
+                    id => SessionState.SetBool(Key + "tutorialIdentity." + id, true)));
                 definition = LevelPackCodec.ReadLevel(Convert.FromBase64String(encoded), SessionState.GetInt(Key + "number", 0));
                 LevelDefinition owned = definition; definition = null;
                 session.InitializeAsync(owned, SessionState.GetInt(Key + "seed", 12345), CancellationToken.None).Forget(error =>

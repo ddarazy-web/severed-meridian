@@ -15,7 +15,7 @@ namespace Tutorial
         private RuntimeSupply normalSupply;
         private bool released;
         private bool pending;
-        private readonly bool composed;
+
         private int recordCursor;
         private int recoveryCursor;
         private int missionCursor;
@@ -36,10 +36,11 @@ namespace Tutorial
             if (definition == null) throw new ArgumentNullException(nameof(definition));
             if (executor == null) throw new ArgumentNullException(nameof(executor));
             if (!definition.HasTutorial) throw new ArgumentException("활성 튜토리얼이 없습니다.", nameof(definition));
-            composed = definition.Tutorial.steps.Any(step => step.conditions?.Count > 0);
+            LevelTutorialDefinition resolved = TutorialFlowResolver.Resolve(definition);
+
             if (executor.PendingBoosters.Count > 0 || executor.BoosterPlacements.Count > 0)
                 throw new ArgumentException("튜토리얼에서는 시작 부스터를 사용할 수 없습니다.", nameof(executor));
-            Progress = new TutorialProgress(definition.Tutorial, readTargets: () => TutorialTargetQuery.Capture(executor.State),
+            Progress = new TutorialProgress(resolved, readTargets: () => TutorialTargetQuery.Capture(executor.State),
                 readMissionRemaining: () => executor.State.Missions.Select(mission => mission.Remaining).ToArray());
             if (Progress.State == TutorialProgressState.Error) throw new ArgumentException(Progress.Message, nameof(definition));
             this.normalSupply = normalSupply;
@@ -206,8 +207,8 @@ namespace Tutorial
                 if (Progress.State != TutorialProgressState.AwaitPresentation) pending = false;
             }
             if (!presentationReady) return;
-            if (composed && executor.State.MovesRemaining == 0 && executor.Phase == BoardActionPhase.Ready &&
-                Progress.State != TutorialProgressState.Completed && Progress.State != TutorialProgressState.Error)
+            if (executor.State.MovesRemaining == 0 && executor.Phase == BoardActionPhase.Ready &&
+                Progress.State == TutorialProgressState.AwaitAction && !Progress.Snapshot.FreeItemAvailable)
                 Progress.Cancel("이동 횟수 소진 · 튜토리얼 미완료");
             if (!pending) RefreshGuidance();
             if (Progress.State == TutorialProgressState.Completed || Progress.State == TutorialProgressState.Error || Progress.State == TutorialProgressState.Cancelled)

@@ -45,12 +45,27 @@ namespace Tutorial.Editor
                 owner.rootVisualElement.Q<Toggle>("tutorial-origin-0-Rocket").value = true;
                 Check(data.Tutorial.steps[0].conditions.Single().allowedOrigins.SequenceEqual(new[] { EffectOrigin.Rocket }), "편집 UI로 대상·감소 조건·원인을 조립");
             }
+            if (Shared)
+            {
+                string flowPath = SessionState.GetString(Key + "folder", "") + "/Flow.asset";
+                TutorialFlowDefinition flow = AssetDatabase.LoadAssetAtPath<TutorialFlowDefinition>(flowPath);
+                if (flow == null) { flow = ScriptableObject.CreateInstance<TutorialFlowDefinition>(); AssetDatabase.CreateAsset(flow, flowPath); }
+                flow.steps = TutorialFlowAuthoring.CopySteps(data.Tutorial.steps); flow.parameters.Clear();
+                TutorialFlowAuthoring.EnsureIds(flow.steps);
+                TutorialStepDefinition first = flow.steps[0];
+                if (first.conditions.Count > 0)
+                    flow.parameters.Add(new TutorialFlowParameter { key = "required", label = "조건 목표", stepId = first.authoringId, conditionId = first.conditions[0].authoringId, field = TutorialFlowField.RequiredCount });
+                EditorUtility.SetDirty(flow); AssetDatabase.SaveAssetIfDirty(flow);
+                TutorialFlowAuthoring.Connect(data, flow); data.Tutorial.steps.Clear();
+                data.Tutorial.completionId = SessionState.GetString(Key + "identity", "");
+                Check(data.HasTutorial && data.Tutorial.steps.Count == 0, "공통 흐름 참조와 레벨별 값만으로 실제 게임 준비 " + id);
+            }
             string authored = JsonUtility.ToJson(data.Tutorial);
             AssetDatabase.SaveAssetIfDirty(data); owner.SetLevel(null); Resources.UnloadAsset(data);
             data = AssetDatabase.LoadAssetAtPath<LevelDefinition>(path);
             Check(JsonUtility.ToJson(data.Tutorial) == authored, "새 조건 실제 에셋 저장·언로드·재로드 " + id);
             File.WriteAllBytes(LevelPackBuild.FilePath(Number), LevelPackCodec.Snapshot(data)); AssetDatabase.ImportAsset(LevelPackBuild.FilePath(Number));
-            SessionState.SetBool("Puzzle.EditorLaunch.tutorialCompleted." + Number, false);
+            SessionState.SetBool(SampleRecordKey, false);
         }
 
         private static void Gesture(PuzzleGameSession session, BoardCoordinate first, BoardCoordinate second)
@@ -109,12 +124,12 @@ namespace Tutorial.Editor
             Check(session.State.MovesRemaining == moves - (id == "hammer" || id == "item-swap" || id == "shuffle" ? 0 : actions), "아이템과 교환 이동 소비 구분 " + id);
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
             Check(!view.Content.gameObject.activeInHierarchy && session.CanAcceptInput, "완료 뒤 강조·입력 제한 해제 " + id);
-            Check(SessionState.GetBool("Puzzle.EditorLaunch.tutorialCompleted." + Number, false), "에디터 시험 문맥 완료 기록 " + id);
+            Check(SessionState.GetBool(SampleRecordKey, false), "에디터 시험 문맥 완료 기록 " + id);
 
             await session.RestartAsync(CancellationToken.None); await Wait(() => session.CanAcceptInput && !session.HasProgressFeedback);
             Check(session.TutorialState.StepIndex == 0 && session.TutorialState.ConditionCounts.All(count => count == 0) &&
                 initial == string.Join(";", session.State.Cells.Select(cell => cell.Coordinate + ":" + cell.Content + ":" + cell.Color)), "실제 재시작은 고정 보드·첫 단계·집계0 복원 " + id);
-            SessionState.SetBool("Puzzle.EditorLaunch.tutorialCompleted." + Number, false);
+            SessionState.SetBool(SampleRecordKey, false);
             if (id == "damage")
             {
                 TutorialBoardAdapter adapter = (TutorialBoardAdapter)typeof(PuzzleGameSession).GetField("tutorial", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session);
@@ -123,7 +138,7 @@ namespace Tutorial.Editor
                 session.SetPaused(false); await Wait(() => session.CanAcceptInput && session.TutorialState.State == TutorialProgressState.Error);
                 await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
                 Check(!session.HasFailed && !view.Content.gameObject.activeInHierarchy && session.State.Supply.Sources.All(source => source.Mode == SupplyMode.Random) &&
-                    !SessionState.GetBool("Puzzle.EditorLaunch.tutorialCompleted." + Number, false), "실게임 안내 오류는 일반 공급·입력 복귀·완료 미기록");
+                    !SessionState.GetBool(SampleRecordKey, false), "실게임 안내 오류는 일반 공급·입력 복귀·완료 미기록");
             }
             if (id == "two")
             {
@@ -131,7 +146,7 @@ namespace Tutorial.Editor
                 Gesture(session, session.TutorialState.First.Value, session.TutorialState.Second.Value);
                 await Wait(() => session.ResultReady);
                 Check(session.Outcome.Kind == BoardOutcomeKind.MovesExhausted && session.TutorialState.State == TutorialProgressState.Cancelled &&
-                    !SessionState.GetBool("Puzzle.EditorLaunch.tutorialCompleted." + Number, false), "실게임 미충족 이동 소진은 정상 실패·완료 미기록");
+                    !SessionState.GetBool(SampleRecordKey, false), "실게임 미충족 이동 소진은 정상 실패·완료 미기록");
                 PuzzleResultView result = null;
                 await Wait(() => (result = UnityEngine.Object.FindFirstObjectByType<PuzzleResultView>()) != null && result.isActiveAndEnabled);
                 UnityEngine.UI.Button retry = (UnityEngine.UI.Button)typeof(PuzzleResultView).GetField("retry", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(result);
@@ -151,7 +166,7 @@ namespace Tutorial.Editor
                 await session.RestartAsync(CancellationToken.None);
                 await Wait(() => session.CanAcceptInput && !session.HasProgressFeedback);
                 Check(!session.HasFailed && session.TutorialState == null && session.State.Supply.Sources.All(source => source.Mode == SupplyMode.Random) &&
-                    !SessionState.GetBool("Puzzle.EditorLaunch.tutorialCompleted." + Number, false), "재시작 준비의 안내 오류는 일반 공급·입력 복귀·완료 미기록");
+                    !SessionState.GetBool(SampleRecordKey, false), "재시작 준비의 안내 오류는 일반 공급·입력 복귀·완료 미기록");
             }
             view.GetComponentInParent<PuzzleScreenView>().enabled = false; EditorApplication.ExitPlaymode();
         }

@@ -26,14 +26,14 @@ namespace Levels
             PackedTutorialLevelPack pack = new PackedTutorialLevelPack
             {
                 FirstLevel = FirstLevel(source[0].LevelNumber),
-                ElementPack = EncodeElements(source, catalog, source.SelectMany(level => LevelTutorialValidator.References(level.Tutorial))),
+                ElementPack = EncodeElements(source, catalog, source.SelectMany(level => LevelTutorialValidator.References(TutorialFlowResolver.Resolve(level)))),
                 // 모든 레벨에 기록을 둬서 메타데이터 누락과 중복을 검출한다.
                 Tutorials = source.Select(level => new PackedLevelTutorial
-                { LevelNumber = level.LevelNumber, Tutorial = level.HasTutorial ? level.Tutorial : null }).ToArray()
+                { LevelNumber = level.LevelNumber, Tutorial = level.HasTutorial ? TutorialFlowResolver.Resolve(level) : null }).ToArray()
             };
             byte[] payload = MemoryPackSerializer.Serialize(pack), bytes = new byte[payload.Length + 8];
             Array.Copy(TutorialMagic, bytes, 4); bytes[4] = TutorialFormatVersion;
-            Array.Copy(payload, 0, bytes, 8, payload.Length); return EncodeComposer(bytes, pack);
+            Array.Copy(payload, 0, bytes, 8, payload.Length); return EncodeIdentity(EncodeComposer(bytes, pack), pack);
         }
 
         private static bool IsTutorialPack(byte[] bytes) => bytes != null && bytes.Length >= 4 &&
@@ -44,8 +44,9 @@ namespace Levels
 
         private static PackedTutorialLevelPack DecodeTutorial(byte[] bytes, bool validate)
         {
-            if (!IsTutorialPack(bytes) || bytes.Length < 8 || (bytes[4] != TutorialFormatVersion && bytes[4] != 4 && bytes[4] != 5) || bytes[5] != 0 || bytes[6] != 0 || bytes[7] != 0)
+            if (!IsTutorialPack(bytes) || bytes.Length < 8 || (bytes[4] != TutorialFormatVersion && bytes[4] != 4 && bytes[4] != 5 && bytes[4] != 6) || bytes[5] != 0 || bytes[6] != 0 || bytes[7] != 0)
                 throw new InvalidOperationException("지원하지 않는 튜토리얼 팩 헤더입니다.");
+            if (bytes[4] == 6) return DecodeIdentity(bytes);
             if (bytes[4] == 5) return DecodeConditionDetails(bytes);
             if (bytes[4] == 4) return DecodeComposer(bytes);
             PackedTutorialLevelPack pack = MemoryPackSerializer.Deserialize<PackedTutorialLevelPack>(bytes.AsSpan(8));
