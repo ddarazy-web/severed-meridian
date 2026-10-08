@@ -1,6 +1,6 @@
 # 조합형 튜토리얼 후속 계획 — 사용자 제작 흐름 점검
 
-상태: 다음 작업 제안. 이 문서 작성으로 실행하지 않는다.
+상태: 완료 · 2026-10-08. 사용자가 선택한 임시 3매칭 샘플에서 점검했고 수정할 문제는 재현되지 않았다.
 
 [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/composer-authoring-review-goal.md) · [실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/composer-authoring-review-command.md)
 
@@ -21,3 +21,5 @@
 - HTML 매뉴얼은 사용자가 별도로 요청할 때만 업데이트한다.
 - 빌드·커밋·푸시를 하지 않는다. 모바일 성능은 실제 기기에서 측정하지 않았다면 보장하지 않는다.
 - 모든 다음 단계 문서를 미리 만들지 않는다. 이 점검에서 확인된 필요에 따라 다음 작업을 정한다.
+
+[실행 결과와 검증 한계](../../../Verification/MoonRabbitJunkyard/Tutorial/composer-authoring-review-progress.md).
