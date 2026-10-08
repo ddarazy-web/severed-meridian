@@ -13,6 +13,7 @@ namespace Tutorial
     {
         private const string Prefix = "MoonRabbit.Tutorial.Completed.";
         private const string IdentityPrefix = "MoonRabbit.Tutorial.Identity.";
+        public bool UsesPlayerProgress { get; private set; }
         private readonly TutorialRunMode mode;
         private readonly Func<int, bool> read;
         private readonly Action<int> write;
@@ -23,11 +24,15 @@ namespace Tutorial
         { this.mode = mode; this.read = read; this.write = write; this.readIdentity = readIdentity; this.writeIdentity = writeIdentity; }
 
         public static TutorialExecutionContext CreatePlayer()
-            => CreateEditorWithIdentity(TutorialRunMode.Automatic,
+        {
+            TutorialExecutionContext context = CreateEditorWithIdentity(TutorialRunMode.Automatic,
                 level => PlayerPrefs.GetInt(Prefix + level, 0) == 1,
                 level => { PlayerPrefs.SetInt(Prefix + level, 1); PlayerPrefs.Save(); },
                 id => PlayerPrefs.GetInt(IdentityPrefix + id, 0) == 1,
                 id => { PlayerPrefs.SetInt(IdentityPrefix + id, 1); PlayerPrefs.Save(); });
+            context.UsesPlayerProgress = true;
+            return context;
+        }
 
         public static TutorialExecutionContext CreateTest(int mode)
         {

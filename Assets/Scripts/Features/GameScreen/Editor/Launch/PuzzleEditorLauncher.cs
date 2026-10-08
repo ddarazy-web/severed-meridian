@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Levels;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -61,23 +60,27 @@ namespace GameScreen.Editor
             if (encoded == "") return;
             // Start보다 앞서 요청을 소비한다. 씬을 다시 로드해도 이전 입력을 재사용하지 않는다.
             SessionState.EraseString(Key + "bytes");
-            LevelDefinition definition = null;
             try
             {
                 PuzzleGameSession session = scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<PuzzleGameSession>(true)).Single();
                 string encodedVisuals = SessionState.GetString(Key + "visuals", "");
-                if (encodedVisuals != "") session.ConfigureVisuals(PuzzleEditorLaunchRequest.DecodeVisuals(encodedVisuals));
-                session.SetLevelAdvanceEnabled(SessionState.GetInt(Key + "source", (int)PuzzleEditorLevelSource.Asset) == (int)PuzzleEditorLevelSource.MemoryPack);
-                session.ConfigureTutorial(Tutorial.TutorialExecutionContext.CreateEditorWithIdentity(
+                PuzzlePlayRequest request = new PuzzlePlayRequest(Convert.FromBase64String(encoded),
+                    SessionState.GetInt(Key + "number", 0), SessionState.GetInt(Key + "seed", 12345),
+                    encodedVisuals == "" ? null : PuzzleEditorLaunchRequest.DecodeVisuals(encodedVisuals));
+                PuzzlePlayContext context = PuzzlePlayContext.CreateTest(Tutorial.TutorialExecutionContext.CreateEditorWithIdentity(
                     (Tutorial.TutorialRunMode)SessionState.GetInt(Key + "tutorialMode", 0),
                     level => SessionState.GetBool(Key + "tutorialCompleted." + level, false),
                     level => SessionState.SetBool(Key + "tutorialCompleted." + level, true),
                     id => SessionState.GetBool(Key + "tutorialIdentity." + id, false),
-                    id => SessionState.SetBool(Key + "tutorialIdentity." + id, true)));
-                definition = LevelPackCodec.ReadLevel(Convert.FromBase64String(encoded), SessionState.GetInt(Key + "number", 0));
-                LevelDefinition owned = definition; definition = null;
-                session.InitializeAsync(owned, SessionState.GetInt(Key + "seed", 12345), CancellationToken.None).Forget(error =>
+                    id => SessionState.SetBool(Key + "tutorialIdentity." + id, true)),
+                    SessionState.GetInt(Key + "source", (int)PuzzleEditorLevelSource.Asset) == (int)PuzzleEditorLevelSource.MemoryPack);
+                session.InitializeAsync(request, context, CancellationToken.None).Forget(error =>
                 {
+                    if (error is OperationCanceledException)
+                    {
+                        SessionState.SetString(Key + "message", "게임 진입이 취소되었습니다.");
+                        return;
+                    }
                     SessionState.SetString(Key + "message", "게임 초기화 실패: " + error.Message);
                     Debug.LogException(error);
                     EditorApplication.ExitPlaymode();
@@ -85,7 +88,6 @@ namespace GameScreen.Editor
             }
             catch (Exception error)
             {
-                if (definition != null) UnityEngine.Object.DestroyImmediate(definition);
                 SessionState.SetString(Key + "message", "게임 초기화 실패: " + error.Message);
                 Debug.LogException(error);
                 EditorApplication.ExitPlaymode();

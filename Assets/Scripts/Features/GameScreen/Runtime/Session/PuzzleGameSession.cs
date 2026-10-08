@@ -22,6 +22,7 @@ namespace GameScreen
         private bool started;
         private bool ready;
         private bool failed;
+        public PuzzlePlayContext PlayContext { get; private set; }
         public LevelRuntimeState State => executor?.State;
         public BoardOutcome Outcome => executor?.Outcome;
         public BoardActionPhase Phase => executor?.Phase ?? BoardActionPhase.Stopped;
@@ -59,7 +60,11 @@ namespace GameScreen
         public UniTask InitializeAsync(LevelDefinition ownedDefinition, int randomSeed, CancellationToken token)
             => InitializeCoreAsync(ownedDefinition, ownedDefinition != null ? ownedDefinition.LevelNumber : 0, randomSeed, token);
 
-        private async UniTask InitializeCoreAsync(LevelDefinition definition, int number, int randomSeed, CancellationToken token)
+        public UniTask InitializeAsync(PuzzlePlayRequest request, PuzzlePlayContext context, CancellationToken token)
+            => InitializeCoreAsync(null, request?.LevelNumber ?? 0, request?.Seed ?? 0, token, request, context, true);
+
+        private async UniTask InitializeCoreAsync(LevelDefinition definition, int number, int randomSeed, CancellationToken token,
+            PuzzlePlayRequest request = null, PuzzlePlayContext context = null, bool explicitRequest = false)
         {
             if (started)
             {
@@ -71,15 +76,35 @@ namespace GameScreen
             try
             {
                 linked.Token.ThrowIfCancellationRequested();
-                if (definition == null) definition = await LevelPackLoader.LoadAsync(number, linked.Token);
+                if (explicitRequest)
+                {
+                    // 실패해도 Start가 정식 레벨 로딩으로 우회하지 않도록 먼저 실행권을 확보한다.
+                    if (request == null) throw new ArgumentNullException(nameof(request));
+                    if (context == null) throw new ArgumentNullException(nameof(context));
+                    PlayContext = context;
+                    tutorialContext = context.Tutorial;
+                    levelAdvanceEnabled = context.AllowLevelAdvance;
+                    ElementVisualCatalogDto visuals = request.CreateVisuals();
+                    visualCatalog = visuals == null ? null : LegacyElementVisuals.WithOverrides(visuals);
+                    definition = request.CreateDefinition();
+                }
+                else if (definition == null) definition = await LevelPackLoader.LoadAsync(number, linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
                 visualCatalog ??= ElementVisualLookup.ForLevel(definition);
                 initialBytes = LevelPackCodec.Snapshot(definition);
                 levelNumber = number; seed = randomSeed;
                 await PrepareAsync(definition, randomSeed, linked.Token);
             }
-            catch (OperationCanceledException) { ready = false; DisposeTutorial(); artwork?.Dispose(); }
-            catch (Exception error) { Fail("레벨 " + number + " 시작 실패: " + error.Message); }
+            catch (OperationCanceledException)
+            {
+                ready = false; DisposeTutorial(); artwork?.Dispose();
+                if (explicitRequest) throw;
+            }
+            catch (Exception error)
+            {
+                Fail("레벨 " + number + " 시작 실패: " + error.Message);
+                if (explicitRequest) throw;
+            }
             finally
             {
                 if (definition != null) Destroy(definition);

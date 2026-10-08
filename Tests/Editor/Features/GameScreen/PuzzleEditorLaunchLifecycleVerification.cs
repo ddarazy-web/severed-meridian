@@ -37,7 +37,9 @@ namespace GameScreen.Editor
         }
 
         [MenuItem("Tools/Match/게임 실행 왕복 검증")]
-        public static void Run()
+        public static void Run() => RunFrom(0);
+        public static void RunEarlyExit() => RunFrom(8);
+        private static void RunFrom(int firstCase)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || PuzzleEditorLauncher.IsBusy) throw new Exception("게임 종료 후 검사하세요.");
             if (File.Exists(LevelPackBuild.FilePath(First))) throw new Exception("검사 전용 구간이 사용 중입니다.");
@@ -56,7 +58,7 @@ namespace GameScreen.Editor
             GameObject marker = new GameObject(Marker); SceneManager.MoveGameObjectToScene(marker, scratch);
             EditorSceneManager.MarkSceneDirty(scratch);
             SessionState.SetString(Key + "scenes", Scenes());
-            SessionState.SetInt(Key + "case", 0);
+            SessionState.SetInt(Key + "case", firstCase);
             SessionState.SetBool(Key + "cancelEnteredPlay", false);
             SessionState.SetBool(Key + "earlyExit", false);
             try { BeginCase(); } catch (Exception error) { Fail(error); }
@@ -79,7 +81,8 @@ namespace GameScreen.Editor
             source.hideFlags = HideFlags.DontSave;
             int number = First + index % 2;
             JsonUtility.FromJsonOverwrite("{\"levelNumber\":" + number + ",\"moveCount\":23}", source);
-            File.WriteAllBytes(LevelPackBuild.FilePath(number), LevelPackCodec.Encode(new[] { source }));
+            source.Tutorial.flow = null; source.Tutorial.steps.Clear(); source.Tutorial.supply.sources.Clear();
+            File.WriteAllBytes(LevelPackBuild.FilePath(number), LevelPackCodec.Snapshot(source));
             JsonUtility.FromJsonOverwrite("{\"moveCount\":37}", source);
             EditorUtility.SetDirty(source);
             SessionState.SetString(Key + "sourceJson", JsonUtility.ToJson(source));
@@ -138,7 +141,7 @@ namespace GameScreen.Editor
                 {
                     if (index == 8) return;
                     PuzzleGameSession session = UnityEngine.Object.FindFirstObjectByType<PuzzleGameSession>();
-                    if (session == null || !session.CanAcceptInput) return;
+                    if (session == null || !session.IsReady || session.IsStartingFeedback) return;
                     Check(UnityEngine.Object.FindObjectsByType<PuzzleGameSession>(FindObjectsSortMode.None).Length == 1, "SingleSession case=" + index);
                     if (index == 9)
                     {
@@ -146,9 +149,11 @@ namespace GameScreen.Editor
                         LevelDefinition normal = LevelPackCodec.ReadLevel(File.ReadAllBytes(LevelPackBuild.FilePath(1)), 1);
                         try
                         {
-                            StartingBoardSearch search = new StartingBoardSearch(normal, 12345);
+                            StartingBoardSearch search = new StartingBoardSearch(normal, session.TutorialState != null ? normal.Tutorial.seed : 12345);
                             while (!search.IsDone) search.Advance(128);
-                            Check(Snapshot(session.State) == Snapshot(search.State), "DefaultSeed12345");
+                            using Tutorial.TutorialBoardAdapter adapter = session.TutorialState != null ? Tutorial.TutorialBoardAdapter.Prepare(normal, search.State) : null;
+                            LevelRuntimeState expected = adapter?.Executor.State ?? new BoardActionExecutor(search.State).State;
+                            Check(Snapshot(session.State) == Snapshot(expected), "DefaultLevelUsesCorrectSeedAndTutorialSupply");
                         }
                         finally { UnityEngine.Object.Destroy(normal); }
                     }
@@ -178,6 +183,11 @@ namespace GameScreen.Editor
                         LevelEditorWindow owner = EditorUtility.InstanceIDToObject(SessionState.GetInt(Key + "owner", 0)) as LevelEditorWindow;
                         Check(source != null && JsonUtility.ToJson(source) == SessionState.GetString(Key + "sourceJson", "") && EditorUtility.IsDirty(source) == SessionState.GetBool(Key + "sourceDirty", false), "UnsavedSourceAndDirtyPreserved case=" + index);
                         Check(owner != null && owner.CurrentLevel == source && owner.WorkspaceTab == 0, "OriginalWindowSelectionRestored case=" + index);
+                        if (index == 8)
+                        {
+                            string message = (string)typeof(LevelEditorWindow).GetField("gameLaunchMessage", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(owner);
+                            Check(!message.Contains("실패"), "EarlyExitIsNotFailure message=" + message);
+                        }
                         if (index < 8)
                         {
                             string message = (string)typeof(LevelEditorWindow).GetField("gameLaunchMessage", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(owner);

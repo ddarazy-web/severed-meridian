@@ -2,6 +2,10 @@
 
 [전체 문서 분류](../README.md)
 
+- [게임·제작 도구 분리 2단계 복사용 목표 실행문](project-wide/game-authoring-stage-02-command.md)
+
+- [게임·제작 도구 분리 1단계 복사용 목표 실행문](project-wide/game-authoring-stage-01-command.md)
+
 - [레벨 튜토리얼 1단계 복사용 실행문](MoonRabbitJunkyard/Tutorial/stage-01-command.md)
 - [레벨 튜토리얼 2단계 복사용 실행문](MoonRabbitJunkyard/Tutorial/stage-02-command.md)
 - [레벨 튜토리얼 3단계 복사용 실행문](MoonRabbitJunkyard/Tutorial/stage-03-command.md)

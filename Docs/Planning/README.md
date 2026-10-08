@@ -2,6 +2,10 @@
 
 [전체 문서 분류](../README.md)
 
+- [게임·제작 도구 분리 2단계 — JSON 계약·안전한 변환](project-wide/game-authoring-stage-02-plan.md)
+
+- [게임·제작 도구 분리 1단계 — 제품 경계·공통 플레이 진입](project-wide/game-authoring-stage-01-plan.md)
+
 - [게임·Windows 제작 도구 분리 — 6단계 통합 계획](project-wide/2026-10-08-game-and-authoring-products-plan.md)
 
 - [JSON 제작 데이터 전환 — 5단계 제안](project-wide/2026-10-08-json-authoring-transition-plan.md)

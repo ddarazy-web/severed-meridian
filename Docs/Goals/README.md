@@ -2,6 +2,10 @@
 
 [전체 문서 분류](../README.md)
 
+- [게임·제작 도구 분리 2단계 목표·완료 조건](project-wide/game-authoring-stage-02-goal.md)
+
+- [게임·제작 도구 분리 1단계 목표·완료 조건](project-wide/game-authoring-stage-01-goal.md)
+
 - [레벨 튜토리얼 1단계 목표·완료 조건](MoonRabbitJunkyard/Tutorial/stage-01-data-editor-goal.md)
 - [레벨 튜토리얼 2단계 목표·완료 조건](MoonRabbitJunkyard/Tutorial/stage-02-runtime-goal.md)
 - [레벨 튜토리얼 3단계 목표·완료 조건](MoonRabbitJunkyard/Tutorial/stage-03-game-integration-goal.md)
