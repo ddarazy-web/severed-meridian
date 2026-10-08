@@ -2,6 +2,10 @@
 
 [전체 문서 분류](../README.md)
 
+- [게임·Windows 제작 도구 분리 — 6단계 통합 계획](project-wide/2026-10-08-game-and-authoring-products-plan.md)
+
+- [JSON 제작 데이터 전환 — 5단계 제안](project-wide/2026-10-08-json-authoring-transition-plan.md)
+
 - [레벨 튜토리얼 — 4단계 통합 가이드라인](MoonRabbitJunkyard/Tutorial/integration-guideline.md)
 - [레벨 튜토리얼 1단계 — 데이터·저장·에디터](MoonRabbitJunkyard/Tutorial/stage-01-data-editor-plan.md)
 - [레벨 튜토리얼 2단계 — 확장 가능한 진행 엔진](MoonRabbitJunkyard/Tutorial/stage-02-runtime-plan.md)
