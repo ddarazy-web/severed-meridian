@@ -11,7 +11,7 @@ using UnityEngine.UIElements;
 namespace Tutorial.Editor
 {
     /// <summary>레벨 설정의 제작 패널. 보드 대상 선택은 배치 도구와 독립적이며 두 칸 선택은 한 번에 확정한다.</summary>
-    public sealed class LevelTutorialEditorPanel : VisualElement, IDisposable
+    public sealed partial class LevelTutorialEditorPanel : VisualElement, IDisposable
     {
         private readonly LevelDefinition owner;
         private readonly LevelBoardView board;
@@ -22,9 +22,13 @@ namespace Tutorial.Editor
         private Label pickStatus;
         private Action<BoardCoordinate> picker;
         private readonly VisualElement fields = new VisualElement();
+        private readonly VisualElement stageHost;
+        private readonly VisualElement testHost;
 
-        public LevelTutorialEditorPanel(LevelDefinition owner, LevelBoardView board, int selected, Action<int> selectionChanged)
+        public LevelTutorialEditorPanel(LevelDefinition owner, LevelBoardView board, int selected, Action<int> selectionChanged,
+            VisualElement stageHost = null, VisualElement testHost = null)
         {
+            this.stageHost = stageHost; this.testHost = testHost;
             this.owner = owner; this.board = board; this.selected = selected; this.selectionChanged = selectionChanged;
             input = new SerializedObject(owner); name = "tutorial-editor";
             Foldout foldout = new Foldout { text = "레벨 튜토리얼", value = true }; Add(foldout); foldout.Add(fields);
@@ -54,8 +58,10 @@ namespace Tutorial.Editor
                 replayStatus.text = issues.Count == 0 ? "논리 재생 통과 · 실제 화면 연출 검사는 별도입니다." : string.Join("\n", issues.Select(issue => issue.ToString()));
             }) { text = "튜토리얼 논리 재생 검사", name = "tutorial-replay" });
             fields.Add(replayStatus);
-            fields.Add(new PropertyField(tutorial.FindPropertyRelative("seed"), "튜토리얼 고정 시드"));
-            fields.Add(new PropertyField(tutorial.FindPropertyRelative("supply"), "튜토리얼 고정 공급"));
+            Foldout supply = new Foldout { text = "보드 시드와 신규 블록 공급", value = false };
+            supply.Add(new PropertyField(tutorial.FindPropertyRelative("seed"), "튜토리얼 고정 시드"));
+            supply.Add(new PropertyField(tutorial.FindPropertyRelative("supply"), "튜토리얼 고정 공급")); fields.Add(supply);
+            AddComposerControls();
             fields.Add(new Button(() => Edit(value =>
             {
                 SerializedProperty list = value.FindPropertyRelative("steps"); selected = list.arraySize; list.arraySize++;
@@ -63,6 +69,11 @@ namespace Tutorial.Editor
                 step.FindPropertyRelative("kind").enumValueIndex = 0;
                 step.FindPropertyRelative("instructions").stringValue = "새 안내";
                 step.FindPropertyRelative("highlights").ClearArray(); step.FindPropertyRelative("results").ClearArray();
+                step.FindPropertyRelative("conditions").ClearArray(); step.FindPropertyRelative("combination").enumValueIndex = 0;
+                step.FindPropertyRelative("automaticHighlights").boolValue = false;
+                step.FindPropertyRelative("freeItemCount").intValue = 1;
+                step.FindPropertyRelative("actionArea").arraySize = 0;
+                step.FindPropertyRelative("firstBinding").stringValue = step.FindPropertyRelative("secondBinding").stringValue = "";
                 step.FindPropertyRelative("hasFirst").boolValue = step.FindPropertyRelative("hasSecond").boolValue = false;
                 step.FindPropertyRelative("actionDefinitionId").stringValue = ""; step.FindPropertyRelative("item").enumValueIndex = 0;
                 step.FindPropertyRelative("first").FindPropertyRelative("row").intValue = step.FindPropertyRelative("first").FindPropertyRelative("column").intValue = 0;
@@ -82,7 +93,16 @@ namespace Tutorial.Editor
                 foreach ((string key, string label) in new[] { ("kind", "단계 종류"), ("instructions", "안내 문구"), ("highlights", "강조 칸"),
                     ("hasFirst", "첫 대상 지정"), ("first", "첫 대상 좌표"), ("hasSecond", "둘째 대상 지정"), ("second", "둘째 대상 좌표"),
                     ("item", "체험 아이템"), ("actionDefinitionId", "발동 파워 정의 ID"), ("results", "생성·발동·제거 조건") })
-                    fields.Add(new PropertyField(current.FindPropertyRelative(key), label) { name = "tutorial-field-" + key });
+                {
+                    var field = new PropertyField(current.FindPropertyRelative(key), label) { name = "tutorial-field-" + key };
+                    if (key == "kind" || key == "item")
+                    {
+                        int initial = current.FindPropertyRelative(key).enumValueIndex;
+                        field.RegisterCallback<SerializedPropertyChangeEvent>(evt =>
+                        { if (!disposed && evt.changedProperty.enumValueIndex != initial) field.schedule.Execute(Rebuild); });
+                    }
+                    fields.Add(field);
+                }
                 fields.Add(new Button(() => BeginPicking(true)) { text = "보드에서 교환 두 칸 선택", name = "tutorial-pick-pair" });
                 fields.Add(new Button(() => BeginPicking(false)) { text = "보드에서 아이템 한 칸 선택", name = "tutorial-pick-item" });
                 fields.Add(new Button(BeginHighlightPicking) { text = "보드에서 강조 칸 추가/제거", name = "tutorial-pick-highlight" });
@@ -91,8 +111,11 @@ namespace Tutorial.Editor
             pickStatus = new Label("대상 선택 중에는 블록을 칠하거나 교체하지 않습니다.") { name = "tutorial-pick-status" };
             pickStatus.style.whiteSpace = WhiteSpace.Normal; fields.Add(pickStatus);
             foreach (LevelValidationIssue issue in LevelTutorialValidator.Validate(owner))
+            {
                 fields.Add(new HelpBox(issue.ToString(), HelpBoxMessageType.Error) { name = "tutorial-error" });
-            fields.Bind(input); ShowTargets();
+                fields.Add(new Button(() => FocusIssue(issue)) { text = "이 오류의 설정으로 이동", name = "tutorial-error-jump" });
+            }
+            fields.Bind(input); ShowTargets(); ArrangeComposer();
         }
 
         private void BeginPicking(bool pair)
@@ -108,9 +131,11 @@ namespace Tutorial.Editor
                 Edit(value =>
                 {
                     SerializedProperty step = value.FindPropertyRelative("steps").GetArrayElementAtIndex(selected);
+                    step.FindPropertyRelative("firstBinding").stringValue = step.FindPropertyRelative("secondBinding").stringValue = "";
                     step.FindPropertyRelative("hasFirst").boolValue = true; step.FindPropertyRelative("hasSecond").boolValue = pair;
                     SetCoordinate(step.FindPropertyRelative("first"), first ?? coordinate);
                     if (pair) SetCoordinate(step.FindPropertyRelative("second"), coordinate);
+                    SetAutomaticHighlights(step);
                 });
             };
             board.TutorialTargetPicked = picker; board.Focus(); pickStatus.text = pair ? "첫 번째 칸을 선택하세요." : "아이템 대상 칸을 선택하세요.";
@@ -121,6 +146,7 @@ namespace Tutorial.Editor
             board.CancelStroke();
             picker = coordinate => Edit(value =>
             {
+                value.FindPropertyRelative("steps").GetArrayElementAtIndex(selected).FindPropertyRelative("automaticHighlights").boolValue = false;
                 SerializedProperty list = value.FindPropertyRelative("steps").GetArrayElementAtIndex(selected).FindPropertyRelative("highlights");
                 int index = owner.Tutorial.steps[selected].highlights.IndexOf(coordinate);
                 if (index >= 0) list.DeleteArrayElementAtIndex(index);
@@ -135,11 +161,18 @@ namespace Tutorial.Editor
         private void ShowTargets()
         {
             TutorialStepDefinition step = owner.Tutorial.steps?.ElementAtOrDefault(selected);
-            board.ShowTutorialTargets(step?.highlights ?? new List<BoardCoordinate>(), step?.hasFirst == true ? step.first : null, step?.hasSecond == true ? step.second : null);
+            if (step == null) { board.ShowTutorialTargets(Array.Empty<BoardCoordinate>(), null, null); return; }
+            IEnumerable<BoardCoordinate> highlights = step.automaticHighlights ? PreviewTargetHighlights(step) : step.highlights;
+            if (step.actionArea.Count > 0) board.ShowTutorialTargets(step.actionArea.Concat(highlights).Distinct().ToList(), null, null);
+            else board.ShowTutorialTargets(highlights, step.hasFirst && string.IsNullOrEmpty(step.firstBinding) ? step.first : null,
+                step.hasSecond && string.IsNullOrEmpty(step.secondBinding) ? step.second : null);
         }
 
         private void CancelPicking()
         {
+            fields.Q("tutorial-target-confirm")?.RemoveFromHierarchy();
+            fields.Q("tutorial-action-area-confirm")?.RemoveFromHierarchy();
+            samplePreview?.Clear();
             if (board.TutorialTargetPicked == picker) board.TutorialTargetPicked = null;
             picker = null;
             if (pickStatus != null) pickStatus.text = "대상 선택 대기";

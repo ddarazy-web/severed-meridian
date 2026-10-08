@@ -19,6 +19,11 @@ namespace Tutorial
                 if (step == null) continue;
                 if (!registry.TryGetStep(step, out ITutorialStepHandler handler)) throw new ArgumentException("등록되지 않은 튜토리얼 행동입니다.");
                 foreach (string id in handler.References(step)) yield return id;
+                foreach (TutorialConditionDefinition condition in step.conditions ?? new List<TutorialConditionDefinition>())
+                {
+                    if (condition?.target?.kind == TutorialTargetKind.Definition) yield return condition.target.definitionId;
+                    if (!string.IsNullOrWhiteSpace(condition?.powerDefinitionId)) yield return condition.powerDefinitionId;
+                }
                 foreach (TutorialResultDefinition result in step.results ?? new List<TutorialResultDefinition>())
                 {
                     if (result == null) continue;
@@ -40,18 +45,34 @@ namespace Tutorial
                 issues.Add(new LevelValidationIssue(LevelValidationCode.InvalidTutorial, message, path, coordinate));
             if (tutorial.steps == null) { Error("tutorial.steps", "단계 목록이 없습니다."); return issues; }
             if (tutorial.steps.Count == 0) return issues;
+            ValidateBindings(tutorial.steps, (path, message) => Error(path, message));
             catalog ??= level.CreateElementCatalog();
             registry ??= TutorialHandlerRegistry.CreateDefault(); registry.Freeze();
             TutorialValidationContext root = new TutorialValidationContext(level, catalog, "", Error);
             ElementDefinition Resolve(string id, string path, bool power = false) => root.Resolve(id, path, power);
-            bool firstAction = true; int moves = 0;
+            bool firstAction = true; long moves = 0;
             for (int i = 0; i < tutorial.steps.Count; i++)
             {
                 TutorialStepDefinition step = tutorial.steps[i]; string path = $"tutorial.steps.Array.data[{i}]";
                 TutorialValidationContext context = new TutorialValidationContext(level, catalog, path, Error, firstAction);
                 ITutorialStepHandler handler = ValidateStep(step, registry, context);
                 if (handler == null) continue;
-                if (handler.ConsumesMove) moves++;
+                if (handler.ConsumesMove)
+                {
+                    // 매칭 묶음 수는 한 번 교환으로 여러 개가 나올 수 있으므로 교환 횟수로 환산하지 않는다.
+                    int required = 1;
+                    if (step.conditions?.Count > 0)
+                    {
+                        required = step.combination == TutorialConditionCombination.Any ? int.MaxValue : 0;
+                        foreach (TutorialConditionDefinition condition in step.conditions)
+                        {
+                            int minimum = condition != null && registry.TryGetCondition(condition.kind, out ITutorialConditionEvaluator evaluator)
+                                ? Math.Max(0, evaluator.MinimumActions(condition)) : 0;
+                            required = step.combination == TutorialConditionCombination.Any ? Math.Min(required, minimum) : Math.Max(required, minimum);
+                        }
+                    }
+                    moves += required;
+                }
                 if (!handler.IsDescription) firstAction = false;
             }
             if (moves > level.MoveCount) Error("tutorial.steps", "튜토리얼 교환 수가 레벨 이동 수를 초과합니다.");
@@ -91,6 +112,39 @@ namespace Tutorial
             return issues;
         }
 
+        internal static void ValidateBindings(IReadOnlyList<TutorialStepDefinition> steps, Action<string, string> error)
+        {
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            for (int i = 0; i < steps.Count; i++)
+            {
+                if (steps[i] != null)
+                {
+                    if (!string.IsNullOrEmpty(steps[i].firstBinding) && !names.Contains(steps[i].firstBinding))
+                        error($"tutorial.steps.Array.data[{i}].firstBinding", "이전 단계에 선언한 생성 연결 이름을 선택하세요.");
+                    if (!string.IsNullOrEmpty(steps[i].secondBinding) && !names.Contains(steps[i].secondBinding))
+                        error($"tutorial.steps.Array.data[{i}].secondBinding", "이전 단계에 선언한 생성 연결 이름을 선택하세요.");
+                }
+                var additions = new HashSet<string>(StringComparer.Ordinal);
+                List<TutorialConditionDefinition> conditions = steps[i]?.conditions;
+                if (conditions == null) continue;
+                for (int j = 0; j < conditions.Count; j++)
+                {
+                    TutorialConditionDefinition condition = conditions[j];
+                    if (condition == null) continue;
+                    string path = $"tutorial.steps.Array.data[{i}].conditions.Array.data[{j}]";
+                    if (condition.target?.kind == TutorialTargetKind.Generated &&
+                        (string.IsNullOrWhiteSpace(condition.target.binding) || !names.Contains(condition.target.binding)))
+                        error(path + ".target.binding", "이전 단계에 선언한 생성 연결 이름을 선택하세요.");
+                    if (string.IsNullOrEmpty(condition.bindGeneratedAs)) continue;
+                    if (condition.kind != TutorialConditionKind.Generated || condition.requiredCount != 1 || string.IsNullOrWhiteSpace(condition.bindGeneratedAs))
+                        error(path + ".bindGeneratedAs", "생성1개 조건에 공백이 아닌 연결 이름을 지정하세요.");
+                    else if (names.Contains(condition.bindGeneratedAs) || !additions.Add(condition.bindGeneratedAs))
+                        error(path + ".bindGeneratedAs", "이미 사용한 생성 연결 이름입니다.");
+                }
+                names.UnionWith(additions);
+            }
+        }
+
         // 저장 검사와 실행 준비가 같은 등록·설정 규칙을 사용한다.
         internal static ITutorialStepHandler ValidateStep(TutorialStepDefinition step, TutorialHandlerRegistry registry, TutorialValidationContext context)
         {
@@ -101,6 +155,36 @@ namespace Tutorial
             if (!registry.TryGetStep(step, out ITutorialStepHandler handler))
                 context.Error(step.kind == TutorialStepKind.Item ? ".item" : ".kind", "등록되지 않은 단계·아이템 종류입니다.");
             else handler.Validate(step, context);
+            if (!Enum.IsDefined(typeof(TutorialConditionCombination), step.combination)) context.Error(".combination", "지원하지 않는 조건 연결입니다.");
+            if (step.conditions == null) context.Error(".conditions", "조립 조건 목록이 없습니다.");
+            else
+            {
+                if (step.conditions.Count > 0 && step.kind == TutorialStepKind.Description)
+                    context.Error(".conditions", "설명 단계에는 실행 조건을 지정하지 않습니다.");
+                for (int j = 0; j < step.conditions.Count; j++)
+                {
+                    TutorialConditionDefinition condition = step.conditions[j];
+                    TutorialValidationContext child = context.ForChild($".conditions.Array.data[{j}]");
+                    if (condition == null) child.Error("", "조건이 null입니다.");
+                    else if (!registry.TryGetCondition(condition.kind, out ITutorialConditionEvaluator evaluator)) child.Error(".kind", "등록되지 않은 조립 조건입니다.");
+                    else evaluator.Validate(condition, child);
+                    if (condition?.kind == TutorialConditionKind.ItemUsed && (step.kind != TutorialStepKind.Item || step.item != condition.item))
+                        child.Error(".item", "단계에서 허용한 아이템과 같은 종류를 선택하세요.");
+                    if (condition?.kind == TutorialConditionKind.SuccessfulSwap && step.kind == TutorialStepKind.Item)
+                        child.Error(".kind", "아이템 교환은 일반 교환 횟수가 아닌 아이템 사용으로 집계하세요.");
+                }
+                if (step.kind == TutorialStepKind.Item && step.conditions.Count > 0)
+                {
+                    int required = step.combination == TutorialConditionCombination.Any ? int.MaxValue : 0;
+                    foreach (TutorialConditionDefinition condition in step.conditions)
+                    {
+                        int minimum = condition != null && registry.TryGetCondition(condition.kind, out ITutorialConditionEvaluator evaluator)
+                            ? Math.Max(0, evaluator.MinimumActions(condition)) : 0;
+                        required = step.combination == TutorialConditionCombination.Any ? Math.Min(required, minimum) : Math.Max(required, minimum);
+                    }
+                    if (required > step.freeItemCount) context.Error(".freeItemCount", "조건에 필요한 최소 사용 횟수보다 무료 체험 횟수가 적습니다.");
+                }
+            }
             if (step.results == null) context.Error(".results", "결과 조건 목록이 없습니다.");
             else for (int j = 0; j < step.results.Count; j++)
             {

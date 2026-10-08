@@ -114,7 +114,12 @@ namespace Simulation
                     if (cell.Cover == CoverKind.Web)
                     {
                         int before = cell.CoverDurability;
+                        long occurrence = cell.CoverOccurrence;
+                        Elements.ElementDefinition definition = cell.CoverElement ?? Elements.LegacyElementDefinitions.Get(CoverKind.Web);
+                        int start = context.ElementRecords.Count;
                         WebRules.Apply(work, cell, context);
+                        context.RecordDamage(definition, occurrence, coordinate, before, cell.CoverDurability, EffectOrigin.AdjacentMatch);
+                        context.SetRemovalOriginFrom(start, EffectOrigin.AdjacentMatch);
                         changes.Add(new MatchedBlockChange(coordinate, cell.Color.Value, cell.Content, null, turn, false, before, cell.CoverDurability) { HitGroup = hit });
                         continue;
                     }
@@ -122,12 +127,16 @@ namespace Simulation
                     RuntimeContent content = !spawn ? RuntimeContent.Empty : decision.Selected.Kind switch
                     { MatchKind.Drone => RuntimeContent.Drone, MatchKind.Rocket => RuntimeContent.Rocket, MatchKind.Bomb => RuntimeContent.Bomb, _ => RuntimeContent.Magnet };
                     RocketDirection? direction = spawn ? decision.Selected.RocketDirection : null;
-                    context.RecordElement(ElementExecutionKind.Removed, cell.ContentElement ?? Elements.LegacyElementDefinitions.GetContent(cell.Content, work.ElementCatalog), cell.ContentOccurrence, coordinate);
+                    context.RecordElement(ElementExecutionKind.Removed, cell.ContentElement ?? Elements.LegacyElementDefinitions.GetContent(cell.Content, work.ElementCatalog), cell.ContentOccurrence, coordinate, EffectOrigin.AdjacentMatch);
                     changes.Add(new MatchedBlockChange(coordinate, cell.Color.Value, content, direction, turn) { HitGroup = hit });
+                    int dustBefore = cell.DustDurability, removalStart = context.ElementRecords.Count;
                     DustRules.ConsumeNormal(work, cell, context);
+                    context.RecordDamage(cell.DustElement ?? Elements.LegacyElementDefinitions.GetDust(), cell.DustOccurrence,
+                        coordinate, dustBefore, cell.DustDurability, EffectOrigin.AdjacentMatch);
+                    context.SetRemovalOriginFrom(removalStart, EffectOrigin.AdjacentMatch);
                     cell.Content = content; cell.Color = null; cell.RocketDirection = direction; cell.ObstacleIndex = null;
                     cell.ContentElement = Elements.LegacyElementDefinitions.GetContent(content, work.ElementCatalog);
-                    if (spawn) context.RecordElement(ElementExecutionKind.Generated, cell.ContentElement, cell.ContentOccurrence, coordinate);
+                    if (spawn) context.RecordElement(ElementExecutionKind.Generated, cell.ContentElement, cell.ContentOccurrence, coordinate, rocketDirection: direction);
                 }
             }
             return changes.AsReadOnly();

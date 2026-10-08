@@ -66,13 +66,14 @@ namespace Simulation
             else if (low == RuntimeContent.Bomb) kind = high == RuntimeContent.Bomb ? PowerCombinationKind.BombBomb : PowerCombinationKind.BombDrone;
             else kind = PowerCombinationKind.DroneDrone;
             bool transform = kind >= PowerCombinationKind.MagnetRocket && kind <= PowerCombinationKind.MagnetDrone;
+            EffectOrigin origin = EffectOrigins.Combination(kind);
             RabbitColor[] colors = work.Cells.Where(c => c.IsActive && c.Content == RuntimeContent.Normal && c.Cover != CoverKind.Mold && c.Color.HasValue).Select(c => c.Color.Value).Distinct().OrderBy(c => c).ToArray();
             if (transform && colors.Length == 0) throw new InvalidOperationException("자석 조합이 변환할 일반 블록 없음");
             foreach (RuntimeCell material in new[] { a, b })
             {
                 Elements.ElementDefinition materialDefinition = material.ContentElement ?? Elements.LegacyElementDefinitions.GetContent(material.Content, work.ElementCatalog);
-                context.RecordElement(ElementExecutionKind.Activated, materialDefinition, material.ContentOccurrence, material.Coordinate);
-                context.RecordElement(ElementExecutionKind.Removed, materialDefinition, material.ContentOccurrence, material.Coordinate);
+                context.RecordElement(ElementExecutionKind.Activated, materialDefinition, material.ContentOccurrence, material.Coordinate, origin);
+                context.RecordElement(ElementExecutionKind.Removed, materialDefinition, material.ContentOccurrence, material.Coordinate, origin);
                 context.RegisterFire(material.Coordinate);
                 material.Content = RuntimeContent.Empty; material.Color = null; material.RocketDirection = null;
             }
@@ -84,12 +85,16 @@ namespace Simulation
                 {
                     if (cell.Cover == CoverKind.Web) { covered.Add(cell.Coordinate); continue; }
                     RabbitColor original = cell.Color.Value;
-                    context.RecordElement(ElementExecutionKind.Removed, cell.ContentElement ?? Elements.LegacyElementDefinitions.GetContent(cell.Content, work.ElementCatalog), cell.ContentOccurrence, cell.Coordinate);
+                    context.RecordElement(ElementExecutionKind.Removed, cell.ContentElement ?? Elements.LegacyElementDefinitions.GetContent(cell.Content, work.ElementCatalog), cell.ContentOccurrence, cell.Coordinate, origin);
+                    int dustBefore = cell.DustDurability, removalStart = context.ElementRecords.Count;
                     DustRules.ConsumeNormal(work, cell, context);
+                    context.RecordDamage(cell.DustElement ?? Elements.LegacyElementDefinitions.GetDust(), cell.DustOccurrence,
+                        cell.Coordinate, dustBefore, cell.DustDurability, origin);
+                    context.SetRemovalOriginFrom(removalStart, origin);
                     cell.Content = low; cell.Color = null;
                     cell.ContentElement = Elements.LegacyElementDefinitions.GetContent(low, work.ElementCatalog);
-                    context.RecordElement(ElementExecutionKind.Generated, cell.ContentElement, cell.ContentOccurrence, cell.Coordinate);
                     cell.RocketDirection = low == RuntimeContent.Rocket ? (RocketDirection?)work.Random.Next(2) : null;
+                    context.RecordElement(ElementExecutionKind.Generated, cell.ContentElement, cell.ContentOccurrence, cell.Coordinate, rocketDirection: cell.RocketDirection);
                     MissionProgressRules.ConsumeColor(work, original, cell.Coordinate);
                     transformations.Add(new PowerTransformation(cell, original));
                 }

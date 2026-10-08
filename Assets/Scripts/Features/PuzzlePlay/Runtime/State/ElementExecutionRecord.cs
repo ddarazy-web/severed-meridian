@@ -3,7 +3,7 @@ using Board;
 
 namespace Simulation
 {
-    internal enum ElementExecutionKind { Generated, Activated, Removed }
+    internal enum ElementExecutionKind { Generated, Activated, Removed, Damaged }
 
     /// <summary>실제 규칙이 발생시킨 요소 기록. 저장 데이터 및 Unity 표시 개체의 수명과 독립적이다.</summary>
     internal sealed class ElementExecutionRecord
@@ -12,8 +12,14 @@ namespace Simulation
         public string DefinitionId { get; }
         public long Occurrence { get; }
         public BoardCoordinate Coordinate { get; }
-        internal ElementExecutionRecord(ElementExecutionKind kind, string definitionId, long occurrence, BoardCoordinate coordinate)
-        { Kind = kind; DefinitionId = definitionId; Occurrence = occurrence; Coordinate = coordinate; }
+        public BoardCoordinate EventCoordinate { get; }
+        public EffectOrigin Origin { get; internal set; }
+        public int Before { get; }
+        public int After { get; }
+        public Levels.RocketDirection? RocketDirection { get; }
+        internal ElementExecutionRecord(ElementExecutionKind kind, string definitionId, long occurrence, BoardCoordinate coordinate,
+            EffectOrigin origin = EffectOrigin.Unknown, int before = 0, int after = 0, BoardCoordinate? eventCoordinate = null, Levels.RocketDirection? rocketDirection = null)
+        { Kind = kind; DefinitionId = definitionId; Occurrence = occurrence; Coordinate = coordinate; EventCoordinate = eventCoordinate ?? coordinate; Origin = origin; Before = before; After = after; RocketDirection = rocketDirection; }
     }
 
     internal static class RuntimeElementOccurrence

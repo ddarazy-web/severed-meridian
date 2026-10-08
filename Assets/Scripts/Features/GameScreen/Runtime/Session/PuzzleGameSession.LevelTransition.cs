@@ -57,8 +57,7 @@ namespace GameScreen
                     linked.Token.ThrowIfCancellationRequested();
                     if (!isActiveAndEnabled) throw new OperationCanceledException();
                     candidateBytes = LevelPackCodec.Snapshot(definition);
-                    bool runTutorial = ShouldRunTutorial(definition);
-                    if (runTutorial) CheckTutorialReplay(definition);
+                    bool runTutorial = ShouldRunTutorial(definition) && CheckTutorialReplay(definition);
                     StartingBoardSearch search = new StartingBoardSearch(definition, runTutorial ? definition.Tutorial.seed : seed);
                     while (!search.IsDone)
                     {

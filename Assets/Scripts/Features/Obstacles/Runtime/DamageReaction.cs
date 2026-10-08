@@ -17,8 +17,19 @@ namespace Simulation
         private readonly HashSet<int> chargedGenerators = new HashSet<int>();
         private readonly List<GeneratorRecord> generators = new List<GeneratorRecord>();
         internal List<ElementExecutionRecord> ElementRecords { get; } = new List<ElementExecutionRecord>();
-        internal void RecordElement(ElementExecutionKind kind, Elements.ElementDefinition definition, long occurrence, BoardCoordinate coordinate)
-            => ElementRecords.Add(new ElementExecutionRecord(kind, definition.Id.Value, occurrence, coordinate));
+        internal void RecordElement(ElementExecutionKind kind, Elements.ElementDefinition definition, long occurrence, BoardCoordinate coordinate,
+            EffectOrigin origin = EffectOrigin.Unknown, BoardCoordinate? eventCoordinate = null, RocketDirection? rocketDirection = null)
+            => ElementRecords.Add(new ElementExecutionRecord(kind, definition.Id.Value, occurrence, coordinate, origin, eventCoordinate: eventCoordinate, rocketDirection: rocketDirection));
+        internal void RecordDamage(Elements.ElementDefinition definition, long occurrence, BoardCoordinate coordinate, int before, int after, EffectOrigin origin)
+        {
+            if (before > after) ElementRecords.Add(new ElementExecutionRecord(ElementExecutionKind.Damaged, definition.Id.Value, occurrence, coordinate, origin, before, after));
+        }
+        // 층 규칙이 방금 추가한 제거 사건에 실제 호출한 공격의 출처를 연결한다.
+        internal void SetRemovalOriginFrom(int start, EffectOrigin origin)
+        {
+            for (int i = start; i < ElementRecords.Count; i++)
+                if (ElementRecords[i].Kind == ElementExecutionKind.Removed) ElementRecords[i].Origin = origin;
+        }
         public System.Collections.ObjectModel.ReadOnlyCollection<GeneratorRecord> Generators => generators.AsReadOnly();
         public bool HasCharged(int index) => chargedGenerators.Contains(index);
         internal void RegisterCharge(int index) => chargedGenerators.Add(index);

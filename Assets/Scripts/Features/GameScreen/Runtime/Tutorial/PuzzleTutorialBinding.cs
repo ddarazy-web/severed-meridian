@@ -1,4 +1,5 @@
 using Board;
+using System.Collections.Generic;
 using Tutorial;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ namespace GameScreen
         private TutorialProgressSnapshot snapshot;
         private Canvas canvas;
         private readonly Vector3[] itemCorners = new Vector3[4];
+        private readonly List<Rect> focusAreas = new List<Rect>(82);
         public void Configure(TutorialOverlayView overlay) => view = overlay;
         public void Bind(PuzzleGameSession game, PuzzleBoardInput boardInput, PuzzleItemBarView itemBar)
         {
@@ -47,6 +49,7 @@ namespace GameScreen
             Camera camera = session.BoardCamera;
             Vector3 cellOffset = session.TutorialCellWorldOffset;
             Vector2 first = Vector2.zero, second = Vector2.zero, cellSize = Vector2.zero;
+            focusAreas.Clear();
             for (int row = 0; row < 9; row++) for (int column = 0; column < 9; column++)
             {
                 BoardCoordinate at = new BoardCoordinate(row, column);
@@ -58,6 +61,7 @@ namespace GameScreen
                 bool highlighted = snapshot.First?.Equals(at) == true || snapshot.Second?.Equals(at) == true;
                 for (int index = 0; index < snapshot.Highlights.Count; index++) highlighted |= snapshot.Highlights[index].Equals(at);
                 view.SetCell(row * 9 + column, center, size, highlighted);
+                if (highlighted) focusAreas.Add(new Rect(center - size / 2, size));
                 if (snapshot.First?.Equals(at) == true) first = center;
                 if (snapshot.Second?.Equals(at) == true) second = center;
             }
@@ -106,6 +110,31 @@ namespace GameScreen
                 view.FreeBadge.anchoredPosition = Local(buttonScreen) + new Vector2(0, -34);
             }
             view.SetItemFocus(itemFocus);
+            if (itemFocus.HasValue) focusAreas.Add(itemFocus.Value);
+            PlaceBubbleOutsideFocus(area);
+        }
+
+        private void PlaceBubbleOutsideFocus(Rect area)
+        {
+            Vector2 preferred = view.Bubble.anchoredPosition, size = view.Bubble.sizeDelta;
+            float bestY = preferred.y, bestDistance = float.PositiveInfinity;
+            void TryPosition(float candidate)
+            {
+                float y = Mathf.Clamp(candidate, area.yMin + size.y / 2, area.yMax - size.y / 2);
+                float distance = Mathf.Abs(y - preferred.y);
+                if (distance >= bestDistance) return;
+                Rect bubble = new Rect(new Vector2(preferred.x - size.x / 2, y - size.y / 2), size);
+                foreach (Rect focus in focusAreas) if (bubble.Overlaps(focus)) return;
+                bestY = y; bestDistance = distance;
+            }
+            // 첫 조작 칸뿐 아니라 조건 대상과 아이템도 피하는 가장 가까운 세로 여백을 사용한다.
+            TryPosition(preferred.y);
+            foreach (Rect focus in focusAreas)
+            {
+                TryPosition(focus.yMin - size.y / 2 - 8);
+                TryPosition(focus.yMax + size.y / 2 + 8);
+            }
+            view.Bubble.anchoredPosition = new Vector2(preferred.x, bestY);
         }
     }
 }

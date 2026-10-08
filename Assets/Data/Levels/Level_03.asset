@@ -1,0 +1,1421 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33dcef7ce60494c4a99675e089ea2641, type: 3}
+  m_Name: Level_03
+  m_EditorClassIdentifier: Assembly-CSharp::Levels.LevelDefinition
+  schemaVersion: 5
+  levelNumber: 3
+  moveCount: 20
+  colors: 00000000010000000200000003000000
+  board:
+    rows: 9
+    columns: 9
+    cells:
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+    - isActive: 1
+  initialBlocks: []
+  obstacles: []
+  covers: []
+  dust: []
+  flow:
+    gravity: []
+    paths: []
+    merges: []
+    walls: []
+    portals: []
+    arrivals: []
+  connections: []
+  supply:
+    sources: []
+    scrapTarget: 0
+    scrapLimit: 0
+    scrapDurability: 1
+    recoveryTarget: 0
+  recoveryParts: []
+  missions:
+  - kind: 0
+    color: 0
+    count: 30
+  - kind: 0
+    color: 1
+    count: 30
+  elements:
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 0
+      column: 0
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 0
+      column: 1
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 0
+      column: 2
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 0
+      column: 3
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 0
+      column: 4
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 0
+      column: 5
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 0
+      column: 6
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 0
+      column: 7
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 0
+      column: 8
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 1
+      column: 0
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 1
+      column: 1
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 1
+      column: 2
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 1
+      column: 3
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 1
+      column: 4
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 1
+      column: 5
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 1
+      column: 6
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 1
+      column: 7
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 1
+      column: 8
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 2
+      column: 0
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 2
+      column: 1
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 2
+      column: 2
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 2
+      column: 3
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 2
+      column: 4
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 2
+      column: 5
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 2
+      column: 6
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 2
+      column: 7
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 2
+      column: 8
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 3
+      column: 0
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 3
+      column: 1
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 3
+      column: 2
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 3
+      column: 3
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 3
+      column: 4
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 3
+      column: 5
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 3
+      column: 6
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 3
+      column: 7
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 3
+      column: 8
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 4
+      column: 0
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 4
+      column: 1
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 4
+      column: 2
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 4
+      column: 3
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 4
+      column: 4
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 4
+      column: 5
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 4
+      column: 6
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 4
+      column: 7
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 4
+      column: 8
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 5
+      column: 0
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 5
+      column: 1
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 5
+      column: 2
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 5
+      column: 3
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 5
+      column: 4
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 5
+      column: 5
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 5
+      column: 6
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 5
+      column: 7
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 5
+      column: 8
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 6
+      column: 0
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 6
+      column: 1
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 6
+      column: 2
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 6
+      column: 3
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 6
+      column: 4
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 6
+      column: 5
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 6
+      column: 6
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 6
+      column: 7
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 6
+      column: 8
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 7
+      column: 0
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 7
+      column: 1
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 7
+      column: 2
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 7
+      column: 3
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 7
+      column: 4
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 7
+      column: 5
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 7
+      column: 6
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 7
+      column: 7
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 7
+      column: 8
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 8
+      column: 0
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 8
+      column: 1
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 8
+      column: 2
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 8
+      column: 3
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 8
+      column: 4
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 8
+      column: 5
+    durability: 0
+    hasColor: 1
+    color: 1
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 8
+      column: 6
+    durability: 0
+    hasColor: 1
+    color: 2
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 8
+      column: 7
+    durability: 0
+    hasColor: 1
+    color: 3
+    requiredCharge: 0
+    rocketDirection: 0
+  - definitionId: supply.normal.fixed
+    instanceId: 
+    layer: 0
+    coordinate:
+      row: 8
+      column: 8
+    durability: 0
+    hasColor: 1
+    color: 0
+    requiredCharge: 0
+    rocketDirection: 0
+  elementCatalog: {fileID: 11400000, guid: b645b207797cb83418ae4bdd2a95385e, type: 2}
+  elementSupply:
+    sources:
+    - coordinate:
+        row: 0
+        column: 1
+      mode: 0
+      exhaustion: 0
+      items: []
+      randomDefinitionId: supply.normal.random
+    - coordinate:
+        row: 0
+        column: 2
+      mode: 0
+      exhaustion: 0
+      items: []
+      randomDefinitionId: supply.normal.random
+    - coordinate:
+        row: 0
+        column: 3
+      mode: 0
+      exhaustion: 0
+      items: []
+      randomDefinitionId: supply.normal.random
+    - coordinate:
+        row: 0
+        column: 4
+      mode: 0
+      exhaustion: 0
+      items: []
+      randomDefinitionId: supply.normal.random
+    - coordinate:
+        row: 0
+        column: 5
+      mode: 0
+      exhaustion: 0
+      items: []
+      randomDefinitionId: supply.normal.random
+    - coordinate:
+        row: 0
+        column: 6
+      mode: 0
+      exhaustion: 0
+      items: []
+      randomDefinitionId: supply.normal.random
+    - coordinate:
+        row: 0
+        column: 7
+      mode: 0
+      exhaustion: 0
+      items: []
+      randomDefinitionId: supply.normal.random
+    - coordinate:
+        row: 0
+        column: 8
+      mode: 0
+      exhaustion: 0
+      items: []
+      randomDefinitionId: supply.normal.random
+    - coordinate:
+        row: 0
+        column: 0
+      mode: 0
+      exhaustion: 0
+      items: []
+      randomDefinitionId: supply.normal.random
+    scrapTarget: 0
+    scrapLimit: 0
+    scrapDurability: 1
+    recoveryTarget: 0
+    scrapDefinitionId: supply.scrap
+    recoveryDefinitionId: supply.recovery
+  embeddedDefinitions: []
+  tutorial:
+    seed: 12345
+    steps:
+    - kind: 0
+      instructions: "\uAC19\uC740 \uC0C9 5\uAC1C\uB97C \u3131 \uBAA8\uC591\uC73C\uB85C
+        \uB9DE\uCD94\uBA74 \uB2EC \uD3ED\uD0C4\uC774 \uC0DD\uACA8\uC694."
+      highlights:
+      - row: 2
+        column: 4
+      - row: 3
+        column: 4
+      hasFirst: 0
+      first:
+        row: 0
+        column: 0
+      hasSecond: 0
+      second:
+        row: 0
+        column: 0
+      item: 0
+      actionDefinitionId: 
+      results: []
+    - kind: 1
+      instructions: "\uD45C\uC2DC\uB41C \uB450 \uCE78\uC744 \uBC14\uAFD4 \u3131 \uBAA8\uC591\uC73C\uB85C
+        \uB2EC \uD3ED\uD0C4\uC744 \uB9CC\uB4E4\uC5B4 \uBCF4\uC138\uC694."
+      highlights: []
+      hasFirst: 1
+      first:
+        row: 2
+        column: 4
+      hasSecond: 1
+      second:
+        row: 3
+        column: 4
+      item: 0
+      actionDefinitionId: 
+      results:
+      - kind: 0
+        definitionId: power.bomb
+        hasCoordinate: 1
+        coordinate:
+          row: 3
+          column: 4
+        count: 1
+    - kind: 0
+      instructions: "\uB2EC \uD3ED\uD0C4\uC774 \uC0DD\uACA8 \uC544\uB798\uB85C \uB0B4\uB824\uC654\uC5B4\uC694.
+        \uC606 \uBE14\uB85D\uACFC \uBC14\uAFB8\uBA74 \uC8FC\uBCC0 3\xD73\uCE78\uC744
+        \uC815\uB9AC\uD574\uC694."
+      highlights:
+      - row: 5
+        column: 4
+      - row: 5
+        column: 5
+      hasFirst: 0
+      first:
+        row: 0
+        column: 0
+      hasSecond: 0
+      second:
+        row: 0
+        column: 0
+      item: 0
+      actionDefinitionId: 
+      results: []
+    - kind: 2
+      instructions: "\uB2EC \uD3ED\uD0C4\uC744 \uD45C\uC2DC\uB41C \uC606 \uBE14\uB85D\uACFC
+        \uBC14\uAFD4 \uBCF4\uC138\uC694."
+      highlights: []
+      hasFirst: 1
+      first:
+        row: 5
+        column: 4
+      hasSecond: 1
+      second:
+        row: 5
+        column: 5
+      item: 0
+      actionDefinitionId: power.bomb
+      results:
+      - kind: 1
+        definitionId: power.bomb
+        hasCoordinate: 1
+        coordinate:
+          row: 5
+          column: 5
+        count: 1
+    - kind: 0
+      instructions: "\uC798\uD588\uC5B4\uC694! \uC774\uC81C \uB0A8\uC740 \uB2EC\uD1A0\uB07C\uB97C
+        \uBAA8\uC544 \uBCF4\uC138\uC694."
+      highlights: []
+      hasFirst: 0
+      first:
+        row: 0
+        column: 0
+      hasSecond: 0
+      second:
+        row: 0
+        column: 0
+      item: 0
+      actionDefinitionId: 
+      results: []
+    supply:
+      sources:
+      - coordinate:
+          row: 0
+          column: 1
+        mode: 1
+        exhaustion: 0
+        items:
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 1
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 3
+          direction: 0
+          durability: 1
+        randomDefinitionId: supply.normal.random
+      - coordinate:
+          row: 0
+          column: 2
+        mode: 1
+        exhaustion: 0
+        items:
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 0
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        randomDefinitionId: supply.normal.random
+      - coordinate:
+          row: 0
+          column: 3
+        mode: 1
+        exhaustion: 0
+        items:
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 3
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 1
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 3
+          direction: 0
+          durability: 1
+        randomDefinitionId: supply.normal.random
+      - coordinate:
+          row: 0
+          column: 4
+        mode: 1
+        exhaustion: 0
+        items:
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 0
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 0
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 0
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 0
+          direction: 0
+          durability: 1
+        randomDefinitionId: supply.normal.random
+      - coordinate:
+          row: 0
+          column: 5
+        mode: 1
+        exhaustion: 0
+        items:
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 1
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 3
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 1
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 3
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 1
+          direction: 0
+          durability: 1
+        randomDefinitionId: supply.normal.random
+      - coordinate:
+          row: 0
+          column: 6
+        mode: 1
+        exhaustion: 0
+        items:
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 0
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 0
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        randomDefinitionId: supply.normal.random
+      - coordinate:
+          row: 0
+          column: 7
+        mode: 1
+        exhaustion: 0
+        items:
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 3
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 1
+          direction: 0
+          durability: 1
+        randomDefinitionId: supply.normal.random
+      - coordinate:
+          row: 0
+          column: 8
+        mode: 1
+        exhaustion: 0
+        items:
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 0
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        randomDefinitionId: supply.normal.random
+      - coordinate:
+          row: 0
+          column: 0
+        mode: 1
+        exhaustion: 0
+        items:
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 0
+          direction: 0
+          durability: 1
+        - definitionId: supply.normal.fixed
+          count: 1
+          color: 2
+          direction: 0
+          durability: 1
+        randomDefinitionId: supply.normal.random
+      scrapTarget: 0
+      scrapLimit: 0
+      scrapDurability: 1
+      recoveryTarget: 0
+      scrapDefinitionId: supply.scrap
+      recoveryDefinitionId: supply.recovery

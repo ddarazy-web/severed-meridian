@@ -257,9 +257,12 @@ public static partial class TutorialGameIntegrationVerification
             invalid.Tutorial.supply.sources.Clear();
             PuzzleGameSession session = owner.AddComponent<PuzzleGameSession>(); session.Configure(board, camera); session.ConfigureTutorial(TutorialExecutionContext.CreateTest(1));
             await session.InitializeAsync(invalid, 12345, CancellationToken.None);
-            Check(session.HasFailed && !session.CanAcceptInput && session.State == null && session.TutorialState == null && session.Message.Contains("공급"), "실제 재생 오류는 게임 시작 전에 진단·사본/엔진 미게시");
+            using (CancellationTokenSource timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+                await UniTask.WaitUntil(() => !session.IsStartingFeedback, cancellationToken: timeout.Token);
+            Check(session.IsReady && !session.HasFailed && session.CanAcceptInput && session.State != null && session.TutorialState == null &&
+                session.State.Supply.Sources.All(source => source.Mode == SupplyMode.Random), "안내 공급 재생 오류는 시작을 막지 않고 일반 보드·입력으로 복귀");
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
-            Check(invalid == null, "시작 실패의 소유 레벨 사본 파기");
+            Check(invalid == null, "안내 생략 후 소유 레벨 사본 파기");
         }
         finally { UnityEngine.Object.Destroy(owner); if (invalid != null) UnityEngine.Object.Destroy(invalid); }
         owner = new GameObject("TutorialCanceledStart");

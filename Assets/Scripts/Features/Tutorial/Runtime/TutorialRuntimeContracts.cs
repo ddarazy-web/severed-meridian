@@ -85,16 +85,29 @@ namespace Tutorial
         public BoardCoordinate? Second { get; }
         public string ActionDefinitionId { get; }
         public ReadOnlyCollection<BoardCoordinate> Highlights { get; }
+        public ReadOnlyCollection<BoardCoordinate> ActionArea { get; }
         public ReadOnlyCollection<int> ConditionCounts { get; }
         internal TutorialProgressSnapshot(TutorialProgressState state, int index, bool paused, bool free, string message,
-            TutorialStepDefinition step, int[] counts)
+            TutorialStepDefinition step, int[] counts, TutorialInput? guidance = null, IReadOnlyList<BoardCoordinate> targetHighlights = null)
         {
             State = state; StepIndex = index; IsPaused = paused; FreeItemAvailable = free; Message = message;
             Instructions = step?.instructions ?? ""; Kind = step?.kind; Item = step?.kind == TutorialStepKind.Item ? step.item : (BoardItem?)null;
-            First = step?.hasFirst == true ? step.first : (BoardCoordinate?)null;
-            Second = step?.hasSecond == true ? step.second : (BoardCoordinate?)null;
+            First = guidance.HasValue ? guidance.Value.First : step?.hasFirst == true ? step.first : (BoardCoordinate?)null;
+            Second = guidance.HasValue ? guidance.Value.Second : step?.hasSecond == true ? step.second : (BoardCoordinate?)null;
             ActionDefinitionId = step?.actionDefinitionId ?? "";
-            Highlights = Array.AsReadOnly(step?.highlights?.ToArray() ?? Array.Empty<BoardCoordinate>());
+            ActionArea = Array.AsReadOnly(step?.actionArea?.ToArray() ?? Array.Empty<BoardCoordinate>());
+            if (step?.automaticHighlights == true)
+            {
+                List<BoardCoordinate> automatic = new List<BoardCoordinate>();
+                automatic.AddRange(ActionArea);
+                if (targetHighlights != null)
+                    foreach (BoardCoordinate at in targetHighlights)
+                        if (!automatic.Contains(at)) automatic.Add(at);
+                if (First.HasValue && !automatic.Contains(First.Value)) automatic.Add(First.Value);
+                if (Second.HasValue && !automatic.Contains(Second.Value)) automatic.Add(Second.Value);
+                Highlights = automatic.AsReadOnly();
+            }
+            else Highlights = Array.AsReadOnly(step?.highlights?.ToArray() ?? Array.Empty<BoardCoordinate>());
             ConditionCounts = Array.AsReadOnly((int[])counts.Clone());
         }
     }

@@ -79,8 +79,7 @@ namespace GameScreen
                 Message = "다시 시작하는 중"; Changed?.Invoke();
                 linked.Token.ThrowIfCancellationRequested();
                 definition = LevelPackCodec.ReadLevel(initialBytes, levelNumber);
-                bool runTutorial = ShouldRunTutorial(definition);
-                if (runTutorial) CheckTutorialReplay(definition);
+                bool runTutorial = ShouldRunTutorial(definition) && CheckTutorialReplay(definition);
                 StartingBoardSearch search = new StartingBoardSearch(definition, runTutorial ? definition.Tutorial.seed : seed);
                 while (!search.IsDone)
                 {

@@ -11,6 +11,14 @@ namespace Tutorial
         private readonly Dictionary<BoardItem, ITutorialStepHandler> items = new Dictionary<BoardItem, ITutorialStepHandler>();
         private readonly Dictionary<TutorialResultKind, ITutorialResultEvaluator> results = new Dictionary<TutorialResultKind, ITutorialResultEvaluator>();
         private bool frozen;
+        private readonly Dictionary<TutorialConditionKind, ITutorialConditionEvaluator> conditions = new Dictionary<TutorialConditionKind, ITutorialConditionEvaluator>();
+
+        public void RegisterCondition(TutorialConditionKind kind, ITutorialConditionEvaluator evaluator)
+        {
+            if (frozen) throw new InvalidOperationException("실행 중 등록 목록을 변경할 수 없습니다.");
+            conditions.Add(kind, evaluator ?? throw new ArgumentNullException(nameof(evaluator)));
+        }
+        public bool TryGetCondition(TutorialConditionKind kind, out ITutorialConditionEvaluator evaluator) => conditions.TryGetValue(kind, out evaluator);
 
         public void RegisterStep(TutorialStepKind kind, ITutorialStepHandler handler)
         {
@@ -40,6 +48,16 @@ namespace Tutorial
         public static TutorialHandlerRegistry CreateDefault()
         {
             TutorialHandlerRegistry registry = new TutorialHandlerRegistry();
+            registry.RegisterCondition(TutorialConditionKind.SuccessfulSwap, new TutorialSwapConditionEvaluator());
+            registry.RegisterCondition(TutorialConditionKind.Match, new TutorialMatchConditionEvaluator());
+            registry.RegisterCondition(TutorialConditionKind.DurabilityDecrease, new TutorialDurabilityConditionEvaluator());
+            registry.RegisterCondition(TutorialConditionKind.RemainingDurability, new TutorialDurabilityConditionEvaluator(true));
+            registry.RegisterCondition(TutorialConditionKind.Removed, new TutorialRemovalConditionEvaluator());
+            registry.RegisterCondition(TutorialConditionKind.Generated, new TutorialPowerConditionEvaluator(TutorialConditionKind.Generated));
+            registry.RegisterCondition(TutorialConditionKind.Activated, new TutorialPowerConditionEvaluator(TutorialConditionKind.Activated));
+            registry.RegisterCondition(TutorialConditionKind.Combined, new TutorialPowerConditionEvaluator(TutorialConditionKind.Combined));
+            registry.RegisterCondition(TutorialConditionKind.ItemUsed, new TutorialItemConditionEvaluator());
+            registry.RegisterCondition(TutorialConditionKind.MissionProgress, new TutorialMissionConditionEvaluator());
             registry.RegisterStep(TutorialStepKind.Description, new TutorialDescriptionHandler());
             registry.RegisterStep(TutorialStepKind.Swap, new TutorialSwapHandler());
             registry.RegisterStep(TutorialStepKind.PowerSwap, new TutorialSwapHandler(true));

@@ -32,11 +32,15 @@ namespace GameScreen
         private bool TutorialAllowsBoardInput => !TutorialActive || tutorial.Progress.State == TutorialProgressState.AwaitAction && !HasProgressFeedback;
         private bool TutorialPresentationReady => ready && !failed && !IsRestarting && !IsChangingLevel && !IsPresenting && !HasProgressFeedback && !IsStartingFeedback;
 
-        private static void CheckTutorialReplay(LevelDefinition definition)
+        private static bool CheckTutorialReplay(LevelDefinition definition)
         {
-            if (!definition.HasTutorial) return;
+            if (!definition.HasTutorial) return false;
             System.Collections.Generic.List<LevelValidationIssue> issues = LevelTutorialReplayValidator.Validate(definition);
-            if (issues.Count > 0) throw new InvalidOperationException(string.Join(" · ", issues.Select(issue => issue.ToString())));
+            if (issues.Count == 0) return true;
+            string diagnostic = string.Join(" · ", issues.Select(issue => issue.ToString()));
+            if (issues.Any(issue => issue.Code != LevelValidationCode.InvalidTutorial)) throw new InvalidOperationException(diagnostic);
+            Debug.LogWarning("튜토리얼 안내 생략 · " + diagnostic);
+            return false;
         }
 
         public bool CanSelectBlock(BoardCoordinate coordinate)
@@ -68,15 +72,32 @@ namespace GameScreen
             if (tutorial == null || failed) return;
             TutorialProgressState previousState = tutorial.Progress.State;
             int previousStep = tutorial.Progress.StepIndex;
+            int previousGuidance = tutorial.Progress.GuidanceRevision;
+            LevelRuntimeState previousBoard = executor.State;
             tutorial.Tick(TutorialPresentationReady, IsPaused || IsRestarting || IsChangingLevel || audioBackground || !isActiveAndEnabled);
+            if (!ReferenceEquals(previousBoard, executor.State))
+            {
+                Draw();
+                if (failed) return;
+            }
             if (!tutorialCompletionRecorded && tutorial.Progress.State == TutorialProgressState.Completed && TutorialPresentationReady && !IsPaused)
             {
                 tutorialContext?.Complete(State.LevelNumber);
                 tutorialCompletionRecorded = true;
             }
-            if (tutorial.Progress.State == TutorialProgressState.Error)
-            { Fail("튜토리얼 처리 중단: " + tutorial.Progress.Message); return; }
-            if (previousState != tutorial.Progress.State || previousStep != tutorial.Progress.StepIndex)
+            if (tutorial.Progress.State == TutorialProgressState.Error || tutorial.Progress.State == TutorialProgressState.Cancelled)
+            {
+                if (tutorial.IsReleased)
+                {
+                    DisposeTutorial();
+                    Message = executor.Outcome?.Message ?? "튜토리얼 안내를 종료했습니다. 계속 플레이하세요.";
+                    Changed?.Invoke();
+                }
+                else if (TutorialPresentationReady && !IsPaused && !audioBackground && executor.Phase == BoardActionPhase.Stopped)
+                    Fail("튜토리얼 처리 중단: " + tutorial.Progress.Message);
+                return;
+            }
+            if (previousState != tutorial.Progress.State || previousStep != tutorial.Progress.StepIndex || previousGuidance != tutorial.Progress.GuidanceRevision)
             { Message = tutorial.Progress.Message; Changed?.Invoke(); }
         }
 

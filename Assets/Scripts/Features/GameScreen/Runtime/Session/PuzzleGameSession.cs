@@ -82,8 +82,7 @@ namespace GameScreen
         private async UniTask PrepareAsync(LevelDefinition definition, int randomSeed, CancellationToken token)
         {
             Message = "시작 보드 구성 중"; Changed?.Invoke();
-            bool runTutorial = ShouldRunTutorial(definition);
-            if (runTutorial) CheckTutorialReplay(definition);
+            bool runTutorial = ShouldRunTutorial(definition) && CheckTutorialReplay(definition);
             StartingBoardSearch search = new StartingBoardSearch(definition, runTutorial ? definition.Tutorial.seed : randomSeed);
             while (!search.IsDone)
             {

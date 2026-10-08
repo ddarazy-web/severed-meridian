@@ -30,6 +30,10 @@ namespace Levels.Editor
         private LevelDefinition catalogOwner;
         private Tutorial.Editor.LevelTutorialEditorPanel tutorialPanel;
         [SerializeField] private int selectedTutorialStep;
+        [SerializeField] private bool tutorialComposerMode;
+        [SerializeField] private LevelDefinition temporaryTutorialSample;
+        [SerializeField] private string tutorialSampleExpected;
+        private VisualElement tutorialTestArea;
 
         public LevelDefinition CurrentLevel => level;
 
@@ -42,6 +46,25 @@ namespace Levels.Editor
         public static void OpenLevel(LevelDefinition target)
         {
             OpenWorkspace(0, target, true);
+        }
+
+        public static LevelEditorWindow OpenTutorialSample(Tutorial.Editor.TutorialSampleBoard sample)
+        {
+            LevelEditorWindow window = CreateInstance<LevelEditorWindow>();
+            window.temporaryTutorialSample = sample.CreateBoard();
+            window.tutorialSampleExpected = sample.ExpectedResult;
+            window.tutorialComposerMode = true;
+            window.gameTutorialMode = Tutorial.TutorialRunMode.Always;
+            window.position = new Rect(80, 80, 1280, 900);
+            window.level = window.temporaryTutorialSample;
+            window.ShowUtility(); window.CreateGUI();
+            return window;
+        }
+
+        private void OnDestroy()
+        {
+            if (temporaryTutorialSample != null && !EditorUtility.IsPersistent(temporaryTutorialSample)) DestroyImmediate(temporaryTutorialSample);
+            temporaryTutorialSample = null;
         }
 
         private void OnEnable()
@@ -110,6 +133,10 @@ namespace Levels.Editor
             bar.Add(new ToolbarButton(Save) { text = "저장", name = "save-level" });
             bar.Add(new ToolbarButton(ShowDuplicatePanel) { text = "복제", name = "duplicate-level" });
             bar.Add(new ToolbarButton(Validate) { text = "검사", name = "validate-level" });
+            bar.Add(new ToolbarButton(() =>
+            {
+                tutorialComposerMode = !tutorialComposerMode; board.CancelStroke(); board.Brush = LevelBrush.Select; Refresh();
+            }) { text = "튜토리얼 편집", name = "tutorial-composer-mode" });
             bar.Add(new ToolbarButton(() =>
             {
                 board.CancelStroke();
@@ -239,6 +266,12 @@ namespace Levels.Editor
             properties?.Unbind();
             data?.Dispose();
             data = null;
+            if (temporaryTutorialSample != null && temporaryTutorialSample != target)
+            {
+                if (!EditorUtility.IsPersistent(temporaryTutorialSample)) DestroyImmediate(temporaryTutorialSample);
+                temporaryTutorialSample = null; tutorialSampleExpected = null;
+                rootVisualElement.Q("tutorial-sample-notice")?.RemoveFromHierarchy();
+            }
             level = target;
             if (levelNamePanel != null) levelNamePanel.style.display = DisplayStyle.None;
             workspaceLevel?.SetValueWithoutNotify(target);
@@ -315,6 +348,7 @@ namespace Levels.Editor
             properties.Clear();
             elementCatalogView?.Dispose(); elementCatalogView = null;
             tools.Clear();
+            tutorialTestArea?.RemoveFromHierarchy(); tutorialTestArea = null;
             data?.Dispose();
             data = null;
             assetField.SetValueWithoutNotify(level);
@@ -326,7 +360,7 @@ namespace Levels.Editor
             connectionGraph.Display(level, selected, board.Brush == LevelBrush.Select || (board.Brush == LevelBrush.Flow && flowTool == FlowTool.Select));
             flowOverlay.DisplayMerge(selected, board.Brush == LevelBrush.Select || (board.Brush == LevelBrush.Flow && flowTool == FlowTool.Select));
             UpdateSaveState();
-            editorRoot.Q<ToolbarButton>("save-level").SetEnabled(level != null);
+            editorRoot.Q<ToolbarButton>("save-level").SetEnabled(level != null && level != temporaryTutorialSample);
             editorRoot.Q<ToolbarButton>("validate-level").SetEnabled(level != null);
             InvalidateResults();
             if (level == null)
@@ -336,6 +370,18 @@ namespace Levels.Editor
                 return;
             }
             bool editable = LevelBoardEditing.CanEdit(level);
+            editorRoot.Q<ToolbarButton>("tutorial-composer-mode").text = tutorialComposerMode ? "배치 편집으로" : "튜토리얼 편집";
+            if (editable && tutorialComposerMode)
+            {
+                VisualElement stages = new VisualElement { name = "tutorial-stage-list" }; tools.Add(stages);
+                tutorialTestArea = new VisualElement { name = "tutorial-test-area" };
+                tutorialTestArea.style.marginTop = 12; tutorialTestArea.style.flexShrink = 0;
+                boardScroll.Add(tutorialTestArea);
+                tutorialPanel = new Tutorial.Editor.LevelTutorialEditorPanel(level, board, selectedTutorialStep,
+                    index => selectedTutorialStep = index, stages, tutorialTestArea);
+                properties.Add(tutorialPanel);
+                return;
+            }
             BuildToolPanel(editable);
             if (!editable)
                 properties.Add(new HelpBox("저장 형식·보드 구조 오류로 칠할 수 없습니다. 검사 후 기존 Inspector에서 원본을 확인하세요.", HelpBoxMessageType.Warning));
@@ -511,7 +557,7 @@ namespace Levels.Editor
         private void Save()
         {
             board?.CancelStroke();
-            if (level == null) return;
+            if (level == null || level == temporaryTutorialSample) return;
             // 지연 입력 필드는 포커스를 잃어야 값이 반영된다. 단축키로 저장할 때도
             // 이 순서를 지켜야 화면에 입력한 숫자 대신 이전 값이 저장되지 않는다.
             (rootVisualElement.focusController?.focusedElement as VisualElement)?.Blur();
@@ -536,7 +582,8 @@ namespace Levels.Editor
             if (titleContent.text != title) titleContent = new GUIContent(title);
             if (state == null) return;
             string message = level == null ? "레벨을 선택하거나 새로 만드세요." :
-                AssetDatabase.GetAssetPath(level) + (dirty ? "  ● 저장 안 됨" : "  • 저장됨");
+                level == temporaryTutorialSample ? "시험용 사본 · 창을 닫으면 해제됩니다. 출시 데이터에 저장하지 않습니다." :
+                    AssetDatabase.GetAssetPath(level) + (dirty ? "  ● 저장 안 됨" : "  • 저장됨");
             if (state.text != message) state.text = message;
         }
 

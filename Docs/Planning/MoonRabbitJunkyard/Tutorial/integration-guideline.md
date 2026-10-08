@@ -1,7 +1,10 @@
 # 레벨 튜토리얼 — 통합 개발 가이드라인
 
-상태: 공통1~4단계 및 후속5단계 완료. 2026-10-07 실제1레벨 기본 매칭·2레벨 로켓 콘텐츠 적용과 검증 반영. 6단계는 계획만 작성.
+## 현재 진행 기준 — 2026-10-08
 
+조합형 1~2단계를 완료했다.2단계는 대상·조건·샘플과 영역 안내, 무료 아이템/미션, 오류 복귀를 확장했다. [완료 감사](../../../Verification/MoonRabbitJunkyard/Tutorial/composer-02-audit.md)와 [검증 기록](../../../Verification/MoonRabbitJunkyard/Tutorial/composer-02-progress.md)에 확인 범위와 한계를 기록했다. 다음 작업은 [조합형 3단계 계획](composer-03-plan.md) → [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/composer-03-goal.md) → [복사 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/composer-03-command.md)이다.3단계는 문서만 작성했고 구현은 시작하지 않았다.
+
+전체 조합형 전환은 3단계다. 2단계는 조건/대상/샘플 확장, 3단계는 공유 흐름·사용자 샘플·기존 전환과 구형 경로 정리다. 기존 8단계 콘텐츠 추가보다 제작 도구 전환을 먼저 진행한다. 실제 1~4레벨 콘텐츠는 이번 작업에서 변경하지 않았다. 아래는 이전 개발 이력이며 새 정책과 충돌하면 조합형 기획을 우선한다.
 [확정 기획](../../../Contents/MoonRabbitJunkyard/13_레벨튜토리얼.md) · [확장 구조 결정](../../../Decisions/MoonRabbitJunkyard/2026-10-07-tutorial-extension.md) · [1단계 검증](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-01-progress.md).
 
 ## 재계획 이유와 유지할 내용
@@ -109,3 +112,19 @@ Unity6000.3.10f1과 기존 패키지/asmdef를 유지한다. Tests/Editor와 Too
 다음6단계는 실제3레벨 ㄱ 매칭 달 폭탄 하나의 생성→인접 교환3×3 발동 콘텐츠다. 후보·재생, 저장·실제 UI, 기록·회귀·인계의 세 작업 묶음으로 직접 진행한다. 새3레벨/팩 변경은 다음 실행 지시 후 시작한다.
 
 [6단계 계획](stage-06-bomb-content-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-06-bomb-content-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-06-command.md).
+
+### 후속6단계 완료와 다음 범위
+
+실제3레벨 ㄱ5매칭→달 폭탄 생성/낙하→인접 교환3×3 발동5단계를 적용했다. Asset/MemoryPack 실제 에디터/UI/포인터·모드·기록·2→3 경계270 PASS, 관련 회귀10개·게임 소스 단독 컴파일을 확인했다. 기존1/2·게임 소스·프리팹·GUID/HEAD를 보존했다. 실제 범위/기존 드론 종합 실패/네이티브 종료 경고/실기기 제약은 [6단계 완료 보고](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-06-progress.md)를 따른다. 위 이전 시점의6단계 계획 대기 설명은 당시 상태다.
+
+다음7단계는 실제4레벨2×2 수거 드론 하나 생성/교환 발동 콘텐츠다. 후보 재생, 저장·실제 플레이, 기록·회귀·인계의 세 묶음으로 진행한다. 현재 표적/비행 규칙을 재사용하고 표적의 사전 강조를 하지 않는다. 신규4레벨/팩 변경은 다음 실행 지시 후 시작한다.
+
+[7단계 계획](stage-07-drone-content-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-07-drone-content-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-07-command.md).
+
+### 후속7단계 완료와 다음 범위
+
+실제4레벨2×2 수거 드론 하나 생성/낙하→인접 교환 발동5단계를 적용했다. 직접+5칸/추가 표적1개의 실제 효과, 현재 미션 우선 선택/상승·호버·돌진, Asset/MemoryPack 실제 화면/포인터·완료 기록·3→4 경계329 PASS를 확인했다. 관련 회귀20개 통과/기존 종합 드론 시간 기대값1개 실패 재현, 테스트 해제 후 게임 소스 단독 컴파일과 기존 콘텐츠·출력 보존을 확인했다. 범위와 제약은 [7단계 결과](../../../Verification/MoonRabbitJunkyard/Tutorial/stage-07-progress.md)를 따른다.
+
+다음8단계는 실제5레벨 직선5매칭 무지개 자석 생성/일반 색 블록 교환 발동이다. 후보·실제 플레이·기록/회귀의 세 묶음으로 진행한다. 문서만 작성했으며5레벨 구현은 다음 실행 지시 후 시작한다.
+
+[8단계 계획](stage-08-magnet-content-plan.md) · [목표](../../../Goals/MoonRabbitJunkyard/Tutorial/stage-08-magnet-content-goal.md) · [복사용 실행문](../../../Commands/MoonRabbitJunkyard/Tutorial/stage-08-command.md).

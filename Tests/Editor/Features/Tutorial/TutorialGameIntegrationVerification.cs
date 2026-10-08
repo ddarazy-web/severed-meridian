@@ -184,7 +184,8 @@ public static partial class TutorialGameIntegrationVerification
                 BoardActionResult action = executor.Swap(first, second);
                 Check(action.IsApplied, "양방향 실제 로켓 교환 발동 " + reverse);
                 object[] actual = ((System.Collections.IEnumerable)records.GetValue(executor.TurnEffects)).Cast<object>().ToArray();
-                TutorialResultRecord[] converted = actual.Select(record => new TutorialResultRecord(
+                // 감소량 사건은 구형 생성/발동/제거 결과의 변환 대상이 아니다.
+                TutorialResultRecord[] converted = actual.Where(record => record.GetType().GetProperty("Kind").GetValue(record).ToString() != "Damaged").Select(record => new TutorialResultRecord(
                     (TutorialResultKind)Enum.Parse(typeof(TutorialResultKind), record.GetType().GetProperty("Kind").GetValue(record).ToString()),
                     (string)record.GetType().GetProperty("DefinitionId").GetValue(record),
                     record.GetType().GetProperty("Occurrence").GetValue(record).ToString(),

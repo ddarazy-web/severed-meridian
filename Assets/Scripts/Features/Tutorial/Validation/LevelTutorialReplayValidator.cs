@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Levels;
 using Simulation;
 using UnityEngine;
@@ -28,7 +29,8 @@ namespace Tutorial
                 if (search.Status != StartingBoardStatus.Success) { Error("시작 보드: " + search.Message); return issues; }
                 adapter = TutorialBoardAdapter.Prepare(owned, search.State);
                 BoardActionExecutor executor = adapter.Executor;
-                for (int budget = 0; budget < owned.Tutorial.steps.Count + 1 && adapter.Progress.State != TutorialProgressState.Completed; budget++)
+                long actionBudget = (long)owned.Tutorial.steps.Count + owned.MoveCount + owned.Tutorial.steps.Where(step => step.kind == TutorialStepKind.Item).Sum(step => (long)step.freeItemCount) + 1;
+                for (long budget = 0; budget < actionBudget && adapter.Progress.State != TutorialProgressState.Completed; budget++)
                 {
                     stepIndex = adapter.Progress.StepIndex;
                     TutorialProgressSnapshot snapshot = adapter.Progress.Snapshot;
@@ -37,7 +39,9 @@ namespace Tutorial
                         adapter.ObserveCascade(executor.AdvanceCascade());
                     if (executor.HasPendingCascade) { Error("논리 연쇄 종료 한도 초과", snapshot); break; }
                     adapter.Tick(true, false);
-                    if (adapter.Progress.State == TutorialProgressState.Error) { Error(adapter.Progress.Message, snapshot); break; }
+                    snapshot = adapter.Progress.Snapshot;
+                    if (adapter.Progress.State == TutorialProgressState.Completed) break;
+                    if (adapter.Progress.State == TutorialProgressState.Error || adapter.Progress.State == TutorialProgressState.Cancelled) { Error(adapter.Progress.Message, snapshot); break; }
                     TutorialInput input = snapshot.State == TutorialProgressState.AwaitDescription ? TutorialInput.Next() :
                         snapshot.Item.HasValue ? TutorialInput.UseItem(snapshot.Item.Value, snapshot.First, snapshot.Second) :
                         TutorialInput.Swap(snapshot.First.Value, snapshot.Second.Value);
@@ -65,8 +69,9 @@ namespace Tutorial
                     }
                     // 논리 재생에서는 표시 시간을 생략한다. 실제 화면 검사는 별도 Play Mode 검사가 담당한다.
                     adapter.Tick(true, false);
-                    if (adapter.Progress.State == TutorialProgressState.Error) { Error(adapter.Progress.Message, snapshot); break; }
-                    if (adapter.Progress.StepIndex == stepIndex) { Error("행동 결과 또는 완료 조건이 충족되지 않았습니다.", snapshot); break; }
+                    if (adapter.Progress.State == TutorialProgressState.Error || adapter.Progress.State == TutorialProgressState.Cancelled) { Error(adapter.Progress.Message, snapshot); break; }
+                    if (adapter.Progress.StepIndex == stepIndex && adapter.Progress.State != TutorialProgressState.AwaitAction)
+                    { Error("행동 결과 또는 완료 조건이 충족되지 않았습니다.", snapshot); break; }
                 }
                 if (issues.Count == 0 && adapter.Progress.State != TutorialProgressState.Completed) Error("단계 재생 한도 초과");
             }

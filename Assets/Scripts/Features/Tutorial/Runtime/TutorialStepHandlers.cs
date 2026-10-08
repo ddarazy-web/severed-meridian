@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Board;
 using Simulation;
 
 namespace Tutorial
@@ -47,7 +48,10 @@ namespace Tutorial
         public bool ConsumesMove => false;
         public TutorialItemHandler(BoardItem item, int targets) { this.item = item; this.targets = targets; }
         public void Validate(TutorialStepDefinition step, TutorialValidationContext context)
-        { context.ValidateTargets(step, targets); context.ValidateInitialTargets(step, targets); }
+        {
+            context.ValidateTargets(step, targets); context.ValidateInitialTargets(step, targets);
+            if (step.freeItemCount < 1) context.Error(".freeItemCount", "무료 체험 횟수는 1 이상입니다.");
+        }
         public IEnumerable<string> References(TutorialStepDefinition step) { yield break; }
         public bool Allows(TutorialStepDefinition step, TutorialInput input)
             => input.Kind == TutorialInputKind.Item && input.Item == item && TutorialTargetRules.Matches(step, input, targets);
@@ -61,6 +65,14 @@ namespace Tutorial
         {
             if (count == 0) return !input.First.HasValue && !input.Second.HasValue;
             if (!input.First.HasValue) return false;
+            if (step.actionArea?.Count > 0)
+            {
+                if (!step.actionArea.Contains(input.First.Value)) return false;
+                if (count == 1) return !input.Second.HasValue && (string.IsNullOrEmpty(step.firstBinding) || input.First.Value.Equals(step.first));
+                return input.Second.HasValue && step.actionArea.Contains(input.Second.Value) && new BoardEdge(input.First.Value, input.Second.Value).IsAdjacent &&
+                    (string.IsNullOrEmpty(step.firstBinding) || input.First.Value.Equals(step.first) || input.Second.Value.Equals(step.first)) &&
+                    (string.IsNullOrEmpty(step.secondBinding) || input.First.Value.Equals(step.second) || input.Second.Value.Equals(step.second));
+            }
             if (count == 1) return input.First.Value.Equals(step.first) && !input.Second.HasValue;
             if (!input.Second.HasValue) return false;
             // 실제 교환은 두 방향이 동일하다. 안내 화살표의 첫→둘째 방향과 실행 허용을 분리한다.

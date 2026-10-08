@@ -1,6 +1,6 @@
 # 튜토리얼 후속 6단계 — 복사용 목표 실행문
 
-상태: 실행 대기. 문서만 작성했으며 구현은 시작하지 않았다.
+상태: 완료. 수행 당시 실행문을 보존한다. 다음 실행은 stage-07-command.md를 사용한다.
 
 ~~~text
 ServeredMeridian 튜토리얼 후속 6단계 ‘3레벨 달 폭탄 콘텐츠’를 진행해.
@@ -21,4 +21,3 @@ TutorialBombLevelVerification의 Preview→Apply→Run과 계획에 명시된 �
 
 완료 후 변경·실제 검증 결과·제약을 보고하고 Docs/Verification/MoonRabbitJunkyard/Tutorial/stage-06-progress.md에 저장해. 완료 결과를 기준으로 다음4레벨 수거 드론 소개의 계획서·목표 문서·복사용 실행문을 작성해. 다음 구현은 자동 시작하지 마.
 ~~~
-

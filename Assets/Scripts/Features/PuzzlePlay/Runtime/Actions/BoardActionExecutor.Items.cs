@@ -20,15 +20,18 @@ namespace Simulation
         public int RandomBefore { get; }
         public int RandomAfter { get; }
         public ReadOnlyCollection<MatchedBlockChange> Changes { get; }
+        public ReadOnlyCollection<MatchDecision> Decisions { get; }
         public ReadOnlyCollection<EffectRecord> Effects { get; }
         public PowerPresentationTrace PowerTrace { get; }
         public ShuffleResult Shuffle { get; }
         internal ItemUseResult(BoardItem item, bool applied, string message, BoardCoordinate? first, BoardCoordinate? second, int turn,
-            int moves, int before, int after, IEnumerable<MatchedBlockChange> changes = null, IEnumerable<EffectRecord> effects = null, ShuffleResult shuffle = null, PowerPresentationTrace powerTrace = null)
+            int moves, int before, int after, IEnumerable<MatchedBlockChange> changes = null, IEnumerable<EffectRecord> effects = null, ShuffleResult shuffle = null, PowerPresentationTrace powerTrace = null,
+            IEnumerable<MatchDecision> decisions = null)
         {
             Item = item; IsApplied = applied; Message = message; First = first; Second = second; Turn = turn; MovesRemaining = moves;
             RandomBefore = before; RandomAfter = after; Changes = Array.AsReadOnly(changes?.ToArray() ?? Array.Empty<MatchedBlockChange>());
             Effects = Array.AsReadOnly(effects?.ToArray() ?? Array.Empty<EffectRecord>()); Shuffle = shuffle; PowerTrace = powerTrace;
+            Decisions = Array.AsReadOnly(decisions?.ToArray() ?? Array.Empty<MatchDecision>());
         }
     }
 
@@ -85,6 +88,7 @@ namespace Simulation
             TurnEffectContext context = TurnEffects?.NextTurn(Turn + 1) ?? new TurnEffectContext(Turn + 1, Array.Empty<MatchedBlockChange>());
             context.ConsumesMove = false;
             ReadOnlyCollection<MatchedBlockChange> changes = Array.AsReadOnly(Array.Empty<MatchedBlockChange>());
+            ReadOnlyCollection<MatchDecision> decisions = Array.AsReadOnly(Array.Empty<MatchDecision>());
             List<EffectRecord> effects = new List<EffectRecord>();
             ShuffleResult shuffled = null;
             if (item == BoardItem.Shuffle)
@@ -114,13 +118,13 @@ namespace Simulation
                 RecoveryRules.Collect(work, Turn + 1, 0);
                 IEnumerable<MatchPattern> patterns = MatchQuery.Find(work).Where(pattern => !previous.Contains(pattern.Key) &&
                     (pattern.Cells.Contains(first.Value) || pattern.Cells.Contains(second.Value)));
-                ReadOnlyCollection<MatchDecision> decisions = MatchResolution.Select(patterns, first.Value, second.Value, work.Random);
+                decisions = MatchResolution.Select(patterns, first.Value, second.Value, work.Random);
                 decisions = MatchResolution.ResolveCoveredSpawn(work, decisions); context.RecordPatterns(decisions);
                 changes = MatchResolution.ApplyLayers(work, decisions, Turn + 1, context); context.Protect(changes);
                 if (!PowerEffectResolution.Apply(work, changes, null, context, effects, out string error)) return Reject(error);
             }
             ItemUseResult result = new ItemUseResult(item, true, "아이템 사용 완료 · 후속 처리 대기", first, second, Turn + 1,
-                work.MovesRemaining, before, work.Random.DrawCount, changes, effects, shuffled, context.PowerTrace);
+                work.MovesRemaining, before, work.Random.DrawCount, changes, effects, shuffled, context.PowerTrace, decisions);
             hasDeferredEnding = false;
             State = work; TurnEffects = context; Turn++; itemUses.Add(result);
             Phase = item == BoardItem.Shuffle ? BoardActionPhase.WaitingForAutomaticMatch : BoardActionPhase.WaitingForFall;

@@ -33,17 +33,28 @@ namespace Levels
             };
             byte[] payload = MemoryPackSerializer.Serialize(pack), bytes = new byte[payload.Length + 8];
             Array.Copy(TutorialMagic, bytes, 4); bytes[4] = TutorialFormatVersion;
-            Array.Copy(payload, 0, bytes, 8, payload.Length); return bytes;
+            Array.Copy(payload, 0, bytes, 8, payload.Length); return EncodeComposer(bytes, pack);
         }
 
         private static bool IsTutorialPack(byte[] bytes) => bytes != null && bytes.Length >= 4 &&
             Enumerable.Range(0, 4).All(index => bytes[index] == TutorialMagic[index]);
 
         public static PackedTutorialLevelPack DecodeTutorial(byte[] bytes)
+            => DecodeTutorial(bytes, true);
+
+        private static PackedTutorialLevelPack DecodeTutorial(byte[] bytes, bool validate)
         {
-            if (!IsTutorialPack(bytes) || bytes.Length < 8 || bytes[4] != TutorialFormatVersion || bytes[5] != 0 || bytes[6] != 0 || bytes[7] != 0)
+            if (!IsTutorialPack(bytes) || bytes.Length < 8 || (bytes[4] != TutorialFormatVersion && bytes[4] != 4 && bytes[4] != 5) || bytes[5] != 0 || bytes[6] != 0 || bytes[7] != 0)
                 throw new InvalidOperationException("지원하지 않는 튜토리얼 팩 헤더입니다.");
+            if (bytes[4] == 5) return DecodeConditionDetails(bytes);
+            if (bytes[4] == 4) return DecodeComposer(bytes);
             PackedTutorialLevelPack pack = MemoryPackSerializer.Deserialize<PackedTutorialLevelPack>(bytes.AsSpan(8));
+            if (validate) ValidateTutorialPack(pack);
+            return pack;
+        }
+
+        private static void ValidateTutorialPack(PackedTutorialLevelPack pack)
+        {
             if (pack == null || pack.FormatVersion != TutorialFormatVersion || pack.Tutorials == null)
                 throw new InvalidOperationException("튜토리얼 팩 버전·메타데이터 오류입니다.");
             ElementLevelPack inner = DecodeElements(pack.ElementPack);
@@ -65,7 +76,6 @@ namespace Levels
                 finally { if (Application.isPlaying) UnityEngine.Object.Destroy(level); else UnityEngine.Object.DestroyImmediate(level); }
             }
             DefinitionClosure(inner.Levels, catalog, false, pack.Tutorials.SelectMany(item => LevelTutorialValidator.References(item.Tutorial)));
-            return pack;
         }
 
         private static LevelWithCatalog ReadTutorialLevel(byte[] bytes, int number)

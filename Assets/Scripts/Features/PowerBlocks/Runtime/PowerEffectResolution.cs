@@ -11,6 +11,7 @@ namespace Simulation
         public BoardCoordinate Source { get; }
         public BoardCoordinate Target { get; }
         public DamageCause Cause { get; }
+        public EffectOrigin Origin { get; internal set; }
         public DamageResponse Response { get; }
         public RuntimeContent Content { get; }
         public RabbitColor? OriginalColor { get; }
@@ -80,44 +81,48 @@ namespace Simulation
             PowerPresentationTrace trace = records.Count > 0 && context.PowerTrace != null ? context.PowerTrace : new PowerPresentationTrace(combination);
             context.PowerTrace = trace;
             // 역순으로 쌓아 행·열 순서로 처리한다. 피격 파워의 범위는 남은 부모 범위보다 먼저 처리한다.
-            Stack<(BoardCoordinate source, BoardCoordinate target, DamageCause cause, bool request, RabbitColor? color, PowerArea area, int hit, bool magnet)> pending =
-                new Stack<(BoardCoordinate, BoardCoordinate, DamageCause, bool, RabbitColor?, PowerArea, int, bool)>();
+            EffectOrigin combinationOrigin = combination == null ? EffectOrigin.Unknown : EffectOrigins.Combination(combination.Kind);
+            HashSet<long> transformedPowers = new HashSet<long>(combination?.Transformations.Select(value => work.CellAt(value.Coordinate).ContentOccurrence) ?? System.Array.Empty<long>());
+            Stack<(BoardCoordinate source, BoardCoordinate target, DamageCause cause, bool request, RabbitColor? color, PowerArea area, int hit, bool magnet, EffectOrigin origin)> pending =
+                new Stack<(BoardCoordinate, BoardCoordinate, DamageCause, bool, RabbitColor?, PowerArea, int, bool, EffectOrigin)>();
             void PushRange(BoardCoordinate source, IEnumerable<BoardCoordinate> range, int hit, bool magnet = false,
-                RuntimeContent power = RuntimeContent.Empty, int parent = 0, PowerArea area = PowerArea.Point)
+                RuntimeContent power = RuntimeContent.Empty, int parent = 0, PowerArea area = PowerArea.Point, EffectOrigin origin = EffectOrigin.Unknown)
             {
                 BoardCoordinate[] selected = range.ToArray();
                 trace.Add(new PowerAttackRecord(hit, parent, source, source, power,
                     work.CellAt(source).RocketDirection, area, false, 0, selected));
                 foreach (BoardCoordinate target in selected.Reverse())
-                    pending.Push((source, target, DamageCause.Power, false, null, PowerArea.Point, hit, magnet));
+                    pending.Push((source, target, DamageCause.Power, false, null, PowerArea.Point, hit, magnet,
+                        origin == EffectOrigin.Unknown ? EffectOrigins.Power(power) : origin));
             }
-            void PushAdjacent(BoardCoordinate source, DamageCause cause, RabbitColor? color, int hit)
+            void PushAdjacent(BoardCoordinate source, DamageCause cause, RabbitColor? color, int hit, EffectOrigin origin = EffectOrigin.AdjacentMatch)
             {
                 foreach (BoardCoordinate target in new[] {
                     new BoardCoordinate(source.Row + 1, source.Column), new BoardCoordinate(source.Row, source.Column + 1),
                     new BoardCoordinate(source.Row, source.Column - 1), new BoardCoordinate(source.Row - 1, source.Column) })
-                    pending.Push((source, target, cause, false, color, PowerArea.Point, hit, false));
+                    pending.Push((source, target, cause, false, color, PowerArea.Point, hit, false, origin));
             }
-            Queue<(int request, BoardCoordinate origin, DroneTarget initial, int effects, int attacks, List<DroneRetargetRecord> retargets)> landings =
-                new Queue<(int, BoardCoordinate, DroneTarget, int, int, List<DroneRetargetRecord>)>();
-            if (activation.HasValue) pending.Push((activation.Value, activation.Value, hammer ? DamageCause.Hammer : DamageCause.Power, false, exchangeColor, PowerArea.Point, context.NextHit(), false));
+            Queue<(int request, BoardCoordinate origin, DroneTarget initial, int effects, int attacks, List<DroneRetargetRecord> retargets, EffectOrigin cause)> landings =
+                new Queue<(int, BoardCoordinate, DroneTarget, int, int, List<DroneRetargetRecord>, EffectOrigin)>();
+            if (activation.HasValue) pending.Push((activation.Value, activation.Value, hammer ? DamageCause.Hammer : DamageCause.Power, false, exchangeColor, PowerArea.Point, context.NextHit(), false,
+                hammer ? EffectOrigin.Hammer : EffectOrigins.Power(work.CellAt(activation.Value).Content)));
             if (combination != null)
             {
                 if (combination.IsTransformation)
                 {
                     foreach (PowerTransformation transformation in combination.Transformations.Reverse())
-                        pending.Push((transformation.Coordinate, transformation.Coordinate, DamageCause.Power, false, null, PowerArea.Point, context.NextHit(), false));
+                        pending.Push((transformation.Coordinate, transformation.Coordinate, DamageCause.Power, false, null, PowerArea.Point, context.NextHit(), false, combinationOrigin));
                     foreach (BoardCoordinate covered in combination.CoveredTargets.Reverse())
-                        pending.Push((combination.Center, covered, DamageCause.Power, false, null, PowerArea.Point, context.NextHit(), false));
+                        pending.Push((combination.Center, covered, DamageCause.Power, false, null, PowerArea.Point, context.NextHit(), false, combinationOrigin));
                 }
                 else
                 {
                     for (int i = 0; i < combination.DroneCount; i++)
-                        pending.Push((combination.Center, combination.Center, DamageCause.Power, true, null, combination.DroneArea, 0, false));
+                        pending.Push((combination.Center, combination.Center, DamageCause.Power, true, null, combination.DroneArea, 0, false, combinationOrigin));
                     PushRange(combination.Center, PowerCombinationResolution.Range(work, combination.Center, combination.InitialArea), context.NextHit(),
                         power: combination.Kind == PowerCombinationKind.MagnetMagnet ? RuntimeContent.Magnet :
                             combination.Kind == PowerCombinationKind.RocketRocket || combination.Kind == PowerCombinationKind.RocketBomb ? RuntimeContent.Rocket :
-                            combination.Kind == PowerCombinationKind.BombBomb ? RuntimeContent.Bomb : RuntimeContent.Drone, area: combination.InitialArea);
+                            combination.Kind == PowerCombinationKind.BombBomb ? RuntimeContent.Bomb : RuntimeContent.Drone, area: combination.InitialArea, origin: combinationOrigin);
                 }
             }
             foreach (MatchedBlockChange match in consumed.Reverse())
@@ -160,7 +165,7 @@ namespace Simulation
                             null, target.Area, true, trace.Attacks.Count, selected,
                             retargeted));
                         foreach (BoardCoordinate coordinate in selected.Reverse())
-                            pending.Push((source, coordinate, DamageCause.Power, false, null, PowerArea.Point, landingHit, false));
+                            pending.Push((source, coordinate, DamageCause.Power, false, null, PowerArea.Point, landingHit, false, landing.cause));
                     }
                     continue;
                 }
@@ -168,7 +173,7 @@ namespace Simulation
                 if (hit.request)
                 {
                     int request = targets.RequestArea(hit.source, hit.area);
-                    landings.Enqueue((request, hit.source, targets.Reservation(request), records.Count, trace.Attacks.Count, new List<DroneRetargetRecord>()));
+                    landings.Enqueue((request, hit.source, targets.Reservation(request), records.Count, trace.Attacks.Count, new List<DroneRetargetRecord>(), hit.origin));
                     continue;
                 }
                 DamageReaction reaction = DamageReaction.Evaluate(work, hit.target, hit.cause, hit.source, context,
@@ -176,6 +181,9 @@ namespace Simulation
                 if (reaction.Response == DamageResponse.None) continue;
                 if (reaction.Response == DamageResponse.Unsupported) { error = hit.target + " " + reaction.Message + " · 행동 전체 취소"; return false; }
                 RuntimeCell cell = work.CellAt(hit.target);
+                int elementRecordStart = context.ElementRecords.Count;
+                long coverOccurrence = cell.CoverOccurrence;
+                Elements.ElementDefinition coverDefinition = cell.Cover.HasValue ? cell.CoverElement ?? Elements.LegacyElementDefinitions.Get(cell.Cover.Value) : null;
                 int? originalBody = cell.ObstacleIndex;
                 int generatorRecordStart = context.Generators.Count;
                 RuntimeContent original = cell.Content;
@@ -194,10 +202,11 @@ namespace Simulation
                 }
                 if (reaction.Response == DamageResponse.Activate)
                 {
-                    context.RecordElement(ElementExecutionKind.Activated, originalDefinition, originalOccurrence, hit.target);
+                    EffectOrigin attackOrigin = transformedPowers.Contains(originalOccurrence) ? combinationOrigin : EffectOrigins.Power(original);
+                    context.RecordElement(ElementExecutionKind.Activated, originalDefinition, originalOccurrence, hit.target, attackOrigin, rocketDirection: cell.RocketDirection);
                     IEnumerable<BoardCoordinate> range = Range(work, hit.target);
                     if (original == RuntimeContent.Drone)
-                        pending.Push((hit.target, hit.target, DamageCause.Power, true, null, PowerArea.Point, 0, false));
+                        pending.Push((hit.target, hit.target, DamageCause.Power, true, null, PowerArea.Point, 0, false, attackOrigin));
                     if (original == RuntimeContent.Magnet)
                     {
                         RabbitColor[] colors = work.Cells.Where(c => c.IsActive && c.Content == RuntimeContent.Normal && c.Cover != CoverKind.Mold && c.Color.HasValue)
@@ -210,7 +219,7 @@ namespace Simulation
                     context.RegisterFire(hit.target);
                     PushRange(hit.target, range, context.NextHit(), original == RuntimeContent.Magnet, original, hit.hit,
                         original == RuntimeContent.Rocket ? (cell.RocketDirection == RocketDirection.Horizontal ? PowerArea.Horizontal : PowerArea.Vertical) :
-                        original == RuntimeContent.Bomb ? PowerArea.Blast3 : original == RuntimeContent.Drone ? PowerArea.Plus : PowerArea.Point);
+                        original == RuntimeContent.Bomb ? PowerArea.Blast3 : original == RuntimeContent.Drone ? PowerArea.Plus : PowerArea.Point, attackOrigin);
                 }
                 if (reaction.Response == DamageResponse.Damage)
                 {
@@ -222,7 +231,7 @@ namespace Simulation
                 {
                     MissionProgressRules.ConsumeColor(work, originalColor, hit.target);
                     if (hit.cause != DamageCause.Hammer) DustRules.ConsumeNormal(work, cell, context);
-                    if (hit.magnet) PushAdjacent(hit.target, DamageCause.MagnetAdjacent, originalColor, hit.hit);
+                    if (hit.magnet) PushAdjacent(hit.target, DamageCause.MagnetAdjacent, originalColor, hit.hit, hit.origin);
                 }
                 if (reaction.Response == DamageResponse.Remove || reaction.Response == DamageResponse.Activate ||
                     (reaction.Response == DamageResponse.Damage && after == 0))
@@ -233,6 +242,15 @@ namespace Simulation
                 }
                 if (reaction.Response == DamageResponse.Remove || reaction.Response == DamageResponse.Activate || reaction.Response == DamageResponse.Damage || reaction.Response == DamageResponse.CoverDamage)
                     targets.Invalidate();
+                if (originalBody.HasValue && before > after)
+                {
+                    RuntimeObstacle body = work.Obstacles[originalBody.Value];
+                    context.RecordDamage(body.Element, body.Occurrence, hit.target, before, after, hit.origin);
+                }
+                if (coverDefinition != null)
+                    context.RecordDamage(coverDefinition, coverOccurrence, hit.target, coverBefore, cell.CoverDurability, hit.origin);
+                context.RecordDamage(cell.DustElement ?? Elements.LegacyElementDefinitions.GetDust(), cell.DustOccurrence,
+                    hit.target, dustBefore, cell.DustDurability, hit.origin);
                 HashSet<int> removedBodies = new HashSet<int>();
                 if (reaction.Response == DamageResponse.Damage && after == 0 && originalBody.HasValue) removedBodies.Add(originalBody.Value);
                 foreach (GeneratorRecord generator in context.Generators.Skip(generatorRecordStart))
@@ -241,7 +259,7 @@ namespace Simulation
                     if (generator.Event == GeneratorEvent.Disconnected && generator.TargetIndex.HasValue) removedBodies.Add(generator.TargetIndex.Value);
                 }
                 records.Add(new EffectRecord(hit.source, hit.target, hit.cause, reaction, original, before, after, originalColor, coverBefore, cell.CoverDurability, dustBefore, cell.DustDurability)
-                { HitGroup = hit.hit, ChargeBefore = chargeBefore, ChargeAfter = chargeAfter, RemovedObstacleIndices = removedBodies.OrderBy(index => index).ToList().AsReadOnly() });
+                { Origin = hit.origin, HitGroup = hit.hit, ChargeBefore = chargeBefore, ChargeAfter = chargeAfter, RemovedObstacleIndices = removedBodies.OrderBy(index => index).ToList().AsReadOnly() });
                 foreach (int index in removedBodies)
                 {
                     RuntimeObstacle body = work.Obstacles[index];
@@ -249,8 +267,10 @@ namespace Simulation
                     // 모든 점유 칸은 같은 본체 식별을 가진다. 위치 조건으로는 어느 칸이든 조회할 수 있다.
                     for (int row = 0; row < size; row++) for (int column = 0; column < size; column++)
                         context.RecordElement(ElementExecutionKind.Removed, body.Element, body.Occurrence,
-                            new BoardCoordinate(body.Definition.Coordinate.Row + row, body.Definition.Coordinate.Column + column));
+                            new BoardCoordinate(body.Definition.Coordinate.Row + row, body.Definition.Coordinate.Column + column),
+                            eventCoordinate: originalBody == index ? hit.target : body.Definition.Coordinate);
                 }
+                context.SetRemovalOriginFrom(elementRecordStart, hit.origin);
                 // 착탄 전에도 실제 효과마다 예약을 검증한다. 재선택은 동일 정책·예약·규칙 난수를 사용한다.
                 foreach (var flying in landings)
                 {
