@@ -2,6 +2,8 @@
 
 [전체 문서 분류](../README.md)
 
+- [게임·제작 도구 분리 3단계 — 공통 편집·JSON 작업 모드](project-wide/game-authoring-stage-03-command.md)
+
 - [게임·제작 도구 분리 2단계 복사용 목표 실행문](project-wide/game-authoring-stage-02-command.md)
 
 - [게임·제작 도구 분리 1단계 복사용 목표 실행문](project-wide/game-authoring-stage-01-command.md)

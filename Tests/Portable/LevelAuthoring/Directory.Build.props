@@ -1,0 +1,1 @@
+<Project><PropertyGroup><BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)../../../Logs/GameAuthoringStage02/obj/</BaseIntermediateOutputPath><MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath></PropertyGroup></Project>

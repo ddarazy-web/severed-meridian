@@ -1,5 +1,8 @@
 # 진행·검증 기록
 
+- [게임·제작 도구 분리 2단계 — JSON 검증 기록](project-wide/game-authoring-stage-02-progress.md)
+- [2단계 제작 필드·JSON 계약 대응표](project-wide/game-authoring-stage-02-field-map.md)
+
 [전체 문서 분류](../README.md)
 
 - [레벨 튜토리얼 1단계 — 데이터·저장·에디터 검증](MoonRabbitJunkyard/Tutorial/stage-01-progress.md)

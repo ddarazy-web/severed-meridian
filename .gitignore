@@ -155,3 +155,9 @@ ServerData/*
 /Assets/__ProjectTests/
 /Assets/__ProjectTests.meta
 
+
+# 독립 JSON 검사의 프로젝트 정의는 소스에 포함
+!/Tests/Portable/LevelAuthoring/LevelAuthoringChecks.csproj
+
+# 2단계 검사·내보내기의 재생성 가능한 시험 스냅샷
+/ContentData/Trials/game-authoring-stage-02/
