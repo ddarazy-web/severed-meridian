@@ -4,6 +4,7 @@ using Levels;
 using Levels.Editor;
 using UnityEngine;
 using Elements;
+using MemoryPack;
 
 namespace GameScreen.Editor
 {
@@ -12,16 +13,16 @@ namespace GameScreen.Editor
     public sealed class PuzzleEditorLaunchRequest
     {
         private readonly byte[] bytes;
-        private readonly string visualJson;
+        private readonly byte[] visualBytes;
         public int LevelNumber { get; }
         public int Seed { get; }
         public PuzzleEditorLevelSource Source { get; }
         public Tutorial.TutorialRunMode TutorialMode { get; private set; }
         internal string EncodedBytes => Convert.ToBase64String(bytes);
-        internal string EncodedVisuals => visualJson;
+        internal string EncodedVisuals => Convert.ToBase64String(visualBytes);
 
         private PuzzleEditorLaunchRequest(byte[] snapshot, int number, int seed, PuzzleEditorLevelSource source, ElementVisualCatalog visuals)
-        { bytes = snapshot; LevelNumber = number; Seed = seed; Source = source; visualJson = JsonUtility.ToJson(visuals.ToDto()); }
+        { bytes = snapshot; LevelNumber = number; Seed = seed; Source = source; visualBytes = MemoryPackSerializer.Serialize(visuals.ToDto()); }
 
         public static PuzzleEditorLaunchRequest Capture(LevelDefinition source, PuzzleEditorLevelSource mode, int seed, Tutorial.TutorialRunMode tutorialMode = Tutorial.TutorialRunMode.Automatic)
         {
@@ -48,6 +49,10 @@ namespace GameScreen.Editor
         }
 
         public LevelDefinition CreateDefinition() => LevelPackCodec.ReadLevel(bytes, LevelNumber);
-        public ElementVisualCatalog CreateVisualCatalog() => ElementVisualCatalog.FromDto(JsonUtility.FromJson<ElementVisualCatalogDto>(visualJson));
+        // 효과 프레임 DTO는 재귀 타입이므로 Unity JSON 직렬화 대신 기존 MemoryPack 계약을 사용한다.
+        internal static ElementVisualCatalogDto DecodeVisuals(string encoded)
+            => MemoryPackSerializer.Deserialize<ElementVisualCatalogDto>(Convert.FromBase64String(encoded));
+        public ElementVisualCatalog CreateVisualCatalog()
+            => ElementVisualCatalog.FromDto(MemoryPackSerializer.Deserialize<ElementVisualCatalogDto>(visualBytes));
     }
 }

@@ -7,7 +7,6 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Elements;
 
 namespace GameScreen.Editor
 {
@@ -66,8 +65,8 @@ namespace GameScreen.Editor
             try
             {
                 PuzzleGameSession session = scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<PuzzleGameSession>(true)).Single();
-                string visualJson = SessionState.GetString(Key + "visuals", "");
-                if (visualJson != "") session.ConfigureVisuals(JsonUtility.FromJson<ElementVisualCatalogDto>(visualJson));
+                string encodedVisuals = SessionState.GetString(Key + "visuals", "");
+                if (encodedVisuals != "") session.ConfigureVisuals(PuzzleEditorLaunchRequest.DecodeVisuals(encodedVisuals));
                 session.SetLevelAdvanceEnabled(SessionState.GetInt(Key + "source", (int)PuzzleEditorLevelSource.Asset) == (int)PuzzleEditorLevelSource.MemoryPack);
                 session.ConfigureTutorial(Tutorial.TutorialExecutionContext.CreateEditorWithIdentity(
                     (Tutorial.TutorialRunMode)SessionState.GetInt(Key + "tutorialMode", 0),

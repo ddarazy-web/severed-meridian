@@ -15,7 +15,6 @@ namespace GameScreen
         [SerializeField] private int seed = 12345;
         [SerializeField] private PuzzleWorldBoard board;
         [SerializeField] private Camera boardCamera;
-        [SerializeField] private ElementVisualCatalogDto visualConfiguration;
         private ElementVisualCatalog visualCatalog;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private PuzzleArtwork artwork;
@@ -40,6 +39,14 @@ namespace GameScreen
             visualCatalog = LegacyElementVisuals.WithOverrides(configuration);
         }
 
+#if UNITY_EDITOR
+        private void Awake() => UnityEditor.EditorApplication.playModeStateChanged += OnEditorPlayModeChanged;
+        private void OnEditorPlayModeChanged(UnityEditor.PlayModeStateChange change)
+        {
+            // Addressables가 종료 시 먼저 해제되므로 남은 HUD 프레임의 이미지 조회를 막는다.
+            if (change == UnityEditor.PlayModeStateChange.ExitingPlayMode) ready = false;
+        }
+#endif
         private void Start()
         {
             if (!started) InitializeAsync(levelNumber, seed, CancellationToken.None).Forget(Debug.LogException);
@@ -66,7 +73,7 @@ namespace GameScreen
                 linked.Token.ThrowIfCancellationRequested();
                 if (definition == null) definition = await LevelPackLoader.LoadAsync(number, linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
-                visualCatalog ??= visualConfiguration != null ? LegacyElementVisuals.WithOverrides(visualConfiguration) : ElementVisualLookup.ForLevel(definition);
+                visualCatalog ??= ElementVisualLookup.ForLevel(definition);
                 initialBytes = LevelPackCodec.Snapshot(definition);
                 levelNumber = number; seed = randomSeed;
                 await PrepareAsync(definition, randomSeed, linked.Token);
@@ -185,6 +192,9 @@ namespace GameScreen
 
         private void OnDestroy()
         {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.playModeStateChanged -= OnEditorPlayModeChanged;
+#endif
             ready = false;
             DisposeTutorial();
             ClearProgress();

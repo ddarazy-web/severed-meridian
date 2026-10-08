@@ -34,7 +34,7 @@ namespace Tutorial.Editor
             };
             Application.logMessageReceived += (message, stack, type) =>
             {
-                if (SessionState.GetBool(Key + "active", false) && type == LogType.Exception)
+                if (SessionState.GetBool(Key + "active", false) && (type == LogType.Exception || type == LogType.Error || type == LogType.Assert))
                     File.AppendAllText(Output + "play-exceptions.txt", message + "\n" + stack + "\n");
             };
         }
