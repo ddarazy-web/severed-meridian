@@ -1,0 +1,38 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>② 파워 만들고 사용하기 | MATCH 매뉴얼</title><link rel="stylesheet" href="manual.css"><link rel="stylesheet" href="tutorial-guide.css"></head><body>
+<a class="skip" href="#content">본문으로 바로가기</a>
+<aside class="sidebar"><a class="brand" href="index.html">MATCH<span>튜토리얼 만들기 · 따라하기</span></a><nav aria-label="튜토리얼 목차">
+<a href="tutorial.html">시작하기 · 화면 읽는 법</a>
+<a href="tutorial-match.html">① 일반 블록 3매칭</a>
+<a href="tutorial-power.html">② 파워 만들고 사용하기</a>
+<a href="tutorial-obstacle.html">③ 장애물 내구도 줄이기</a>
+<a href="tutorial-shared.html">저장 · 내 샘플 · 공통 구성</a>
+<a href="tutorial.html#test-save">검사하고 실제 레벨에 적용</a>
+<a href="tutorial.html#errors">막혔을 때</a>
+<a href="index.html">전체 매뉴얼</a></nav><p class="side-footer">2026-10-08 확인<br>Windows · Unity 6000.3.10f1<br>그림을 누르면 원본 크기로 열립니다.</p></aside>
+<main id="content"><header><p class="eyebrow">추가 · 튜토리얼 따라하기</p><h1>② 파워 만들고 사용하기</h1><p class="lead">새로 만든 로켓에 이름표를 붙이면, 떨어진 뒤에도 같은 로켓을 찾을 수 있습니다.</p><p class="prepare"><b>준비</b> <a href="tutorial.html#start">시험 보드를 여는 방법</a>을 먼저 확인하세요. 사진 속 행·열은 보드 가장자리의 1~9 숫자를 기준으로 읽습니다.</p></header>
+<nav class="on-page"><a href="#start">준비</a><a href="#create">로켓 만들기</a><a href="#use">만든 로켓 쓰기</a><a href="#other">다른 파워</a><a href="#check">확인</a></nav>
+<section id="start"><h2>두 장의 안내를 이어 붙입니다</h2><div class="recipe"><strong>1단계: 로켓 만들기 → 2단계: 방금 만든 로켓 사용하기</strong><p>처음부터 로켓이 놓인 보드와, 플레이 중에 생긴 로켓은 선택 방법이 다릅니다. 새 로켓에는 “만든 로켓”이라는 이름표를 붙여 다음 단계에서 찾습니다.</p></div>
+<ol class="steps"><li><b>시험 보드</b>에서 <b>생성 로켓 이어서 조작</b>을 고르고 <b>시험 보드 사본을 새 창에서 열기</b>를 누릅니다.</li><li>왼쪽에는 1단계와 2단계가 준비되어 있습니다. 먼저 각 단계를 눌러 아래 설정과 비교해 보세요.</li><li>직접 처음부터 만들고 싶다면 <b>이 시험 창에서만</b> 2단계와 1단계를 삭제합니다. 보드는 그대로 두고 아래 순서로 두 단계를 만듭니다.</li></ol>
+<p>이 예제는 5행 3열을 5행 4열과 바꿔 <b>세로로 4개</b>를 맞추고 <b>가로로 발사되는 청소 로켓</b>을 만듭니다. 현재 게임의 로켓 방향 규칙입니다.</p></section>
+<section id="create"><h2>1. 로켓을 만드는 단계</h2><ol class="steps">
+<li><b>셀 선택 → 새 단계 만들기</b>를 누릅니다. <b>5행 3열 → 5행 4열</b> 순서로 클릭합니다.</li>
+<li>샘플 <b>지정한 두 칸 교환</b>을 골라 <b>새 단계로 적용</b>합니다.</li>
+<li>오른쪽의 기존 <b>교환 횟수</b> 조건 아래 <b>조건 삭제</b>를 누릅니다. 왼쪽의 단계 <b>삭제</b>와 다른 버튼입니다.</li>
+<li><b>+ 파워 생성</b>을 누르고 아래 값을 넣습니다.</li></ol>
+<div class="table-wrap"><table><thead><tr><th>항목</th><th>값</th></tr></thead><tbody><tr><td>필요 횟수 / 개수</td><td>1</td></tr><tr><td>조건 대상</td><td>보드 전체</td></tr><tr><td>파워 종류</td><td>청소 로켓 (power.rocket)</td></tr><tr><td>로켓 방향</td><td>가로</td></tr><tr><td>생성 결과 연결 이름 (선택)</td><td>만든 로켓</td></tr></tbody></table></div>
+<p><b>안내 문구</b>에는 “분홍 달토끼를 오른쪽으로 옮겨 로켓을 만들어 주세요.”라고 적고, <b>대상과 조작 셀 자동 강조</b>를 체크합니다.</p>
+<figure><a href='images/tutorial-power-create.png'><img src='images/tutorial-power-create.png' alt='청소 로켓 생성 조건에 가로 방향과 만든 로켓 연결 이름을 지정한 화면' width='1480' height='1000' loading='lazy'></a><figcaption>1단계는 생성 조건과 이름표를 정합니다. · 실제 임시 시험 보드, 2026-10-08. 그림을 누르면 크게 볼 수 있습니다.</figcaption></figure>
+<aside class="note"><strong>이름표는 왜 붙이나요?</strong><p>로켓이 만들어진 뒤 빈칸으로 떨어질 수 있습니다. 처음 칸만 기억하면 엉뚱한 블록을 가리킬 수 있어요. “만든 로켓”은 <b>그 로켓 자체</b>를 찾는 이름입니다. 튜토리얼 전체의 <b>학습 완료 ID</b>와는 다른 것입니다.</p></aside></section>
+<section id="use"><h2>2. 방금 만든 로켓을 쓰는 단계</h2><p>새 로켓을 집는 설정과, 그 로켓이 실제 사용됐는지 확인하는 설정을 <b>둘 다</b> 연결합니다.</p>
+<ol class="steps"><li><b>셀 선택 → 새 단계 만들기</b>를 누르고 이번 시험 보드의 <b>7행 4열 → 7행 5열</b>을 고릅니다. <b>지정한 두 칸 교환 → 새 단계로 적용</b>으로 2단계를 만듭니다.</li>
+<li>오른쪽 <b>첫 조작 대상</b>을 <b>생성: 만든 로켓</b>으로 바꿉니다. <b>둘째 조작 대상</b>은 <b>지정 칸 / 선택 영역 사용</b>으로 둡니다. 이 예제의 둘째 칸은 7행 5열입니다.</li>
+<li>기존 <b>교환 횟수</b> 조건을 <b>조건 삭제</b>하고 <b>+ 직접 단독 발동</b>을 누릅니다.</li>
+<li>아래 표대로 조건을 입력합니다. <b>안내 문구</b>는 “만든 로켓을 오른쪽 블록과 바꿔 사용해 주세요.”로 적습니다. <b>대상과 조작 셀 자동 강조</b>를 체크합니다.</li></ol>
+<div class="table-wrap"><table><thead><tr><th>항목</th><th>값</th><th>뜻</th></tr></thead><tbody><tr><td>필요 횟수 / 개수</td><td>1</td><td>한 번 사용하면 완료</td></tr><tr><td>조건 대상</td><td>이전 생성 결과</td><td>앞 단계에서 만든 것을 검사</td></tr><tr><td>생성 연결</td><td>만든 로켓</td><td>같은 이름표 선택</td></tr><tr><td>파워 종류</td><td>청소 로켓 (power.rocket)</td><td>로켓 사용 확인</td></tr><tr><td>로켓 방향</td><td>방향 무관</td><td>이 단계는 사용했는지만 확인</td></tr></tbody></table></div>
+<figure><a href='images/tutorial-power-use.png'><img src='images/tutorial-power-use.png' alt='2단계 첫 조작 대상과 조건 대상이 앞 단계의 만든 로켓에 연결된 화면' width='1480' height='1000' loading='lazy'></a><figcaption>2단계는 첫 조작 대상과 생성 연결, 두 곳을 같은 이름으로 맞춥니다. · 실제 임시 시험 보드, 2026-10-08. 그림을 누르면 크게 볼 수 있습니다.</figcaption></figure>
+<p class="result">첫 조작 대상과 완료 조건의 생성 연결이 모두 <b>만든 로켓</b>이면 연결이 끝났습니다. <b>편집 보드는 시작 배치</b>를 보여 줍니다. 2단계를 눌렀는데 보드에 새 로켓이 아직 안 보이는 것은 정상입니다.</p>
+<aside class="note"><strong>칸을 다시 골랐다면 이름표도 다시 확인하세요</strong><p><b>보드에서 교환 두 칸 선택</b>으로 두 칸을 다시 지정하면 생성 연결 조작이 일반 좌표 선택으로 돌아갑니다. 칸 선택을 마친 뒤 <b>첫 조작 대상 = 생성: 만든 로켓</b>을 다시 고르세요.</p></aside></section>
+<section id="other"><h2>폭탄·드론·자석도 같은 방식입니다</h2><div class="table-wrap"><table><thead><tr><th>시험 보드</th><th>만드는 모양</th><th>바꿀 항목</th></tr></thead><tbody><tr><td>가로 로켓 생성</td><td>세로 4매칭</td><td>청소 로켓 · 가로</td></tr><tr><td>세로 로켓 생성</td><td>가로 4매칭</td><td>청소 로켓 · 세로</td></tr><tr><td>폭탄 생성</td><td>꺾인 5매칭</td><td>파워 종류에서 폭탄 계열 선택</td></tr><tr><td>드론 생성</td><td>2×2 매칭</td><td>파워 종류에서 드론 계열 선택</td></tr><tr><td>자석 생성</td><td>가로 5매칭</td><td>파워 종류에서 자석 계열 선택</td></tr></tbody></table></div><p>각 시험 보드를 열면 맞는 배치와 생성 조건을 살펴볼 수 있습니다. 이어서 쓰게 하려면 “만든 폭탄”처럼 이름표를 붙이고, 다음 단계의 조작과 완료 조건에서 같은 이름을 선택합니다. <b>7행 5열은 위 로켓 시험 보드 전용</b>입니다. 다른 보드에서는 낙하 후 실제 이웃 칸을 정해야 합니다.</p><p>이미 놓여 있는 로켓을 쓰는 연습은 <b>로켓 직접 단독 발동</b> 시험 보드로 시작하세요. 새로 만든 물건이 아니므로 생성 이름표 대신 보드에서 로켓과 이웃한 일반 블록을 고르면 됩니다.</p><p>파워 두 개를 합치는 학습은 <b>+ 파워 조합</b>을 사용합니다. <b>직접 단독 발동</b>은 두 파워 조합이나 자동 연쇄 발동을 세지 않습니다.</p></section>
+<section id="check"><h2>3. 두 단계를 처음부터 시험하기</h2><ol class="steps"><li><b>튜토리얼 논리 재생 검사</b>로 두 단계가 이어지는지 확인합니다.</li><li><b>게임 입력 = 에셋</b>, <b>튜토리얼 = 항상 실행</b>에서 <b>게임 플레이</b>를 누릅니다.</li><li>로켓을 만들고, 낙하를 기다립니다. 다음 안내가 <b>움직인 로켓</b>을 가리키는지 확인합니다.</li><li>로켓과 이웃 블록을 교환합니다. 로켓이 발사되고 튜토리얼이 끝나야 합니다.</li></ol><p>샘플로 보관할 때는 <b>전체 흐름을 내 샘플로 저장</b>하세요. 2단계만 저장하면 “만든 로켓”이라는 앞 단계의 이름표가 없어집니다. 작업 레벨의 배치와 신규 블록 공급도 따로 맞춰야 합니다.</p></section>
+<section id="history" class="history"><h2>변경 이력 · 확인 범위</h2><p><a href="#content">이번에 추가한 따라하기 본문으로</a></p><p>2026-10-08 · 추가 · 짧은 기능 소개에서 실제 선택 순서·입력값·변경·확인 방법을 갖춘 예제로 확장했습니다. 사용자 요청에 따른 초보자용 안내입니다.</p><p>Windows / Unity 6000.3.10f1. 임시 시험 보드의 실제 에디터 화면 캡처와 논리 재생을 확인했습니다. 실기기 터치 검사는 이번 문서 작업에 포함하지 않았습니다. 화면 속 시험 보드는 출시 레벨을 변경하지 않습니다.</p></section>
+<footer><a href="tutorial.html">← 튜토리얼 시작하기</a><a href="tutorial-shared.html#samples">만든 것을 내 샘플로 저장 →</a></footer><p class="prepare">문서 표시 확인 · 2026-10-08 · Chrome 1440px / 390px · 내부 링크·이미지 정상. 폴더 복사 후 오프라인 파일 열기와 목차 왕복 확인.</p></main></body></html>

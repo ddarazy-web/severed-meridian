@@ -1,0 +1,11 @@
+/* 기존 매뉴얼의 색과 글꼴을 유지하는 튜토리얼 보조 스타일. */
+.tutorial-guide .on-page { margin-bottom:24px; }
+.recipe { padding:18px 22px; background:#edf3e9; border:1px solid #c7d7c8; border-radius:6px; margin:20px 0; }
+.recipe strong { color:#173a38; }
+.result { border-left:4px solid #457b61; padding:10px 18px; background:#e7f0e8; }
+details.revision { padding:10px 14px; margin:18px 0; font-size:13px; border:1px solid #ccd6ce; border-radius:4px; color:#52675b; }
+details.revision summary { cursor:pointer; }
+li p { margin:6px 0; }
+kbd { font:inherit; font-size:.9em; border:1px solid #bbcbbf; border-bottom-width:2px; border-radius:4px; padding:1px 6px; background:#fff; }
+.table-wrap { margin:18px 0; }
+@media (max-width:640px) { .recipe { padding:14px; } .sidebar nav { gap:3px; } h2 { font-size:21px; } }
