@@ -18,7 +18,7 @@ namespace Levels.Editor
             void Apply(List<BoardCoordinate> order)
             {
                 if (!Current()) return;
-                operation.text = LevelFlowEditing.SetMerge(level, cell, order) ?? "합류 우선순위를 변경했습니다. Undo 한 번으로 복구합니다.";
+                operation.text = EditFlow("합류 순서 편집", () => LevelFlowEditing.SetMerge(level, cell, order)) ?? "합류 우선순위를 변경했습니다. Undo 한 번으로 복구합니다.";
                 Refresh();
             }
             parent.Add(new Label("합류 우선순위 · 핸들을 드래그 (1번 우선)"));
@@ -66,7 +66,7 @@ namespace Levels.Editor
                 evt.menu.AppendAction("합류 우선순위 초기화", _ =>
                 {
                     if (!Current()) return;
-                    operation.text = LevelFlowEditing.RemoveMerge(level, cell) ?? "합류 우선순위를 초기화했습니다.";
+                    operation.text = EditFlow("합류 순서 초기화", () => LevelFlowEditing.RemoveMerge(level, cell)) ?? "합류 우선순위를 초기화했습니다.";
                     Refresh();
                 });
             }));

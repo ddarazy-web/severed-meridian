@@ -28,6 +28,7 @@ namespace Levels.Editor
                 if (additive) operation.text = "이 층의 유일한 배치 요소만 추가 선택할 수 있습니다.";
             }
             inspectorPage = 0;
+            CaptureJsonViewState();
             Refresh();
         }
 
@@ -102,11 +103,13 @@ namespace Levels.Editor
             {
                 if (!Current()) return;
                 board.CancelStroke();
-                string error = LevelCommonEditing.Set(level, targets, field, value, out int changed);
-                operation.text = error ?? $"공통 설정: 변경 {changed}개 · 나머지 속성 보존";
+                EditLevel("공통 속성 변경", () =>
+                {
+                    string error = LevelCommonEditing.Set(level, targets, field, value, out int changed);
+                    operation.text = error ?? $"공통 설정: 변경 {changed}개 · 나머지 속성 보존";
+                });
                 Refresh();
             }
         }
     }
 }
-

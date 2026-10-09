@@ -23,7 +23,7 @@ namespace LevelAuthoring.Editor
         { Guid = guid; Kind = kind; Asset = asset; }
     }
 
-    public static class LegacyContentExporter
+    public static partial class LegacyContentExporter
     {
         private static readonly Dictionary<string, Type> Types = new Dictionary<string, Type>
         {
@@ -45,6 +45,11 @@ namespace LevelAuthoring.Editor
             string allowed = Path.GetFullPath("ContentData/Trials/game-authoring-stage-02") + Path.DirectorySeparatorChar;
             if (!root.StartsWith(allowed, StringComparison.OrdinalIgnoreCase))
                 throw new ContentFormatException("내보내기는 2단계 시험 폴더의 명시적 하위 폴더만 허용합니다.");
+            return ExportToRoot(root, sources, beforePublish);
+        }
+
+        private static StoredContentSnapshot ExportToRoot(string root, IReadOnlyList<LegacyContentSource> sources, Action beforePublish)
+        {
             var repository = new ContentSnapshotStore(root);
             StoredContentSnapshot previous = null;
             try { previous = repository.Read(); }

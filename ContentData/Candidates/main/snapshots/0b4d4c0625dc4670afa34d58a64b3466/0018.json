@@ -1,0 +1,68 @@
+{
+  "kind": "element",
+  "schemaVersion": 1,
+  "id": "element-faac530173aa422e89c3b12b868a6105",
+  "data": {
+    "definition": {
+      "aggregation": {
+        "enabled": false,
+        "perHitCell": false
+      },
+      "charge": {
+        "enabled": false,
+        "maxRequired": 5,
+        "minRequired": 3,
+        "perHit": 1,
+        "size": 2
+      },
+      "color": {
+        "enabled": false,
+        "requiresMatchingColor": false
+      },
+      "damage": {
+        "adjacentMatch": false,
+        "enabled": false,
+        "hammer": false,
+        "magnetAdjacent": false,
+        "power": false
+      },
+      "displayName": "먼지",
+      "id": "floor.dust",
+      "layer": {
+        "behavior": "NormalConsumption",
+        "damage": 1,
+        "enabled": true,
+        "mission": "Dust"
+      },
+      "placement": {
+        "enabled": true,
+        "maxDurability": 3,
+        "size": 1
+      },
+      "reaction": "Unspecified",
+      "removal": {
+        "enabled": false,
+        "kind": "Color"
+      },
+      "supply": {
+        "behavior": "Unspecified",
+        "bodyIdPrefix": "",
+        "choiceDefinitionIds": [],
+        "choices": [],
+        "content": "Empty",
+        "enabled": false,
+        "hasObstacle": false,
+        "obstacle": "Crate",
+        "obstacleDefinitionId": ""
+      },
+      "turn": {
+        "behavior": "Unspecified",
+        "enabled": false,
+        "initialDurability": 1
+      }
+    },
+    "displayName": "floor.dust",
+    "planningDocument": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+    "planningSection": "먼지 — 확정 수치/행동과 기존 구현을 대조"
+  }
+}

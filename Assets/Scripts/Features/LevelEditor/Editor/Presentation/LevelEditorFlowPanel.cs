@@ -17,12 +17,12 @@ namespace Levels.Editor
 
         private void SetupFlowOverlay()
         {
-            flowOverlay = new LevelFlowOverlay();
+            flowOverlay = new LevelFlowOverlay { EditAction = EditFlow };
             board.Add(flowOverlay);
             board.Cancelled += flowOverlay.CancelInput;
             flowOverlay.CellSelected += SelectCell;
             flowOverlay.Edited += message => { operation.text = message; Refresh(); };
-            connectionGraph = new LevelConnectionGraph(); board.Add(connectionGraph);
+            connectionGraph = new LevelConnectionGraph { EditAction = EditFlow }; board.Add(connectionGraph);
             board.Cancelled += connectionGraph.Cancel;
             connectionGraph.Edited += message => { operation.text = message; Refresh(); };
         }
@@ -181,7 +181,7 @@ namespace Levels.Editor
                 {
                     board.CancelStroke();
                     if (level != owner || JsonUtility.ToJson(level) != snapshot) { Refresh(); return; }
-                    operation.text = action() ?? "설정을 적용했습니다.";
+                    operation.text = EditFlow("흐름 속성 편집", action) ?? "설정을 적용했습니다.";
                     Refresh();
                 }) { text = text, name = name });
             }

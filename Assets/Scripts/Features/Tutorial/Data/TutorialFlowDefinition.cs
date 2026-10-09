@@ -30,8 +30,6 @@ namespace Tutorial
         public string conditionId = "";
         public TutorialFlowField field;
     }
-
-    [CreateAssetMenu(menuName = "달 토끼/튜토리얼/공통 진행 구성", fileName = "TutorialFlow")]
     public sealed class TutorialFlowDefinition : ScriptableObject
     {
         public List<TutorialStepDefinition> steps = new List<TutorialStepDefinition>();

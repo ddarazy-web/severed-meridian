@@ -106,8 +106,11 @@ namespace Levels.Editor
                 Add("설정 붙여넣기", placements.Any(item => LevelCommonEditing.Fields(item, level).Length > 0), () =>
                 {
                     board.CancelStroke();
-                    string error = LevelCommonEditing.Paste(level, placements, EditorGUIUtility.systemCopyBuffer, out int changed, out int excluded);
-                    operation.text = error ?? $"설정 적용: 변경 {changed}개 · 변경 없음 {placements.Length - changed - excluded}개 · 제외 {excluded}개";
+                    EditLevel("설정 붙여넣기", () =>
+                    {
+                        string error = LevelCommonEditing.Paste(level, placements, EditorGUIUtility.systemCopyBuffer, out int changed, out int excluded);
+                        operation.text = error ?? $"설정 적용: 변경 {changed}개 · 변경 없음 {placements.Length - changed - excluded}개 · 제외 {excluded}개";
+                    });
                     Refresh();
                 });
             }

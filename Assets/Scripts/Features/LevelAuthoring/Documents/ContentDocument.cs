@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
 using Newtonsoft.Json.Linq;
 
@@ -23,3 +24,4 @@ namespace LevelAuthoring.Documents
         }
     }
 }
+#endif

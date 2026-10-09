@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
-using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
 using UnityEngine;
 using Elements;
 using MemoryPack;
-using Elements.Editor;
 
 namespace Levels.Editor
 {
@@ -25,56 +22,13 @@ namespace Levels.Editor
 
         public static void Generate()
         {
-            // 전체 변환을 먼저 검증한다. 중복 번호나 스키마 오류로 기존 산출물을 일부만 바꾸지 않는다.
-            LevelDefinition[] levels = AssetDatabase.FindAssets("t:LevelDefinition", new[] { LevelAssetOperations.DefaultFolder })
-                .Select(AssetDatabase.GUIDToAssetPath).Select(AssetDatabase.LoadAssetAtPath<LevelDefinition>).ToArray();
-            Dictionary<string, byte[]> outputs = CreatePackBytes(levels);
-            byte[] contentBytes = ElementContentPackBuild.CreateDefaultBytes();
-            foreach (ElementCatalogAsset catalog in levels.Select(level => level.ElementCatalog).Where(value => value != null).Distinct())
-                ElementContentAuthoring.ValidatePlanning(catalog);
-            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
-            ValidateExclusion(settings, true);
-            foreach (string guid in AuthoringGuids()) settings.RemoveAssetEntry(guid);
-            ValidateExclusion(settings);
-            ElementContentPackBuild.WriteAndRegister(contentBytes, settings);
-            Directory.CreateDirectory(OutputFolder);
-            foreach (var output in outputs)
-                if (!File.Exists(output.Key) || !File.ReadAllBytes(output.Key).SequenceEqual(output.Value)) File.WriteAllBytes(output.Key, output.Value);
-            foreach (string obsolete in Directory.GetFiles(OutputFolder, "levels-*.bytes").Select(path => path.Replace('\\', '/')))
-                if (!outputs.ContainsKey(obsolete))
-                {
-                    settings.RemoveAssetEntry(AssetDatabase.AssetPathToGUID(obsolete));
-                    AssetDatabase.DeleteAsset(obsolete);
-                }
-            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
-            AddressableAssetGroup group = settings.FindGroup("Level Packs") ?? settings.CreateGroup("Level Packs", false, false, false, null,
-                typeof(BundledAssetGroupSchema), typeof(ContentUpdateGroupSchema));
-            BundledAssetGroupSchema bundle = group.GetSchema<BundledAssetGroupSchema>();
-            bundle.BundleMode = BundledAssetGroupSchema.BundlePackingMode.PackSeparately;
-            bundle.BuildPath.SetVariableByName(settings, AddressableAssetSettings.kLocalBuildPath);
-            bundle.LoadPath.SetVariableByName(settings, AddressableAssetSettings.kLocalLoadPath);
-            foreach (var output in outputs)
-                settings.CreateOrMoveEntry(AssetDatabase.AssetPathToGUID(output.Key), group).address = "Levels/" + Path.GetFileNameWithoutExtension(output.Key);
-            LevelPackAddressablesBuilder builder = AssetDatabase.LoadAssetAtPath<LevelPackAddressablesBuilder>(BuilderPath);
-            if (builder == null)
-            {
-                builder = ScriptableObject.CreateInstance<LevelPackAddressablesBuilder>();
-                AssetDatabase.CreateAsset(builder, BuilderPath);
-                settings.AddDataBuilder(builder);
-            }
-            settings.ActivePlayerDataBuilderIndex = settings.DataBuilders.IndexOf(builder);
-            EditorUtility.SetDirty(settings);
-            AssetDatabase.SaveAssetIfDirty(group);
-            AssetDatabase.SaveAssetIfDirty(bundle);
-            AssetDatabase.SaveAssetIfDirty(builder);
-            AssetDatabase.SaveAssetIfDirty(settings);
-            Debug.Log($"MemoryPack: {levels.Length} levels, {outputs.Count} packs (50 levels/range)");
+            // 검증하여 채택한 JSON만 사용한다. 원본 선택 실패를 구형 SO 검색으로 숨기지 않는다.
+            string folder = LevelAuthoring.Editor.AuthoringSourceSelection.ReadFolder(LevelAuthoring.Editor.AuthoringSourceSelection.DefaultConfiguration);
+            LevelAuthoring.Editor.JsonPackRegistration.Publish(folder);
+            Debug.Log("선택한 JSON의 레벨·요소 MemoryPack 갱신 완료 (50레벨 구간)");
         }
 
         public static void ValidateExclusion(AddressableAssetSettings settings)
-            => ValidateExclusion(settings, false);
-
-        private static void ValidateExclusion(AddressableAssetSettings settings, bool omitDirectOriginals)
         {
             List<string> roots = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToList();
             roots.AddRange(PlayerSettings.GetPreloadedAssets().Where(asset => asset != null).Select(AssetDatabase.GetAssetPath));
@@ -83,7 +37,6 @@ namespace Levels.Editor
             foreach (AddressableAssetGroup group in settings.groups.Where(group => group != null))
                 foreach (AddressableAssetEntry entry in group.entries)
                 {
-                    if (omitDirectOriginals && IsAuthoringType(AssetDatabase.GetMainAssetTypeAtPath(entry.AssetPath))) continue;
                     List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
                     entry.GatherAllAssets(entries, true, true, false);
                     roots.AddRange(entries.Select(asset => asset.AssetPath));
@@ -93,9 +46,8 @@ namespace Levels.Editor
             if (originals.Length > 0) throw new BuildFailedException("레벨/요소 제작 원본이 빌드 리소스에서 참조됩니다. 씬/프리팹/Resources/Addressables 폴더 참조를 제거하고 팩으로 로드하세요:\n" + string.Join("\n", originals));
         }
 
-        internal static bool IsAuthoringType(Type type) => type == typeof(LevelDefinition) || type == typeof(ElementCatalogAsset) || type == typeof(ElementDefinitionAsset) || type == typeof(ElementVisualCatalogAsset);
-        private static IEnumerable<string> AuthoringGuids() => new[] { "t:LevelDefinition", "t:ElementCatalogAsset", "t:ElementDefinitionAsset", "t:ElementVisualCatalogAsset" }
-            .SelectMany(filter => AssetDatabase.FindAssets(filter)).Distinct();
+        internal static bool IsAuthoringType(Type type) => type == typeof(LevelDefinition) || type == typeof(ElementCatalogAsset) || type == typeof(ElementDefinitionAsset) || type == typeof(ElementVisualCatalogAsset) ||
+            type == typeof(Tutorial.TutorialFlowDefinition) || type == typeof(Tutorial.TutorialUserSampleDefinition) || type == typeof(LevelShapePreset);
 
         // 선검증과 메모리 인코딩만 수행한다. 디스크/Addressables 변경은 Generate가 별도로 소유한다.
         public static Dictionary<string, byte[]> CreatePackBytes(IEnumerable<LevelDefinition> levels)

@@ -13,6 +13,8 @@ namespace Levels.Editor
     // 기존 블록 입력과 분리된 흐름 도구다. 미리보기만 소유하며 저장은 편집 API가 담당한다.
     public sealed partial class LevelFlowOverlay : VisualElement
     {
+        public Func<string, Func<string>, string> EditAction { get; set; }
+        private string RunEdit(string label, Func<string> action) => EditAction == null ? action() : EditAction(label, action);
         private LevelDefinition level;
         private FlowTool tool;
         private string source;
@@ -100,8 +102,8 @@ namespace Levels.Editor
         public void Complete()
         {
             if (!Current()) return;
-            string error = tool == FlowTool.Path ? LevelFlowEditing.SetPath(level, draft.ToArray()) :
-                tool == FlowTool.Wire ? LevelConnectionEditing.SetWire(level, WireIndex, draft.ToArray()) : "경로 또는 전선 도구에서 완료하세요.";
+            string error = RunEdit("경로 확정", () => tool == FlowTool.Path ? LevelFlowEditing.SetPath(level, draft.ToArray()) :
+                tool == FlowTool.Wire ? LevelConnectionEditing.SetWire(level, WireIndex, draft.ToArray()) : "경로 또는 전선 도구에서 완료하세요.");
             if (error == null) CancelInput();
             source = JsonUtility.ToJson(level);
             Edited?.Invoke(error ?? "경로를 확정했습니다. Undo 한 번으로 복구합니다.");
@@ -110,7 +112,7 @@ namespace Levels.Editor
         public void SavePartialWire()
         {
             if (!Current() || tool != FlowTool.Wire) return;
-            string error = LevelConnectionEditing.SetWire(level, WireIndex, draft.ToArray(), true);
+            string error = RunEdit("전선 중간 경로", () => LevelConnectionEditing.SetWire(level, WireIndex, draft.ToArray(), true));
             if (error == null) CancelInput();
             source = JsonUtility.ToJson(level);
             Edited?.Invoke(error ?? "전선 중간 경로를 기록했습니다. 대상에 닿기 전까지 연결 오류로 표시합니다.");
@@ -173,6 +175,8 @@ namespace Levels.Editor
                 return;
             }
             string error = null;
+            error = RunEdit("흐름·연결 편집", () =>
+            {
             switch (tool)
             {
                 case FlowTool.PathErase: error = LevelFlowEditing.RemovePath(level, cell); break;
@@ -185,6 +189,8 @@ namespace Levels.Editor
                     int target = LevelConnectionRules.FindAt(level, cell);
                     error = target >= 0 ? LevelConnectionEditing.Add(level, GeneratorId, LevelConnectionRules.Body(level, target).Id) : "연결할 장애물을 선택하세요."; break;
             }
+                return error;
+            });
             source = JsonUtility.ToJson(level);
             Edited?.Invoke(error ?? "설정을 적용했습니다.");
         }
@@ -245,9 +251,9 @@ namespace Levels.Editor
             FlowTool completedTool = tool;
             CancelInput();
             GravityDirection? gravity = completedTool == FlowTool.GravityClear ? null : (GravityDirection)((int)completedTool - (int)FlowTool.Down);
-            string error = completedTool == FlowTool.Wall || completedTool == FlowTool.WallErase
+            string error = RunEdit("영역 흐름 편집", () => completedTool == FlowTool.Wall || completedTool == FlowTool.WallErase
                 ? LevelFlowEditing.SetWalls(level, completedEdges, completedTool == FlowTool.WallErase)
-                : LevelFlowEditing.SetGravity(level, completedCells, gravity);
+                : LevelFlowEditing.SetGravity(level, completedCells, gravity));
             source = JsonUtility.ToJson(level);
             Edited?.Invoke(error ?? "영역 설정을 적용했습니다. Undo 한 번으로 복구합니다.");
         }

@@ -9,6 +9,7 @@ namespace Levels.Editor
         public override string Name => "Level MemoryPack + AssetBundles";
         protected override TResult BuildDataImplementation<TResult>(AddressablesDataBuilderInput builderInput)
         {
+            Products.Editor.ProductProfiles.PrepareContentBuild();
             LevelPackBuild.Generate();
             return base.BuildDataImplementation<TResult>(builderInput);
         }

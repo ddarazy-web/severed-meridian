@@ -1,23 +1,27 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
+using Levels;
 
 namespace Elements
 {
     public static class ElementContentPackLoader
     {
-        // 팩 안의 값만 반환한다. TextAsset과 Addressables 핸들의 소유권은 남기지 않는다.
         public static async UniTask<ElementContentData> LoadAsync(CancellationToken token = default)
         {
-            var handle = Addressables.LoadAssetAsync<TextAsset>(ElementContentPackCodec.Address);
-            try
-            {
-                TextAsset asset = await handle.ToUniTask(cancellationToken: token);
-                token.ThrowIfCancellationRequested();
-                return ElementContentPackCodec.Decode(asset.bytes);
-            }
-            finally { if (handle.IsValid()) Addressables.Release(handle); }
+            var generation = ContentPackGenerationCodec.Decode(await ContentPackAssetLoader.LoadAsync(ContentPackGenerationCodec.Address, token));
+            return await LoadAsync(generation, ContentPackAssetLoader.LoadAsync, token);
+        }
+
+        // 레벨 로더가 확보한 세대를 그대로 사용하여 두 팩 사이의 재조회 혼합을 막는다.
+        internal static async UniTask<ElementContentData> LoadAsync(ContentPackGeneration generation,
+            Func<string, CancellationToken, UniTask<byte[]>> read, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            byte[] bytes = await read(ElementContentPackCodec.Address, token);
+            token.ThrowIfCancellationRequested();
+            ContentPackGenerationCodec.Verify(generation, ElementContentPackCodec.Address, bytes);
+            return ElementContentPackCodec.Decode(bytes);
         }
     }
 }

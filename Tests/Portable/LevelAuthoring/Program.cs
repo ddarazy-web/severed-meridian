@@ -39,6 +39,11 @@ internal static partial class Program
         StorageChecks(document);
         ExportedChecks();
         SafetyChecks(document);
+        EditingChecks();
+        PlacementChecks();
+        CommonChecks();
+        ToolWorkspaceChecks();
+        TrialSourceChecks();
         Console.WriteLine("PASS " + passed + " portable checks");
     }
     private static void StorageChecks(ContentDocument document)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using Board;
@@ -20,7 +20,7 @@ namespace Levels.Editor
         [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("level")] private LevelDefinition sourceLevel;
         [SerializeField] private bool useMemoryPack;
         private LevelDefinition packedLevel;
-        private LevelDefinition level => useMemoryPack ? packedLevel : sourceLevel;
+        private LevelDefinition level => JsonInput || useMemoryPack ? packedLevel : sourceLevel;
         [SerializeField] private int seed = 1;
         private Label status;
         private Label details;
@@ -45,6 +45,7 @@ namespace Levels.Editor
 
         internal void SetLevel(LevelDefinition target)
         {
+            UpdateSourceControls();
             if (sourceLevel == target) return;
             sourceLevel = target;
             rootVisualElement.Q<ObjectField>("initial-level")?.SetValueWithoutNotify(target);
@@ -163,7 +164,8 @@ namespace Levels.Editor
         {
             if (balancePanel?.CanContinue == true) return;
             if (batchSession != null) { UpdateBatchControls(); return; }
-            if (inputFingerprint != null && inputFingerprint != LevelStateBuilder.Fingerprint(level))
+            if (inputFingerprint != null && (JsonInput
+                ? jsonSourceFingerprint != LevelStateBuilder.Fingerprint(sourceLevel) : inputFingerprint != LevelStateBuilder.Fingerprint(level)))
                 Invalidate("원본 내용이 바뀌었습니다. 이전 후보를 지웠습니다. 다시 구성하세요.");
         }
 

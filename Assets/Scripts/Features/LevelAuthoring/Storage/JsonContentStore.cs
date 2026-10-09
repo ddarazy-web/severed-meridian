@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
 using System.IO;
 using System.Security.Cryptography;
@@ -117,3 +118,4 @@ namespace LevelAuthoring.Storage
         }
     }
 }
+#endif

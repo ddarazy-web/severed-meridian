@@ -10,6 +10,8 @@ namespace Levels.Editor
     // 연결점은 기존 전선의 시작 꼭짓점으로 식별한다. 저장 형식에 슬롯 상태를 중복 저장하지 않는다.
     public sealed partial class LevelConnectionGraph : VisualElement
     {
+        public Func<string, Func<string>, string> EditAction { get; set; }
+        private string RunEdit(string label, Func<string> action) => EditAction == null ? action() : EditAction(label, action);
         private LevelDefinition level;
         private string snapshot;
         private BoardCoordinate? selection;
@@ -229,7 +231,7 @@ namespace Levels.Editor
                     if (level != owner || version != snapshot || version != JsonUtility.ToJson(owner))
                     { Cancel(); Edited?.Invoke("레벨이 변경되었습니다. 연결을 다시 선택하세요."); return; }
                     if (!Current()) return;
-                    Cancel(); string error = remove();
+                    Cancel(); string error = RunEdit("연결 해제", remove);
                     Edited?.Invoke(error ?? "연결을 해제했습니다. Undo로 복구할 수 있습니다.");
                 });
             }));
@@ -288,7 +290,7 @@ namespace Levels.Editor
                 bool fromGenerator = LevelConnectionRules.Body(level, sourceBody).IsGenerator;
                 int generator = fromGenerator ? sourceBody : targetBody, target = fromGenerator ? targetBody : sourceBody;
                 int slot = fromGenerator ? sourceSlot : targetSlot;
-                message = routeError ?? LevelConnectionEditing.ConnectAuto(level, LevelConnectionRules.Body(level, generator).Id, LevelConnectionRules.Body(level, target).Id, Slot(LevelConnectionRules.Body(level, generator), slot), TargetTerminal(target)) ?? "연결 완료 · 전선 경로를 자동으로 만들었습니다. Undo 한 번으로 취소합니다.";
+                message = routeError ?? RunEdit("전선 연결", () => LevelConnectionEditing.ConnectAuto(level, LevelConnectionRules.Body(level, generator).Id, LevelConnectionRules.Body(level, target).Id, Slot(LevelConnectionRules.Body(level, generator), slot), TargetTerminal(target))) ?? "연결 완료 · 전선 경로를 자동으로 만들었습니다. Undo 한 번으로 취소합니다.";
             }
             Cancel(); Edited?.Invoke(message);
         }

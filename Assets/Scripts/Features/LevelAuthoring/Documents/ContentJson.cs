@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
 using System.Globalization;
 using System.IO;
@@ -108,3 +109,4 @@ namespace LevelAuthoring.Documents
         }
     }
 }
+#endif

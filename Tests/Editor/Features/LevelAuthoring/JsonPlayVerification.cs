@@ -20,7 +20,9 @@ namespace LevelAuthoring.Editor
 {
     public static class JsonPlayVerification
     {
-        private const string Output = "Logs/GameAuthoringStage02/play-results.txt";
+        private static bool packed;
+        private static string Output => packed ? "Logs/GameAuthoringStage06/packed-action-results.txt" : "Logs/GameAuthoringStage02/play-results.txt";
+        public static void RunPacked() { packed = true; Run(); }
         private static readonly List<GameObject> Owners = new List<GameObject>();
         private static bool previousEnabled;
         private static EnterPlayModeOptions previousOptions;
@@ -94,7 +96,7 @@ namespace LevelAuthoring.Editor
         {
             try
             {
-                var snapshot = new ContentSnapshotStore(File.ReadAllText("Logs/GameAuthoringStage02/latest-export.txt")).Read().Snapshot;
+                var snapshot = new ContentSnapshotStore(packed ? AuthoringSourceSelection.ReadFolder(AuthoringSourceSelection.DefaultConfiguration) : File.ReadAllText("Logs/GameAuthoringStage02/latest-export.txt")).Read().Snapshot;
                 var sources = LegacyContentExporter.Discover().Where(item => item.Kind == "level").OrderBy(item => ((LevelDefinition)item.Asset).LevelNumber).ToArray();
                 int baseline = Resources.FindObjectsOfTypeAll<LevelDefinition>().Length;
                 foreach (var source in sources)
@@ -109,7 +111,20 @@ namespace LevelAuthoring.Editor
                     int savedLevel = PlayerPrefs.GetInt(levelKey), savedIdentity = PlayerPrefs.GetInt(identityKey);
                     var json = CreateSession(); var asset = CreateSession();
                     UniTask jsonStart = json.InitializeAsync(jsonRequest, PuzzlePlayContext.CreateTest(TutorialRunMode.Always), CancellationToken.None);
-                    UniTask assetStart = asset.InitializeAsync(PuzzlePlayRequest.Capture(level, 12345), PuzzlePlayContext.CreateTest(TutorialRunMode.Always), CancellationToken.None);
+                    PuzzlePlayRequest comparison = PuzzlePlayRequest.Capture(level, 12345);
+                    if (packed)
+                    {
+                        var settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
+                        Func<string, CancellationToken, UniTask<byte[]>> read = (address, token) =>
+                        {
+                            token.ThrowIfCancellationRequested();
+                            string path = settings.groups.Where(group => group != null).SelectMany(group => group.entries).Single(entry => entry.address == address).AssetPath;
+                            return UniTask.FromResult(AssetDatabase.LoadAssetAtPath<TextAsset>(path).bytes);
+                        };
+                        var method = typeof(PackedPuzzlePlayAdapter).GetMethod("CreateRequestAsync", BindingFlags.NonPublic | BindingFlags.Static);
+                        comparison = (await (UniTask<PackedPuzzleTrial>)method.Invoke(null, new object[] { level.LevelNumber, 12345, read, CancellationToken.None })).Request;
+                    }
+                    UniTask assetStart = asset.InitializeAsync(comparison, PuzzlePlayContext.CreateTest(TutorialRunMode.Always), CancellationToken.None);
                     await jsonStart; await assetStart; await Stable(json); await Stable(asset);
                     Check(State(json) == State(asset), "initial board/supply/RNG/missions " + level.LevelNumber);
                     Check(json.TutorialState != null && json.TutorialState.State == TutorialProgressState.AwaitDescription, "real tutorial started " + level.LevelNumber);

@@ -21,18 +21,26 @@ namespace Tutorial.Editor
                 { tooltip = "전체 튜토리얼의 완료 기록 이름입니다. 같은 학습만 같은 ID를 사용하세요. 예: basic.swap" });
             fields.Add(new PropertyField(tutorial.FindPropertyRelative("previousLevelNumbers"), "이어받을 이전 레벨 번호")
                 { tooltip = "이전에 같은 학습을 진행했던 레벨 번호만 등록합니다. 새 학습은 비워 두세요. 기존 기록은 삭제하지 않습니다." });
+            if (isolatedJsonDraft)
+            {
+                fields.Add(new HelpBox(LevelEditorWindow.JsonFlowDraftRestriction, HelpBoxMessageType.Info));
+                return false;
+            }
+            if (jsonWorkspace != null) AddJsonFlowChoice();
+            else
+            {
             ObjectField choice = new ObjectField("공통 진행 구성") { name = "tutorial-flow-choice", objectType = typeof(TutorialFlowDefinition), allowSceneObjects = false, value = owner.Tutorial.flow,
                 tooltip = "동작 순서·조건·안내를 공유합니다. 레벨별 값만 수정하면 공유 원본은 바뀌지 않습니다." };
             choice.RegisterValueChangedCallback(evt =>
             {
                 try
                 {
-                    if (evt.newValue == null) TutorialFlowAuthoring.Detach(owner);
-                    else TutorialFlowAuthoring.Connect(owner, (TutorialFlowDefinition)evt.newValue);
+                    Mutate("공통 진행 구성 연결", () => { if (evt.newValue == null) TutorialFlowAuthoring.Detach(owner); else TutorialFlowAuthoring.Connect(owner, (TutorialFlowDefinition)evt.newValue); });
                     Rebuild();
                 }
                 catch (Exception error) { choice.SetValueWithoutNotify(owner.Tutorial.flow); fields.Add(new HelpBox(error.Message, HelpBoxMessageType.Error)); }
             }); fields.Add(choice);
+            }
             if (owner.Tutorial.flow == null)
             {
                 fields.Add(new HelpBox("이 레벨만의 독립 구성입니다. 샘플로 단계를 만든 뒤 공통 구성으로 저장하면 다른 레벨에서도 재사용할 수 있습니다.", HelpBoxMessageType.Info));
@@ -41,12 +49,12 @@ namespace Tutorial.Editor
             }
             TutorialFlowDefinition flow = owner.Tutorial.flow;
             fields.Add(new HelpBox("공통 진행 구성은 공유 중입니다. 아래 값만 이 레벨에 저장합니다. 동작 순서나 조건 종류가 달라야 한다면 독립 복사하세요.", HelpBoxMessageType.Info));
-            fields.Add(new Button(() => LevelEditorWindow.OpenTutorialFlow(owner, flow))
+            fields.Add(new Button(() => { if (openFlow != null) openFlow(flow); else LevelEditorWindow.OpenTutorialFlow(owner, flow); })
                 { text = "공통 원본 편집 · 사용 레벨 확인", name = "tutorial-flow-edit", tooltip = "보드 에디터의 사본에서 수정합니다. 적용 버튼을 누르기 전에는 원본이 바뀌지 않습니다." });
-            fields.Add(new Button(() => { TutorialFlowAuthoring.Detach(owner); Rebuild(); })
+            fields.Add(new Button(() => { Mutate("공통 구성 독립 복사", () => TutorialFlowAuthoring.Detach(owner)); Rebuild(); })
                 { text = "독립 복사 · 공유 연결 해제", name = "tutorial-flow-detach", tooltip = "현재 레벨 값을 적용한 독립 단계를 만듭니다. 완료 ID는 유지되며 Undo 가능합니다." });
             fields.Add(new Label("이 레벨의 설정") { name = "tutorial-level-settings" });
-            fields.Add(new Button(() => { TutorialFlowAuthoring.Synchronize(owner); Rebuild(); })
+            fields.Add(new Button(() => { Mutate("공통 구성 설정 동기화", () => TutorialFlowAuthoring.Synchronize(owner)); Rebuild(); })
                 { text = "설정 목록 동기화", tooltip = "추가·삭제된 설정 항목을 반영합니다. 이름과 종류가 같은 기존 값은 유지합니다. Undo 가능." });
             SerializedProperty bindings = tutorial.FindPropertyRelative("bindings");
             foreach (TutorialFlowParameter parameter in flow.parameters)
@@ -139,6 +147,8 @@ namespace Tutorial.Editor
 
         private void CreateSharedFlow()
         {
+            if (isolatedJsonDraft) { fields.Add(new HelpBox(LevelEditorWindow.JsonFlowDraftRestriction, HelpBoxMessageType.Warning)); return; }
+            if (jsonWorkspace != null) { CreateJsonFlow(); return; }
             if (owner.Tutorial.steps.Count == 0) { fields.Add(new HelpBox("단계를 먼저 추가하세요.", HelpBoxMessageType.Warning)); return; }
             string path = EditorUtility.SaveFilePanelInProject("공통 진행 구성 저장", "TutorialFlow", "asset", "새 이름으로 저장하세요.", "Assets/Data");
             if (string.IsNullOrEmpty(path)) return;
@@ -151,6 +161,8 @@ namespace Tutorial.Editor
 
         private void AddUserSamples()
         {
+            if (isolatedJsonDraft) return;
+            if (jsonWorkspace != null) { AddJsonSamples(); return; }
             Foldout section = new Foldout { text = "내 샘플 · 저장한 구성을 복사해서 사용", value = false }; fields.Add(section);
             section.Add(new HelpBox("샘플은 적용 시 복사합니다. 이후 샘플 수정이 이미 적용한 단계에 전파되지 않습니다.", HelpBoxMessageType.Info));
             foreach (bool whole in new[] { false, true })
@@ -166,7 +178,7 @@ namespace Tutorial.Editor
             ObjectField sample = new ObjectField("적용할 샘플") { objectType = typeof(TutorialUserSampleDefinition), allowSceneObjects = false, name = "tutorial-user-sample" };
             VisualElement preview = new VisualElement();
             Button apply = new Button(() =>
-            { if (sample.value is TutorialUserSampleDefinition selectedSample) { TutorialUserSampleStore.Apply(owner, selectedSample); Rebuild(); } }) { text = "미리 본 샘플을 끝에 추가", name = "tutorial-user-sample-apply" };
+            { if (sample.value is TutorialUserSampleDefinition selectedSample) { Mutate("내 샘플 적용", () => TutorialUserSampleStore.Apply(owner, selectedSample)); Rebuild(); } }) { text = "미리 본 샘플을 끝에 추가", name = "tutorial-user-sample-apply" };
             apply.SetEnabled(false);
             sample.RegisterValueChangedCallback(evt =>
             {

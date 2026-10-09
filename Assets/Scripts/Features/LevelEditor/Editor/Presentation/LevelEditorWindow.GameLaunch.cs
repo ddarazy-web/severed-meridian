@@ -25,9 +25,11 @@ namespace Levels.Editor
             source.labelElement.style.width = 60;
             source.RegisterValueChangedCallback(evt =>
             {
+                if (IsJsonFlowDraft) { source.SetValueWithoutNotify("현재 편집 사본"); return; }
                 gameLevelSource = evt.newValue == "에셋" ? PuzzleEditorLevelSource.Asset : PuzzleEditorLevelSource.MemoryPack;
                 gameLaunchMessage = "";
             });
+            if (IsJsonFlowDraft) { source.choices = new List<string> { "현재 편집 사본" }; source.SetValueWithoutNotify("현재 편집 사본"); source.tooltip = JsonFlowDraftRestriction; }
             parent.Add(source);
             IntegerField seedField = new IntegerField("게임 시드") { value = gameLevelSeed, name = "game-level-seed", isDelayed = false };
             seedField.style.width = 170; seedField.labelElement.style.minWidth = 60; seedField.labelElement.style.width = 60;
@@ -48,8 +50,8 @@ namespace Levels.Editor
             {
                 bool available = !PuzzleEditorLauncher.IsBusy && !EditorApplication.isCompiling && !EditorApplication.isPlayingOrWillChangePlaymode;
                 launch.SetEnabled(level != null && available);
-                source.SetEnabled(available); seedField.SetEnabled(available); tutorialMode.SetEnabled(available);
-                string input = gameLevelSource == PuzzleEditorLevelSource.Asset ? "에셋의 현재 편집값 사용 (미저장 값 포함)" : "마지막 생성 MemoryPack 사용 · 갱신: 플레이 테스트 → MemoryPack 갱신";
+                source.SetEnabled(available && !IsJsonMode && !IsJsonFlowDraft); seedField.SetEnabled(available); tutorialMode.SetEnabled(available);
+                string input = IsJsonFlowDraft ? "공통 원본 편집 사본의 현재 값 사용 · 부모 적용과 무관한 시험" : IsJsonMode ? "JSON 작업 폴더의 현재 편집값 사용 (시험용 스냅샷)" : gameLevelSource == PuzzleEditorLevelSource.Asset ? "에셋의 현재 편집값 사용 (미저장 값 포함)" : "마지막 생성 MemoryPack 사용 · 갱신: 플레이 테스트 → MemoryPack 갱신";
                 gameLaunchInfo.text = gameLaunchMessage != "" ? gameLaunchMessage : $"게임 실행: 레벨 {(level != null ? level.LevelNumber.ToString() : "미선택")} · 시드 {gameLevelSeed} · {input}";
             }
         }
@@ -58,11 +60,15 @@ namespace Levels.Editor
         {
             try
             {
+                if (!TryPrepareJsonDraftTest(out string connectionError)) throw new InvalidOperationException(connectionError);
                 board?.CancelStroke();
                 data?.ApplyModifiedProperties();
-                PuzzleEditorLaunchRequest request = PuzzleEditorLaunchRequest.Capture(level, gameLevelSource, gameLevelSeed, gameTutorialMode);
+                PuzzleEditorLaunchRequest request = IsJsonMode
+                    ? PuzzleEditorLaunchRequest.FromJson(CreateJsonPlayRequest(gameLevelSeed), gameTutorialMode)
+                    : PuzzleEditorLaunchRequest.Capture(level, IsJsonFlowDraft ? PuzzleEditorLevelSource.Asset : gameLevelSource, gameLevelSeed, gameTutorialMode);
+                CaptureJsonViewState();
                 PuzzleEditorLauncher.Launch(request, GetInstanceID());
-                gameLaunchMessage = $"레벨 {request.LevelNumber} · {gameLevelSource} · 시드 {request.Seed} 게임 실행 중";
+                gameLaunchMessage = $"레벨 {request.LevelNumber} · {request.Source} · 시드 {request.Seed} 게임 실행 중";
             }
             catch (Exception error)
             {

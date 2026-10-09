@@ -1,0 +1,68 @@
+{
+  "kind": "element",
+  "schemaVersion": 1,
+  "id": "element-26cc4f57499845659071b5a07f8e9798",
+  "data": {
+    "definition": {
+      "aggregation": {
+        "enabled": false,
+        "perHitCell": false
+      },
+      "charge": {
+        "enabled": false,
+        "maxRequired": 5,
+        "minRequired": 3,
+        "perHit": 1,
+        "size": 2
+      },
+      "color": {
+        "enabled": false,
+        "requiresMatchingColor": false
+      },
+      "damage": {
+        "adjacentMatch": false,
+        "enabled": false,
+        "hammer": false,
+        "magnetAdjacent": false,
+        "power": false
+      },
+      "displayName": "우주 곰팡이",
+      "id": "cover.mold",
+      "layer": {
+        "behavior": "CoverRemoval",
+        "damage": 1,
+        "enabled": true,
+        "mission": "Mold"
+      },
+      "placement": {
+        "enabled": true,
+        "maxDurability": 1,
+        "size": 1
+      },
+      "reaction": "Unspecified",
+      "removal": {
+        "enabled": false,
+        "kind": "Color"
+      },
+      "supply": {
+        "behavior": "Unspecified",
+        "bodyIdPrefix": "",
+        "choiceDefinitionIds": [],
+        "choices": [],
+        "content": "Empty",
+        "enabled": false,
+        "hasObstacle": false,
+        "obstacle": "Crate",
+        "obstacleDefinitionId": ""
+      },
+      "turn": {
+        "behavior": "AdjacentCoverSpread",
+        "enabled": true,
+        "initialDurability": 1
+      }
+    },
+    "displayName": "cover.mold",
+    "planningDocument": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+    "planningSection": "우주 곰팡이 — 확정 수치/행동과 기존 구현을 대조"
+  }
+}

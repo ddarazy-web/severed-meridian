@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "projectId": "project-6c3a162b7e1b4f34859cf9f7621a6b58",
+  "snapshotHash": "148f6db3612fc0320c3a349592b70aae66272804e594abf9a4ff0b2cddbf4dcc",
+  "references": [
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[0]",
+      "to": "element-26cc4f57499845659071b5a07f8e9798"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[1]",
+      "to": "element-b914266c7529487e97723076fac4a5c3"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[2]",
+      "to": "element-faac530173aa422e89c3b12b868a6105"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[3]",
+      "to": "element-7b45bb5da5fe401e8b647ff3387adb53"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[4]",
+      "to": "element-cb5a4b10ab3b40bdbf0b74a41028d486"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[5]",
+      "to": "element-39abc33d5bd046ed9e205e8b35e7c448"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[6]",
+      "to": "element-180a89acacce40b0b47e5cb698e6b4fe"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[7]",
+      "to": "element-1c095c23ee284aa9a7edef97055de51d"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[8]",
+      "to": "element-43c5dd84c6f0476b84b5b140bd71964f"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[9]",
+      "to": "element-7bb42b50a3394be98efa6fd4cd6713b8"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[10]",
+      "to": "element-938967dba657416ebf9bbc9685f04faa"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[11]",
+      "to": "element-5c946f6e4c6f466cb1e5645a578a70dc"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[12]",
+      "to": "element-c656ce4b36ce49cfaeee9e191e6efbcd"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[13]",
+      "to": "element-750e8ab379c24e36af76571cefbb0923"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[14]",
+      "to": "element-f91baa94af4f4a1a8f739045361221d1"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[15]",
+      "to": "element-a743ce838c2e48c1b056977fdddd8057"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[16]",
+      "to": "element-190847babf4f4d45abac1136766295f2"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.definitionIds[17]",
+      "to": "element-a8db92745fe5401180f50807c7a75546"
+    },
+    {
+      "from": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+      "field": "data.visualId",
+      "to": "visual-39d32a17fab04590841af320d59c56c7"
+    },
+    {
+      "from": "level-60bc319684094c67bfee34e35d48a8d8",
+      "field": "data.catalogId",
+      "to": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9"
+    },
+    {
+      "from": "level-60f267ee0c5a453bb09291a997bd660a",
+      "field": "data.catalogId",
+      "to": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9"
+    },
+    {
+      "from": "level-88f4664956ec4c2bb3700f68a7cac518",
+      "field": "data.catalogId",
+      "to": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9"
+    },
+    {
+      "from": "level-9476d3b3a91c4563b712bfb753f46c98",
+      "field": "data.catalogId",
+      "to": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9"
+    },
+    {
+      "from": "project-6c3a162b7e1b4f34859cf9f7621a6b58",
+      "field": "data.defaultCatalogId",
+      "to": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9"
+    }
+  ],
+  "planning": [
+    {
+      "documentId": "element-180a89acacce40b0b47e5cb698e6b4fe",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "금속기둥 상자 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-190847babf4f4d45abac1136766295f2",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "부품 공급 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-1c095c23ee284aa9a7edef97055de51d",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "고물 회수 캡슐 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-26cc4f57499845659071b5a07f8e9798",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "우주 곰팡이 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-39abc33d5bd046ed9e205e8b35e7c448",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "고장 난 발전기 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-43c5dd84c6f0476b84b5b140bd71964f",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "고철 뭉치 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-5c946f6e4c6f466cb1e5645a578a70dc",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "자석 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-750e8ab379c24e36af76571cefbb0923",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "지정 달토끼 공급 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-7b45bb5da5fe401e8b647ff3387adb53",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "색깔 자물쇠 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-7bb42b50a3394be98efa6fd4cd6713b8",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "폭탄 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-938967dba657416ebf9bbc9685f04faa",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "드론 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-a743ce838c2e48c1b056977fdddd8057",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "무작위 파워 공급 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-a8db92745fe5401180f50807c7a75546",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "고철 공급 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-b914266c7529487e97723076fac4a5c3",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "거미줄 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-c656ce4b36ce49cfaeee9e191e6efbcd",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "청소 로켓 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-cb5a4b10ab3b40bdbf0b74a41028d486",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "나무상자 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-f91baa94af4f4a1a8f739045361221d1",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "무작위 달토끼 공급 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "element-faac530173aa422e89c3b12b868a6105",
+      "kind": "element",
+      "document": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+      "section": "먼지 — 확정 수치/행동과 기존 구현을 대조"
+    },
+    {
+      "documentId": "visual-39d32a17fab04590841af320d59c56c7",
+      "kind": "visual",
+      "document": "Docs/Contents/MoonRabbitJunkyard/03_캐릭터와아트.md",
+      "section": null
+    }
+  ]
+}

@@ -23,6 +23,10 @@ namespace Levels.Editor
             Results.Clear(); Directory.CreateDirectory(Evidence);
             try
             {
+                Check(typeof(BotBatchSession).Assembly.GetType("AutoPlay.BotAnalysisReader")?.IsPublic == true, "실행용 결과 분석 로더 제공");
+                Type runtimeStore = typeof(BotBatchSession).Assembly.GetType("AutoPlay.BotBatchStore");
+                Check(runtimeStore != null && runtimeStore.IsPublic, "실행용 반복 시험 기록 저장소 제공");
+                Check(typeof(BotBatchSession).Assembly.GetType("AutoPlay.PersistedBotBatch") != null, "비동기 저장을 기다리는 반복 시험 소유자 제공");
                 BoardCoordinate[] active = Enumerable.Range(0, 16).Select(i => new BoardCoordinate(i / 4, i % 4)).ToArray();
                 level = (LevelDefinition)typeof(SettlementVerification).GetMethod("Make", BindingFlags.Static | BindingFlags.NonPublic)
                     .Invoke(null, new object[] { active });
@@ -103,6 +107,7 @@ namespace Levels.Editor
                 }
                 Check(JsonUtility.ToJson(level) == original && EditorUtility.IsDirty(level) == dirty, "반복·중지·저장 실패 후 원본 JSON·dirty 보존");
                 Store(level);
+                Persisted(level);
                 File.WriteAllLines(Evidence + "/core-actions.jsonl", uninterrupted);
             }
             catch (Exception error) { failure = error; Results.Add("FAIL " + error); }

@@ -13,32 +13,19 @@ namespace Tutorial.Editor
 {
     public sealed partial class LevelTutorialEditorPanel
     {
-        private static string ConditionLabel(TutorialConditionKind kind) => kind switch
-        {
-            TutorialConditionKind.SuccessfulSwap => "교환 횟수", TutorialConditionKind.Match => "매칭 조건",
-            TutorialConditionKind.DurabilityDecrease => "내구도 줄이기", TutorialConditionKind.RemainingDurability => "남은 내구도",
-            TutorialConditionKind.Removed => "지정 원인으로 제거", TutorialConditionKind.Generated => "파워 생성",
-            TutorialConditionKind.Activated => "직접 단독 발동", TutorialConditionKind.Combined => "파워 조합", TutorialConditionKind.ItemUsed => "아이템 사용 성공", TutorialConditionKind.MissionProgress => "미션 진행 증가", _ => kind.ToString()
-        };
+        private static string ConditionLabel(TutorialConditionKind kind) => TutorialAuthoringRules.ConditionLabel(kind);
 
         private void AddCondition(TutorialConditionKind kind)
         {
-            var condition = new TutorialConditionDefinition { kind = kind };
-            if (kind >= TutorialConditionKind.DurabilityDecrease && kind <= TutorialConditionKind.Combined) condition.target = new TutorialTargetDefinition();
-            if (kind == TutorialConditionKind.ItemUsed) condition.item = owner.Tutorial.steps[selected].item;
-            if (kind == TutorialConditionKind.MissionProgress) condition.missionIndex = -1;
-            if (kind == TutorialConditionKind.Removed) condition.allowedOrigins.Add(EffectOrigin.Rocket);
-            if (kind == TutorialConditionKind.Combined) condition.allowedOrigins.Add(EffectOrigin.RocketBomb);
-            if (kind == TutorialConditionKind.Generated || kind == TutorialConditionKind.Activated)
-                condition.powerDefinitionId = owner.CreateElementCatalog().Definitions.FirstOrDefault(value => value.Supply?.Behavior == ElementSupplyBehavior.Power)?.Id.Value ?? "";
-            Undo.RecordObject(owner, "튜토리얼 조건 추가"); owner.Tutorial.steps[selected].conditions.Add(condition);
-            EditorUtility.SetDirty(owner); Rebuild();
+            var condition = TutorialAuthoringRules.CreateCondition(kind, owner.CreateElementCatalog(), owner.Tutorial.steps[selected].item);
+            Mutate("튜토리얼 조건 추가", () => { Undo.RecordObject(owner, "튜토리얼 조건 추가"); owner.Tutorial.steps[selected].conditions.Add(condition);
+            EditorUtility.SetDirty(owner); }); Rebuild();
         }
 
         private void ChangeCondition(int index, Action<TutorialConditionDefinition> change)
         {
-            Undo.RecordObject(owner, "튜토리얼 조건 편집"); change(owner.Tutorial.steps[selected].conditions[index]);
-            EditorUtility.SetDirty(owner); Rebuild();
+            Mutate("튜토리얼 조건 편집", () => { Undo.RecordObject(owner, "튜토리얼 조건 편집"); change(owner.Tutorial.steps[selected].conditions[index]);
+            EditorUtility.SetDirty(owner); }); Rebuild();
         }
 
         private void AddExtendedCondition(VisualElement card, SerializedProperty property, int index)
@@ -184,9 +171,9 @@ namespace Tutorial.Editor
             fields.Add(choice); fields.Add(preview);
             fields.Add(new Button(() =>
             {
-                Undo.RecordObject(owner, "튜토리얼 조건 샘플 적용");
+                Mutate("튜토리얼 조건 샘플 적용", () => { Undo.RecordObject(owner, "튜토리얼 조건 샘플 적용");
                 owner.Tutorial.steps[selected].conditions.AddRange(samples[choice.index].CreateConditions());
-                EditorUtility.SetDirty(owner); Rebuild();
+                EditorUtility.SetDirty(owner); }); Rebuild();
             }) { text = "현재 단계에 샘플 조건 추가", name = "tutorial-condition-sample-apply" });
         }
 
@@ -213,10 +200,10 @@ namespace Tutorial.Editor
                 List<TutorialConditionDefinition> conditions = samples[choice.index].CreateConditions();
                 foreach (TutorialConditionDefinition condition in conditions)
                     condition.target = new TutorialTargetDefinition { kind = TutorialTargetKind.Entity, layer = target.layer, coordinate = coordinate };
-                Undo.RecordObject(owner, "대상 튜토리얼 샘플 적용");
+                Mutate("대상 튜토리얼 샘플 적용", () => { Undo.RecordObject(owner, "대상 튜토리얼 샘플 적용");
                 owner.Tutorial.steps.Add(new TutorialStepDefinition { kind = TutorialStepKind.Swap, instructions = "표시된 대상을 확인하고 블록을 교환해 주세요.",
                     highlights = new List<BoardCoordinate> { coordinate }, conditions = conditions });
-                selected = owner.Tutorial.steps.Count - 1; EditorUtility.SetDirty(owner); Rebuild();
+                selected = owner.Tutorial.steps.Count - 1; EditorUtility.SetDirty(owner); }); Rebuild();
             }) { text = "새 단계로 적용 · 다음에 조작 셀 지정", name = "tutorial-obstacle-sample-apply" };
             void ShowPreview()
             {

@@ -161,3 +161,5 @@ ServerData/*
 
 # 2단계 검사·내보내기의 재생성 가능한 시험 스냅샷
 /ContentData/Trials/game-authoring-stage-02/
+/ContentData/Trials/game-authoring-stage-03/
+/ContentData/Candidates/verification-*/

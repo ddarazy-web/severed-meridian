@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -171,3 +172,4 @@ namespace LevelAuthoring.Validation
         }
     }
 }
+#endif

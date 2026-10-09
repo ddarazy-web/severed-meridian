@@ -11,6 +11,8 @@ namespace Levels.Editor
     {
         public override VisualElement CreateInspectorGUI()
         {
+            if (EditorUtility.IsPersistent(target))
+                return LevelAuthoring.Editor.LegacyAuthoringInspection.Create(serializedObject, this);
             VisualElement root = new VisualElement();
             root.Add(new Button(() => LevelEditorWindow.OpenLevel((LevelDefinition)target))
                 { text = "보드 편집 창 열기", name = "open-level-editor" });

@@ -8,7 +8,7 @@ using MemoryPack;
 
 namespace GameScreen.Editor
 {
-    public enum PuzzleEditorLevelSource { Asset, MemoryPack }
+    public enum PuzzleEditorLevelSource { Asset, MemoryPack, Json }
 
     public sealed class PuzzleEditorLaunchRequest
     {
@@ -48,6 +48,17 @@ namespace GameScreen.Editor
             finally { UnityEngine.Object.DestroyImmediate(validation); }
         }
 
+        public static PuzzleEditorLaunchRequest FromJson(PuzzlePlayRequest request, Tutorial.TutorialRunMode tutorialMode)
+        {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            LevelDefinition level = request.CreateDefinition();
+            try
+            {
+                return new PuzzleEditorLaunchRequest(LevelPackCodec.Snapshot(level), request.LevelNumber, request.Seed,
+                    PuzzleEditorLevelSource.Json, ElementVisualCatalog.FromDto(request.CreateVisuals())) { TutorialMode = tutorialMode };
+            }
+            finally { UnityEngine.Object.DestroyImmediate(level); }
+        }
         public LevelDefinition CreateDefinition() => LevelPackCodec.ReadLevel(bytes, LevelNumber);
         // 효과 프레임 DTO는 재귀 타입이므로 Unity JSON 직렬화 대신 기존 MemoryPack 계약을 사용한다.
         internal static ElementVisualCatalogDto DecodeVisuals(string encoded)

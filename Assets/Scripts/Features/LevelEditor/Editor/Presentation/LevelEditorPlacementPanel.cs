@@ -76,7 +76,7 @@ namespace Levels.Editor
             {
                 board.CancelStroke();
                 if (level != owner || JsonUtility.ToJson(level) != selectionSource) { Refresh(); return; }
-                operation.text = LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = layer, Erase = true }, new[] { coordinate }).ToString();
+                EditLevel("선택 요소 삭제", () => operation.text = LevelObstacleEditing.Apply(level, new PlacementBrush { Layer = layer, Erase = true }, new[] { coordinate }).ToString());
                 Refresh();
             }) { text = "선택한 층의 요소 삭제", name = "delete-placement" });
         }
@@ -121,11 +121,14 @@ namespace Levels.Editor
         {
             board.CancelStroke();
             if (JsonUtility.ToJson(level) != snapshot) { Refresh(); return; }
-            using SerializedObject edit = new SerializedObject(level);
-            SerializedProperty field = edit.FindProperty(path);
-            if (field == null || field.intValue == value) return;
-            field.intValue = value;
-            LevelObstacleEditing.Commit(edit, "선택 요소 속성 변경");
+            EditLevel("선택 요소 속성 변경", () =>
+            {
+                using SerializedObject edit = new SerializedObject(level);
+                SerializedProperty field = edit.FindProperty(path);
+                if (field == null || field.intValue == value) return;
+                field.intValue = value;
+                LevelObstacleEditing.Commit(edit, "선택 요소 속성 변경");
+            });
             Refresh();
         }
     }

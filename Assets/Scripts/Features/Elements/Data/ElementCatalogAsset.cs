@@ -5,7 +5,6 @@ using UnityEngine;
 namespace Elements
 {
     /// <summary>제작 목록에서 원본과 독립된 카탈로그를 구성한다. 자동 저장하지 않는다.</summary>
-    [CreateAssetMenu(menuName = "MATCH/요소 카탈로그")]
     public sealed class ElementCatalogAsset : ScriptableObject
     {
         [SerializeField] private List<ElementDefinitionAsset> definitions = new List<ElementDefinitionAsset>();

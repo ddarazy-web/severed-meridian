@@ -105,9 +105,9 @@ namespace Levels.Editor
         {
             string message = "통로 연결을 취소했습니다.";
             if (portalTarget.HasValue)
-                message = routeError ?? LevelFlowEditing.SetPortal(level,
+                message = routeError ?? RunEdit("통로 연결", () => LevelFlowEditing.SetPortal(level,
                     portalFromEntrance ? portalSource.Value : portalTarget.Value,
-                    portalFromEntrance ? portalTarget.Value : portalSource.Value) ?? "통로 연결 완료 · 화살표는 입구에서 출구 방향입니다.";
+                    portalFromEntrance ? portalTarget.Value : portalSource.Value)) ?? "통로 연결 완료 · 화살표는 입구에서 출구 방향입니다.";
             Cancel(); Edited?.Invoke(message);
         }
 

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
 using System.Collections;
 using System.Linq;
@@ -16,20 +17,33 @@ namespace LevelAuthoring.Runtime
         public static ContentDocument Write(ScriptableObject source, string kind, string id,
             Func<UnityEngine.Object, string> documentId, Func<string, string> resourceId)
         {
+            ContentDocument result = WriteDraft(source, kind, id, documentId, resourceId);
+            ContentDocumentValidator.Validate(result);
+            return result;
+        }
+
+        // 편집 사본은 잘못된 수치도 보존한다. 공개 저장과 실행에는 Write/ContentSnapshot을 사용한다.
+        public static ContentDocument WriteDraft(ScriptableObject source, string kind, string id,
+            Func<UnityEngine.Object, string> documentId, Func<string, string> resourceId)
+        {
             if (source == null) throw new ArgumentNullException(nameof(source));
             string type = (string)Schema["roots"][kind];
             if (type != source.GetType().FullName) throw new ContentFormatException("원본 종류와 JSON 계약이 다릅니다: " + kind);
             var data = WriteObject(source, source.GetType(), type, documentId, resourceId);
             data["displayName"] = source.name;
-            var result = new ContentDocument(kind, id, data);
-            ContentDocumentValidator.Validate(result);
-            return result;
+            return new ContentDocument(kind, id, data);
         }
 
         public static ScriptableObject Read(ContentDocument document, Type rootType,
             Func<string, ScriptableObject> reference, Func<string, string> resourcePath, Action<ScriptableObject> own)
         {
             ContentDocumentValidator.Validate(document);
+            return ReadDraft(document, rootType, reference, resourcePath, own);
+        }
+
+        public static ScriptableObject ReadDraft(ContentDocument document, Type rootType,
+            Func<string, ScriptableObject> reference, Func<string, string> resourcePath, Action<ScriptableObject> own)
+        {
             if ((string)Schema["roots"][document.Kind] != rootType.FullName) throw new ContentFormatException("요청 타입과 문서 종류가 다릅니다.");
             if (own == null) throw new ArgumentNullException(nameof(own));
             var result = ScriptableObject.CreateInstance(rootType);
@@ -139,3 +153,4 @@ namespace LevelAuthoring.Runtime
         }
     }
 }
+#endif

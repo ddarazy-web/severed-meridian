@@ -28,13 +28,14 @@ namespace Levels.Editor
             selectedSupplyItem = -1;
             board.SourceSelection = selectedSources;
             inspectorPage = 0;
+            CaptureJsonViewState();
             Refresh();
         }
 
         private void SupplyAction(Func<string> action)
         {
             board.CancelStroke();
-            operation.text = action() ?? "편집 완료 · Undo로 복원할 수 있습니다.";
+            EditLevel("미션·공급 편집", () => operation.text = action() ?? "편집 완료 · Undo로 복원할 수 있습니다.");
             Refresh();
         }
 
@@ -282,7 +283,3 @@ namespace Levels.Editor
         }
     }
 }
-
-
-
-

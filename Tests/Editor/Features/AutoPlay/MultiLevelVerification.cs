@@ -19,7 +19,7 @@ namespace Levels.Editor
     }
 
     /// <summary>설치한 패키지와 다중 레벨 실행을 작은 표본으로 확인한다. 추천 전체 20,000판은 실행하지 않는다.</summary>
-    public static class MultiLevelVerification
+    public static partial class MultiLevelVerification
     {
         private static readonly List<string> results = new List<string>();
         private static readonly List<LevelDefinition> owned = new List<LevelDefinition>();
@@ -31,6 +31,10 @@ namespace Levels.Editor
         {
             try
             {
+                Check(typeof(BotBatchSession).Assembly.GetType("AutoPlay.MultiLevelTestSession")?.IsPublic == true, "실행용 여러 레벨 시험 제공");
+                Check(typeof(BotBatchSession).Assembly.GetType("AutoPlay.BotMoveBalanceSession")?.IsPublic == true, "실행용 이동 수 시험 제공");
+                Check(typeof(BotBatchSession).Assembly.GetType("AutoPlay.PersistedMultiLevelTest") != null, "여러 레벨 비동기 저장 경계 제공");
+                Check(typeof(BotBatchSession).Assembly.GetType("AutoPlay.BotTrialSourceContext") != null, "독립 제작 원본 전달 경계 제공");
                 PackageRoundTripFixture value = new PackageRoundTripFixture { Name = "달토끼", Value = 7 };
                 PackageRoundTripFixture restored = MemoryPackSerializer.Deserialize<PackageRoundTripFixture>(MemoryPackSerializer.Serialize(value));
                 Check(restored.Name == value.Name && restored.Value == 7, "MemoryPack 생성기·직렬화 왕복");
@@ -78,7 +82,8 @@ namespace Levels.Editor
                 session.Advance(); session.SetPaused(true); session.Stop();
                 Check(session.Record.entries.All(e => e.status == MultiLevelTestStatus.Stopped), "추천 모드 중지는 대기 레벨도 중지");
                 Check(store.Load().entries.All(e => e.status == MultiLevelTestStatus.Stopped), "추천 시험 중지 기록 재조회");
-                results.Add("DATA 신규 플레이 4판 · 추천 모드 플레이 0판"); Finish(null);
+                VerifyPersistence();
+                results.Add("DATA 신규 플레이 8판 · 추천 모드 플레이 0판"); Finish(null);
             }
             catch (Exception error) { Finish(error); }
         }

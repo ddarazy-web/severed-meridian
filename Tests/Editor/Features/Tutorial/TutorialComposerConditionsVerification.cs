@@ -47,7 +47,7 @@ namespace Tutorial.Editor
 
         private static void VerifySampleBoards()
         {
-            Type library = typeof(TutorialSampleCatalog).Assembly.GetType("Tutorial.Editor.TutorialSampleBoards");
+            Type library = typeof(TutorialSampleCatalog).Assembly.GetType("Tutorial.TutorialSampleBoards");
             Check(library != null, "기본 샘플의 독립 시험 보드 라이브러리 제공");
             foreach (object sample in (IEnumerable)library.GetProperty("All").GetValue(null))
             {

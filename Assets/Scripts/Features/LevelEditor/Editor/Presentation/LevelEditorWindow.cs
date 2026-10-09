@@ -40,15 +40,15 @@ namespace Levels.Editor
         [MenuItem("Match/레벨 에디터")]
         public static void Open()
         {
-            OpenWorkspace(0);
+            LevelTool.Editor.LevelToolLauncher.Launch();
         }
 
         public static void OpenLevel(LevelDefinition target)
         {
-            OpenWorkspace(0, target, true);
+            LevelTool.Editor.LevelToolLegacyImport.Open(target);
         }
 
-        public static LevelEditorWindow OpenTutorialSample(Tutorial.Editor.TutorialSampleBoard sample)
+        public static LevelEditorWindow OpenTutorialSample(Tutorial.TutorialSampleBoard sample)
         {
             LevelEditorWindow window = CreateInstance<LevelEditorWindow>();
             window.temporaryTutorialSample = sample.CreateBoard();
@@ -63,6 +63,7 @@ namespace Levels.Editor
 
         private void OnDestroy()
         {
+            ReleaseJsonWorkspace();
             if (temporaryTutorialSample != null && !EditorUtility.IsPersistent(temporaryTutorialSample)) DestroyImmediate(temporaryTutorialSample);
             temporaryTutorialSample = null;
             if (tutorialFlowDraft != null) DestroyImmediate(tutorialFlowDraft);
@@ -70,6 +71,8 @@ namespace Levels.Editor
 
         private void OnEnable()
         {
+            RestoreJsonWorkspace();
+            if (IsJsonFlowDraft) TryPrepareJsonDraftTest(out _);
             minSize = new Vector2(680, 480);
             Undo.undoRedoPerformed += ExternalChange;
             Undo.postprocessModifications += OnModifications;
@@ -80,6 +83,8 @@ namespace Levels.Editor
 
         private void OnDisable()
         {
+            CaptureJsonViewState();
+            EditorApplication.playModeStateChanged -= OnJsonPlayModeChanged;
             tutorialPanel?.Dispose(); tutorialPanel = null;
             elementCatalogView?.Dispose(); elementCatalogView = null;
             elementCatalogModel?.Dispose(); elementCatalogModel = null; catalogOwner = null;
@@ -96,6 +101,7 @@ namespace Levels.Editor
             properties?.Unbind();
             data?.Dispose();
             data = null;
+            ReleaseJsonWorkspace();
         }
 
         private void OnLostFocus()
@@ -142,7 +148,7 @@ namespace Levels.Editor
             {
                 board.CancelStroke();
                 data?.ApplyModifiedProperties();
-                LevelInitialStateWindow.OpenManualLevel(level);
+                if (IsJsonFlowDraft) SelectWorkspaceTab(1); else LevelInitialStateWindow.OpenManualLevel(level);
             }) { text = "플레이 테스트", name = "play-level" });
             editorRoot.Add(bar);
             CreateGameLaunchControls(bar);
@@ -220,11 +226,12 @@ namespace Levels.Editor
                     Color = board.Color
                 };
                 replacement.ReplaceExisting = true;
-                operation.text = LevelObstacleEditing.Apply(level, replacement, new[] { coordinate }).ToString();
+                operation.text = (IsJsonMode && level.SchemaVersion == 5 ? ApplyJsonPlacement(replacement, new[] { coordinate }) : LevelObstacleEditing.Apply(level, replacement, new[] { coordinate })).ToString();
                 Refresh();
             };
             board.MoveCommitted += (index, destination) =>
             {
+                if (IsJsonMode && level.SchemaVersion == 5) { JsonAction(() => MoveJsonPlacement(index, destination)); Refresh(); return; }
                 LevelObstacleEditing.Move(level, index, destination, out string message);
                 operation.text = message;
                 selected = destination;
@@ -259,8 +266,17 @@ namespace Levels.Editor
 
         public void SetLevel(LevelDefinition target)
         {
+            if (IsJsonFlowDraft && target != temporaryTutorialSample) { BlockJsonDraftExternalAction(); return; }
+            if (!LeaveJsonFor(target)) return;
             if (editingTutorialFlow != null && target != temporaryTutorialSample) return;
+            if (IsJsonMode && jsonWorkspace.Owns(target) && jsonWorkspace.Session.SelectedLevelId != jsonWorkspace.DocumentId(target))
+                jsonWorkspace.Session.SelectLevel(jsonWorkspace.DocumentId(target));
             if (level == target && data != null) return;
+            if (recommendationPanel != null)
+            {
+                recommendationPanel.Clear(); recommendationPanel.style.display = DisplayStyle.None;
+            }
+            refreshShapeUsage = null;
             tutorialPanel?.Dispose(); tutorialPanel = null; selectedTutorialStep = 0;
             board?.CancelStroke();
             elementCatalogView?.Dispose(); elementCatalogView = null;
@@ -323,6 +339,7 @@ namespace Levels.Editor
 
         private void ExternalChange()
         {
+            if (editorRoot == null) return;
             board?.CancelStroke();
             InvalidateResults();
             if (refreshQueued) return;
@@ -380,7 +397,7 @@ namespace Levels.Editor
                 tutorialTestArea.style.marginTop = 12; tutorialTestArea.style.flexShrink = 0;
                 boardScroll.Add(tutorialTestArea);
                 tutorialPanel = new Tutorial.Editor.LevelTutorialEditorPanel(level, board, selectedTutorialStep,
-                    index => selectedTutorialStep = index, stages, tutorialTestArea);
+                    index => selectedTutorialStep = index, stages, tutorialTestArea, EditLevel, jsonWorkspace, flow => OpenTutorialFlow(level, flow, IsJsonMode ? this : null), isolatedJsonDraft: IsJsonFlowDraft);
                 properties.Add(tutorialPanel);
                 return;
             }
@@ -393,13 +410,13 @@ namespace Levels.Editor
                 properties.Add(new Button(() =>
                 {
                     board.CancelStroke();
-                    LevelSchemaUpgrade.Upgrade(level, out string message);
-                    operation.text = message;
+                    EditLevel("이전 형식 전환", () => { LevelSchemaUpgrade.Upgrade(level, out string message); operation.text = message; });
                     Refresh();
                 }) { text = "5단계 형식으로 전환", name = "upgrade-level" });
             }
-            properties.Add(new Button(() => { board.CancelStroke(); Selection.activeObject = level; EditorGUIUtility.PingObject(level); })
-                { text = "기존 Inspector에서 확인", name = "show-inspector" });
+            Button inspector = new Button(() => { if (IsJsonMode || IsJsonFlowDraft) return; board.CancelStroke(); Selection.activeObject = level; EditorGUIUtility.PingObject(level); })
+                { text = "기존 Inspector에서 확인", name = "show-inspector", tooltip = IsJsonMode || IsJsonFlowDraft ? "JSON 편집은 이 창의 속성에서 수정하세요. 외부 Inspector의 별도 변경 이력은 사용하지 않습니다." : "기존 Inspector에서 에셋을 확인합니다." };
+            inspector.SetEnabled(!IsJsonMode && !IsJsonFlowDraft); properties.Add(inspector);
             data = new SerializedObject(level);
             foreach (string fieldName in new[] { "levelNumber", "moveCount", "colors" })
             {
@@ -410,7 +427,7 @@ namespace Levels.Editor
             BuildMissionSettings();
             if (editable)
             {
-                tutorialPanel = new Tutorial.Editor.LevelTutorialEditorPanel(level, board, selectedTutorialStep, index => selectedTutorialStep = index);
+                tutorialPanel = new Tutorial.Editor.LevelTutorialEditorPanel(level, board, selectedTutorialStep, index => selectedTutorialStep = index, edit: EditLevel, workspace: jsonWorkspace, openFlow: flow => OpenTutorialFlow(level, flow, IsJsonMode ? this : null), isolatedJsonDraft: IsJsonFlowDraft);
                 properties.Add(tutorialPanel);
             }
             selectedProperties = new VisualElement { name = "selected-cell-properties" };
@@ -439,6 +456,7 @@ namespace Levels.Editor
             if (board.Brush == LevelBrush.Select && LevelCommonEditing.TrySelect(level, board.Layer, coordinate, out PlacementSelection target)) selectedPlacements.Add(target);
             RefreshPlacementSelection();
             selected = coordinate;
+            CaptureJsonViewState();
             board.Display(level, selected);
             connectionGraph.Display(level, selected, board.Brush == LevelBrush.Select || (board.Brush == LevelBrush.Flow && flowTool == FlowTool.Select));
             flowOverlay.DisplayMerge(selected, board.Brush == LevelBrush.Select || (board.Brush == LevelBrush.Flow && flowTool == FlowTool.Select));
@@ -525,23 +543,30 @@ namespace Levels.Editor
         private void ApplyStroke(LevelBrush brush, RabbitColor color, IReadOnlyCollection<BoardCoordinate> coordinates)
         {
             board.CancelStroke();
+            if (TryApplyJsonStroke(brush, color, coordinates)) return;
+            EditLevel("보드 편집", () =>
+            {
             if (brush == LevelBrush.Source || brush == LevelBrush.SourceErase)
                 operation.text = LevelSupplyEditing.PlaceSources(level, coordinates, brush == LevelBrush.SourceErase) ?? "생성구 편집 완료";
             else if (brush == LevelBrush.Recovery || brush == LevelBrush.RecoveryErase)
                 operation.text = LevelSupplyEditing.PlaceRecovery(level, coordinates, brush == LevelBrush.RecoveryErase) ?? "회수 부품 편집 완료";
             else if (brush == LevelBrush.Placement)
-                operation.text = LevelObstacleEditing.Apply(level, board.Placement, coordinates).ToString();
+                operation.text = (IsJsonMode && level.SchemaVersion == 5 ? ApplyJsonPlacement(board.Placement, coordinates) : LevelObstacleEditing.Apply(level, board.Placement, coordinates)).ToString();
             else if (brush == LevelBrush.Fixed || brush == LevelBrush.Random || brush == LevelBrush.Erase)
-                operation.text = LevelObstacleEditing.Apply(level, new PlacementBrush
+            {
+                var placement = new PlacementBrush
                 {
                     Layer = PlacementLayer.Block, Kind = brush == LevelBrush.Fixed ? (int)InitialBlockKind.FixedNormal : (int)InitialBlockKind.RandomNormal,
                     Color = color, Erase = brush == LevelBrush.Erase
-                }, coordinates).ToString();
+                };
+                operation.text = (IsJsonMode && level.SchemaVersion == 5 ? ApplyJsonPlacement(placement, coordinates) : LevelObstacleEditing.Apply(level, placement, coordinates)).ToString();
+            }
             else
             {
                 int changed = LevelBoardEditing.Apply(level, brush, color, coordinates);
                 operation.text = changed == 0 ? "변경 없음. 보드 구조와 현재 상태를 확인하세요." : $"{changed}칸 변경 · 실행 취소 한 번으로 복구할 수 있습니다.";
             }
+            });
             Refresh();
         }
 
@@ -549,6 +574,10 @@ namespace Levels.Editor
         /// <param name="evt">이 창 안에서 발생한 키 입력.</param>
         private void HandleSaveShortcut(KeyDownEvent evt)
         {
+            if (IsJsonMode && evt.actionKey && !evt.altKey && evt.keyCode == KeyCode.Z)
+            {
+                evt.StopImmediatePropagation(); JsonAction(() => UndoJson(evt.shiftKey)); return;
+            }
             if (workspaceTab != 0 || evt.keyCode != KeyCode.S || !evt.actionKey || evt.altKey || evt.shiftKey) return;
             // Unity의 일반 저장 명령까지 전파하여 다른 에셋을 함께 저장하지 않도록 소비한다.
             evt.StopImmediatePropagation();
@@ -558,6 +587,13 @@ namespace Levels.Editor
         /// <summary>저장 버튼과 단축키가 공통으로 사용한다. 확정한 입력을 현재 레벨 파일에 저장한다.</summary>
         private void Save()
         {
+            if (BlockJsonDraftExternalAction()) return;
+            if (IsJsonMode)
+            {
+                (rootVisualElement.focusController?.focusedElement as VisualElement)?.Blur();
+                rootVisualElement.schedule.Execute(() => JsonAction(SaveJsonWorkspace));
+                return;
+            }
             board?.CancelStroke();
             if (level == null || level == temporaryTutorialSample) return;
             // 지연 입력 필드는 포커스를 잃어야 값이 반영된다. 단축키로 저장할 때도
@@ -579,6 +615,7 @@ namespace Levels.Editor
         /// <summary>Unity 에셋의 실제 dirty 상태를 제목과 저장 안내에 표시한다.</summary>
         private void UpdateSaveState()
         {
+            if (UpdateJsonSaveState()) return;
             bool dirty = level != null && EditorUtility.IsDirty(level);
             string title = dirty ? "Match *" : "Match";
             if (titleContent.text != title) titleContent = new GUIContent(title);
@@ -594,7 +631,13 @@ namespace Levels.Editor
             board.CancelStroke();
             if (level == null) return;
             List<LevelValidationIssue> found = LevelDefinitionValidator.Validate(level);
-            found.AddRange(LevelAssetOperations.FindNumberConflicts(level));
+            if (IsJsonMode)
+            {
+                jsonWorkspace.Capture("검사 입력 확정"); PersistJsonState();
+                string error = jsonWorkspace.Session.ValidationError;
+                if (error != null) found.Add(new LevelValidationIssue(LevelValidationCode.InvalidPlacementValue, "JSON 작업 폴더: " + error, ""));
+            }
+            else found.AddRange(LevelAssetOperations.FindNumberConflicts(level));
             issues.Clear();
             validationDrawer.text = found.Count == 0 ? "구조 검사 · 오류 없음" : $"구조 검사 · 오류 {found.Count}개";
             validationDrawer.value = true;
@@ -675,5 +718,3 @@ namespace Levels.Editor
         }
     }
 }
-
-

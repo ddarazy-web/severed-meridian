@@ -1,3 +1,4 @@
+using AutoPlay;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -63,7 +64,8 @@ namespace Levels.Editor
         private void RequestScan(bool ask)
         {
             if (IsBusy || blocked()) return;
-            askAfterScan = ask; deleting = false; cleanup = new TestRecordCleanup(roots);
+            askAfterScan = ask; deleting = false;
+            cleanup = new TestRecordCleanup(roots ?? new[] { BotBatchStore.DefaultRoot, BotMoveBalanceStore.DefaultRoot, MultiLevelTestStore.DefaultRoot });
             lockPanels(true); message = "삭제 대상 수를 확인하는 중입니다.";
         }
 

@@ -151,32 +151,7 @@ namespace Tutorial.Editor
         }
 
         private IEnumerable<BoardCoordinate> PreviewTargetHighlights(TutorialStepDefinition step)
-        {
-            bool initialAction = owner.Tutorial.steps.Take(selected).All(value => value.kind == TutorialStepKind.Description);
-            Elements.ElementCatalog catalog = owner.CreateElementCatalog();
-            IReadOnlyList<ElementPlacementDefinition> placements = owner.SchemaVersion == LevelDefinition.LegacySchemaVersion ? LegacyElementLevelAdapter.Preview(owner) : owner.Elements;
-            var result = new HashSet<BoardCoordinate>();
-            foreach (TutorialConditionDefinition condition in step.conditions)
-            {
-                TutorialTargetDefinition target = condition.target;
-                if (target == null || condition.kind < TutorialConditionKind.DurabilityDecrease || condition.kind > TutorialConditionKind.Combined) continue;
-                if (target.kind == TutorialTargetKind.Area) { result.UnionWith(target.cells); continue; }
-                if (target.kind == TutorialTargetKind.Entity) result.Add(target.coordinate);
-                if (!initialAction || target.kind != TutorialTargetKind.Entity && target.kind != TutorialTargetKind.Definition) continue;
-                foreach (ElementPlacementDefinition placement in placements)
-                {
-                    if (placement == null || string.IsNullOrWhiteSpace(placement.definitionId)) continue;
-                    Elements.ElementDefinition definition = catalog.Definitions.FirstOrDefault(value => value.Id.Value == placement.definitionId);
-                    if (definition == null) continue;
-                    TutorialTargetLayer layer = placement.layer == PlacementLayer.Cover ? TutorialTargetLayer.Cover : placement.layer == PlacementLayer.Dust ? TutorialTargetLayer.Floor : TutorialTargetLayer.Content;
-                    if (target.layer != layer) continue;
-                    var footprint = LevelPlacementRules.Footprint(placement.coordinate, definition.Placement?.Size ?? definition.ChargePlacement?.Size ?? 1).ToArray();
-                    if (target.kind == TutorialTargetKind.Entity ? footprint.Contains(target.coordinate) : target.definitionId == placement.definitionId)
-                        result.UnionWith(footprint);
-                }
-            }
-            return result;
-        }
+            => TutorialAuthoringRules.PreviewTargetHighlights(owner, step, owner.Tutorial.steps.Take(selected).All(value => value.kind == TutorialStepKind.Description));
 
         private void AddActionBindingControls()
         {
@@ -267,9 +242,9 @@ namespace Tutorial.Editor
                 choice.RegisterValueChangedCallback(_ => preview.text = choice.index == 0 ? "두 칸 교환 허용 · 성공한 교환 1회 · 선택한 셀 자동 강조" : "두 칸 교환 허용 · 직접 정확히 3개 매칭 1회 · 선택한 셀 자동 강조");
                 samplePreview.Add(new Button(() =>
                 {
-                    Undo.RecordObject(owner, "튜토리얼 샘플 적용");
+                    Mutate("튜토리얼 샘플 적용", () => { Undo.RecordObject(owner, "튜토리얼 샘플 적용");
                     owner.Tutorial.steps.Add(TutorialSampleCatalog.CreateSwap(start, coordinate, choice.index == 1));
-                    selected = owner.Tutorial.steps.Count - 1; EditorUtility.SetDirty(owner); Rebuild();
+                    selected = owner.Tutorial.steps.Count - 1; EditorUtility.SetDirty(owner); }); Rebuild();
                 }) { text = "새 단계로 적용", name = "tutorial-sample-apply" });
                 samplePreview.Add(new Button(() => { samplePreview.Clear(); ShowTargets(); }) { text = "취소" });
                 board.ShowTutorialTargets(new[] { start, coordinate }, start, coordinate);

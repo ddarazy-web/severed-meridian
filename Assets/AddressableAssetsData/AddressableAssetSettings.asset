@@ -67,6 +67,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9a38e483cc18bb24ca151079f4bf6c58, type: 2}
   - {fileID: 11400000, guid: 2979db438e132c642ae8a7c4f5d08b2c, type: 2}
   - {fileID: 11400000, guid: bd8295f94f7ffc744b1cd8dbfee067fc, type: 2}
+  - {fileID: 11400000, guid: 6abfce1e1ab62c64c9c3ddf82eb66d0d, type: 2}
   - {fileID: 11400000, guid: a35153c8d1395444da5e23b4c399dcaf, type: 2}
   m_BuildSettings:
     m_LogResourceManagerExceptions: 1
@@ -85,6 +86,62 @@ MonoBehaviour:
         m_Value: 'ServerData/[BuildTarget]'
       - m_Id: ece2a97b47172c541b3534d4ff3fba8a
         m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
+      - m_Id: f06fc74d07899e549ac4be122bd687c7
+        m_Value: <undefined>
+    - m_InheritedParent: 
+      m_Id: 7e5d4beb950972041a83b0f5c5654d17
+      m_ProfileName: Windows Steam Game
+      m_Values:
+      - m_Id: 75c63c444c0aea048a969e92cab1d179
+        m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/PRODUCT_STEAM_GAME/[BuildTarget]'
+      - m_Id: 81d6b22279fbf7849ade868564b38547
+        m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
+      - m_Id: a6eca30c369dd4a4ebfee40505608903
+        m_Value: 'ServerData/[BuildTarget]'
+      - m_Id: ece2a97b47172c541b3534d4ff3fba8a
+        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/PRODUCT_STEAM_GAME/[BuildTarget]'
+      - m_Id: f06fc74d07899e549ac4be122bd687c7
+        m_Value: <undefined>
+    - m_InheritedParent: 
+      m_Id: a9d43a60e028cf142b89cc03e2651e35
+      m_ProfileName: Android Game
+      m_Values:
+      - m_Id: 75c63c444c0aea048a969e92cab1d179
+        m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/PRODUCT_ANDROID_GAME/[BuildTarget]'
+      - m_Id: 81d6b22279fbf7849ade868564b38547
+        m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
+      - m_Id: a6eca30c369dd4a4ebfee40505608903
+        m_Value: 'ServerData/[BuildTarget]'
+      - m_Id: ece2a97b47172c541b3534d4ff3fba8a
+        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/PRODUCT_ANDROID_GAME/[BuildTarget]'
+      - m_Id: f06fc74d07899e549ac4be122bd687c7
+        m_Value: <undefined>
+    - m_InheritedParent: 
+      m_Id: d83bed88d99a79e49b5d1799586361ab
+      m_ProfileName: iOS Game
+      m_Values:
+      - m_Id: 75c63c444c0aea048a969e92cab1d179
+        m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/PRODUCT_IOS_GAME/[BuildTarget]'
+      - m_Id: 81d6b22279fbf7849ade868564b38547
+        m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
+      - m_Id: a6eca30c369dd4a4ebfee40505608903
+        m_Value: 'ServerData/[BuildTarget]'
+      - m_Id: ece2a97b47172c541b3534d4ff3fba8a
+        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/PRODUCT_IOS_GAME/[BuildTarget]'
+      - m_Id: f06fc74d07899e549ac4be122bd687c7
+        m_Value: <undefined>
+    - m_InheritedParent: 
+      m_Id: e9dd39b656f2be448970bd6cf7348cd4
+      m_ProfileName: Windows Level Editor
+      m_Values:
+      - m_Id: 75c63c444c0aea048a969e92cab1d179
+        m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/PRODUCT_LEVEL_EDITOR/[BuildTarget]'
+      - m_Id: 81d6b22279fbf7849ade868564b38547
+        m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
+      - m_Id: a6eca30c369dd4a4ebfee40505608903
+        m_Value: 'ServerData/[BuildTarget]'
+      - m_Id: ece2a97b47172c541b3534d4ff3fba8a
+        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/PRODUCT_LEVEL_EDITOR/[BuildTarget]'
       - m_Id: f06fc74d07899e549ac4be122bd687c7
         m_Value: <undefined>
     m_ProfileEntryNames:

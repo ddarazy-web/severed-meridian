@@ -34,13 +34,11 @@ namespace Levels.Editor
             {
                 if (!independent) FormulaChecks();
                 string source = independent ? File.ReadAllText(Evidence + "/source-path.txt") :
-                    Directory.GetFiles("Library/Match/AutoPlayLoadVerification", "batch.json", SearchOption.AllDirectories)
-                        .Where(path => JsonUtility.FromJson<BotBatchRecord>(File.ReadAllText(path)).finished == 200)
-                        .OrderBy(path => path, StringComparer.Ordinal).Select(Path.GetDirectoryName).First();
+                    CreateCurrentSource();
                 if (!independent) File.WriteAllText(Evidence + "/source-path.txt", source);
                 Stopwatch timer = Stopwatch.StartNew(); long memory = GC.GetTotalMemory(true);
                 BotAnalysisReader reader = Load(source); timer.Stop();
-                Check(reader.Games.Count == 200 && reader.Record.finished == 200, "실제 27단계 200판 기록 확인 · 새 실행 아님");
+                Check(reader.Games.Count == 200 && reader.Record.finished == 200, "생성된 200판 저장 기록 재조회");
                 foreach (BotStrategyKind strategy in Enum.GetValues(typeof(BotStrategyKind)))
                 {
                     BotStrategyStatistics stats = BotBatchStatistics.Calculate(reader.Record, reader.Games, reader.Missions, strategy);
@@ -111,6 +109,25 @@ namespace Levels.Editor
             EditorApplication.Exit(failure == null ? 0 : 1);
         }
 
+        // 캐시 정렬의 첫 과거 실행에 기대지 않고 현재 규칙으로 독립 자료를 만든다.
+        private static string CreateCurrentSource()
+        {
+            var cells = Enumerable.Range(0, 81).Select(i => new Board.BoardCoordinate(i / 9, i % 9)).ToArray();
+            var level = (LevelDefinition)typeof(SettlementVerification).GetMethod("Make", BindingFlags.NonPublic | BindingFlags.Static)
+                .Invoke(null, new object[] { cells });
+            try
+            {
+                JsonUtility.FromJsonOverwrite("{\"initialBlocks\":[],\"moveCount\":3,\"missions\":[{\"kind\":0,\"color\":0,\"count\":100}]}", level);
+                string root = Path.Combine(Evidence, "source-" + Guid.NewGuid().ToString("N"));
+                var store = new BotBatchStore(root);
+                using var batch = new BotBatchSession(level, Enumerable.Range(771, 100).ToArray(), store.Save);
+                int steps = 0;
+                while (batch.NeedsAdvance && steps++ < 10000000) batch.Advance();
+                Check(batch.Record.status == BotBatchStatus.Completed && batch.Record.finished == 200, "현재 규칙의 독립 200판 자료 생성");
+                return Path.Combine(root, batch.Record.id);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(level); }
+        }
         private static BotAnalysisReader Load(string folder)
         {
             BotAnalysisReader reader = new BotAnalysisReader(folder);

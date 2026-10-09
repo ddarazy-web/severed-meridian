@@ -34,7 +34,7 @@ namespace Elements.Editor
                 { if (found >= 0) return -2; found = i; }
             return found;
         }
-        private static ElementDefinition BrushDefinition(ElementCatalog catalog, PlacementBrush brush)
+        internal static ElementDefinition BrushDefinition(ElementCatalog catalog, PlacementBrush brush)
         {
             if (!string.IsNullOrEmpty(brush.DefinitionId)) return catalog.Get(new ElementId(brush.DefinitionId));
             // 기존 팔레트 입력도 신형 목록에만 기록한다.

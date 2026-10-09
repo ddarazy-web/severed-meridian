@@ -153,7 +153,7 @@ namespace Levels.Editor
         {
             // 삭제 도중 탭을 다시 열어도 SetVisible이 파일 열거를 재시작하지 않게 한다.
             if (!Root.enabledSelf) return;
-            scan?.Dispose(); scan = BotAnalysisCatalog.Scan().GetEnumerator(); entries.Clear(); history.ClearSelection(); history.Rebuild();
+            scan?.Dispose(); scan = BotAnalysisCatalog.Scan(BotBatchStore.DefaultRoot).GetEnumerator(); entries.Clear(); history.ClearSelection(); history.Rebuild();
             notice.text = "이력 목록을 읽는 중입니다.";
         }
 

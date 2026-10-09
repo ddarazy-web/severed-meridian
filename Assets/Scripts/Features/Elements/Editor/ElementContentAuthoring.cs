@@ -23,7 +23,7 @@ namespace Elements.Editor
                 () => AssetDatabase.LoadAssetAtPath<ElementVisualCatalogAsset>(VisualPath)?.CreateCatalog());
         }
 
-        [MenuItem("MATCH/데이터/확정 요소 제작 원본 생성")]
+        [MenuItem("MATCH/구형 자료 복구/SO 제작 원본 초기화")]
         public static void Initialize()
         {
             if (!File.Exists(RulesDocument)) throw new InvalidOperationException("확정 기획 문서를 찾을 수 없습니다.");

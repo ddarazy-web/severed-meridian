@@ -1,0 +1,68 @@
+{
+  "kind": "element",
+  "schemaVersion": 1,
+  "id": "element-7b45bb5da5fe401e8b647ff3387adb53",
+  "data": {
+    "definition": {
+      "aggregation": {
+        "enabled": true,
+        "perHitCell": false
+      },
+      "charge": {
+        "enabled": false,
+        "maxRequired": 5,
+        "minRequired": 3,
+        "perHit": 1,
+        "size": 2
+      },
+      "color": {
+        "enabled": true,
+        "requiresMatchingColor": true
+      },
+      "damage": {
+        "adjacentMatch": true,
+        "enabled": true,
+        "hammer": true,
+        "magnetAdjacent": true,
+        "power": true
+      },
+      "displayName": "색깔 자물쇠",
+      "id": "obstacle.color-lock",
+      "layer": {
+        "behavior": "Unspecified",
+        "damage": 1,
+        "enabled": false,
+        "mission": "Color"
+      },
+      "placement": {
+        "enabled": true,
+        "maxDurability": 3,
+        "size": 1
+      },
+      "reaction": "Durability",
+      "removal": {
+        "enabled": true,
+        "kind": "ColorLock"
+      },
+      "supply": {
+        "behavior": "Unspecified",
+        "bodyIdPrefix": "",
+        "choiceDefinitionIds": [],
+        "choices": [],
+        "content": "Empty",
+        "enabled": false,
+        "hasObstacle": false,
+        "obstacle": "Crate",
+        "obstacleDefinitionId": ""
+      },
+      "turn": {
+        "behavior": "Unspecified",
+        "enabled": false,
+        "initialDurability": 1
+      }
+    },
+    "displayName": "obstacle.color-lock",
+    "planningDocument": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+    "planningSection": "색깔 자물쇠 — 확정 수치/행동과 기존 구현을 대조"
+  }
+}

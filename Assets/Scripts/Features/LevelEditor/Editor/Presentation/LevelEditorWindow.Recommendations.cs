@@ -25,6 +25,8 @@ namespace Levels.Editor
         /// <summary>등록된 모양 목록을 표시한다. 선택과 미리보기만으로는 레벨을 변경하지 않는다.</summary>
         internal void ShowShapeRecommendations()
         {
+            if (BlockJsonDraftExternalAction()) return;
+            if (IsJsonMode) { ShowJsonShapes(); return; }
             board?.CancelStroke(); data?.ApplyModifiedProperties();
             refreshShapeUsage = null;
             recommendationPanel.Clear(); recommendationPanel.style.display = DisplayStyle.Flex;

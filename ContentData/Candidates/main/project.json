@@ -1,0 +1,992 @@
+{
+  "kind": "project",
+  "schemaVersion": 1,
+  "id": "project-6c3a162b7e1b4f34859cf9f7621a6b58",
+  "data": {
+    "contentVersion": 1,
+    "defaultCatalogId": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+    "documents": [
+      {
+        "id": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0000.json"
+      },
+      {
+        "id": "element-180a89acacce40b0b47e5cb698e6b4fe",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0001.json"
+      },
+      {
+        "id": "element-190847babf4f4d45abac1136766295f2",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0002.json"
+      },
+      {
+        "id": "element-1c095c23ee284aa9a7edef97055de51d",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0003.json"
+      },
+      {
+        "id": "element-26cc4f57499845659071b5a07f8e9798",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0004.json"
+      },
+      {
+        "id": "element-39abc33d5bd046ed9e205e8b35e7c448",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0005.json"
+      },
+      {
+        "id": "element-43c5dd84c6f0476b84b5b140bd71964f",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0006.json"
+      },
+      {
+        "id": "element-5c946f6e4c6f466cb1e5645a578a70dc",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0007.json"
+      },
+      {
+        "id": "element-750e8ab379c24e36af76571cefbb0923",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0008.json"
+      },
+      {
+        "id": "element-7b45bb5da5fe401e8b647ff3387adb53",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0009.json"
+      },
+      {
+        "id": "element-7bb42b50a3394be98efa6fd4cd6713b8",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0010.json"
+      },
+      {
+        "id": "element-938967dba657416ebf9bbc9685f04faa",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0011.json"
+      },
+      {
+        "id": "element-a743ce838c2e48c1b056977fdddd8057",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0012.json"
+      },
+      {
+        "id": "element-a8db92745fe5401180f50807c7a75546",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0013.json"
+      },
+      {
+        "id": "element-b914266c7529487e97723076fac4a5c3",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0014.json"
+      },
+      {
+        "id": "element-c656ce4b36ce49cfaeee9e191e6efbcd",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0015.json"
+      },
+      {
+        "id": "element-cb5a4b10ab3b40bdbf0b74a41028d486",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0016.json"
+      },
+      {
+        "id": "element-f91baa94af4f4a1a8f739045361221d1",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0017.json"
+      },
+      {
+        "id": "element-faac530173aa422e89c3b12b868a6105",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0018.json"
+      },
+      {
+        "id": "level-60bc319684094c67bfee34e35d48a8d8",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0019.json"
+      },
+      {
+        "id": "level-60f267ee0c5a453bb09291a997bd660a",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0020.json"
+      },
+      {
+        "id": "level-88f4664956ec4c2bb3700f68a7cac518",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0021.json"
+      },
+      {
+        "id": "level-9476d3b3a91c4563b712bfb753f46c98",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0022.json"
+      },
+      {
+        "id": "shape-5d73912df91d4a32b90ade639c9cb0f3",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0023.json"
+      },
+      {
+        "id": "shape-74d53b3c3a8c4628a226f8ff5eed25e8",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0024.json"
+      },
+      {
+        "id": "visual-39d32a17fab04590841af320d59c56c7",
+        "path": "snapshots/0b4d4c0625dc4670afa34d58a64b3466/0025.json"
+      }
+    ],
+    "name": "ServeredMeridian",
+    "resources": [
+      {
+        "id": "resource-0028b7bb323495efd7f80d60fc941eb953ab52d5916a80589c4eb532bb7fc64c",
+        "path": "Effects/Rocket/Animations/rocket-trail-frame-04-v1-256"
+      },
+      {
+        "id": "resource-01e6c7ceed3a9f12b83277e2c576414531ab8b9823538ff06074cc341bd10da0",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-yellow-durability-6-v1-256"
+      },
+      {
+        "id": "resource-02f46ec3f6ef27fb4612fd33b72979e50083beef4f6572282b82e19f14a930cc",
+        "path": "Effects/BombExplosion/Animations/bomb-explosion-frame-04-v1-256"
+      },
+      {
+        "id": "resource-0313d127648ebd21c5b305a227744edc6acd078ab045eb8b8029d8f3bbc50d8d",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-yellow-durability-8-v1-256"
+      },
+      {
+        "id": "resource-038b1845d3af1758fc98704049829554a7f54356102e74668ab3c599b6382075",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-blue-durability-6-v1-256"
+      },
+      {
+        "id": "resource-04f380ccbee9b0ffc9d3ca4a47fdd3a4534267880da21efeac28318553be6ffa",
+        "path": "Effects/Rocket/Animations/rocket-trail-frame-01-v1-256"
+      },
+      {
+        "id": "resource-0692019f107426397defaa16e71825daa412dc5123f64aaf37e0b17ed9a08cfc",
+        "path": "Effects/WoodBreak/Animations/wood-break-frame-02-v1-256"
+      },
+      {
+        "id": "resource-07ade04c440175fae6dcc97067dca76b7bd0f77c99ab64d0bc26074a5008dda8",
+        "path": "Obstacles/Scrap/scrap-durability-2-v1-256"
+      },
+      {
+        "id": "resource-0887f4d296aa93f6701ad3e0b3b5942417620dd895a4e049f3352041adc42477",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-blue-durability-1-v1-256"
+      },
+      {
+        "id": "resource-0a79fd9e84698fcfa530ca15a3ca8af661b176525ab9cefcb0a4710d5ae08ac0",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-green-durability-1-v1-256"
+      },
+      {
+        "id": "resource-0c10dc6e19c96f14be802434dcfbc982ad2d39642b0047b94d965e642c6e6922",
+        "path": "Blocks/rabbit-blue-v1-256"
+      },
+      {
+        "id": "resource-0dc711fb0efbde306d812e1c7a3b5ca73a319658b8e28f18c972cc3c4e4a535e",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-pink-durability-3-v1-256"
+      },
+      {
+        "id": "resource-0e930582a3a37fc93fb674e5d603c4f8eba4f3b8579aae79bfbaab157a352d2f",
+        "path": "Obstacles/Generator/generator-charge-1-of-4-v1-512"
+      },
+      {
+        "id": "resource-0edd4d84240c2fa200c3e884ece3761217a8eb66c43704e03b9fdd741d18e9b3",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-pink-durability-1-v1-256"
+      },
+      {
+        "id": "resource-0f587df56273a3794ea0da50d7ca54f111a1bc65506b5dab0005fc9b9a42819b",
+        "path": "Obstacles/ColorLock/color-lock-purple-durability-2-v1-256"
+      },
+      {
+        "id": "resource-129de49569303410299c857af30465efabf846d7201741a73f922c905eb73d2b",
+        "path": "Blocks/rabbit-purple-v1-256"
+      },
+      {
+        "id": "resource-152312bf20e2b822d2c4cd04d822016964c7b92a64354d16356b1db9375f5d8b",
+        "path": "Effects/MetalBreak/Animations/metal-break-frame-01-v1-256"
+      },
+      {
+        "id": "resource-16d1768c3a18f7f235df209ab3f0e2092a0a080236d822789486f3f11065355f",
+        "path": "Effects/BombExplosion/Animations/bomb-explosion-frame-05-v1-256"
+      },
+      {
+        "id": "resource-16f9e5b25ed6fa975a3872ed8b54448c8ea90e5ff57fa74813b76873ace8c464",
+        "path": "Effects/Drone/Animations/drone-impact-frame-02-v1-256"
+      },
+      {
+        "id": "resource-170dd7071c6f102faa10e5ece2fa055f1a79814581015b897c4f5f06a93193fa",
+        "path": "PowerBlocks/cleaning-rocket-vertical-launch-frame-3-v1-256"
+      },
+      {
+        "id": "resource-18f93858c0825710b653c9ea2e5a9389b815b08298d0ef03094603abdf8c20d1",
+        "path": "Obstacles/ColorLock/color-lock-blue-durability-2-v1-256"
+      },
+      {
+        "id": "resource-19ec20fc12728cb35e4be65ca37fcb858b4313284014befc375ef6c9877cf69e",
+        "path": "Obstacles/RecoveryCapsule/recovery-capsule-durability-3-v1-256"
+      },
+      {
+        "id": "resource-1a0b09732bd65c99409ea976d4ce96174c7cba51e26c5c8be9b058c95e697603",
+        "path": "Effects/WebBreak/Animations/web-break-frame-03-v1-256"
+      },
+      {
+        "id": "resource-1b35396e89ff267320f173dcdec7754d116cd98b7b5a99dbced8181e548db345",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-green-durability-2-v1-256"
+      },
+      {
+        "id": "resource-1be6f353c86d6cc7bb160829a72a30cfed7dc936a2baec2eea9cbb5d540e0189",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-blue-durability-2-v1-256"
+      },
+      {
+        "id": "resource-1ed2b3f62dea27a37a8b454ccae8a580a9101a5994a1d2acc1cc4855cd4f26d3",
+        "path": "Effects/Match/Animations/match-blue-frame-03-v1-256"
+      },
+      {
+        "id": "resource-1ef2f2a33560c948f754b9a44cdf77b9d27ed55122db76249186f39fe73a059e",
+        "path": "Effects/PowerCreation/Animations/power-creation-frame-03-v1-256"
+      },
+      {
+        "id": "resource-20d74cb8a96e7034a836bd155a8b41634560aedfa3bc7eb03ebde587554184f6",
+        "path": "Effects/PowerCreation/Animations/power-creation-frame-04-v1-256"
+      },
+      {
+        "id": "resource-20f752891a3068e02bb6b8facc7f18a45f2119d0638c8be196c5d756e5363241",
+        "path": "PowerBlocks/cleaning-rocket-horizontal-launch-frame-4-v1-256"
+      },
+      {
+        "id": "resource-2246daad01aa83823fabce943ff51bc40b4859e10f10f1501c46e4714c443c8a",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-green-durability-8-v1-256"
+      },
+      {
+        "id": "resource-22b9fdd8a8f6b8c48c7c17217cc9c3a1ce9623318370a4b7ef3c8b72e9891493",
+        "path": "Effects/GeneratorCharge/charge-pulse-04-v1-256"
+      },
+      {
+        "id": "resource-23f6d692e44a25a7a4f944b02187241546738136287db4e04428a35ac9afcc39",
+        "path": "Effects/GeneratorCharge/charge-pulse-03-v1-256"
+      },
+      {
+        "id": "resource-2432cf7fb266c933842e9b3bf589f22ff580916f527f7c6acecef754d0cd3814",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-blue-durability-8-v1-256"
+      },
+      {
+        "id": "resource-275580706f56b494e6434c720b371cfedfe51b2cde8ae4194f788bee163d71f7",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-blue-durability-7-v1-256"
+      },
+      {
+        "id": "resource-28742c06ad55e56c82ad58ae08dd1d7e5ae909bbcd5e61423e238c4e8dc7c079",
+        "path": "Effects/Match/Animations/match-pink-frame-03-v1-256"
+      },
+      {
+        "id": "resource-29124739ccbac05f07b1ad71aab6f693879a5003b1d088692ef89d815401275b",
+        "path": "BoardDevices/Recovery/recovery-part-v1-256"
+      },
+      {
+        "id": "resource-29d0f8f9434dda522b9b02c25b959fe955cf788ef6440881a0c3bfb225317aee",
+        "path": "Obstacles/Generator/generator-charge-0-of-4-v1-512"
+      },
+      {
+        "id": "resource-2ba64904245fd32322aa8e014b25ffb7aa185c9a2133795c94a5163e92f88e5f",
+        "path": "Effects/WebBreak/Animations/web-break-frame-04-v1-256"
+      },
+      {
+        "id": "resource-2d5f0a0b71a8423b05cf222d716b55bf9251fe60be86a5b02c7922f8bbbbe5c8",
+        "path": "Effects/Drone/Animations/drone-impact-frame-03-v1-256"
+      },
+      {
+        "id": "resource-2f428a6ae8e64deee751aad9615f6fa2de4ab4cb61602f24cc459bbfde1a7249",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-yellow-durability-3-v1-256"
+      },
+      {
+        "id": "resource-2fcbc00e4a42074ce7ea385b660af5b83a851bde52ed450ffcf887d782a86dae",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-green-durability-6-v1-256"
+      },
+      {
+        "id": "resource-311c4f8871e0b87e97a45d6dd4b9903e6ef42f9ca155849ca4fe561effb34090",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-purple-durability-8-v1-256"
+      },
+      {
+        "id": "resource-330aee5fa62cef4d3370fb18895275960119ae3026467f118d0607feba41eb63",
+        "path": "Obstacles/Generator/generator-charge-5-of-5-v1-512"
+      },
+      {
+        "id": "resource-331c096d1681ab8d8f5ccec75b3cea099014f81a7c1f304bdc31980671e18d09",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-pink-durability-7-v1-256"
+      },
+      {
+        "id": "resource-33678a33836e06543326bc2b41731ba4c5b6c9127238d3252c65cdcb87f5ba6c",
+        "path": "Obstacles/ColorLock/color-lock-yellow-durability-3-v1-256"
+      },
+      {
+        "id": "resource-33af26b030602d5cecb18736b3663e1492d56bd02432259b2cfdebe82e7a3d67",
+        "path": "Effects/MoldClear/Animations/mold-clear-frame-03-v1-256"
+      },
+      {
+        "id": "resource-345679baa9da5b8e85e412930cce2807d040836a266011a09fa1cd6bb6ce849e",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-purple-durability-6-v1-256"
+      },
+      {
+        "id": "resource-3573626a2138a9509d9012572ee3ad175b49dfc5a79335f1c8b01b15830227a5",
+        "path": "PowerBlocks/cleaning-rocket-horizontal-v1"
+      },
+      {
+        "id": "resource-36a5defdcb072f861ebd6ebfc0ad33b3bd1dff1b2d5921133ec9e0d27647ae4d",
+        "path": "Effects/Match/Animations/match-purple-frame-03-v1-256"
+      },
+      {
+        "id": "resource-38cb909b198f8e35e3e6e1fd51b8ae58392a61a3b602c9270581d4444a3f8a8e",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-purple-durability-3-v1-256"
+      },
+      {
+        "id": "resource-3bc36fe9739409ada36ebb4ef8958df3c70cf2f5ee0f78dfd1333db0ee941d75",
+        "path": "Effects/WebBreak/Animations/web-break-frame-02-v1-256"
+      },
+      {
+        "id": "resource-3c125c37b77dd8cc0fe31b593359a495d0131b6d7157841e00aa2a1977d01748",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-pink-durability-8-v1-256"
+      },
+      {
+        "id": "resource-3dc5ca1e8473df7c31be2aa68d1354a83128fe78c4660c641d833d14a0f54540",
+        "path": "Obstacles/RecoveryCapsule/recovery-capsule-durability-1-v1-256"
+      },
+      {
+        "id": "resource-3f7e9839f8325c858017053716fe7dc164f635efb1f4f68f50b1ebc7950f1b14",
+        "path": "Effects/MetalBreak/Animations/metal-break-frame-02-v1-256"
+      },
+      {
+        "id": "resource-3fbe0fca824520fa66935bc3a9c536a119567cad917946217b740fb5781a8cb9",
+        "path": "PowerBlocks/moon-bomb-v1"
+      },
+      {
+        "id": "resource-409d1c5337ff762a933e60b85f1be98d347ccdc8051f05c96bada7e5d81443a2",
+        "path": "Effects/Match/Animations/match-green-frame-03-v1-256"
+      },
+      {
+        "id": "resource-41b9ce95dcece980f2edfd23e7c544be5cf144b368cf6ad76e2b744445aeea4c",
+        "path": "Effects/Magnet/Animations/magnet-pull-frame-03-v1-256"
+      },
+      {
+        "id": "resource-48d8e8c83d4a2f228ff3fe425e965ed7c2c897baced57d8ebf5367e39710410b",
+        "path": "Effects/DustClear/Animations/dust-clear-frame-04-v1-256"
+      },
+      {
+        "id": "resource-4b165d62ea15767687b12b11adb4b6cdd7c20ca27778f2df17c00bff1642d1d3",
+        "path": "Obstacles/Generator/generator-charge-1-of-3-v1-512"
+      },
+      {
+        "id": "resource-4b4dda78fcf930bbf860099b9d2dbaab63937e48a56fa7dbc66d6ebc46e9a064",
+        "path": "Effects/Match/Animations/match-yellow-frame-03-v1-256"
+      },
+      {
+        "id": "resource-4dde97cd28a8f08fc889ac4403ac1e060bbc6ad4644d006f3bd835761a4db80a",
+        "path": "Effects/PowerCreation/Animations/power-creation-frame-02-v1-256"
+      },
+      {
+        "id": "resource-4ec7b038bcc03e2315631ca364971d7b17664d3d5c51683ef3bc1c8ab8b5396d",
+        "path": "Obstacles/Generator/generator-charge-3-of-5-v1-512"
+      },
+      {
+        "id": "resource-5037b672a97405648db343c1af0adcf2d482e5826568b847f0401f911192726a",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-yellow-durability-4-v1-256"
+      },
+      {
+        "id": "resource-505c60e9cd1a31cfc88806a8d3a89be4e2a472f5efb9906780c653ac08fda0df",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-blue-durability-5-v1-256"
+      },
+      {
+        "id": "resource-53647ad2231000a6c07a532f7b988faf911ad69babcb7953c772fbd556a6343b",
+        "path": "Obstacles/Generator/generator-charge-2-of-4-v1-512"
+      },
+      {
+        "id": "resource-551762ece6887b4e48646bc5916833ace721bbc93878d1365ae8fc3b98c518ab",
+        "path": "Effects/BombExplosion/Animations/bomb-explosion-frame-08-v1-256"
+      },
+      {
+        "id": "resource-5701ade249f89aa212f200c6132eda33c962ebbeaed574513d139d97d39c4db6",
+        "path": "Obstacles/Crate/crate-durability-6-v1-256"
+      },
+      {
+        "id": "resource-5b35bb4cd6c4b8eb2b6e23e26053e7c83d8bf27e2f87ac92e9983816365506aa",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-pink-durability-9-v1-256"
+      },
+      {
+        "id": "resource-5d8fdc50bf751052addfbcb2eff63b49cd755d927e64c88bae0942d4cdb6d06d",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-green-durability-7-v1-256"
+      },
+      {
+        "id": "resource-5df24f0eae0feea69d814762a90a248dd786d6bf5dcc3a361e5595da7540e315",
+        "path": "Effects/Match/Animations/match-yellow-frame-01-v1-256"
+      },
+      {
+        "id": "resource-5f4221e6966aa0f6fd7e1657f449850b75abf4d6177f4f051b8c47682095597d",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-yellow-durability-2-v1-256"
+      },
+      {
+        "id": "resource-5f6094c6a8f593935989567d43bc1d6e3b62baf166e38ba5650d3e64ad914720",
+        "path": "Obstacles/Generator/generator-charge-3-of-3-v1-512"
+      },
+      {
+        "id": "resource-606aceb2783a4844b49fa772f3f9de2ec087b2373ba050ae1c5b78f6d2409563",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-purple-durability-4-v1-256"
+      },
+      {
+        "id": "resource-628111a3c783b3b3ac3faecbbcb10d49c22076f73ffccde38561ffc63c89bb64",
+        "path": "Effects/Match/Animations/match-yellow-frame-04-v1-256"
+      },
+      {
+        "id": "resource-645af49a0fc48c295a73846df5eb9565c234d0306e519fda22c83f0c90cdcc64",
+        "path": "Blocks/rabbit-green-v1-256"
+      },
+      {
+        "id": "resource-6510f86c2445cbde92228330bd54cfbe0d76c88696cce27264a6fbb5b653f1d1",
+        "path": "Obstacles/ColorLock/color-lock-blue-durability-1-v1-256"
+      },
+      {
+        "id": "resource-67535e1642f15c00f00ca41ff1a816559f033579edb6879572e9bfca846f1ddc",
+        "path": "Effects/Match/Animations/match-pink-frame-01-v1-256"
+      },
+      {
+        "id": "resource-685c8da4f8629e0e1abc98e7ced13c0c14c1f21a3b51b9323880dd7f51f34b9a",
+        "path": "Obstacles/Scrap/scrap-durability-4-v1-256"
+      },
+      {
+        "id": "resource-691a63b97cfd7817de424bcda83eb9bece540eab7faa1fd52e2697438832087d",
+        "path": "Effects/Rocket/Animations/rocket-impact-frame-03-v1-256"
+      },
+      {
+        "id": "resource-6a982d1637beafec6078a983071889396064722fb00745586302a70a6c516bf0",
+        "path": "Obstacles/ColorLock/color-lock-pink-durability-3-v1-256"
+      },
+      {
+        "id": "resource-6be4629a47a7457c49a172745fe7f89e463a44d4c124a66002b44bdd513f165d",
+        "path": "Effects/Rocket/Animations/rocket-impact-frame-01-v1-256"
+      },
+      {
+        "id": "resource-6c9bf0b81ae72553ac1a6aa633022c51e9ebd0ffad278e4f37e4c596b873be0a",
+        "path": "PowerBlocks/cleaning-rocket-horizontal-launch-frame-2-v1-256"
+      },
+      {
+        "id": "resource-6dd4d06f91fba5c18b561a9bc79ad644243218de58c4be6ba35d0fe3a50655c8",
+        "path": "Effects/Match/Animations/match-pink-frame-02-v1-256"
+      },
+      {
+        "id": "resource-6e83c5da15b4fd2eaafa25549d8793e66a10d436701339b85689699634bf6495",
+        "path": "PowerBlocks/rainbow-magnet-v1"
+      },
+      {
+        "id": "resource-6fe6c930981e185f1e42d7ee986ba9d2f3be248f3b8294768ea56383cd9e454d",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-pink-durability-2-v1-256"
+      },
+      {
+        "id": "resource-7196f21cd1ad0aa070eb86cdc371474ed316b7ac0a793343967735a9ac0b3c87",
+        "path": "Effects/MoldClear/Animations/mold-clear-frame-04-v1-256"
+      },
+      {
+        "id": "resource-721f490aef6d5d0e6c0b0c0daf57a5494d5c59eb6fa8788b3604abf8e747c7d0",
+        "path": "Obstacles/RecoveryCapsule/recovery-capsule-durability-4-v1-256"
+      },
+      {
+        "id": "resource-7255ecdbc06520c3bb2fc0794ff23d960adfb2e120aa7012abdc97fc38b873df",
+        "path": "Obstacles/Generator/generator-charge-0-of-5-v1-512"
+      },
+      {
+        "id": "resource-73fad15fe6d5e9a725d09a0f7587da789f3ebf8fcac653d43df97fe7e461c89b",
+        "path": "Effects/WoodBreak/Animations/wood-break-frame-03-v1-256"
+      },
+      {
+        "id": "resource-765dcfe7e80c8cd3f5c17b2ad949b75f7b443b6db287c86e8bcd2d71a905b24d",
+        "path": "Effects/PowerCreation/Animations/power-creation-frame-01-v1-256"
+      },
+      {
+        "id": "resource-771e061f33438a5070732badb287c26828b2c479afa8dfbb8c5fb5cdf3fd12f3",
+        "path": "Obstacles/Web/web-durability-3-v2-256"
+      },
+      {
+        "id": "resource-7855d1df8ab3cde396f1bcf87b44ff0f22c6a0afbd7245c69df97c5b39aaf9f7",
+        "path": "Obstacles/Crate/crate-durability-3-v1-256"
+      },
+      {
+        "id": "resource-78e713ef7d6eddcccb39333099caca12eaaf0aab3741d9266263d13bf0502470",
+        "path": "Obstacles/Crate/crate-durability-5-v1-256"
+      },
+      {
+        "id": "resource-79eac9b448e98d91350e07893232a73f74ef03019617555b7d87fa899ec485ef",
+        "path": "Effects/WoodBreak/Animations/wood-break-frame-04-v1-256"
+      },
+      {
+        "id": "resource-7b65dba799f819f52aa432e70b582bdab0edd15b8ff6aeb2718cb099ac8887d8",
+        "path": "Obstacles/Scrap/scrap-durability-1-v1-256"
+      },
+      {
+        "id": "resource-7b90d7d89ca5db816bd6c60c40904977475fcde8147c16272a36bb4dabe841f2",
+        "path": "Effects/Rocket/Animations/rocket-trail-frame-02-v1-256"
+      },
+      {
+        "id": "resource-7e4eb29bd3cd72ba8ec0c55cbf12f3691f143678789a38b5d00cba13d99848a5",
+        "path": "PowerBlocks/collection-drone-rotor-4frames-v1"
+      },
+      {
+        "id": "resource-7fec5591fda6fa7199f914673e98fb834f09b8d7c3eebe9649ed7210fc5735af",
+        "path": "PowerBlocks/collection-drone-v1"
+      },
+      {
+        "id": "resource-81658ad51c3a6e22bb8528759fbfc616b45564fbf5b732411cefa6b9633b5644",
+        "path": "Effects/DustClear/Animations/dust-clear-frame-03-v1-256"
+      },
+      {
+        "id": "resource-81bc688f680bf8583ff042679177262888159a3e1932ca7b1451c028c48934f2",
+        "path": "Obstacles/Crate/crate-durability-4-v1-256"
+      },
+      {
+        "id": "resource-82de628e6a0b4747f21fab813f40ba74c3b25f98e7f5c54247a96b904af24891",
+        "path": "Obstacles/Crate/crate-durability-2-v1-256"
+      },
+      {
+        "id": "resource-849e00ccddace5d4b7b5a6a4268e7d708b54ff4e6e1026f42ebee2acc64038c9",
+        "path": "Obstacles/ColorLock/color-lock-pink-durability-2-v1-256"
+      },
+      {
+        "id": "resource-859d0c33a27c0076e6344307b09721c20ad8789662d58a89b1824740ec8942ed",
+        "path": "Effects/DustClear/Animations/dust-clear-frame-01-v1-256"
+      },
+      {
+        "id": "resource-88d47face338ee9e58ef78b0efb19bfe28708072291d1594630d76771619a18d",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-yellow-durability-1-v1-256"
+      },
+      {
+        "id": "resource-894ef3fb6e9a170f1fcaf126bcc68256e3f29b1900b8fd83644c0f5f640ead8e",
+        "path": "Effects/Match/Animations/match-purple-frame-04-v1-256"
+      },
+      {
+        "id": "resource-895adfbfa9c8c88f37ca5b8abb72c39cce62100407d8f253ae7faf4fdf0855be",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-purple-durability-9-v1-256"
+      },
+      {
+        "id": "resource-8a5a1bf0d6dbb5cc95ea56861458ba14b89a12cbecc27d5cfc14f027efc84dc7",
+        "path": "Obstacles/ColorLock/color-lock-green-durability-2-v1-256"
+      },
+      {
+        "id": "resource-8ae4c28f4d83a39a4a979842511a9fa12b7bbfbb5d5e64646ca0ae5730098b00",
+        "path": "Effects/Match/Animations/match-yellow-frame-02-v1-256"
+      },
+      {
+        "id": "resource-8b03396fbdf78ce4a7c4585506362f8e681c8631953c2542606a65d1247fbd33",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-pink-durability-5-v1-256"
+      },
+      {
+        "id": "resource-8c89f8000413121d72ee70b8a22ca944a3601dabc3e5869837be58adb7a0da5b",
+        "path": "Effects/MoldClear/Animations/mold-clear-frame-02-v1-256"
+      },
+      {
+        "id": "resource-8d8973354ac7c6bd67bb40b03fb018a6ba9d9dc4683b687fbdb623f2cf034bfb",
+        "path": "Obstacles/ColorLock/color-lock-yellow-durability-2-v1-256"
+      },
+      {
+        "id": "resource-8dd179a796503fa0006e702b0b5473c31c1e563ce2dacb754a8a6c9c3ece02a5",
+        "path": "Effects/WoodBreak/Animations/wood-break-frame-01-v1-256"
+      },
+      {
+        "id": "resource-8e29c592c302a2c10e3d20fc1c46556466e9aaba29773ba5bf1e39876ccdf16f",
+        "path": "Obstacles/Scrap/scrap-durability-3-v1-256"
+      },
+      {
+        "id": "resource-8ef9402f655cfe3f289c8332e57612474539b3f77791274a07b0ece9a37c1f77",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-purple-durability-7-v1-256"
+      },
+      {
+        "id": "resource-902f339380ec0ba00054c30e6d2a2944b0779ee5a3baaf592fcae3bdfdd6c4a4",
+        "path": "Obstacles/Generator/generator-charge-4-of-5-v1-512"
+      },
+      {
+        "id": "resource-9106ab7a5b8dcfe7cd87c50e2379ecacb031dedc7f90c7b05f5559e833512447",
+        "path": "Effects/Match/Animations/match-blue-frame-02-v1-256"
+      },
+      {
+        "id": "resource-93086788c9bda987fc80e36587fb49eaeb948024692a6b919887498dfaa38b8c",
+        "path": "Obstacles/RecoveryCapsule/recovery-capsule-durability-2-v1-256"
+      },
+      {
+        "id": "resource-944e0700062af98708763f13d17229a5e9c1f4d39728477a853df8be008c54b2",
+        "path": "Effects/Rocket/Animations/rocket-trail-frame-03-v1-256"
+      },
+      {
+        "id": "resource-95d1a48702f488300da5296384c322cfaac54e4dc81d3228cfdd42d6eb23cce9",
+        "path": "Effects/Match/Animations/match-green-frame-01-v1-256"
+      },
+      {
+        "id": "resource-9999964091726b4a70fb78c208addb51722890962eb22d14461b821985ef778c",
+        "path": "Obstacles/Dust/dust-durability-1-v1-256"
+      },
+      {
+        "id": "resource-9ddb20648fa6b0bde1573b6c7a7f24abdf9aa0b525055dca182c1536a84ca12a",
+        "path": "Effects/Drone/Animations/drone-impact-frame-04-v1-256"
+      },
+      {
+        "id": "resource-9ecab28c718a2d1555f03adf6b93ee88194c678172d6e8159b4a5dbc8bec3dc7",
+        "path": "Effects/Magnet/Animations/magnet-transform-frame-03-v1-256"
+      },
+      {
+        "id": "resource-9f173a3a523c0dfac32d7dcec95a278bc984e68eb347bb73eaf449de8a6118f6",
+        "path": "Obstacles/RecoveryCapsule/recovery-capsule-durability-5-v1-256"
+      },
+      {
+        "id": "resource-a112f4206360ccc034ff05b24fab86ecfa3dd95a25f822d53a4c7521b6b6cff3",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-blue-durability-3-v1-256"
+      },
+      {
+        "id": "resource-a36256d5d8c22192d49030377db91b02fa45f211f54cc6021fc1fde0014ff9a5",
+        "path": "Effects/Rocket/Animations/rocket-impact-frame-02-v1-256"
+      },
+      {
+        "id": "resource-a3bc69812e16a90bc2905d8ca6d2350883cfa4278b98c15f6061de8a3dac9fb2",
+        "path": "Obstacles/Mold/mold-base-v1-256"
+      },
+      {
+        "id": "resource-a4ae2bc050136c7afa158ae668e1317a14cc4a59fe58617eacf75b728a0102c8",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-blue-durability-9-v1-256"
+      },
+      {
+        "id": "resource-a645bc5538d6e6e65ef95c01befb266102f9f46fa4cc5e2dc0784dfcee3223f2",
+        "path": "Obstacles/Generator/generator-charge-2-of-3-v1-512"
+      },
+      {
+        "id": "resource-a8d10db4fe9e18c18ad6080c75eb47916adcb55e1ff691fde90d19d852f6f70b",
+        "path": "Blocks/rabbit-pink-v1-256"
+      },
+      {
+        "id": "resource-a96c52158c2e7fa3efd501d07037b0cd8576b4ae5acae16d99b1264c08a51580",
+        "path": "Obstacles/Generator/generator-charge-2-of-5-v1-512"
+      },
+      {
+        "id": "resource-aa412ccaaa382f61ec088c5748e46667df7421eeb1cf600f965ac62b92b3b813",
+        "path": "Effects/BombExplosion/Animations/bomb-explosion-frame-03-v1-256"
+      },
+      {
+        "id": "resource-aacde4db573699451d9bbee52fbc138d8ac99c48715ff1dfa7924748a6d7fe16",
+        "path": "Effects/Match/Animations/match-blue-frame-04-v1-256"
+      },
+      {
+        "id": "resource-ab3cff60e2f60f3baca1eedd044757b3bd3624971938182645a10bbd93476d26",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-purple-durability-2-v1-256"
+      },
+      {
+        "id": "resource-ad2a2a3787ee6b14bcafd3e0c4f1160737fc2ff3e9789124829554b3d34f8c56",
+        "path": "Effects/Match/Animations/match-purple-frame-01-v1-256"
+      },
+      {
+        "id": "resource-ade13c9af7cc0550100816abc00bf00473de8590f8cd51e13ef96e43fa6631ee",
+        "path": "Obstacles/Web/web-durability-1-v2-256"
+      },
+      {
+        "id": "resource-b0ef4a8fd1589f1bca092a7967e5e937e063ea3579fe5ab36bfc937385d63978",
+        "path": "Obstacles/Scrap/scrap-durability-5-v1-256"
+      },
+      {
+        "id": "resource-b177f72e86c1656991ce776fa8c8ee90edfbe938c58c79a58cef4383c6b488e0",
+        "path": "Effects/Magnet/Animations/magnet-transform-frame-04-v1-256"
+      },
+      {
+        "id": "resource-b2f5f57c4fe1e0c7e24bd71283ef796c8ea529b1b993cd48c660af86748d2dfa",
+        "path": "Effects/Magnet/Animations/magnet-pull-frame-04-v1-256"
+      },
+      {
+        "id": "resource-b34efec8d42cc920d5cb7f3e87aaae6e5b44b9a4379be67cb0355ead16e46df4",
+        "path": "Effects/GeneratorCharge/charge-pulse-01-v1-256"
+      },
+      {
+        "id": "resource-b5c5852ea16f43dc9358ed4b1e1b67faeeefd640c91b47b087816a3ebd960f54",
+        "path": "Effects/Match/Animations/match-green-frame-02-v1-256"
+      },
+      {
+        "id": "resource-b612efb8065ba60560bdb358ce95bc601a3af055789f1cba1627d317fb2d60f7",
+        "path": "Obstacles/Generator/generator-charge-4-of-4-v1-512"
+      },
+      {
+        "id": "resource-b6562f4a0b134d856dd583d5ca99d969f76c58ac739457110372b53e346ad018",
+        "path": "Effects/MoldClear/Animations/mold-clear-frame-01-v1-256"
+      },
+      {
+        "id": "resource-bb5845bd0ed6e2bfb16729231f18215228bf4b70e646ecfe20a8c8006c447f4e",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-yellow-durability-9-v1-256"
+      },
+      {
+        "id": "resource-bc32fc5c5432b50ff1d80fe246f7dee2c1528915b5dac854d174a29ce00a6010",
+        "path": "Effects/Magnet/Animations/magnet-transform-frame-02-v1-256"
+      },
+      {
+        "id": "resource-bd06069535ad7d065d96bd88e6b22e44cefd475fe864aa23b534653b30ba6219",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-pink-durability-4-v1-256"
+      },
+      {
+        "id": "resource-bdacfd957a983e81264e90ae328042f422a992fbac8091935504fdb4a037f7d9",
+        "path": "Obstacles/ColorLock/color-lock-purple-durability-1-v1-256"
+      },
+      {
+        "id": "resource-bddd234f052c1ad641bf663a6e60aaa7a9c28eb9ca5d0f280e743b384448b560",
+        "path": "Blocks/rabbit-yellow-v1-256"
+      },
+      {
+        "id": "resource-c0eedd196874922d93fccb793d6645c50b110675f0227294cf7f813c651236b3",
+        "path": "Obstacles/ColorLock/color-lock-green-durability-3-v1-256"
+      },
+      {
+        "id": "resource-c14435cad060bf210c358c68012d60cbdc8544e32ddf1ca700a7e99ae7fcb645",
+        "path": "Obstacles/Dust/dust-durability-2-v1-256"
+      },
+      {
+        "id": "resource-c33ebc3a1fa06a4b0bf8fdbbac698994691eb932e54af7c365b64838523d8375",
+        "path": "Effects/Match/Animations/match-purple-frame-02-v1-256"
+      },
+      {
+        "id": "resource-c50f315cc65edc6db76d38826ad55efc211eee945974af1012084a1a575f0756",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-purple-durability-1-v1-256"
+      },
+      {
+        "id": "resource-c53c3af28c3dd98083bb237333c57abe0126b087a756493202b638f74b80a0c4",
+        "path": "Effects/MetalBreak/Animations/metal-break-frame-03-v1-256"
+      },
+      {
+        "id": "resource-c8b4ee18bb639a4affcb111ef11348128e5b4bfdce24a18840d5058a253dfa72",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-blue-durability-4-v1-256"
+      },
+      {
+        "id": "resource-c941c90db8ec929b138f12e4707fe7ad6e8d2ceea1cd47ce1de8d76347afc680",
+        "path": "Obstacles/Web/web-durability-2-v2-256"
+      },
+      {
+        "id": "resource-cc3f59d73911396ba0af4af159486cafa93fc350324dc591231314c93b9e7f25",
+        "path": "Effects/Match/Animations/match-blue-frame-01-v1-256"
+      },
+      {
+        "id": "resource-d01bb0db1056049d44b9f333404601d30c60634ee64e836f44aa7c635c7f48f4",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-pink-durability-6-v1-256"
+      },
+      {
+        "id": "resource-d16bb120a8463a3fa50fd21482b606373e689c4ba618035ad437ae75b19b952b",
+        "path": "PowerBlocks/cleaning-rocket-horizontal-launch-frame-3-v1-256"
+      },
+      {
+        "id": "resource-d23c44718cbffda3ee5514201e16d2ab38162297d1384098a6ff51ee3de08d35",
+        "path": "Effects/Magnet/Animations/magnet-transform-frame-01-v1-256"
+      },
+      {
+        "id": "resource-d3704b47d5f6d5dfa5e11710bd3a0d07902b1caa47cfaca05510231259e9c682",
+        "path": "PowerBlocks/cleaning-rocket-vertical-launch-frame-2-v1-256"
+      },
+      {
+        "id": "resource-d40124464e1871a6587b2a2aa0c429af36518a2529d7aa3f84d90bd63e82e4b5",
+        "path": "Obstacles/ColorLock/color-lock-blue-durability-3-v1-256"
+      },
+      {
+        "id": "resource-d444d72ee69e3b454fa0c61c50fb5b0e990885fcd41bf5ff4d31f5b6cf7242aa",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-green-durability-3-v1-256"
+      },
+      {
+        "id": "resource-d450ca20ed098c433fa18d1a596afb6361e1c73e881d2a2dee7e30f0f18b06ae",
+        "path": "Effects/Match/Animations/match-pink-frame-04-v1-256"
+      },
+      {
+        "id": "resource-d4ba2711c0c947cee01d3f526a7e50e32fa1abb1f736984a484c5c24d7186d27",
+        "path": "Obstacles/Crate/crate-durability-1-v1-256"
+      },
+      {
+        "id": "resource-d53f32b393e6d752d6b80894022b66d44c822202aeadf3a949eeab3874944d8b",
+        "path": "Effects/BombExplosion/Animations/bomb-explosion-frame-01-v1-256"
+      },
+      {
+        "id": "resource-d7e9276d1ad57670720881d768037161ab69a3f6df55267e1472d450daede3fb",
+        "path": "PowerBlocks/cleaning-rocket-vertical-launch-frame-4-v1-256"
+      },
+      {
+        "id": "resource-d869d29ae874944929df65b6de9fa22d1ac6b6c0c19b9a3ae2b80d06e792e0a0",
+        "path": "Obstacles/ColorLock/color-lock-pink-durability-1-v1-256"
+      },
+      {
+        "id": "resource-d8faa0209b3030f8fb36773523af986c4e12e4379efa1fd35190875c1a332063",
+        "path": "Effects/Magnet/Animations/magnet-pull-frame-02-v1-256"
+      },
+      {
+        "id": "resource-ddc290ffa16d5b5027a5d21b239b19803fa4467a2abeb4ff2a89035d96099585",
+        "path": "Effects/WebBreak/Animations/web-break-frame-01-v1-256"
+      },
+      {
+        "id": "resource-de4cc92560a6c7eabd5f68c1053c91758cddabbb6d13ed366292fa33de5066df",
+        "path": "Obstacles/Generator/generator-charge-1-of-5-v1-512"
+      },
+      {
+        "id": "resource-e19cf31bbe60b40c2e1f9c61aa8a7600fe5aa85c3c2fd6790ce8546fb15f1493",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-purple-durability-5-v1-256"
+      },
+      {
+        "id": "resource-e4d4ff22c286f6de101f0fc3adb87bbb1e81a52d2b13f550d06e16de07e1b75c",
+        "path": "Effects/BombExplosion/Animations/bomb-explosion-frame-02-v1-256"
+      },
+      {
+        "id": "resource-e6eb4378d1219bd46cdb5813131fb53fac03ca53ada28e96aac9484ecaf3f90e",
+        "path": "Effects/BombExplosion/Animations/bomb-explosion-frame-07-v1-256"
+      },
+      {
+        "id": "resource-e71376eda945540ad9b8b7e89ce1286b16f905ac86806c893b83a4ef5e7eee6a",
+        "path": "Effects/DustClear/Animations/dust-clear-frame-02-v1-256"
+      },
+      {
+        "id": "resource-e7a056b8665599ebd00f6dd7240ed59498b63df0f5f9733a8638ba5956541643",
+        "path": "Effects/MetalBreak/Animations/metal-break-frame-04-v1-256"
+      },
+      {
+        "id": "resource-e85a435d7904df8ba2e5f69e567f4d02e396d9d485edfaf8ac80c8a21f82b357",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-yellow-durability-5-v1-256"
+      },
+      {
+        "id": "resource-e88f60f4b110564e8672d827683b298b9bbeb6bd142b61c8cc484c3cb8df6198",
+        "path": "Obstacles/ColorLock/color-lock-green-durability-1-v1-256"
+      },
+      {
+        "id": "resource-e988c2316a0c6d7383109908b969dd15a5ba70be6537af318939f55d0add675d",
+        "path": "Obstacles/ColorLock/color-lock-purple-durability-3-v1-256"
+      },
+      {
+        "id": "resource-e9b5a58cb5000c57d1b380bd8c4fc84baa70250626e2ea0bc664b3c510507322",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-green-durability-9-v1-256"
+      },
+      {
+        "id": "resource-ecf85b9d42deaa801631c79ca447c2f56647f7d42d47bf3757e693b0b0716636",
+        "path": "Obstacles/Dust/dust-durability-3-v1-256"
+      },
+      {
+        "id": "resource-ef18d3b724886c348c7bebea6d5a2b869e9e25db34a1acd33e3e7e80be65a04b",
+        "path": "Effects/Drone/Animations/drone-impact-frame-01-v1-256"
+      },
+      {
+        "id": "resource-f06504611c3b003dd03b537b921f803b10f46c7093e1f340bcb2cc2146229d5d",
+        "path": "Effects/Rocket/Animations/rocket-impact-frame-04-v1-256"
+      },
+      {
+        "id": "resource-f08d207d3ee48036cfc35b9cc619b514869584dcd4bcde6ed1c9fdf17e9d317d",
+        "path": "PowerBlocks/cleaning-rocket-vertical-v1"
+      },
+      {
+        "id": "resource-f3bd771495d402c73f6cbc7e238406c741d2792805df1010735a8990006dfa69",
+        "path": "Obstacles/Generator/generator-charge-0-of-3-v1-512"
+      },
+      {
+        "id": "resource-f3d9a363b7fb6d8a70e498b8b9a1eafbe236bec0325ed55e075cc3849800f3b7",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-green-durability-4-v1-256"
+      },
+      {
+        "id": "resource-f3f63df580b5eed0da855420a6310837e6d126a61a780df631f64cb2f8e840b0",
+        "path": "Effects/BombExplosion/Animations/bomb-explosion-frame-06-v1-256"
+      },
+      {
+        "id": "resource-f5ce900a7639560f04721d8092a9df1c853cfd0d05f808e195cd67835dd5d474",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-yellow-durability-7-v1-256"
+      },
+      {
+        "id": "resource-f6d509476b534fbfc4b25deea22e12df7aabdc819badfb181d108e6afa688652",
+        "path": "Obstacles/MetalRodBox/metal-rod-box-green-durability-5-v1-256"
+      },
+      {
+        "id": "resource-f88e3b77a36c699af26be8380c8b292a588af87a3191f8b838a75c6cd8a8137e",
+        "path": "Obstacles/Generator/generator-charge-3-of-4-v1-512"
+      },
+      {
+        "id": "resource-fcb365f84420916005f4093355771c81dab89c8bc6296af4dcab3de147c73286",
+        "path": "Obstacles/ColorLock/color-lock-yellow-durability-1-v1-256"
+      },
+      {
+        "id": "resource-fd8aa140946b7c588c8e684fb5b056caab1edb32cfb0af5e3b058628d644aead",
+        "path": "Effects/Magnet/Animations/magnet-pull-frame-01-v1-256"
+      },
+      {
+        "id": "resource-fde1340eeacbbb34c042b149d78f79e517ccda38112bad01b95a21dd2837932a",
+        "path": "Effects/Match/Animations/match-green-frame-04-v1-256"
+      },
+      {
+        "id": "resource-fe76bbda591d5ee86044cde1a57812b1ef374e0ec0b32520c422fbf4ccb9b92c",
+        "path": "Effects/GeneratorCharge/charge-pulse-02-v1-256"
+      }
+    ],
+    "sourceIds": [
+      {
+        "documentId": "element-1c095c23ee284aa9a7edef97055de51d",
+        "sourceGuid": "024735e318a94e44ea119f42b1ee6d14"
+      },
+      {
+        "documentId": "level-60bc319684094c67bfee34e35d48a8d8",
+        "sourceGuid": "02ffd300249623e40b2d38e1a90df2a6"
+      },
+      {
+        "documentId": "element-750e8ab379c24e36af76571cefbb0923",
+        "sourceGuid": "068040369e7ba2f46963c36c68ad84ea"
+      },
+      {
+        "documentId": "element-180a89acacce40b0b47e5cb698e6b4fe",
+        "sourceGuid": "1c720f5d2426bca4eaade54cf5391cdb"
+      },
+      {
+        "documentId": "element-39abc33d5bd046ed9e205e8b35e7c448",
+        "sourceGuid": "22c62a6c0432b804899f331c27338942"
+      },
+      {
+        "documentId": "level-88f4664956ec4c2bb3700f68a7cac518",
+        "sourceGuid": "28ea7c3b6c85b6a46abe7d8a4fbc271e"
+      },
+      {
+        "documentId": "element-a743ce838c2e48c1b056977fdddd8057",
+        "sourceGuid": "45e36c676721f15478bb80013e034a27"
+      },
+      {
+        "documentId": "element-7bb42b50a3394be98efa6fd4cd6713b8",
+        "sourceGuid": "573a40c4da0a69c4d98ff78d75314be6"
+      },
+      {
+        "documentId": "element-7b45bb5da5fe401e8b647ff3387adb53",
+        "sourceGuid": "6405c88659075c144a2226367a3e9b9f"
+      },
+      {
+        "documentId": "element-5c946f6e4c6f466cb1e5645a578a70dc",
+        "sourceGuid": "670d8399872e37546ba7c93a166af325"
+      },
+      {
+        "documentId": "element-b914266c7529487e97723076fac4a5c3",
+        "sourceGuid": "6d2ed2d2023712c4d8464ed1e3c78528"
+      },
+      {
+        "documentId": "element-938967dba657416ebf9bbc9685f04faa",
+        "sourceGuid": "77d0b8025b4c0134e9c4dbffad7502cd"
+      },
+      {
+        "documentId": "element-a8db92745fe5401180f50807c7a75546",
+        "sourceGuid": "819140f3f3497fd44ba284116fe70a55"
+      },
+      {
+        "documentId": "level-9476d3b3a91c4563b712bfb753f46c98",
+        "sourceGuid": "8340d75c714de7f4984e693a01968742"
+      },
+      {
+        "documentId": "element-f91baa94af4f4a1a8f739045361221d1",
+        "sourceGuid": "9c010e5fe15a7f145875dca4dd50cc20"
+      },
+      {
+        "documentId": "element-faac530173aa422e89c3b12b868a6105",
+        "sourceGuid": "9da965a7cbb661e49bb979c1ef507557"
+      },
+      {
+        "documentId": "element-190847babf4f4d45abac1136766295f2",
+        "sourceGuid": "a2bf5ab4d39bee140901591a5c93e88b"
+      },
+      {
+        "documentId": "element-43c5dd84c6f0476b84b5b140bd71964f",
+        "sourceGuid": "aa0ce4b36ecea8d499b5dbc4d8e703c5"
+      },
+      {
+        "documentId": "level-60f267ee0c5a453bb09291a997bd660a",
+        "sourceGuid": "ab4a9cf395b654b46b3b54c571ce0720"
+      },
+      {
+        "documentId": "element-26cc4f57499845659071b5a07f8e9798",
+        "sourceGuid": "b0f904926634a3f40b24faf330d2696f"
+      },
+      {
+        "documentId": "visual-39d32a17fab04590841af320d59c56c7",
+        "sourceGuid": "b4e0d619af4ed3d4a8c14b04e166ce6c"
+      },
+      {
+        "documentId": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+        "sourceGuid": "b645b207797cb83418ae4bdd2a95385e"
+      },
+      {
+        "documentId": "element-c656ce4b36ce49cfaeee9e191e6efbcd",
+        "sourceGuid": "bc5a19b897068c2429744571292b4387"
+      },
+      {
+        "documentId": "shape-5d73912df91d4a32b90ade639c9cb0f3",
+        "sourceGuid": "ce379721fb79bee459e8e4c95af2b801"
+      },
+      {
+        "documentId": "element-cb5a4b10ab3b40bdbf0b74a41028d486",
+        "sourceGuid": "e51744259299394449334b16259f2f53"
+      },
+      {
+        "documentId": "shape-74d53b3c3a8c4628a226f8ff5eed25e8",
+        "sourceGuid": "eb6cc32373cdcf844a539e1010d6c7be"
+      }
+    ]
+  }
+}

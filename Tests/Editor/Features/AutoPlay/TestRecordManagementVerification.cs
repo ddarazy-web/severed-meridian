@@ -1,3 +1,4 @@
+using AutoPlay;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,6 +41,17 @@ namespace Levels.Editor
                     new MultiLevelTestEntry { name = "완료", status = MultiLevelTestStatus.Completed },
                     new MultiLevelTestEntry { name = "중단", status = MultiLevelTestStatus.Running } } });
                 Header(roots[2] + "/" + multi + "/0000/" + repeat, "batch.json", repeat);
+                // JSON 시험은 원본 사본을 함께 보관한다. 세 종류의 소유 위치와 중첩 기록을 검사한다.
+                foreach (string folder in new[] {
+                    roots[0] + "/" + repeat,
+                    roots[1] + "/" + balance,
+                    roots[1] + "/" + balance + "/trials/" + repeat,
+                    roots[2] + "/" + multi + "/0000",
+                    roots[2] + "/" + multi + "/0000/" + repeat })
+                {
+                    File.WriteAllText(folder + "/source.context", "isolated JSON source fixture");
+                    File.WriteAllText(folder + "/source.context.tmp", "interrupted atomic write fixture");
+                }
                 string pointer = File.ReadAllText(roots[2] + "/latest.txt");
                 Check(store.Load(multi).entries[1].status == MultiLevelTestStatus.Interrupted, "이전 실행 상태는 중단으로 읽기");
                 Check(File.ReadAllText(roots[2] + "/latest.txt") == pointer, "ID 조회는 최근 포인터 보존");

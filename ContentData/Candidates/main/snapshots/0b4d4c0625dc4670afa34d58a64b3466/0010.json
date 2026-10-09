@@ -1,0 +1,68 @@
+{
+  "kind": "element",
+  "schemaVersion": 1,
+  "id": "element-7bb42b50a3394be98efa6fd4cd6713b8",
+  "data": {
+    "definition": {
+      "aggregation": {
+        "enabled": false,
+        "perHitCell": false
+      },
+      "charge": {
+        "enabled": false,
+        "maxRequired": 5,
+        "minRequired": 3,
+        "perHit": 1,
+        "size": 2
+      },
+      "color": {
+        "enabled": false,
+        "requiresMatchingColor": false
+      },
+      "damage": {
+        "adjacentMatch": false,
+        "enabled": false,
+        "hammer": false,
+        "magnetAdjacent": false,
+        "power": false
+      },
+      "displayName": "폭탄",
+      "id": "power.bomb",
+      "layer": {
+        "behavior": "Unspecified",
+        "damage": 1,
+        "enabled": false,
+        "mission": "Color"
+      },
+      "placement": {
+        "enabled": false,
+        "maxDurability": 1,
+        "size": 1
+      },
+      "reaction": "Unspecified",
+      "removal": {
+        "enabled": false,
+        "kind": "Color"
+      },
+      "supply": {
+        "behavior": "Power",
+        "bodyIdPrefix": "",
+        "choiceDefinitionIds": [],
+        "choices": [],
+        "content": "Bomb",
+        "enabled": true,
+        "hasObstacle": false,
+        "obstacle": "Crate",
+        "obstacleDefinitionId": ""
+      },
+      "turn": {
+        "behavior": "Unspecified",
+        "enabled": false,
+        "initialDurability": 1
+      }
+    },
+    "displayName": "power.bomb",
+    "planningDocument": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+    "planningSection": "폭탄 — 확정 수치/행동과 기존 구현을 대조"
+  }
+}

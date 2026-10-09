@@ -27,7 +27,7 @@ namespace Levels.Editor
                 tools.Add(new Button(() =>
                 {
                     board.CancelStroke();
-                    try { LevelElementMigration.Apply(level); operation.text = "선택 레벨을 ID 형식으로 변환했습니다. Undo로 복원할 수 있습니다."; }
+                    try { EditLevel("ID 형식 변환", () => { LevelElementMigration.Apply(level); operation.text = "선택 레벨을 ID 형식으로 변환했습니다. Undo로 복원할 수 있습니다."; }); }
                     catch (Exception error) { operation.text = error.Message; }
                     Refresh();
                 }) { text = "이 레벨에 ID 변환 적용", name = "apply-elements" });
@@ -37,16 +37,36 @@ namespace Levels.Editor
             UnityEditor.UIElements.ObjectField catalogField = new UnityEditor.UIElements.ObjectField("요소 카탈로그")
                 { objectType = typeof(ElementCatalogAsset), name = "element-catalog-asset" };
             catalogField.SetValueWithoutNotify(level.ElementCatalog);
+            catalogField.SetEnabled(!IsJsonMode && !IsJsonFlowDraft);
+            if (IsJsonFlowDraft) catalogField.tooltip = JsonFlowDraftRestriction;
             LevelDefinition source = level;
             catalogField.RegisterValueChangedCallback(evt =>
             {
+                if (IsJsonMode || BlockJsonDraftExternalAction()) { catalogField.SetValueWithoutNotify(level.ElementCatalog); return; }
                 if (level != source) return;
                 board.CancelStroke();
-                using SerializedObject edit = new SerializedObject(level);
-                edit.FindProperty("elementCatalog").objectReferenceValue = evt.newValue;
-                LevelObstacleEditing.Commit(edit, "레벨 요소 카탈로그 지정"); Refresh();
+                EditLevel("레벨 요소 카탈로그 지정", () =>
+                {
+                    using SerializedObject edit = new SerializedObject(level);
+                    edit.FindProperty("elementCatalog").objectReferenceValue = evt.newValue;
+                    LevelObstacleEditing.Commit(edit, "레벨 요소 카탈로그 지정");
+                }); Refresh();
             });
             tools.Add(catalogField);
+            if (IsJsonMode)
+            {
+                var catalogs = jsonWorkspace.Session.Documents.Where(doc => doc.Kind == "catalog").ToArray();
+                var labels = new[] { "카탈로그 미지정 · 내장 기본값" }.Concat(catalogs.Select(doc => (string)doc.Data["displayName"] + " · " + doc.Id)).ToList();
+                string current = (string)jsonWorkspace.Session.Get(jsonWorkspace.Session.SelectedLevelId).Data["catalogId"];
+                var choice = new PopupField<string>("JSON 요소 카탈로그", labels, Array.FindIndex(catalogs, doc => doc.Id == current) + 1);
+                choice.RegisterValueChangedCallback(_ => JsonAction(() =>
+                {
+                    LevelAuthoring.Editing.DocumentEditing.SetField(jsonWorkspace.Session, jsonWorkspace.Session.SelectedLevelId, "catalogId",
+                        choice.index == 0 ? Newtonsoft.Json.Linq.JValue.CreateNull() : new Newtonsoft.Json.Linq.JValue(catalogs[choice.index - 1].Id));
+                    jsonWorkspace.RestoreDisplay(); PersistJsonState(); Refresh();
+                }));
+                tools.Add(choice);
+            }
             try
             {
                 if (catalogOwner != level)
@@ -98,7 +118,7 @@ namespace Levels.Editor
                 {
                     if (level != owner || JsonUtility.ToJson(level) != snapshot) { Refresh(); return; }
                     board.CancelStroke();
-                    operation.text = ElementPlacementEditing.Apply(level, new PlacementBrush { Layer = value.layer, Erase = true }, new[] { coordinate }).ToString();
+                    EditLevel("선택 요소 삭제", () => operation.text = ElementPlacementEditing.Apply(level, new PlacementBrush { Layer = value.layer, Erase = true }, new[] { coordinate }).ToString());
                     Refresh();
                 }) { text = "선택 요소 삭제", name = "delete-placement" });
             }

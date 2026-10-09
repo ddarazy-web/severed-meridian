@@ -22,22 +22,24 @@ namespace Levels.Editor
         internal int WorkspaceTab => workspaceTab;
 
         [MenuItem("Match/통합 작업창", false, 0)]
-        public static void OpenWorkspaceMenu() => OpenWorkspace(0);
+        public static void OpenWorkspaceMenu() => LevelTool.Editor.LevelToolLauncher.Launch();
 
         internal static LevelEditorWindow OpenWorkspace(int tab, LevelDefinition target = null, bool replaceLevel = false)
         {
             LevelEditorWindow window = GetWindow<LevelEditorWindow>("Match");
             window.Show();
-            if (window.editorRoot == null) window.CreateGUI();
-            if (replaceLevel) window.SetLevel(target);
-            else if (window.CurrentLevel == null && Selection.activeObject is LevelDefinition selectedLevel) window.SetLevel(selectedLevel);
-            window.SelectWorkspaceTab(tab);
+            if (replaceLevel) window.level = target;
+            else if (window.CurrentLevel == null && Selection.activeObject is LevelDefinition selectedLevel) window.level = selectedLevel;
+            window.CreateGUI();
             window.Focus();
             return window;
         }
 
-        public void CreateGUI()
+        private void CreateLegacyEditorGUI()
         {
+            if (IsJsonFlowDraft) TryPrepareJsonDraftTest(out _);
+            CaptureJsonViewState();
+            if (IsJsonMode && jsonViewLevelId == jsonWorkspace.Session.SelectedLevelId) jsonRestoreViewPending = true;
             tutorialPanel?.Dispose(); tutorialPanel = null;
             // Unity의 코드 재컴파일 뒤에도 이 메서드가 다시 호출된다. 이전 패널의 예약 작업과
             // 바인딩을 먼저 해제한다. 직렬화된 레벨·탭 선택은 유지하지만 UI 객체는 재사용하지 않는다.
@@ -47,6 +49,8 @@ namespace Levels.Editor
             board?.CancelStroke(); properties?.Unbind(); data?.Dispose(); data = null;
             titleContent = new GUIContent("Match");
             rootVisualElement.Clear();
+            rootVisualElement.UnregisterCallback<SerializedPropertyChangeEvent>(OnJsonPropertyChanged);
+            rootVisualElement.RegisterCallback<SerializedPropertyChangeEvent>(OnJsonPropertyChanged);
             // CreateGUI 재호출 시 중복 저장을 방지한다. 창 내부의 키 입력만 받는다.
             rootVisualElement.UnregisterCallback<KeyDownEvent>(HandleSaveShortcut, TrickleDown.TrickleDown);
             rootVisualElement.RegisterCallback<KeyDownEvent>(HandleSaveShortcut, TrickleDown.TrickleDown);
@@ -78,6 +82,7 @@ namespace Levels.Editor
             workspaceLevel.RegisterValueChangedCallback(evt => SetLevel(evt.newValue as LevelDefinition));
             header.Add(workspaceLevel);
             workspaceContent.Add(header);
+            BuildJsonControls(workspaceContent);
             if (temporaryTutorialSample != null)
                 workspaceContent.Add(new HelpBox("시험 보드 · " + tutorialSampleExpected + "\n현재 사본을 수정·검사할 수 있습니다. 게임 플레이는 입력 ‘에셋’으로 실행하세요. 출시 레벨과 팩은 변경하지 않습니다.", HelpBoxMessageType.Info)
                     { name = "tutorial-sample-notice" });
@@ -130,11 +135,18 @@ namespace Levels.Editor
                 rootVisualElement.Q<Button>("duplicate-level")?.SetEnabled(false);
             }
             SelectWorkspaceTab(workspaceTab);
+            RestoreJsonViewState();
             LevelEditorHelp.Apply(rootVisualElement);
         }
 
         internal void SelectWorkspaceTab(int tab)
         {
+            if (IsJsonFlowDraft && tab == 4) { BlockJsonDraftExternalAction(); return; }
+            if (IsJsonMode && tab == 4)
+            {
+                if (operation != null) operation.text = "JSON 여러 레벨 일괄 시험은 아직 지원하지 않습니다. JSON 레벨을 선택하고 플레이 테스트·진단·게임 플레이를 사용하세요.";
+                return;
+            }
             // 탭 전환은 새로운 시뮬레이션을 만드는 작업이 아니다. 입력 중인 편집을 반영하고
             // 숨겨진 패널의 자동 진행만 멈춘다. SetVisible이 복귀 시 재개할 진행 상태를 관리한다.
             if (workspaceTabs == null) return;

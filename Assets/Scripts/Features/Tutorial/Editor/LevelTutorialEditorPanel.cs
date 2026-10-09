@@ -14,6 +14,10 @@ namespace Tutorial.Editor
     public sealed partial class LevelTutorialEditorPanel : VisualElement, IDisposable
     {
         private readonly LevelDefinition owner;
+        private readonly Action<string, Action> edit;
+        private readonly Action<TutorialFlowDefinition> openFlow;
+        private readonly bool isolatedJsonDraft;
+        private readonly LevelAuthoring.Editor.JsonAuthoringWorkspace jsonWorkspace;
         private readonly LevelBoardView board;
         private readonly SerializedObject input;
         private readonly Action<int> selectionChanged;
@@ -26,9 +30,9 @@ namespace Tutorial.Editor
         private readonly VisualElement testHost;
 
         public LevelTutorialEditorPanel(LevelDefinition owner, LevelBoardView board, int selected, Action<int> selectionChanged,
-            VisualElement stageHost = null, VisualElement testHost = null)
+            VisualElement stageHost = null, VisualElement testHost = null, Action<string, Action> edit = null, LevelAuthoring.Editor.JsonAuthoringWorkspace workspace = null, Action<TutorialFlowDefinition> openFlow = null, bool isolatedJsonDraft = false)
         {
-            this.stageHost = stageHost; this.testHost = testHost;
+            this.stageHost = stageHost; this.testHost = testHost; this.edit = edit; jsonWorkspace = workspace; this.openFlow = openFlow; this.isolatedJsonDraft = isolatedJsonDraft;
             this.owner = owner; this.board = board; this.selected = selected; this.selectionChanged = selectionChanged;
             input = new SerializedObject(owner); name = "tutorial-editor";
             Foldout foldout = new Foldout { text = "레벨 튜토리얼", value = true }; Add(foldout); foldout.Add(fields);
@@ -39,11 +43,18 @@ namespace Tutorial.Editor
         private void Edit(Action<SerializedProperty> change)
         {
             if (disposed || owner == null) return;
-            Undo.IncrementCurrentGroup(); Undo.SetCurrentGroupName("레벨 튜토리얼 편집");
-            input.Update(); change(input.FindProperty("tutorial")); input.ApplyModifiedProperties();
-            Undo.IncrementCurrentGroup(); Rebuild();
+            Mutate("레벨 튜토리얼 편집", () =>
+            {
+                Undo.IncrementCurrentGroup(); Undo.SetCurrentGroupName("레벨 튜토리얼 편집");
+                input.Update(); change(input.FindProperty("tutorial")); input.ApplyModifiedProperties();
+                Undo.IncrementCurrentGroup();
+            });
+            Rebuild();
         }
-
+        private void Mutate(string label, Action action)
+        {
+            if (edit == null) action(); else edit(label, action);
+        }
         private void Rebuild()
         {
             CancelPicking(); fields.Unbind(); fields.Clear(); input.Update();

@@ -11,13 +11,21 @@ namespace Levels.Editor
 {
     public sealed partial class LevelEditorWindow
     {
+        [SerializeField] private LevelEditorWindow jsonFlowOwner;
         [SerializeField] private TutorialFlowDefinition editingTutorialFlow;
         [SerializeField] private TutorialFlowDefinition tutorialFlowDraft;
         [SerializeField] private string tutorialFlowOriginal;
 
-        public static LevelEditorWindow OpenTutorialFlow(LevelDefinition source, TutorialFlowDefinition flow)
+        public static LevelEditorWindow OpenTutorialFlow(LevelDefinition source, TutorialFlowDefinition flow, LevelEditorWindow jsonOwner = null)
         {
             LevelEditorWindow window = CreateInstance<LevelEditorWindow>();
+            window.jsonFlowOwner = jsonOwner; window.jsonFlowDraftMode = jsonOwner != null;
+            if (jsonOwner != null)
+            {
+                window.jsonFlowDocumentId = jsonOwner.jsonWorkspace.DocumentId(flow);
+                window.jsonFlowSourceLevelId = jsonOwner.jsonWorkspace.DocumentId(source);
+                window.jsonFlowParentFolder = jsonOwner.jsonFolder;
+            }
             window.temporaryTutorialSample = Instantiate(source);
             window.temporaryTutorialSample.hideFlags = HideFlags.HideAndDontSave;
             // 공통 기본값을 편집한다. 특정 레벨의 연결 값은 원본에 섞지 않는다.
@@ -39,8 +47,8 @@ namespace Levels.Editor
             workspaceLevel.SetEnabled(false);
             Foldout controls = new Foldout { text = "공통 원본 편집 · 레벨별 설정 항목 지정", value = true, name = "tutorial-flow-draft" };
             host.Add(controls);
-            foreach (LevelDefinition used in TutorialFlowUsageQuery.Find(editingTutorialFlow))
-                controls.Add(new Button(() => OpenLevel(used)) { text = $"사용 중: 레벨 {used.LevelNumber} · {used.name}" });
+            foreach (LevelDefinition used in jsonFlowOwner != null ? jsonFlowOwner.JsonFlowUsers(editingTutorialFlow) : TutorialFlowUsageQuery.Find(editingTutorialFlow))
+                controls.Add(new Button(() => { if (jsonFlowOwner != null) jsonFlowOwner.OpenJsonUsageLevel(used); else OpenLevel(used); }) { text = $"사용 중: 레벨 {used.LevelNumber} · {used.name}" });
             controls.Add(new HelpBox("아래에서 단계를 편집하고, 레벨마다 달라질 항목만 체크하세요. 공통 원본 적용 전까지는 사본입니다. 창을 닫으면 적용하지 않은 수정은 버립니다.", HelpBoxMessageType.Info));
             VisualElement declarations = new VisualElement(); controls.Add(declarations);
             void RefreshDeclarations()
@@ -97,21 +105,32 @@ namespace Levels.Editor
             controls.Add(new Button(() =>
             {
                 report.Clear();
+                if (!TryPrepareJsonDraftTest(out string connectionError))
+                { report.Add(new HelpBox(connectionError, HelpBoxMessageType.Error)); return; }
                 if (level != temporaryTutorialSample || level == null) { report.Add(new HelpBox("원래 편집 사본이 아닙니다. 원본 편집 창을 다시 여세요.", HelpBoxMessageType.Error)); return; }
                 if (JsonUtility.ToJson(editingTutorialFlow) != tutorialFlowOriginal)
                 { report.Add(new HelpBox("다른 창에서 원본이 변경되었습니다. 이 창을 닫고 원본 편집을 다시 열어 변경 내용을 확인하세요.", HelpBoxMessageType.Error)); return; }
                 TutorialFlowAuthoring.EnsureIds(level.Tutorial.steps);
                 if (tutorialFlowDraft.parameters.Any(value => !level.Tutorial.steps.Any(step => step.authoringId == value.stepId && (string.IsNullOrEmpty(value.conditionId) || step.conditions.Any(condition => condition.authoringId == value.conditionId)))))
                 { report.Add(new HelpBox("삭제된 단계/조건의 연결을 먼저 정리하세요.", HelpBoxMessageType.Error)); return; }
-                Undo.RecordObject(editingTutorialFlow, "공통 튜토리얼 적용");
-                editingTutorialFlow.steps = TutorialFlowAuthoring.CopySteps(level.Tutorial.steps);
-                editingTutorialFlow.parameters = JsonUtility.FromJson<ParameterCopy>(JsonUtility.ToJson(new ParameterCopy { values = tutorialFlowDraft.parameters })).values;
-                EditorUtility.SetDirty(editingTutorialFlow); AssetDatabase.SaveAssetIfDirty(editingTutorialFlow);
-                tutorialFlowOriginal = JsonUtility.ToJson(editingTutorialFlow);
-                IReadOnlyList<(LevelDefinition level, LevelValidationIssue issue)> issues = TutorialFlowUsageQuery.Validate(editingTutorialFlow);
+                void ApplyFlow()
+                {
+                    Undo.RecordObject(editingTutorialFlow, "공통 튜토리얼 적용");
+                    editingTutorialFlow.steps = TutorialFlowAuthoring.CopySteps(level.Tutorial.steps);
+                    editingTutorialFlow.parameters = JsonUtility.FromJson<ParameterCopy>(JsonUtility.ToJson(new ParameterCopy { values = tutorialFlowDraft.parameters })).values;
+                    EditorUtility.SetDirty(editingTutorialFlow);
+                }
+                try
+                {
+                    if (jsonFlowOwner != null) jsonFlowOwner.CommitJsonFlow(editingTutorialFlow, ApplyFlow);
+                    else { ApplyFlow(); if (EditorUtility.IsPersistent(editingTutorialFlow)) AssetDatabase.SaveAssetIfDirty(editingTutorialFlow); }
+                }
+                catch (Exception error) { report.Add(new HelpBox(error.Message, HelpBoxMessageType.Error)); return; }                tutorialFlowOriginal = JsonUtility.ToJson(editingTutorialFlow);
+                IReadOnlyList<(LevelDefinition level, LevelValidationIssue issue)> issues = jsonFlowOwner == null ? TutorialFlowUsageQuery.Validate(editingTutorialFlow) :
+                    jsonFlowOwner.JsonFlowUsers(editingTutorialFlow).SelectMany(used => LevelTutorialReplayValidator.Validate(used).Select(issue => (used, issue))).ToArray();
                 report.Add(new HelpBox(issues.Count == 0 ? "공통 원본 적용 및 사용 레벨 검사 통과" : "원본 적용됨 · 아래 레벨의 설정을 확인하세요. 새 선언은 설정 목록 동기화가 필요합니다.", issues.Count == 0 ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning));
                 foreach ((LevelDefinition affected, LevelValidationIssue issue) in issues)
-                    report.Add(new Button(() => OpenLevel(affected)) { text = $"레벨 {affected.LevelNumber}: {issue}", tooltip = "해당 레벨을 열어 튜토리얼 오류와 연결 설정을 확인합니다." });
+                    report.Add(new Button(() => { if (jsonFlowOwner != null) jsonFlowOwner.OpenJsonUsageLevel(affected); else OpenLevel(affected); }) { text = $"레벨 {affected.LevelNumber}: {issue}", tooltip = "해당 레벨을 열어 튜토리얼 오류와 연결 설정을 확인합니다." });
             }) { text = "공통 원본에 적용하고 사용 레벨 검사", name = "tutorial-flow-apply" });
         }
         [Serializable] private sealed class ParameterCopy { public List<TutorialFlowParameter> values; }

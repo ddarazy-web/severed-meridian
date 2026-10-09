@@ -6,8 +6,20 @@ try {
     if ($Action -ne 'Portable') {
         foreach ($method in @(
             'LevelAuthoring.Editor.JsonAuthoringVerification.Run',
+            'LevelAuthoring.Editor.JsonEditingVerification.Run',
             'LevelAuthoring.Editor.JsonExportVerification.Run',
             'LevelAuthoring.Editor.JsonSharedFixtureVerification.Run',
+            'LevelAuthoring.Editor.JsonWorkspaceVerification.Run',
+            # 5단계부터 기본 편집은 공통 씬이다. 폐기된 창의 UI 대신 같은 기능의 현재 경로를 검사한다.
+            'LevelAuthoring.Editor.LevelToolGatewayVerification.Run',
+            'LevelAuthoring.Editor.LevelToolAdvancedVerification.Run',
+            'LevelAuthoring.Editor.LevelToolAdvancedVerification.RunTutorialSamples',
+            'LevelAuthoring.Editor.LevelToolAdvancedVerification.RunSharedTutorial',
+            'LevelAuthoring.Editor.LevelToolAdvancedVerification.RunHandoff',
+            'LevelAuthoring.Editor.LevelToolReloadVerification.Run',
+            'LevelAuthoring.Editor.LevelToolReloadVerification.RunShared',
+            'LevelAuthoring.Editor.LevelToolTrialLifecycleVerification.Run',
+            'LevelAuthoring.Editor.LevelToolPlayVerification.Run',
             'LevelAuthoring.Editor.JsonRequestVerification.Run',
             'LevelAuthoring.Editor.JsonPlayVerification.Run')) {
             & (Join-Path $PSScriptRoot 'ProjectTests.ps1') -Action Run -Method $method

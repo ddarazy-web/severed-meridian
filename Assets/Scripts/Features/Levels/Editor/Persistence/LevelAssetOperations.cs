@@ -9,11 +9,9 @@ namespace Levels.Editor
     public static partial class LevelAssetOperations
     {
         public const string DefaultFolder = "Assets/Data/Levels";
-
-        [MenuItem("Assets/Create/퍼즐/레벨 데이터", priority = 200)]
         public static void CreateLevelAsset()
         {
-            LevelEditorWindow.OpenWorkspace(0).ShowLevelNamePanel(true);
+            LevelTool.Editor.LevelToolLauncher.Launch();
         }
 
         public static LevelDefinition CreateNamed(string fileName)
