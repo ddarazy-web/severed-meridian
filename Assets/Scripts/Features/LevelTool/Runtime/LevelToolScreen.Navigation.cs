@@ -67,14 +67,17 @@ namespace LevelTool
             var focused = root?.focusController?.focusedElement as VisualElement;
             if (focused == null || !root.Contains(focused)) return null;
             // 내부 입력 요소 대신 필드 단위로 기억하여 재구성 뒤에도 같은 위치를 찾는다.
-            VisualElement element = focused;
-            for (VisualElement ancestor = focused; ancestor != null && ancestor != root; ancestor = ancestor.parent)
-                if (ancestor is TextField || ancestor is IntegerField || ancestor is FloatField) { element = ancestor; break; }
+            VisualElement element = FindCommandInput(focused) ?? focused;
             var path = new List<int>();
             for (VisualElement current = element; current != root && current.parent != null; current = current.parent)
                 path.Insert(0, current.parent.hierarchy.IndexOf(current));
-            return new FocusedInputState { Element = element, Path = path.ToArray(), Type = element.GetType(),
-                Cursor = element is TextField text ? text.cursorIndex : 0, Selection = element is TextField selected ? selected.selectIndex : 0 };
+            var state = new FocusedInputState { Element = element, Path = path.ToArray(), Type = element.GetType() };
+            if (element is TextField text) CaptureInputRange(text, state);
+            else if (element is IntegerField integer) CaptureInputRange(integer, state);
+            else if (element is FloatField single) CaptureInputRange(single, state);
+            else if (element is DoubleField number) CaptureInputRange(number, state);
+            else if (element is LongField wide) CaptureInputRange(wide, state);
+            return state;
         }
 
         private void RestoreFocusedInput(FocusedInputState state)
@@ -86,14 +89,26 @@ namespace LevelTool
                 element = root;
                 foreach (int index in state.Path)
                 {
-                    if (index >= element.hierarchy.childCount) return;
+                    if (index < 0 || index >= element.hierarchy.childCount) return;
                     element = element.hierarchy[index];
                 }
             }
             if (element.GetType() != state.Type || !element.enabledInHierarchy) return;
             element.Focus();
-            if (element is TextField text) text.SelectRange(Math.Min(state.Cursor, text.value.Length), Math.Min(state.Selection, text.value.Length));
+            if (element is TextField text) RestoreInputRange(text, state);
+            else if (element is IntegerField integer) RestoreInputRange(integer, state);
+            else if (element is FloatField single) RestoreInputRange(single, state);
+            else if (element is DoubleField number) RestoreInputRange(number, state);
+            else if (element is LongField wide) RestoreInputRange(wide, state);
         }
+
+        private static void CaptureInputRange<T>(TextInputBaseField<T> field, FocusedInputState state)
+        {
+            state.Cursor = field.cursorIndex; state.Selection = field.selectIndex;
+        }
+
+        private static void RestoreInputRange<T>(TextInputBaseField<T> field, FocusedInputState state) =>
+            field.SelectRange(Math.Min(state.Cursor, field.text.Length), Math.Min(state.Selection, field.text.Length));
     }
 }
 #endif

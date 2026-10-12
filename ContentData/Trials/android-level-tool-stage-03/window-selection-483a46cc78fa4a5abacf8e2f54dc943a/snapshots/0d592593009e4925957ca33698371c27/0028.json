@@ -1,0 +1,87 @@
+{
+  "kind": "tutorialFlow",
+  "schemaVersion": 1,
+  "id": "tutorialFlow-0bb23f9134184986af0f1fba7f05d591",
+  "data": {
+    "displayName": "공유 교환",
+    "parameters": [
+      {
+        "conditionId": "condition-0",
+        "field": "RequiredCount",
+        "help": "레벨별 값",
+        "key": "swap-count",
+        "label": "교환 횟수",
+        "stepId": "step-0"
+      }
+    ],
+    "steps": [
+      {
+        "actionArea": [],
+        "actionDefinitionId": "",
+        "authoringId": "step-0",
+        "automaticHighlights": true,
+        "combination": "All",
+        "conditions": [
+          {
+            "aggregation": "Total",
+            "allowedOrigins": [],
+            "anyColor": true,
+            "anyDirection": true,
+            "authoringId": "condition-0",
+            "bindGeneratedAs": "",
+            "color": "Type1",
+            "item": "Hammer",
+            "kind": "SuccessfulSwap",
+            "matchSize": 3,
+            "missionColor": "Type1",
+            "missionIndex": 0,
+            "missionKind": "Unselected",
+            "origin": "DirectSwap",
+            "powerDefinitionId": "",
+            "requiredCount": 1,
+            "rocketDirection": "Horizontal",
+            "sizeComparison": "Exactly",
+            "target": {
+              "binding": "",
+              "cells": [],
+              "coordinate": {
+                "column": 0,
+                "row": 0
+              },
+              "definitionId": "",
+              "kind": "Board",
+              "layer": "Content"
+            }
+          }
+        ],
+        "first": {
+          "column": 2,
+          "row": 4
+        },
+        "firstBinding": "",
+        "freeItemCount": 1,
+        "hasFirst": true,
+        "hasSecond": true,
+        "highlights": [
+          {
+            "column": 2,
+            "row": 4
+          },
+          {
+            "column": 3,
+            "row": 4
+          }
+        ],
+        "instructions": "표시된 두 블록을 바꿔 주세요.",
+        "item": "Hammer",
+        "kind": "Swap",
+        "results": [],
+        "second": {
+          "column": 3,
+          "row": 4
+        },
+        "secondBinding": ""
+      }
+    ]
+  }
+}

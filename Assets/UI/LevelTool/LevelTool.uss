@@ -84,3 +84,41 @@ Button:focus { border-color: rgb(169, 245, 228); }
 .skin-button.selected, .skin-button:focus { border-color: rgb(119, 216, 202); -unity-background-image-tint-color: rgb(171, 230, 214); }
 #save.skin-button { -unity-background-image-tint-color: rgb(139, 225, 193); }
 #play.skin-button { -unity-background-image-tint-color: rgb(156, 210, 249); }
+
+/* 160 DPI 기준 패널 배율에서 48 UI 단위 누름 영역을 목표로 한다. 실제 dp는 기기 검수가 필요하다. */
+.mobile-level-tool Button { min-height: 48px; }
+.mobile-level-tool .unity-base-field { min-height: 48px; }
+.mobile-level-tool .unity-base-field__input { min-height: 40px; }
+.mobile-level-tool .unity-base-dropdown__item { min-height: 48px; }
+.mobile-level-tool .unity-scroller > .unity-base-slider { min-height: 0; }
+.mobile-level-tool .unity-scroller .unity-base-field__input { min-height: 0; padding: 0; }
+.mobile-level-tool .tool-header { flex-direction: column; align-items: stretch; padding: 0; }
+.mobile-level-tool .workspace-identity { margin-right: 0; }
+.mobile-level-tool .level-title { font-size: 16px; margin-bottom: 0; }
+.mobile-level-tool #workspace-status { max-height: 16px; white-space: nowrap; text-overflow: ellipsis; }
+.mobile-level-tool .toolbar { flex-wrap: nowrap; margin-top: 2px; margin-bottom: 2px; }
+.mobile-level-tool .toolbar > Button { flex-grow: 1; flex-shrink: 1; min-width: 0; padding-left: 4px; padding-right: 4px; }
+.mobile-level-tool .board-viewport { min-width: 0; }
+.mobile-level-tool .sidebar { padding: 4px; }
+.mobile-level-tool #levels, .mobile-level-tool #palette { min-height: 120px; }
+.mobile-level-tool .status { min-height: 22px; max-height: 36px; padding: 2px 4px; overflow: hidden; }
+.mobile-level-tool .validation-panel { max-height: 64px; }
+.mobile-navigation { flex-direction: row; flex-shrink: 0; }
+.mobile-navigation > Button { flex-grow: 1; flex-shrink: 1; min-width: 0; }
+.mobile-tool-status { font-size: 12px; min-height: 20px; flex-shrink: 0; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+#mobile-more-panel .menu-bar, #mobile-more-panel .workspace-tabs, #mobile-more-panel .page-tools { flex-direction: column; align-items: stretch; }
+#mobile-more-panel .workspace-tabs > Button { flex-grow: 0; }
+.mobile-level-tool #trial-source { flex-direction: column; align-items: stretch; }
+.mobile-level-tool .mobile-trial-controls { flex-direction: column; align-items: stretch; }
+.mobile-landscape .workspace-identity { display: none; }
+.mobile-landscape .status { max-height: 22px; }
+.mobile-landscape .validation-panel { max-height: 48px; }
+.cell.touch-preview {
+    border-left-color: rgb(99, 216, 204);
+    border-right-color: rgb(99, 216, 204);
+    border-top-color: rgb(99, 216, 204);
+    border-bottom-color: rgb(99, 216, 204);
+}
+#board-touch-tools Toggle { flex-direction: row; align-items: center; }
+#board-touch-tools Toggle > .unity-base-field__label { min-width: 0; margin-right: 6px; white-space: nowrap; }
+#board-touch-tools Toggle > .unity-base-field__input { min-height: 0; }

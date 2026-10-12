@@ -25,6 +25,7 @@ namespace LevelTool
         private float cellSize = 52;
         private string moveBody;
         private bool busy;
+        private Camera backgroundCamera;
         private LevelToolWindowController windowController;
         private string levelListKey, paletteKey, boardKey;
         private Dictionary<string, JObject> definitions = new Dictionary<string, JObject>();
@@ -32,6 +33,8 @@ namespace LevelTool
 
         private void OnEnable()
         {
+            backgroundCamera = GetComponentInChildren<Camera>(true);
+            InitializeMobileViewport();
             if (LevelToolWindowController.Supported) windowController ??= new LevelToolWindowController();
             root = GetComponent<UIDocument>().rootVisualElement;
             root.Clear();
@@ -42,6 +45,7 @@ namespace LevelTool
             navigationPage = null;
             levelListKey = paletteKey = boardKey = null;
             BuildEditorLayout();
+            editor.SetEnabled(!busy);
             RegisterShortcuts();
             Refresh();
             EnableRecovery().Forget();
@@ -67,6 +71,7 @@ namespace LevelTool
         }
         private void CancelPendingInput()
         {
+            CancelBoardTouch();
             tutorialPick = null;
             CancelFlowTool(); wireDrawing = false; wireRoute.Clear();
             connectionGenerator = null; connectionTarget = null; selectedConnection = 0;
@@ -151,7 +156,11 @@ namespace LevelTool
                     foreach (var pair in materials)
                     {
                         string id = pair.Key;
-                        Button item = Button(palette, id, (string)pair.Value["displayName"], () => { brush = id; moveBody = null; Refresh(); Show("빈 칸 클릭으로 배치, 기존 칸은 더블클릭으로 교체합니다."); });
+                        Button item = Button(palette, id, (string)pair.Value["displayName"], () =>
+                        {
+                            CancelBoardTouch(); boardTouchTool = "tap"; brush = id; moveBody = null; UpdateBoardTouchHint(); Refresh();
+                            Show("빈 칸에 배치합니다. 터치 교체는 ‘교체’ 옵션, 마우스 교체는 더블클릭을 사용하세요.");
+                        });
                         item.tooltip = id;
                     }
                 }

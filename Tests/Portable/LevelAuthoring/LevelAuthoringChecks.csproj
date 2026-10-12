@@ -11,6 +11,7 @@
     <Compile Include="../../../Assets/Scripts/Features/LevelAuthoring/Documents/**/*.cs" />
     <Compile Include="../../../Assets/Scripts/Features/LevelAuthoring/Validation/**/*.cs" />
     <Compile Include="../../../Assets/Scripts/Features/LevelAuthoring/Storage/**/*.cs" />
+    <Compile Include="../../../Assets/Scripts/Features/LevelAuthoring/Runtime/SharedTutorialDraft.cs" />
     <Reference Include="Newtonsoft.Json"><HintPath>$(JsonLibrary)</HintPath></Reference>
   </ItemGroup>
 </Project>

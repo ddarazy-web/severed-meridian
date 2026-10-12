@@ -25,20 +25,22 @@ namespace Products.Editor
             string[] commonRoots = AssetDatabase.GetAllAssetPaths().Where(path => (path.StartsWith("Assets/", StringComparison.Ordinal) || path.StartsWith("Packages/", StringComparison.Ordinal)) &&
                 !AssetDatabase.IsValidFolder(path) && !path.Contains("/Editor/") && (path.Contains("/Resources/") || path.StartsWith("Assets/StreamingAssets/", StringComparison.Ordinal))).ToArray();
             
-            List<string> addressableRoots = new List<string>();
-            foreach (AddressableAssetGroup group in settings.groups.Where(value => value != null))
-            {
-                BundledAssetGroupSchema schema = group.GetSchema<BundledAssetGroupSchema>();
-                if (schema == null || !schema.IncludeInBuild) continue;
-                foreach (AddressableAssetEntry entry in group.entries)
-                {
-                    List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
-                    entry.GatherAllAssets(entries, true, true, false);
-                    addressableRoots.AddRange(entries.Select(value => value.AssetPath));
-                }
-            }
             foreach (ProductDefinition definition in Definitions)
             {
+                List<string> addressableRoots = new List<string>();
+                foreach (AddressableAssetGroup group in settings.groups.Where(value => value != null))
+                {
+                    BundledAssetGroupSchema schema = group.GetSchema<BundledAssetGroupSchema>();
+                    // 도구 UI는 현재 선택 제품의 전역 포함 상태가 아니라 감사 대상 제품을 기준으로 확인한다.
+                    bool included = group.Name == global::LevelTool.Editor.LevelToolAtlasBuild.GroupName ? definition.IsTool : schema != null && schema.IncludeInBuild;
+                    if (schema == null || !included) continue;
+                    foreach (AddressableAssetEntry entry in group.entries)
+                    {
+                        List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
+                        entry.GatherAllAssets(entries, true, true, false);
+                        addressableRoots.AddRange(entries.Select(value => value.AssetPath));
+                    }
+                }
                 BuildProfile profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(definition.ProfilePath);
                 ValidateProfile(profile);
                 SerializedObject player = new SerializedObject(ProfileSettings(profile, false));
@@ -58,7 +60,8 @@ namespace Products.Editor
                 if (string.IsNullOrEmpty(profileId)) throw new BuildFailedException(definition.Name + " 콘텐츠 프로필이 없습니다.");
                 string buildPath = settings.profileSettings.GetValueByName(profileId, "Local.BuildPath");
                 string loadPath = settings.profileSettings.GetValueByName(profileId, "Local.LoadPath");
-                if (!buildPath.Contains("/" + definition.Symbol + "/") || !loadPath.Contains("/" + definition.Symbol + "/"))
+                if (buildPath != "[UnityEngine.AddressableAssets.Addressables.BuildPath]/" + definition.ContentKey ||
+                    loadPath != "{UnityEngine.AddressableAssets.Addressables.RuntimePath}/" + definition.ContentKey)
                     throw new BuildFailedException(definition.Name + " 콘텐츠 출력/로드 경로가 분리되지 않았습니다.");
                 SerializedProperty preloadedProperty = player.FindProperty("preloadedAssets");
                 if (preloadedProperty == null || !preloadedProperty.isArray) throw new BuildFailedException("프로필 사전 로드 설정을 읽을 수 없습니다.");
@@ -103,8 +106,13 @@ namespace Products.Editor
             report.AppendLine("설치 Unity TestBuildAssemblyFilter(BuildOptions.None) 적용 후 NUnit/TestRunner=0. 이 검사는 빌드 실행이 아닌 필터 입력/출력 검사.");
             foreach (string root in new[] { "Assets/Scripts/Features/LevelAuthoring", "Assets/Scripts/Features/LevelTool" })
                 foreach (string path in Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories).Select(value => value.Replace('\\', '/')).Where(value => !value.Contains("/Editor/")))
-                    if (!File.ReadAllText(path).TrimStart('\ufeff', ' ', '\r', '\n', '\t').StartsWith("#if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR", StringComparison.Ordinal))
+                {
+                    string guard = File.ReadLines(path).First().Trim('\ufeff', ' ', '\r', '\n', '\t');
+                    // Windows 네이티브 어댑터의 추가 플랫폼 제한도 제작 코드 경계로 인정한다.
+                    if (guard != "#if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR" &&
+                        guard != "#if (UNITY_EDITOR || PRODUCT_LEVEL_EDITOR) && (UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN)")
                         throw new BuildFailedException("게임에서 제작 코드가 컴파일되지 않도록 제품 경계가 필요합니다: " + path);
+                }
             report.AppendLine("앱 식별자는 프로젝트 구성값이며 스토어 등록/예약 완료를 뜻하지 않음. 검사 범위: 설정/직렬화 의존성/플러그인 포함 규칙. Player/Addressables 빌드, iOS Xcode, Steam SDK/스토어 인증 및 실기 실행은 수행하지 않음.");
             return report.ToString();
         }

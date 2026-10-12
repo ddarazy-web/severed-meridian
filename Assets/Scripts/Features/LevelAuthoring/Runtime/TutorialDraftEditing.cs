@@ -98,6 +98,8 @@ namespace LevelAuthoring.Runtime
             var sample = TutorialSampleBoards.All.Single(value => value.Id == sampleId);
             using var graph = new AuthoringObjectGraph(session.Documents);
             var board = sample.CreateBoard();
+            foreach (var item in board.Elements)
+                if (string.IsNullOrEmpty(item.instanceId)) item.instanceId = Guid.NewGuid().ToString("N");
             string temporary = graph.Register(board, "level");
             TutorialAuthoringRules.EnsureIds(board.Tutorial.steps);
             JObject template = graph.Encode(temporary).Data;

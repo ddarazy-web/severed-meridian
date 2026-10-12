@@ -13,6 +13,19 @@ namespace LevelTool
         [SerializeField] private bool incomingDefault;
         private bool recoveryBlocksDefault;
 
+        private void TryOpenInternalDefault()
+        {
+            // 복구 선택·명시적 인계·현재 편집은 최초 기본 프로젝트보다 우선한다.
+            if (busy || recoveryBlocksDefault || Session != null || modal != null || !string.IsNullOrEmpty(incomingWorkspace)) return;
+            try
+            {
+                LevelToolProjectAccess.OpenDefault(Workspace, InternalProjectsRoot, LevelToolDocuments.NewProject());
+                RememberInternalProject();
+                Refresh(); Show("내부 기본 프로젝트를 열었습니다.");
+            }
+            catch (System.Exception error) { Show("기본 프로젝트 확인 실패: " + error.Message); }
+        }
+
         public void OfferWorkspace(string state)
         {
             // 인계 데이터가 유효한지 먼저 확인하되 현재 작업이나 복구 선택을 덮어쓰지 않는다.

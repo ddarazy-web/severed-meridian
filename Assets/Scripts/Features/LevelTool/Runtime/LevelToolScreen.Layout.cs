@@ -51,8 +51,8 @@ namespace LevelTool
             var layers = new DropdownField("편집 층", new List<string> { "Block", "Obstacle", "Cover", "Dust" }, 0) { name = "edit-layer" };
             layers.SetValueWithoutNotify(layer);
             layers.tooltip = "Block: 일반·파워 블록 / Obstacle: 장애물 / Cover: 덮개 / Dust: 바닥";
-            layers.RegisterValueChangedCallback(e => { layer = e.newValue; brush = null; moveBody = null; Refresh(); }); materialPanel.Add(layers);
-            Button(materialPanel, "select", "선택 도구", () => { brush = null; moveBody = null; Refresh(); Show("셀 선택 · Shift+클릭으로 사각 영역 선택"); });
+            layers.RegisterValueChangedCallback(e => { CancelBoardTouch(); layer = e.newValue; brush = null; moveBody = null; Refresh(); }); materialPanel.Add(layers);
+            Button(materialPanel, "select", "선택 도구", () => SetBoardTouchTool("tap"));
             palette = new ScrollView { name = "palette" }; palette.style.flexGrow = 1; materialPanel.Add(palette);
             boardScroll = new ScrollView(ScrollViewMode.VerticalAndHorizontal) { name = "board-scroll" }; boardScroll.AddToClassList("board-viewport"); body.Add(boardScroll);
             board = new VisualElement { name = "board", focusable = true }; board.AddToClassList("board"); boardScroll.Add(board);
@@ -70,6 +70,8 @@ namespace LevelTool
             validationPanel = new ScrollView { name = "validation-panel" }; validationPanel.AddToClassList("validation-panel"); editor.Add(validationPanel);
             status = new Label("왼쪽에서 레벨을 선택하고, 소재 탭에서 배치할 블록을 고르세요.") { name = "status" }; status.AddToClassList("status"); editor.Add(status);
             UpdatePanelVisibility();
+            InitializeMobileLayout();
+            InitializeBoardTouch();
         }
 
         private void UpdatePanelVisibility()
@@ -86,6 +88,7 @@ namespace LevelTool
             VisualElement settings = inspector.Q("level-settings"), selection = inspector.Q("selection-properties");
             if (settings != null) settings.style.display = levelSettingsVisible ? DisplayStyle.Flex : DisplayStyle.None;
             if (selection != null) selection.style.display = levelSettingsVisible ? DisplayStyle.None : DisplayStyle.Flex;
+            if (mobileNavigation != null) UpdateMobilePanelVisibility();
         }
 
         private void ToggleBoardFocus()

@@ -1,0 +1,5734 @@
+{
+  "kind": "level",
+  "schemaVersion": 1,
+  "id": "level-f8cc79076ad647a1af6a953287423940",
+  "data": {
+    "board": {
+      "cells": [
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        }
+      ],
+      "columns": 9,
+      "rows": 9
+    },
+    "catalogId": null,
+    "colors": [
+      "Type1",
+      "Type2",
+      "Type3",
+      "Type4"
+    ],
+    "connections": [],
+    "covers": [],
+    "displayName": "JSON fixture 2",
+    "dust": [],
+    "elementSupply": {
+      "recoveryDefinitionId": "supply.recovery",
+      "recoveryTarget": 0,
+      "scrapDefinitionId": "supply.scrap",
+      "scrapDurability": 1,
+      "scrapLimit": 0,
+      "scrapTarget": 0,
+      "sources": [
+        {
+          "coordinate": {
+            "column": 0,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 1,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 2,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 3,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 4,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 5,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 6,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 7,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 8,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        }
+      ]
+    },
+    "elements": [
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 3,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 0,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 1,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 2,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 3,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 4,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 5,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 6,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 7,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 8,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 3,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 0,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 1,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 3,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 4,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 5,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 6,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 7,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 8,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 2,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 3,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 0,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 1,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 2,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 3,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 4,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 5,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 6,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 7,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 8,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 3,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 0,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 1,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 2,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 3,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 4,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 5,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 6,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 7,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 8,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 3,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 8
+        },
+        "definitionId": "power.rocket",
+        "durability": 1,
+        "hasColor": false,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      }
+    ],
+    "embeddedDefinitions": [],
+    "flow": {
+      "arrivals": [],
+      "gravity": [],
+      "merges": [],
+      "paths": [],
+      "portals": [],
+      "walls": []
+    },
+    "initialBlocks": [],
+    "levelNumber": 991803,
+    "missions": [
+      {
+        "color": "Type1",
+        "count": 99,
+        "kind": "Color"
+      }
+    ],
+    "moveCount": 20,
+    "obstacles": [],
+    "recoveryParts": [],
+    "schemaVersion": 5,
+    "supply": {
+      "recoveryTarget": 0,
+      "scrapDurability": 1,
+      "scrapLimit": 0,
+      "scrapTarget": 0,
+      "sources": []
+    },
+    "tutorial": {
+      "bindings": [
+        {
+          "cells": [],
+          "color": "Type1",
+          "coordinate": {
+            "column": 0,
+            "row": 0
+          },
+          "definitionId": "",
+          "field": "RequiredCount",
+          "key": "swap-count",
+          "number": 3,
+          "target": {
+            "binding": "",
+            "cells": [],
+            "coordinate": {
+              "column": 0,
+              "row": 0
+            },
+            "definitionId": "",
+            "kind": "Board",
+            "layer": "Content"
+          }
+        }
+      ],
+      "completionId": "stage02-fixture-2",
+      "flowId": "tutorialFlow-c281848b2148485ebc5a81e9e5f4cd34",
+      "previousLevelNumbers": [
+        93
+      ],
+      "seed": 12345,
+      "steps": [
+        {
+          "actionArea": [],
+          "actionDefinitionId": "",
+          "authoringId": "",
+          "automaticHighlights": false,
+          "combination": "All",
+          "conditions": [],
+          "first": {
+            "column": 0,
+            "row": 0
+          },
+          "firstBinding": "",
+          "freeItemCount": 1,
+          "hasFirst": false,
+          "hasSecond": false,
+          "highlights": [],
+          "instructions": "보존할 비활성 로컬 단계 2",
+          "item": "Hammer",
+          "kind": "Description",
+          "results": [],
+          "second": {
+            "column": 0,
+            "row": 0
+          },
+          "secondBinding": ""
+        }
+      ],
+      "supply": {
+        "recoveryDefinitionId": "supply.recovery",
+        "recoveryTarget": 0,
+        "scrapDefinitionId": "supply.scrap",
+        "scrapDurability": 1,
+        "scrapLimit": 0,
+        "scrapTarget": 0,
+        "sources": [
+          {
+            "coordinate": {
+              "column": 0,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 1,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 2,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 3,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 4,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 5,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 6,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 7,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 8,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -60,7 +60,7 @@ namespace LevelTool
             { ConnectionDocumentEditing.Remove(data, selectedConnection); wireDrawing = false; wireRoute.Clear(); }));
             Button(inspector, "wire-start", "선택 연결의 전선 그리기 / 이어 그리기", () =>
             {
-                CancelFlowTool(); brush = null; wireDrawing = true; wireRoute.Clear();
+                CancelFlowTool(); brush = null; moveBody = null; wireDrawing = true; wireRoute.Clear();
                 wireRoute.AddRange(connections[selectedConnection]["vertices"].Select(v => (int)v["row"] * 10 + (int)v["column"])); Refresh();
             });
             if (!wireDrawing) return;

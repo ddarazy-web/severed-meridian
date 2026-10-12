@@ -19,6 +19,8 @@ namespace LevelTool
         private CancellationTokenSource playLifetime;
         private Button returnButton;
         private PuzzleGameSession playSession;
+        private PuzzlePopupBinding playPopups;
+        private int playBackFrame = -1;
         private TutorialRunMode tutorialMode = TutorialRunMode.Automatic;
         private int playRevision;
         private FocusedInputState playReturnFocus;
@@ -63,10 +65,14 @@ namespace LevelTool
                 playSession.Configure(world, camera); input.Configure(playSession, world, camera);
                 PuzzleScreenView screen = Instantiate(screenPrefab, playRoot.transform).GetComponent<PuzzleScreenView>();
                 screen.Configure(playSession, input);
+                playPopups = screen.GetComponent<PuzzlePopupBinding>();
+                if (backgroundCamera != null) backgroundCamera.enabled = false;
                 editor.style.display = DisplayStyle.None;
                 root.style.backgroundColor = Color.clear; root.pickingMode = PickingMode.Ignore;
                 returnButton = Button(root, "return-to-editor", "← 편집으로 돌아가기", ReturnToEditor);
                 returnButton.style.position = Position.Absolute; returnButton.style.right = 80; returnButton.style.top = 12;
+                ApplyTrialReturnLayout();
+                if (mobileViewportActive) ApplyToolSkin();
                 // Start가 정식 입력을 선택하기 전에 명시적 시험 문맥을 전달한다.
                 await playSession.InitializeAsync(request, PuzzlePlayContext.CreateTest(tutorialMode), playLifetime.Token);
                 if (playSession != null && playSession.HasFailed) throw new InvalidOperationException(playSession.Message);
@@ -78,10 +84,12 @@ namespace LevelTool
 
         public void ReturnToEditor()
         {
+            if (backgroundCamera != null) backgroundCamera.enabled = true;
             playRevision++; busy = false;
             playLifetime?.Cancel(); playLifetime?.Dispose(); playLifetime = null;
             if (playRoot != null) { playRoot.SetActive(false); Destroy(playRoot); playRoot = null; }
-            playSession = null; returnButton?.RemoveFromHierarchy(); returnButton = null;
+            playSession = null; playPopups = null; playBackFrame = -1;
+            returnButton?.RemoveFromHierarchy(); returnButton = null;
             if (editor != null)
             {
                 editor.SetEnabled(true);
@@ -92,6 +100,26 @@ namespace LevelTool
                 RefreshCommandStates();
                 Show("시험에서 돌아왔습니다. 미저장 내용과 실행 취소 이력을 유지했습니다.");
             }
+        }
+
+        private void HandleTrialBack()
+        {
+            if (playBackFrame == Time.frameCount) return;
+            playBackFrame = Time.frameCount;
+            if (playPopups?.Host?.TryCancelInput() == true) return;
+            if (playSession != null && playSession.IsReady && !playSession.IsRestarting && !playSession.IsChangingLevel &&
+                (playSession.Outcome == null || playSession.IsPresenting || playSession.HasProgressFeedback))
+                playPopups?.OpenPause();
+        }
+
+        private void ApplyTrialReturnLayout()
+        {
+            if (returnButton == null || !mobileViewportActive) return;
+            returnButton.text = "← 편집 복귀";
+            returnButton.style.right = StyleKeyword.Auto;
+            returnButton.style.left = mobileVisibleArea.xMin + 8;
+            returnButton.style.top = mobileVisibleArea.yMin + 8;
+            returnButton.style.minWidth = 48; returnButton.style.minHeight = 48;
         }
 
         private void OnDestroy() { artworkRevision++; artwork?.Dispose(); artwork = null; ReturnToEditor(); }

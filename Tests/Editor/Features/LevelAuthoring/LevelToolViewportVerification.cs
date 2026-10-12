@@ -113,7 +113,7 @@ namespace LevelAuthoring.Editor
                     Check(Root.Q<Foldout>("validation-results").value, "validation results are expanded");
                     Within(Root.Q("validation-summary"), Root.worldBound, "validation summary");
                     Capture("validation");
-                    Invoke("ChooseFolder", new object[] { new Action<string>(_ => { throw new Exception("Viewport test must not select a folder"); }) });
+                    Invoke("ChooseFolder", new object[] { new Action<string>(_ => { throw new Exception("Viewport test must not select a folder"); }), false });
                     Advance(4);
                 }
                 else if (phase == 4)

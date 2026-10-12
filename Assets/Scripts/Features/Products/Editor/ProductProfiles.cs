@@ -17,6 +17,7 @@ namespace Products.Editor
         public readonly string Name, Symbol, Scene, Output, ProductName, ApplicationId;
         public readonly BuildTarget Target;
         public bool IsTool => Symbol == "PRODUCT_LEVEL_EDITOR";
+        public string ContentKey => Symbol + "/" + Target;
         public string ProfilePath => "Assets/Settings/BuildProfiles/" + Name + ".asset";
         public ProductDefinition(string name, string symbol, BuildTarget target, string scene, string output, string productName, string applicationId)
         { Name = name; Symbol = symbol; Target = target; Scene = scene; Output = output; ProductName = productName; ApplicationId = applicationId; }
@@ -26,17 +27,18 @@ namespace Products.Editor
     {
         public static readonly ProductDefinition[] Definitions =
         {
-            new ProductDefinition("Android Game", "PRODUCT_ANDROID_GAME", BuildTarget.Android, "Assets/Scenes/PuzzleGame.unity", "Builds/Android/Game.apk", "Moon Rabbit Junk Shop", "com.twelvethwarriors.moonrabbits"),
-            new ProductDefinition("iOS Game", "PRODUCT_IOS_GAME", BuildTarget.iOS, "Assets/Scenes/PuzzleGame.unity", "Builds/iOS", "Moon Rabbit Junk Shop", "com.twelvethwarriors.moonrabbits"),
-            new ProductDefinition("Windows Steam Game", "PRODUCT_STEAM_GAME", BuildTarget.StandaloneWindows64, "Assets/Scenes/PuzzleGame.unity", "Builds/Steam/MoonRabbit.exe", "Moon Rabbit Junk Shop", "com.twelvethwarriors.moonrabbits"),
-            new ProductDefinition("Windows Level Editor", "PRODUCT_LEVEL_EDITOR", BuildTarget.StandaloneWindows64, "Assets/Scenes/LevelTool.unity", "Builds/LevelTool/MoonRabbitLevelTool.exe", "Moon Rabbit Level Editor", "com.twelvethwarriors.moonrabbits.leveleditor")
+            new ProductDefinition("Android Game", "PRODUCT_ANDROID_GAME", BuildTarget.Android, "Assets/Scenes/PuzzleGame.unity", "Builds/Android/Game.apk", "Moon Rabbit Junk Shop", "com.twelvethwarriors.aos.moonrabbits"),
+            new ProductDefinition("iOS Game", "PRODUCT_IOS_GAME", BuildTarget.iOS, "Assets/Scenes/PuzzleGame.unity", "Builds/iOS", "Moon Rabbit Junk Shop", "com.twelvethwarriors.ios.moonrabbits"),
+            new ProductDefinition("Windows Steam Game", "PRODUCT_STEAM_GAME", BuildTarget.StandaloneWindows64, "Assets/Scenes/PuzzleGame.unity", "Builds/Steam/MoonRabbit.exe", "Moon Rabbit Junk Shop", "com.twelvethwarriors.windows.moonrabbits"),
+            new ProductDefinition("Windows Level Editor", "PRODUCT_LEVEL_EDITOR", BuildTarget.StandaloneWindows64, "Assets/Scenes/LevelTool.unity", "Builds/LevelTool/MoonRabbitLevelTool.exe", "Moon Rabbit Level Editor", "com.twelvethwarriors.windows.moonrabbits.leveleditor"),
+            new ProductDefinition("Android Level Editor", "PRODUCT_LEVEL_EDITOR", BuildTarget.Android, "Assets/Scenes/LevelTool.unity", "Builds/Android/LevelTool.apk", "Moon Rabbit Level Tool", "com.twelvethwarriors.aos.moonrabbits.leveleditor")
         };
 
         public static ProductDefinition ValidateSelection(string[] symbols, BuildTarget target)
         {
             string[] products = symbols.Where(value => value.StartsWith("PRODUCT_", StringComparison.Ordinal)).Distinct().ToArray();
-            ProductDefinition definition = products.Length == 1 ? Definitions.FirstOrDefault(value => value.Symbol == products[0]) : null;
-            if (definition == null || definition.Target != target)
+            ProductDefinition definition = products.Length == 1 ? Definitions.SingleOrDefault(value => value.Symbol == products[0] && value.Target == target) : null;
+            if (definition == null)
                 throw new BuildFailedException("제품 심볼은 대상 플랫폼에 맞는 하나만 선택해야 합니다: " + string.Join(", ", products) + " / " + target);
             return definition;
         }
@@ -77,6 +79,18 @@ namespace Products.Editor
             foreach (ProductDefinition definition in Definitions)
             {
                 BuildProfile profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(definition.ProfilePath);
+                if (profile == null && definition.IsTool && definition.Target == BuildTarget.Android)
+                {
+                    // 같은 타깃의 직렬화된 플랫폼 설정을 복제하며 원본 프로필과 GUID는 보존한다.
+                    string source = Definitions.Single(value => !value.IsTool && value.Target == BuildTarget.Android).ProfilePath;
+                    if (!AssetDatabase.CopyAsset(source, definition.ProfilePath))
+                        throw new BuildFailedException("Android 레벨툴 프로필을 생성할 수 없습니다.");
+                    profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(definition.ProfilePath);
+                    profile.name = definition.Name;
+                    profile.scriptingDefines = new[] { definition.Symbol };
+                    profile.overrideGlobalScenes = true;
+                    profile.scenes = new[] { new EditorBuildSettingsScene(definition.Scene, true) };
+                }
                 ValidateProfile(profile);
                 SerializedObject player = new SerializedObject(ProfileSettings(profile, true));
                 SerializedProperty name = player.FindProperty("productName");
@@ -92,7 +106,7 @@ namespace Products.Editor
                     pair.FindPropertyRelative("second").stringValue = definition.ApplicationId; found = true;
                 }
                 if (!found) throw new BuildFailedException("제품 식별자 플랫폼 항목이 없습니다: " + platform);
-                if (definition.IsTool)
+                if (definition.IsTool && definition.Target == BuildTarget.StandaloneWindows64)
                 {
                     SerializedProperty resizable = player.FindProperty("resizableWindow");
                     SerializedProperty fullscreenMode = player.FindProperty("fullscreenMode");
@@ -105,21 +119,37 @@ namespace Products.Editor
                     width.intValue = 1280;
                     height.intValue = 800;
                 }
+                if (definition.IsTool && definition.Target == BuildTarget.Android)
+                {
+                    SerializedProperty orientation = player.FindProperty("defaultScreenOrientation");
+                    string[] rotations = { "allowedAutorotateToPortrait", "allowedAutorotateToPortraitUpsideDown", "allowedAutorotateToLandscapeRight", "allowedAutorotateToLandscapeLeft" };
+                    if (orientation == null || rotations.Any(value => player.FindProperty(value) == null))
+                        throw new BuildFailedException("Android 레벨툴 방향 PlayerSettings 직렬화 형식을 확인해야 합니다.");
+                    orientation.intValue = (int)UIOrientation.AutoRotation;
+                    foreach (string rotation in rotations) player.FindProperty(rotation).boolValue = true;
+                }
                 player.ApplyModifiedPropertiesWithoutUndo();
                 typeof(BuildProfile).GetMethod("SerializePlayerSettings", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(profile, null);
                 EditorUtility.SetDirty(profile); AssetDatabase.SaveAssetIfDirty(profile);
                 string id = settings.profileSettings.GetProfileId(definition.Name);
                 if (string.IsNullOrEmpty(id)) id = settings.profileSettings.AddProfile(definition.Name, settings.activeProfileId);
-                settings.profileSettings.SetValue(id, "Local.BuildPath", "[UnityEngine.AddressableAssets.Addressables.BuildPath]/" + definition.Symbol + "/[BuildTarget]");
-                settings.profileSettings.SetValue(id, "Local.LoadPath", "{UnityEngine.AddressableAssets.Addressables.RuntimePath}/" + definition.Symbol + "/[BuildTarget]");
+                settings.profileSettings.SetValue(id, "Local.BuildPath", "[UnityEngine.AddressableAssets.Addressables.BuildPath]/" + definition.ContentKey);
+                settings.profileSettings.SetValue(id, "Local.LoadPath", "{UnityEngine.AddressableAssets.Addressables.RuntimePath}/" + definition.ContentKey);
             }
             EditorUtility.SetDirty(settings); AssetDatabase.SaveAssetIfDirty(settings);
-            Debug.Log("네 제품의 설정·콘텐츠 경로 구성을 저장했습니다. 빌드는 실행하지 않았습니다.");
+            Debug.Log("다섯 제품의 설정·콘텐츠 경로 구성을 저장했습니다. 빌드는 실행하지 않았습니다.");
         }
 
         public static void Select(string symbol)
         {
-            ProductDefinition definition = Definitions.Single(value => value.Symbol == symbol);
+            // 기존 도구 선택 호출은 Windows 제품을 계속 선택한다.
+            BuildTarget target = symbol == "PRODUCT_LEVEL_EDITOR" ? BuildTarget.StandaloneWindows64 : Definitions.Single(value => value.Symbol == symbol).Target;
+            Select(symbol, target);
+        }
+
+        public static void Select(string symbol, BuildTarget target)
+        {
+            ProductDefinition definition = ValidateSelection(new[] { symbol }, target);
             BuildProfile profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(definition.ProfilePath);
             ValidateProfile(profile); ProfileSettings(profile, false);
             if (!BuildPipeline.IsBuildTargetSupported(BuildPipeline.GetBuildTargetGroup(definition.Target), definition.Target))
@@ -139,5 +169,6 @@ namespace Products.Editor
         [MenuItem("Tools/Products/선택/iOS 게임")] public static void IOS() => Select("PRODUCT_IOS_GAME");
         [MenuItem("Tools/Products/선택/Steam 게임")] public static void Steam() => Select("PRODUCT_STEAM_GAME");
         [MenuItem("Tools/Products/선택/Windows 레벨툴")] public static void LevelTool() => Select("PRODUCT_LEVEL_EDITOR");
+        [MenuItem("Tools/Products/선택/Android 레벨툴")] public static void AndroidLevelTool() => Select("PRODUCT_LEVEL_EDITOR", BuildTarget.Android);
     }
 }

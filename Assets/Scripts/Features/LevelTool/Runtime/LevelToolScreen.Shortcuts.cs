@@ -31,8 +31,9 @@ namespace LevelTool
         private void OnApplicationFocus(bool focused)
         {
             if (focused) return;
+            ResetBoardTouch();
             heldShortcutKeys.Clear();
-            CancelFlowTool(); wireDrawing = false; wireRoute.Clear();
+            CheckpointOnInterruption();
         }
         private void OnShortcutKeyUp(KeyUpEvent evt) => heldShortcutKeys.Remove(evt.keyCode);
         private void OnShortcutFocusOut(FocusOutEvent evt)
@@ -48,6 +49,13 @@ namespace LevelTool
 
         private void OnShortcutKeyDown(KeyDownEvent evt)
         {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if (evt.keyCode == KeyCode.Escape)
+            {
+                if (heldShortcutKeys.Add(evt.keyCode)) HandleAndroidBack();
+                evt.StopPropagation(); evt.PreventDefault(); return;
+            }
+#endif
             if (evt.keyCode == KeyCode.Tab || evt.altKey || evt.commandKey) return;
             ToolCommandId? command = null;
             if (evt.keyCode == KeyCode.Escape) command = ToolCommandId.Cancel;
@@ -55,6 +63,10 @@ namespace LevelTool
             else if (evt.ctrlKey && evt.keyCode == KeyCode.S) command = evt.shiftKey ? ToolCommandId.SaveCopy : ToolCommandId.Save;
             else if (evt.ctrlKey && evt.keyCode == KeyCode.Z) command = evt.shiftKey ? ToolCommandId.Redo : ToolCommandId.Undo;
             else if (evt.ctrlKey && evt.keyCode == KeyCode.Y && !evt.shiftKey) command = ToolCommandId.Redo;
+            else if (evt.ctrlKey && evt.keyCode == KeyCode.C && !evt.shiftKey) command = ToolCommandId.Copy;
+            else if (evt.ctrlKey && evt.keyCode == KeyCode.X && !evt.shiftKey) command = ToolCommandId.Cut;
+            else if (evt.ctrlKey && evt.keyCode == KeyCode.V && !evt.shiftKey) command = ToolCommandId.Paste;
+            else if (!evt.ctrlKey && !evt.shiftKey && evt.keyCode == KeyCode.Delete) command = ToolCommandId.Delete;
             else if (!evt.ctrlKey && !evt.shiftKey && evt.keyCode == KeyCode.F1) command = ToolCommandId.Help;
             else if (!evt.ctrlKey && !evt.shiftKey && evt.keyCode == KeyCode.F5) command = ToolCommandId.Play;
             else if (!evt.ctrlKey && evt.shiftKey && evt.keyCode == KeyCode.Space) command = ToolCommandId.BoardFocus;
@@ -64,7 +76,8 @@ namespace LevelTool
             {
                 if (command == null) return;
                 VisualElement modalFocus = root?.focusController?.focusedElement as VisualElement ?? evt.target as VisualElement;
-                if ((command == ToolCommandId.Undo || command == ToolCommandId.Redo) && FindCommandInput(modalFocus) != null) return;
+                if ((command == ToolCommandId.Undo || command == ToolCommandId.Redo || command == ToolCommandId.Copy ||
+                    command == ToolCommandId.Cut || command == ToolCommandId.Paste || command == ToolCommandId.Delete) && FindCommandInput(modalFocus) != null) return;
                 if (heldShortcutKeys.Add(evt.keyCode) && command == ToolCommandId.Cancel) TryExecuteCommand(ToolCommandId.Cancel);
                 evt.StopImmediatePropagation(); evt.PreventDefault(); return;
             }
@@ -105,7 +118,8 @@ namespace LevelTool
             if (!string.IsNullOrEmpty(Input.compositionString))
             { Show("글자 조합을 마친 뒤 실행하세요. 입력은 그대로 유지됩니다."); return false; }
             VisualElement focused = root?.focusController?.focusedElement as VisualElement;
-            VisualElement input = FindCommandInput(focused);
+            VisualElement input = RestoreMobileCommandInput(out FocusedInputState suspendedFocus) ?? FindCommandInput(focused);
+            if (suspendedFocus != null) focused = input;
             if (input == null) return true;
             int integer = 0;
             long longValue = 0;
@@ -117,7 +131,7 @@ namespace LevelTool
                 (input is FloatField floatField && (!float.TryParse(floatField.text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatValue) || float.IsNaN(floatValue) || float.IsInfinity(floatValue))) ||
                 (input is DoubleField doubleField && (!double.TryParse(doubleField.text, NumberStyles.Float, CultureInfo.InvariantCulture, out doubleValue) || double.IsNaN(doubleValue) || double.IsInfinity(doubleValue))))
             { Show("올바른 숫자를 입력한 뒤 실행하세요. 입력은 그대로 유지됩니다."); return false; }
-            FocusedInputState snapshot = CaptureFocusedInput();
+            FocusedInputState snapshot = suspendedFocus ?? CaptureFocusedInput();
             bool changed = input is TextField pendingText && pendingText.value != pendingText.text ||
                 input is IntegerField pendingInteger && pendingInteger.value != integer ||
                 input is LongField pendingLong && pendingLong.value != longValue ||

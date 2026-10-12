@@ -86,7 +86,15 @@ namespace LevelTool
             toolBalanceReader = null; balanceGraph?.Dispose(); balanceGraph = null;
             toolBatch?.Dispose(); toolBatch = null; toolBatchGraph?.Dispose(); toolBatchGraph = null;
             toolMulti?.Dispose(); toolMulti = null; multiGraph?.Dispose(); multiGraph = null;
-            CloseModal(); recordConfirming = false; recordDeleting = true; recordCleanup.Begin();
+            recordConfirming = false; CloseModal(); recordDeleting = true; recordCleanup.Begin();
+        }
+
+        // 확인 버튼뿐 아니라 Back/취소 명령으로 창을 닫을 때도 시험 시작 잠금을 해제한다.
+        private void CancelToolRecordConfirmation()
+        {
+            if (!recordConfirming) return;
+            SetRecordMessage(recordMessage + " · 삭제 취소");
+            EndToolRecords();
         }
 
         private void EndToolRecords()

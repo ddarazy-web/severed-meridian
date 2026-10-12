@@ -6,8 +6,15 @@ using Newtonsoft.Json.Linq;
 internal static partial class Program
 {
     private static int passed;
-    private static void Main()
+    private static void Main(string[] args)
     {
+        if (args.Length == 1 && (args[0] == "stage4-package" || args[0] == "stage4-recovery"))
+        {
+            if (args[0] == "stage4-package") ProjectPackageChecks();
+            else ProjectRecoveryChecks();
+            Console.WriteLine("PASS " + passed + " focused portable checks");
+            return;
+        }
         string valid = "{\"kind\":\"project\",\"schemaVersion\":1,\"id\":\"project-test\",\"data\":{\"name\":\"한글 프로젝트\",\"contentVersion\":1,\"defaultCatalogId\":null,\"resources\":[]}}";
         valid = valid.Replace("\"name\"", "\"documents\":[],\"sourceIds\":[],\"name\"");
         var document = ContentJson.Read(valid);
@@ -41,9 +48,12 @@ internal static partial class Program
         SafetyChecks(document);
         EditingChecks();
         PlacementChecks();
+        ElementSelectionChecks();
         CommonChecks();
         ToolWorkspaceChecks();
         TrialSourceChecks();
+        ProjectRecoveryChecks();
+        ProjectPackageChecks();
         Console.WriteLine("PASS " + passed + " portable checks");
     }
     private static void StorageChecks(ContentDocument document)

@@ -24,6 +24,10 @@ namespace LevelTool
 
         private void DrawBoard()
         {
+            // 소수점 반올림으로 아홉 번째 셀이 다음 줄에 넘어가지 않도록 격자 크기를 맞춘다.
+            cellSize = Mathf.Clamp(Mathf.Round(cellSize), 32, 144);
+            float viewportWidth = boardScroll.contentViewport.resolvedStyle.width;
+            boardScroll.contentContainer.style.minWidth = Mathf.Max(float.IsNaN(viewportWidth) ? 0 : viewportWidth, cellSize * 9 + 32);
             JObject level = LevelToolDocuments.UpgradePreview(Session.Get(Session.SelectedLevelId).Data);
             board.style.width = cellSize * 9; board.style.height = cellSize * 9;
             for (int index = 0; index < 81; index++)
@@ -39,33 +43,38 @@ namespace LevelTool
                 tile.tooltip = "행 " + (index / 9 + 1) + " · 열 " + (index % 9 + 1) + (item == null ? "" : "\n" + item["definitionId"]);
                 tile.RegisterCallback<PointerDownEvent>(e =>
                 {
-                    if (e.button != 0 || busy) return;
-                    board.Focus();
-                    if (UseTutorialPicker(cell)) return;
-                    if (UseFlowTool(cell)) return;
-                    Edit(() =>
-                    {
-                        if (e.shiftKey && anchor >= 0)
-                        {
-                            int minRow = Math.Min(cell / 9, anchor / 9), maxRow = Math.Max(cell / 9, anchor / 9);
-                            int minCol = Math.Min(cell % 9, anchor % 9), maxCol = Math.Max(cell % 9, anchor % 9);
-                            Session.SelectCells(Enumerable.Range(0, 81).Where(i => i / 9 >= minRow && i / 9 <= maxRow && i % 9 >= minCol && i % 9 <= maxCol));
-                        }
-                        else { anchor = cell; Session.SelectCells(new[] { cell }); }
-                        if (moveBody != null)
-                        {
-                            Session.Apply("장애물 이동", docs => LevelDocumentEditing.Move(docs[Session.SelectedLevelId].Data, definitions, moveBody, cell / 9, cell % 9));
-                            moveBody = null; return;
-                        }
-                        if (brush != null && !e.shiftKey)
-                            Session.Apply("요소 배치", docs => LevelDocumentEditing.Place(docs[Session.SelectedLevelId].Data, definitions, brush, cell / 9, cell % 9, e.clickCount >= 2, color: color, direction: direction));
-                    });
+                    if (e.pointerType == UnityEngine.UIElements.PointerType.touch || e.button != 0 || busy || modal != null) return;
+                    ExecuteBoardCell(cell, e.shiftKey, e.clickCount >= 2, false);
                 });
                 board.Add(tile);
             }
             DrawFlowOverlay(level);
             DrawConnectionOverlay(level);
             DrawArtwork(level).Forget();
+        }
+
+        private void ExecuteBoardCell(int cell, bool shift, bool replace, bool touch)
+        {
+            board.Focus();
+            if (UseTutorialPicker(cell) || UseFlowTool(cell)) return;
+            Edit(() =>
+            {
+                if (shift && anchor >= 0)
+                    Session.SelectCells(Enumerable.Range(0, 81).Where(i => i / 9 >= Math.Min(cell / 9, anchor / 9) && i / 9 <= Math.Max(cell / 9, anchor / 9) &&
+                        i % 9 >= Math.Min(cell % 9, anchor % 9) && i % 9 <= Math.Max(cell % 9, anchor % 9)));
+                else { anchor = cell; if (touch) SelectBoardCells(new[] { cell }); else Session.SelectCells(new[] { cell }); }
+                if (moveBody != null)
+                {
+                    Session.Apply("장애물 이동", docs => LevelDocumentEditing.Move(docs[Session.SelectedLevelId].Data, definitions, moveBody, cell / 9, cell % 9));
+                    moveBody = null; return;
+                }
+                if (brush != null && !shift)
+                    Session.Apply("요소 배치", docs =>
+                    {
+                        if (touch) PlaceOnCurrentLayer(docs[Session.SelectedLevelId].Data, cell, replace);
+                        else LevelDocumentEditing.Place(docs[Session.SelectedLevelId].Data, definitions, brush, cell / 9, cell % 9, replace, color: color, direction: direction);
+                    });
+            });
         }
 
         private void DrawProperties()
@@ -122,8 +131,8 @@ namespace LevelTool
             brushColor.RegisterValueChangedCallback(e => color = e.newValue); inspector.Add(brushColor);
             DropdownField orientation = new DropdownField("로켓 방향", new System.Collections.Generic.List<string> { "Horizontal", "Vertical" }, direction == "Horizontal" ? 0 : 1);
             orientation.RegisterValueChangedCallback(e => direction = e.newValue); inspector.Add(orientation);
-            Slider zoom = new Slider("보드 확대", 32, 92) { value = cellSize };
-            zoom.RegisterValueChangedCallback(e => { autoFitBoard = false; cellSize = e.newValue; board.Clear(); DrawBoard(); DrawTutorialPreview(); DrawTutorialPicking(); }); inspector.Add(zoom);
+            Slider zoom = new Slider("보드 확대", 32, 144) { value = cellSize };
+            zoom.RegisterValueChangedCallback(e => ZoomBoard(e.newValue, boardScroll.contentViewport.worldBound.center)); inspector.Add(zoom);
             Button(inspector, "fit-board", "보드를 화면에 맞추기", () => { autoFitBoard = true; FitBoardToViewport(); });
             inspector.Add(new Label("선택 칸 " + Session.SelectedCells.Length + "개 · Shift+클릭으로 영역 선택"));
             Button(inspector, "place-area", "선택 영역에 현재 도구 배치", () => Change("영역 배치", data =>
@@ -137,9 +146,11 @@ namespace LevelTool
             }));
             Button(inspector, "sources", "선택 칸에 생성구 추가", () => Change("생성구 추가", data => SupplyDocumentEditing.PlaceSources(data, Session.SelectedCells, false)));
             Button(inspector, "erase-sources", "선택 칸 생성구 삭제", () => Change("생성구 삭제", data => SupplyDocumentEditing.PlaceSources(data, Session.SelectedCells, true)));
-            if (Session.SelectedCells.Length == 1)
+            string[] selectedIds = SelectedBoardInstanceIds(out string selectionReason);
+            if (selectionReason != null) inspector.Add(new Label(selectionReason));
+            if (selectedIds.Length == 1)
             {
-                JObject item = Placement(level, Session.SelectedCells[0]);
+                JObject item = ((JArray)level["elements"]).OfType<JObject>().FirstOrDefault(value => (string)value["instanceId"] == selectedIds[0]);
                 if (item != null)
                 {
                     string id = (string)item["instanceId"];

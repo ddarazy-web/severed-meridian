@@ -20,6 +20,9 @@ namespace Products.Editor
                 validate.Invoke(null, new object[] { new[] { "PRODUCT_IOS_GAME" }, BuildTarget.iOS });
                 validate.Invoke(null, new object[] { new[] { "PRODUCT_STEAM_GAME" }, BuildTarget.StandaloneWindows64 });
                 validate.Invoke(null, new object[] { new[] { "PRODUCT_LEVEL_EDITOR" }, BuildTarget.StandaloneWindows64 });
+                object androidTool = validate.Invoke(null, new object[] { new[] { "PRODUCT_LEVEL_EDITOR" }, BuildTarget.Android });
+                Check(((ProductDefinition)androidTool).Name == "Android Level Editor", "shared tool symbol resolves Android product");
+                Reject(() => validate.Invoke(null, new object[] { new[] { "PRODUCT_LEVEL_EDITOR" }, BuildTarget.iOS }), "unsupported tool target rejected");
                 Reject(() => validate.Invoke(null, new object[] { new[] { "PRODUCT_STEAM_GAME", "PRODUCT_LEVEL_EDITOR" }, BuildTarget.StandaloneWindows64 }), "two products rejected");
                 Reject(() => validate.Invoke(null, new object[] { new[] { "PRODUCT_ANDROID_GAME" }, BuildTarget.iOS }), "wrong target rejected");
                 Reject(() => validate.Invoke(null, new object[] { Array.Empty<string>(), BuildTarget.Android }), "missing product rejected");
@@ -47,7 +50,7 @@ namespace Products.Editor
                     Debug.Log("NUNIT-DIAG assembly=" + assembly.name + "; flags=" + assembly.flags + "; paths=" + string.Join(",", nunit) + "; sourceMentions=" + string.Join(",", sourceUses));
                 }
                 string report = (string)rules.GetMethod("AuditAll").Invoke(null, null);
-                Check(report.Contains("PRODUCT_ANDROID_GAME") && report.Contains("PRODUCT_IOS_GAME") && report.Contains("PRODUCT_STEAM_GAME") && report.Contains("PRODUCT_LEVEL_EDITOR"), "all products audited");
+                Check(ProductProfiles.Definitions.Length == 5 && ProductProfiles.Definitions.All(value => report.Contains(value.Name + " |")), "all five products audited");
                 System.IO.Directory.CreateDirectory("Logs/GameAuthoringStage06");
                 System.IO.File.WriteAllText("Logs/GameAuthoringStage06/product-audit.txt", report);
                 Debug.Log("ProductBoundaryVerification PASS\n" + report);

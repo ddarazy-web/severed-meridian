@@ -24,6 +24,8 @@ namespace Products.Editor
             string previousState = serialized.FindProperty("m_ContentStateBuildPath").stringValue;
             string previousCustomState = serialized.FindProperty("m_CustomContentStateBuildPath").stringValue;
             byte[] global = File.ReadAllBytes("ProjectSettings/ProjectSettings.asset");
+            var toolSchema = settings.FindGroup(global::LevelTool.Editor.LevelToolAtlasBuild.GroupName)?.GetSchema<UnityEditor.AddressableAssets.Settings.GroupSchemas.BundledAssetGroupSchema>();
+            bool previousToolInclusion = toolSchema != null && toolSchema.IncludeInBuild;
             Exception failure = null;
             try
             {
@@ -33,24 +35,28 @@ namespace Products.Editor
                 string[] catalogRoots = ProductProfiles.Definitions.Select(value =>
                 {
                     ProductProfiles.ApplyContentPaths(value);
-                    Check(Addressables.LibraryPath.Contains("/Products/" + value.Symbol + "/"), "library isolated " + value.Symbol);
+                    Check(Addressables.LibraryPath.Contains("/Products/" + value.ContentKey + "/"), "library isolated " + value.Name);
                     Check(Addressables.BuildReportPath.StartsWith(Addressables.LibraryPath, StringComparison.Ordinal), "report isolated " + value.Symbol);
                     Check(settings.ContentStateBuildPath.StartsWith(Addressables.LibraryPath, StringComparison.Ordinal), "content state isolated " + value.Symbol);
                     return Addressables.BuildPath;
                 }).ToArray();
-                Check(catalogRoots.Distinct().Count() == 4, "four distinct initialization/catalog roots without building");
+                Check(catalogRoots.Distinct().Count() == 5, "five distinct initialization/catalog roots without building");
                 ProductProfiles.ApplyContentPaths(null);
                 Check(Addressables.LibraryPath == "Library/com.unity.addressables/" && Addressables.BuildReportPath == "Library/com.unity.addressables/BuildReports/" && string.IsNullOrEmpty(settings.ContentStateBuildPath), "default content paths restored");
                 foreach (ProductDefinition definition in compatible)
                 {
-                    ProductProfiles.Select(definition.Symbol);
+                    ProductProfiles.Select(definition.Symbol, definition.Target);
                     BuildProfile selected = BuildProfile.GetActiveBuildProfile();
-                    Check(selected != null && selected.scriptingDefines.Contains(definition.Symbol), "Build Profile selected " + definition.Symbol);
+                    Check(selected != null && ProductProfiles.ValidateProfile(selected) == definition, "Build Profile selected " + definition.Name);
                     Check(settings.activeProfileId == settings.profileSettings.GetProfileId(definition.Name), "Addressables Profile matched " + definition.Symbol);
                     string selectedOutput = EditorUserBuildSettings.GetBuildLocation(target);
                     Debug.Log("Selected output actual=" + selectedOutput + "; expected=" + definition.Output);
                     Check(!string.IsNullOrEmpty(selectedOutput) && string.Equals(Path.GetFullPath(selectedOutput), Path.GetFullPath(definition.Output), StringComparison.OrdinalIgnoreCase), "output matched " + definition.Symbol);
-                    Check(Addressables.BuildPath.Contains("/Products/" + definition.Symbol + "/"), "catalog root matched " + definition.Symbol);
+                    Check(Addressables.BuildPath.Contains("/Products/" + definition.ContentKey + "/"), "catalog root matched " + definition.Name);
+                    settings.activeProfileId = previousContent;
+                    ProductProfiles.SynchronizeContentPaths();
+                    Check(settings.activeProfileId == settings.profileSettings.GetProfileId(definition.Name), "reload synchronization matched " + definition.Name);
+                    Check(toolSchema != null && toolSchema.IncludeInBuild == definition.IsTool, "tool UI inclusion matched " + definition.Name);
                     ProductProfiles.PrepareContentBuild();
                 }
                 Debug.Log("Not selected in this run: " + string.Join(", ", ProductProfiles.Definitions.Except(compatible).Select(value => value.Name)));
@@ -66,6 +72,11 @@ namespace Products.Editor
                 serialized.FindProperty("m_CustomContentStateBuildPath").stringValue = previousCustomState;
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(settings); AssetDatabase.SaveAssetIfDirty(settings);
+                if (toolSchema != null)
+                {
+                    toolSchema.IncludeInBuild = previousToolInclusion;
+                    EditorUtility.SetDirty(toolSchema); AssetDatabase.SaveAssetIfDirty(toolSchema);
+                }
                 EditorUserBuildSettings.SetBuildLocation(target, previousOutput);
             }
             try

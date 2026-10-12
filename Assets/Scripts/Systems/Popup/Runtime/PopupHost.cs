@@ -169,6 +169,20 @@ namespace PopupUI
             if (target != null && ValidSelection(target.gameObject))
             { PrepareSelection(target.gameObject); data.selectedObject = target.gameObject; }
         }
+        // OS 뒤로가기와 EventSystem 취소가 같은 프레임에 와도 최상위 한 창만 처리한다.
+        public bool TryCancelInput()
+        {
+            if (cancelFrame == Time.frameCount) return true;
+            if (service?.Top == null)
+            {
+                // 빈 목록의 후속 처리로 창을 열더라도 같은 입력이 새 창을 닫지 않는다.
+                cancelFrame = Time.frameCount;
+                return false;
+            }
+            Cancel(service.Top.Value, new BaseEventData(EventSystem.current));
+            return true;
+        }
+
         internal void Cancel(PopupHandle handle, BaseEventData data)
         {
             data.Use();

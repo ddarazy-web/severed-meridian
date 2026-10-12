@@ -69,6 +69,8 @@ namespace Levels.Editor
                     button.SendEvent(submit);
                 });
             }
+            if (brush == LevelBrush.Select && IsJsonMode && level.SchemaVersion == 5)
+                AddJsonElementSelectionActions(Add, layer, cell, placements);
             if (brush == LevelBrush.SourceSelect || brush == LevelBrush.Source || brush == LevelBrush.SourceErase)
             {
                 int[] indices = sources.Select(cell => LevelSupplyRules.FindSource(level, cell)).ToArray();
@@ -118,7 +120,7 @@ namespace Levels.Editor
             {
                 evt.menu.AppendSeparator();
                 Existing("move-obstacle", "2×2 본체 이동");
-                Existing("delete-placement", "선택한 층의 요소 삭제");
+                if (!IsJsonMode || level.SchemaVersion != 5) Existing("delete-placement", "선택한 층의 요소 삭제");
                 Existing("delete-recovery", "회수 부품 삭제");
             }
             if ((brush == LevelBrush.Select && placements.Length <= 1) || (brush == LevelBrush.Flow && flowTool == FlowTool.Select))

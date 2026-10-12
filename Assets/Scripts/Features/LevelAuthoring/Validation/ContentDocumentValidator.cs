@@ -10,6 +10,11 @@ namespace LevelAuthoring.Validation
     public static class ContentDocumentValidator
     {
         private static readonly JObject Schema = JObject.Parse(AuthoringSchema.Json);
+        public static void ValidateElementPlacement(JObject placement)
+        {
+            if (placement == null) throw new ContentFormatException("붙여넣을 요소가 없습니다.");
+            ValidateValue(placement, new JObject { ["type"] = "Levels.ElementPlacementDefinition", ["nullable"] = false }, "elements");
+        }
         public static void Validate(ContentDocument document)
         {
             if (document == null || string.IsNullOrWhiteSpace(document.Id)) throw new ContentFormatException("문서 ID가 없습니다.");
