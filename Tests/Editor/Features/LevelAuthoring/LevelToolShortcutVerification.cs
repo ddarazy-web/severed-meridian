@@ -28,6 +28,11 @@ namespace LevelAuthoring.Editor
                     menu.Q("menu-test") != null && menu.Q("menu-help") != null, "five menus share command definitions");
                 Check(!Allowed(screen, commandType, "Save") && !Allowed(screen, commandType, "Undo"), "empty workspace disables save and undo");
                 Check(Allowed(screen, commandType, "Open") && Allowed(screen, commandType, "Help"), "empty workspace can open and ask for help");
+                Check(Allowed(screen, commandType, "Manual"), "manual is available before opening a project");
+                typeof(Clickable).GetMethod("Invoke", Flags).Invoke(menu.Q<Button>("menu-help").clickable, new object[] { null });
+                Check(root.Q<Button>("command-Manual")?.enabledSelf == true && root.Q<Button>("command-Help") != null,
+                    "help menu includes manual and existing shortcut help");
+                Call(screen, "CloseModal");
                 Check(!Allowed(screen, commandType, "Windowed") && !Allowed(screen, commandType, "Fullscreen"), "standalone window commands cannot resize Unity Editor");
                 Set(screen, "busy", true);
                 Check(!Allowed(screen, commandType, "Open") && !Allowed(screen, commandType, "Play"), "busy blocks file and play commands");

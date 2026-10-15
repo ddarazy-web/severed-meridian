@@ -8,7 +8,7 @@ namespace LevelTool
 {
     public sealed partial class LevelToolScreen
     {
-        private enum ToolCommandId { Open, NewProject, ImportProject, ExportProject, RecentProjects, Save, SaveCopy, Reload, Backup, Exit, Undo, Redo, Copy, Cut, Paste, Delete, BoardFocus, Play, Validate, ReplayTutorial, Help, Cancel, Windowed, Fullscreen }
+        private enum ToolCommandId { Open, NewProject, ImportProject, ExportProject, RecentProjects, Save, SaveCopy, Reload, Backup, Exit, Undo, Redo, Copy, Cut, Paste, Delete, BoardFocus, Play, Validate, ReplayTutorial, Help, Cancel, Windowed, Fullscreen, Manual }
         private sealed class ToolCommand
         {
             internal readonly ToolCommandId Id;
@@ -41,6 +41,7 @@ namespace LevelTool
             new ToolCommand(ToolCommandId.Validate, "레벨 검사", "", "선택한 레벨의 현재 자료를 검사합니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.ReplayTutorial, "튜토리얼 재생 검사", "", "튜토리얼 재생을 포함하여 검사합니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.Help, "단축키 안내", "F1", "명령과 적용 범위, 입력 주의점을 검색합니다.", "제작 화면"),
+            new ToolCommand(ToolCommandId.Manual, "레벨툴 사용 설명서", "", "현재 화면의 JSON 저장, ZIP 전달, Android 터치 조작을 스크린샷과 함께 봅니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.Cancel, "진행 중 조작 취소", "Esc", "맨 위 메뉴·모달, 대상 지정, 현재 도구 순서로 한 단계만 취소합니다.", "현재 입력 문맥")
         };
         private readonly Dictionary<Button, ToolCommandId> commandButtons = new Dictionary<Button, ToolCommandId>();
@@ -66,7 +67,7 @@ namespace LevelTool
                 if (tutorialPick == null && flowTool == null && !wireDrawing && brush == null && moveBody == null && boardTouchPoints.Count == 0 && boardAreaStart < 0)
                     reason = "취소할 조작이 없습니다.";
             }
-            else if (id == ToolCommandId.Help) return true;
+            else if (id == ToolCommandId.Help || id == ToolCommandId.Manual) return true;
             else if (tutorialPick != null) reason = "칸 지정을 확정하거나 취소하세요.";
             else if (sharedTutorialDraft != null && (id == ToolCommandId.Open || id == ToolCommandId.NewProject ||
                 id == ToolCommandId.ImportProject || id == ToolCommandId.ExportProject || id == ToolCommandId.RecentProjects ||
@@ -142,6 +143,7 @@ namespace LevelTool
                 case ToolCommandId.Validate: ValidateLevel(false); break;
                 case ToolCommandId.ReplayTutorial: ValidateLevel(true); break;
                 case ToolCommandId.Help: OpenShortcutHelp(); break;
+                case ToolCommandId.Manual: OpenManual(); break;
             }
             RefreshCommandStates();
             return true;
@@ -198,7 +200,7 @@ namespace LevelTool
                 new[] { ToolCommandId.Undo, ToolCommandId.Redo, ToolCommandId.Copy, ToolCommandId.Cut, ToolCommandId.Paste, ToolCommandId.Delete, ToolCommandId.Cancel },
                 new[] { ToolCommandId.BoardFocus, ToolCommandId.Windowed, ToolCommandId.Fullscreen },
                 new[] { ToolCommandId.Play, ToolCommandId.Validate, ToolCommandId.ReplayTutorial },
-                new[] { ToolCommandId.Help }
+                new[] { ToolCommandId.Manual, ToolCommandId.Help }
             };
             for (int index = 0; index < names.Length; index++)
             {
