@@ -35,10 +35,10 @@ namespace LevelTool
                 if (element == leftPanel || element == rightPanel || element.ClassListContains("dialog")) sprite = "panel";
                 else if (element is Button && element.parent != workspaceTabs && element.parent?.name != "menu-bar")
                 { sprite = "button"; element.AddToClassList("skin-button"); }
-                else if (element.ClassListContains("unity-base-field__input")) sprite = "input";
+                else if (element.ClassListContains("unity-base-field__input") && !element.ClassListContains("unity-toggle__input")) sprite = "input";
                 if (sprite == null) continue;
                 element.style.backgroundImage = new StyleBackground(toolSkin.Get(sprite));
-                element.style.backgroundColor = Color.clear;
+                element.style.backgroundColor = StyleKeyword.Null;
                 element.style.unitySliceLeft = element.style.unitySliceRight = 16;
                 element.style.unitySliceTop = element.style.unitySliceBottom = 16;
                 element.style.unitySliceScale = .5f;

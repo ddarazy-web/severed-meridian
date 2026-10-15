@@ -17,12 +17,12 @@ namespace LevelTool
 
         private void DrawTrialSource()
         {
-            var controls = new VisualElement(); controls.AddToClassList("toolbar"); editor.Add(controls);
+            var controls = new VisualElement { name = "trial-input-bar" }; controls.AddToClassList("toolbar"); editor.Add(controls);
             var source = new DropdownField("게임 시험 입력", new List<string> { "현재 편집본 JSON", "생성된 MemoryPack" }, packedTrial ? 1 : 0) { name = "trial-source" };
             source.tooltip = "편집본은 미저장 내용까지 시험합니다. MemoryPack은 마지막으로 생성·등록한 팩을 시험하며 현재 편집 내용을 저장하거나 반영하지 않습니다.";
             source.RegisterValueChangedCallback(change => { packedTrial = source.index == 1; UpdatePackStatus(); }); controls.Add(source);
             Button(controls, "check-pack", "팩 상태 확인", () => CheckPackStatus().Forget());
-            packStatus = new Label { name = "trial-pack-status" }; editor.Add(packStatus); UpdatePackStatus();
+            packStatus = new Label { name = "trial-pack-status" }; controls.Add(packStatus); UpdatePackStatus();
         }
 
         public async UniTask CheckPackStatus()

@@ -1,6 +1,6 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>① 일반 블록 3매칭 | MATCH 매뉴얼</title><link rel="stylesheet" href="manual.css"><link rel="stylesheet" href="tutorial-guide.css"></head><body>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>① 일반 블록 3매칭 | MATCH 매뉴얼</title><link rel="stylesheet" href="manual.css"><link rel="stylesheet" href="tutorial-guide.css"><link rel="stylesheet" href="leveltool-guide.css"></head><body>
 <a class="skip" href="#content">본문으로 바로가기</a>
-<aside class="sidebar"><a class="brand" href="index.html">MATCH<span>튜토리얼 만들기 · 따라하기</span></a><nav aria-label="튜토리얼 목차">
+<aside class="sidebar"><a class="brand" href="index.html">MATCH<span>튜토리얼 만들기 · 따라하기</span></a><nav aria-label="튜토리얼 목차"><div class="current-guide-links"><strong>현재 씬 레벨툴 안내</strong><a href="index.html">시작하기</a><a href="scene-guide.html">화면과 첫 편집</a><a href="json-save.html">JSON 저장·다시 열기</a><a href="zip-transfer.html">ZIP 가져오기·내보내기</a><a href="android-touch.html">Android 터치 조작</a></div>
 <a href="tutorial.html">시작하기 · 화면 읽는 법</a>
 <a href="tutorial-match.html">① 일반 블록 3매칭</a>
 <a href="tutorial-power.html">② 파워 만들고 사용하기</a>
@@ -9,7 +9,7 @@
 <a href="tutorial.html#test-save">검사하고 실제 레벨에 적용</a>
 <a href="tutorial.html#errors">막혔을 때</a>
 <a href="index.html">전체 매뉴얼</a></nav><p class="side-footer">2026-10-08 확인<br>Windows · Unity 6000.3.10f1<br>그림을 누르면 원본 크기로 열립니다.</p></aside>
-<main id="content"><header><p class="eyebrow">추가 · 튜토리얼 따라하기</p><h1>① 일반 블록 3매칭</h1><p class="lead">두 칸 고르기 → 조건 정하기 → 안내 쓰기 → 직접 해 보기.</p><p class="prepare"><b>준비</b> <a href="tutorial.html#start">시험 보드를 여는 방법</a>을 먼저 확인하세요. 사진 속 행·열은 보드 가장자리의 1~9 숫자를 기준으로 읽습니다.</p></header>
+<main id="content"><aside class="note legacy-notice" id="current-leveltool-notice"><strong>현재 레벨툴을 쓰고 있나요?</strong><p>이 페이지의 캡처·메뉴 절차는 <b>이전 Unity 편집창 기준</b>으로 보존했습니다. 현재 위치·저장·전달·터치는 <a href="scene-guide.html">화면과 첫 편집</a> / <a href="json-save.html">JSON 저장</a> / <a href="zip-transfer.html">ZIP 전달</a> / <a href="android-touch.html">Android 터치</a>를 우선하세요. 이전 에셋 저장·메뉴 위치를 현재 앱에 그대로 적용하지 마세요.</p><details><summary>변경 이력 · 2026.10.15</summary><p><b>변경 항목:</b> <a href="#current-leveltool-notice">안내 기준·목차</a><br>이전: <del>편집창 안내로 바로 시작</del> → 현재: 씬 UI 입문 우선 연결. 기존 본문·캡처·이력 보존.<br><b>이유:</b> 현재 JSON·ZIP·터치 설명 요청.<br>설명 편집일 2026.10.15. 과거 세부 기능의 확인일은 기존 본문을 따릅니다. 현재 앱에서 모든 세부 절차를 재검증했다는 의미는 아닙니다.</p></details></aside><header><p class="eyebrow">추가 · 튜토리얼 따라하기</p><h1>① 일반 블록 3매칭</h1><p class="lead">두 칸 고르기 → 조건 정하기 → 안내 쓰기 → 직접 해 보기.</p><p class="prepare"><b>준비</b> <a href="tutorial.html#start">시험 보드를 여는 방법</a>을 먼저 확인하세요. 사진 속 행·열은 보드 가장자리의 1~9 숫자를 기준으로 읽습니다.</p></header>
 <nav class="on-page"><a href="#goal">만들 것</a><a href="#new">처음 만들기</a><a href="#values">값 입력</a><a href="#change">고치기</a><a href="#check">확인</a></nav>
 <section id="goal"><h2>이번에 만들 안내</h2><div class="recipe"><strong>“분홍 달토끼를 오른쪽으로 옮겨서 3개를 연결해 주세요.”</strong><p>플레이어가 지정한 두 칸을 바꾸고, 같은 색 블록 3개가 연결되면 안내가 끝납니다.</p></div><p><b>단계</b>는 안내 한 장입니다. 이번에는 한 장만 만듭니다. <b>동작</b>은 “어느 두 칸을 바꿀까?”, <b>조건</b>은 “정말 3개를 맞췄을까?”입니다.</p></section>
 <section id="new"><h2>1. 빈 단계에서 직접 시작하기</h2><ol class="steps">

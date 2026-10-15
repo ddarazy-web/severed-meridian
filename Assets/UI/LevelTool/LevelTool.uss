@@ -1,63 +1,71 @@
 .level-tool {
     flex-grow: 1;
-    background-color: rgb(20, 26, 36);
-    color: rgb(232, 238, 244);
+    background-color: rgb(18, 24, 33);
+    color: rgb(224, 232, 241);
     padding: 10px;
     font-size: 14px;
 }
-.toolbar { flex-direction: row; flex-wrap: wrap; flex-shrink: 0; margin-top: 6px; margin-bottom: 8px; }
+.toolbar { flex-direction: row; flex-wrap: wrap; flex-shrink: 0; align-items: center; margin-top: 2px; margin-bottom: 4px; }
 .body { flex-direction: row; flex-grow: 1; min-height: 0; }
-.sidebar { width: 210px; flex-shrink: 0; padding: 8px; background-color: rgb(34, 43, 57); }
+.sidebar { width: 210px; flex-shrink: 0; padding: 8px; background-color: rgb(27, 35, 47); border-width: 1px; border-color: rgb(47, 60, 76); border-radius: 8px; -unity-background-image-tint-color: rgba(255, 255, 255, 0.06); }
 .board { flex-direction: row; flex-wrap: wrap; flex-shrink: 0; margin: 16px; }
-.cell { flex-shrink: 0; border-width: 1px; border-color: rgb(89, 108, 125); background-color: rgb(47, 63, 78); -unity-text-align: middle-center; overflow: hidden; font-size: 10px; }
-.cell.inactive { background-color: rgb(17, 22, 29); color: rgb(92, 107, 116); }
+.cell { flex-shrink: 0; border-width: 1px; border-color: rgb(49, 65, 81); border-radius: 3px; background-color: rgb(38, 53, 68); -unity-text-align: middle-center; overflow: hidden; font-size: 10px; }
+.cell.inactive { background-color: rgb(20, 28, 38); color: rgb(100, 117, 134); border-color: rgb(33, 45, 58); }
 .selected { border-width: 2px; border-color: rgb(116, 224, 206); }
-Button { min-height: 30px; padding: 4px 8px; margin: 2px; color: rgb(235, 244, 248); background-color: rgb(58, 78, 97); border-width: 1px; border-color: rgb(91, 112, 129); -unity-text-align: middle-center; }
-Button:hover { background-color: rgb(72, 104, 124); }
+Button { min-height: 32px; padding: 5px 10px; margin: 2px; color: rgb(218, 228, 239); background-color: rgb(36, 48, 63); border-width: 1px; border-color: rgb(58, 75, 93); border-radius: 6px; -unity-text-align: middle-center; transition-property: background-color, border-color; transition-duration: 0.1s; }
+Button:hover { background-color: rgb(47, 65, 82); border-color: rgb(83, 111, 131); }
+Button:active { background-color: rgb(28, 43, 57); }
+Button.selected { background-color: rgb(31, 66, 68); border-width: 1px; border-color: rgb(83, 179, 166); color: rgb(184, 244, 227); }
 Button:disabled { opacity: 0.4; }
 Label { white-space: normal; }
 .status { padding: 8px; min-height: 40px; flex-shrink: 0; color: rgb(158, 220, 211); }
-.unity-base-field { flex-shrink: 0; margin: 3px; min-height: 28px; }
-.unity-base-field__label { min-width: 88px; }
-.unity-base-field__input { background-color: rgb(20, 29, 39); color: white; padding: 4px; min-height: 24px; }
-.unity-toggle__checkmark { width: 20px; height: 20px; border-width: 1px; border-color: rgb(154, 178, 194); background-color: rgb(20, 29, 39); }
+.unity-base-field { flex-shrink: 0; margin: 4px 3px; min-height: 30px; }
+.unity-base-field__label { min-width: 88px; color: rgb(168, 186, 202); }
+.level-tool .unity-base-field__input { background-color: rgb(18, 27, 38); color: rgb(234, 241, 248); padding: 5px 7px; min-height: 26px; border-width: 1px; border-color: rgb(52, 69, 87); border-radius: 5px; -unity-background-image-tint-color: rgba(255, 255, 255, 0.08); }
+.unity-base-field__input:focus { border-color: rgb(95, 194, 177); }
+.level-tool .unity-toggle__input { background-color: transparent; border-width: 0; padding: 0; }
+.level-tool .unity-toggle__checkmark { width: 18px; height: 18px; border-width: 1px; border-color: rgb(108, 136, 155); border-radius: 4px; background-color: rgb(18, 27, 38); }
+.level-tool Image { background-color: transparent; }
 .unity-toggle__input:checked > .unity-toggle__checkmark { background-color: rgb(81, 189, 162); }
 .modal { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.7); }
-.dialog { width: 620px; max-width: 95%; max-height: 95%; padding: 20px; background-color: rgb(34, 43, 57); }
+.dialog { width: 620px; max-width: 95%; max-height: 95%; padding: 20px; background-color: rgb(27, 37, 50); border-width: 1px; border-color: rgb(72, 99, 119); border-radius: 12px; -unity-background-image-tint-color: rgba(255, 255, 255, 0.08); }
 .unity-scroll-view { min-height: 0; }
 .unity-scroll-view__content-viewport { overflow: hidden; min-height: 0; flex-grow: 1; }
 .unity-scroll-view__content-container { flex-shrink: 0; }
 .unity-scroller--vertical { width: 14px; }
 .unity-scroller--horizontal { height: 14px; }
 .unity-base-slider__tracker { background-color: rgb(15, 23, 33); min-height: 5px; min-width: 5px; }
-.unity-base-slider__dragger { background-color: rgb(110, 150, 166); min-height: 12px; min-width: 12px; border-radius: 3px; }
+.level-tool .unity-base-slider__dragger { background-color: rgb(76, 106, 126); min-height: 12px; min-width: 12px; border-radius: 4px; }
 .unity-base-slider { min-height: 18px; }
 .unity-base-dropdown__container-outer { background-color: rgb(34, 43, 57); color: white; border-width: 1px; border-color: rgb(100, 137, 150); }
 .unity-base-dropdown__item { min-height: 28px; padding: 4px 8px; }
 .unity-base-dropdown__item:hover { background-color: rgb(65, 96, 117); }
 .editor-shell { flex-grow: 1; min-height: 0; }
-.menu-bar { flex-direction: row; flex-shrink: 0; border-bottom-width: 1px; border-bottom-color: rgb(49, 63, 78); padding-bottom: 4px; }
+.menu-bar { flex-direction: row; flex-shrink: 0; border-bottom-width: 1px; border-bottom-color: rgb(40, 54, 69); padding-bottom: 4px; }
 .menu-bar > Button { background-color: transparent; border-width: 0; min-width: 60px; }
-.tool-header { flex-direction: row; align-items: center; flex-shrink: 0; padding: 8px 4px; }
+.tool-header { flex-direction: row; align-items: center; flex-shrink: 0; padding: 10px 4px; }
 .workspace-identity { flex-grow: 1; min-width: 0; margin-right: 10px; }
-.level-title { font-size: 19px; -unity-font-style: bold; margin-bottom: 5px; }
+.level-title { font-size: 20px; -unity-font-style: bold; margin-bottom: 4px; }
 #workspace-status { font-size: 11px; color: rgb(163, 185, 198); max-height: 34px; overflow: hidden; }
-.workspace-tabs { flex-direction: row; flex-shrink: 0; margin-bottom: 4px; }
-.workspace-tabs > Button { flex-grow: 1; min-height: 36px; background-color: rgb(29, 40, 52); }
-.workspace-tabs > .selected { background-color: rgb(48, 79, 82); border-bottom-color: rgb(119, 216, 202); }
+.workspace-tabs { flex-direction: row; flex-shrink: 0; margin-bottom: 6px; border-bottom-width: 1px; border-bottom-color: rgb(42, 57, 72); }
+.workspace-tabs > Button { flex-grow: 1; min-height: 36px; background-color: transparent; border-width: 0; border-bottom-width: 2px; border-bottom-color: transparent; border-radius: 4px; color: rgb(153, 176, 194); }
+.workspace-tabs > Button:hover { background-color: rgb(29, 43, 57); color: rgb(230, 239, 246); }
+.workspace-tabs > .selected { background-color: rgb(26, 49, 56); border-width: 0; border-bottom-width: 2px; border-bottom-color: rgb(105, 212, 187); color: rgb(179, 244, 225); }
 .page-tools { flex-direction: row; flex-shrink: 0; min-height: 32px; align-items: center; }
 .panel-tabs { flex-direction: row; flex-shrink: 0; margin-bottom: 6px; }
 .panel-tabs > Button { flex-grow: 1; min-width: 0; font-size: 12px; }
 .panel-content { flex-grow: 1; min-height: 0; }
 #left-panel { width: 205px; margin-right: 6px; }
 #right-panel { width: 290px; margin-left: 6px; }
-.board-viewport { flex-grow: 1; min-width: 160px; background-color: rgb(18, 25, 34); }
+.board-viewport { flex-grow: 1; min-width: 160px; background-color: rgb(14, 21, 30); border-width: 1px; border-color: rgb(39, 54, 70); border-radius: 8px; }
 .board-viewport > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container { align-items: center; }
-.validation-panel { flex-shrink: 0; max-height: 160px; margin-top: 5px; background-color: rgb(28, 39, 50); }
+.validation-panel { flex-shrink: 0; max-height: 160px; margin-top: 5px; padding: 4px; background-color: rgb(25, 36, 48); border-radius: 6px; }
 .status { min-height: 30px; padding: 5px 8px; font-size: 12px; }
-#trial-pack-status { font-size: 11px; color: rgb(162, 183, 196); flex-shrink: 0; margin-bottom: 5px; }
-#save { background-color: rgb(63, 132, 120); }
-#play { background-color: rgb(63, 100, 139); }
+#trial-input-bar { padding: 2px 6px; margin-top: 2px; margin-bottom: 6px; background-color: rgb(23, 33, 45); border-radius: 6px; }
+#trial-pack-status { font-size: 11px; color: rgb(145, 167, 185); flex-grow: 1; flex-shrink: 1; margin: 4px 8px; }
+#save { background-color: rgb(35, 73, 67); border-color: rgb(65, 133, 116); color: rgb(197, 248, 223); }
+#play { background-color: rgb(49, 120, 106); border-color: rgb(102, 201, 169); color: rgb(240, 255, 247); -unity-font-style: bold; }
+#play:hover { background-color: rgb(63, 145, 125); }
 Button:focus { border-color: rgb(169, 245, 228); }
 .command-menu-item { flex-direction: row; justify-content: space-between; min-height: 34px; }
 .command-gesture { margin-left: 20px; color: rgb(156, 190, 199); -unity-text-align: middle-right; }
@@ -78,15 +86,23 @@ Button:focus { border-color: rgb(169, 245, 228); }
 .unity-toggle__text { margin-left: 6px; }
 .unity-base-field__input { overflow: hidden; }
 .level-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.skin-button { border-width: 1px; border-color: transparent; -unity-background-image-tint-color: rgb(210, 224, 233); }
-.skin-button:hover { -unity-background-image-tint-color: white; }
-.skin-button:active { -unity-background-image-tint-color: rgb(162, 195, 203); }
-.skin-button.selected, .skin-button:focus { border-color: rgb(119, 216, 202); -unity-background-image-tint-color: rgb(171, 230, 214); }
-#save.skin-button { -unity-background-image-tint-color: rgb(139, 225, 193); }
-#play.skin-button { -unity-background-image-tint-color: rgb(156, 210, 249); }
+.skin-button { -unity-background-image-tint-color: rgba(255, 255, 255, 0.08); }
+.skin-button:hover { -unity-background-image-tint-color: rgba(255, 255, 255, 0.12); }
+.skin-button:active { -unity-background-image-tint-color: rgba(255, 255, 255, 0.04); }
+.skin-button.selected, .skin-button:focus { border-color: rgb(105, 212, 187); }
+#levels Button, #palette Button { -unity-text-align: middle-left; padding-left: 12px; min-height: 34px; margin-bottom: 4px; }
+.unity-foldout__toggle { margin-top: 8px; padding-bottom: 4px; color: rgb(181, 205, 221); }
+#board-touch-tools { height: 40px; margin-bottom: 6px; background-color: rgb(23, 33, 45); border-radius: 6px; }
+#board-touch-tools .unity-toggle { min-height: 30px; }
+#board-touch-hint { align-self: center; margin-left: 10px; font-size: 11px; color: rgb(137, 162, 181); }
 
 /* 160 DPI 기준 패널 배율에서 48 UI 단위 누름 영역을 목표로 한다. 실제 dp는 기기 검수가 필요하다. */
 .mobile-level-tool Button { min-height: 48px; }
+.mobile-level-tool #board-touch-tools { height: 56px; }
+.mobile-level-tool #board-touch-tools .unity-toggle { min-height: 48px; }
+.mobile-level-tool #trial-input-bar { flex-direction: column; align-items: stretch; }
+.mobile-level-tool #trial-pack-status { flex-grow: 0; max-height: 32px; overflow: hidden; }
+.mobile-level-tool #levels Button, .mobile-level-tool #palette Button { min-height: 48px; }
 .mobile-level-tool .unity-base-field { min-height: 48px; }
 .mobile-level-tool .unity-base-field__input { min-height: 40px; }
 .mobile-level-tool .unity-base-dropdown__item { min-height: 48px; }

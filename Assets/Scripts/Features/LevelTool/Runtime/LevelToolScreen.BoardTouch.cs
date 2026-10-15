@@ -67,7 +67,7 @@ namespace LevelTool
             ScrollView tools = new ScrollView(ScrollViewMode.Horizontal) { name = "board-touch-tools" };
             tools.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
             tools.tooltip = "좌우로 밀어 나머지 보드 도구를 확인하세요.";
-            tools.style.flexShrink = 0; tools.style.height = 56;
+            tools.style.flexShrink = 0;
             tools.contentContainer.style.flexDirection = FlexDirection.Row;
             editor.Insert(editor.IndexOf(body), tools);
             Button(tools, "board-touch-select", "선택", () => SetBoardTouchTool("tap"));
@@ -83,7 +83,7 @@ namespace LevelTool
             Button(tools, "board-actions", "작업", OpenBoardActions);
             Button(tools, "board-touch-cancel", "취소", () => { CancelBoardTouch(); Show("진행 중 터치와 영역 지정을 취소했습니다."); });
             foreach (VisualElement control in tools.contentContainer.Children())
-            { control.style.minHeight = 48; control.style.minWidth = 48; control.style.flexShrink = 0; }
+            { control.style.minWidth = 48; control.style.flexShrink = 0; }
             boardTouchHint = new Label { name = "board-touch-hint" }; tools.Add(boardTouchHint);
             UpdateBoardTouchHint();
         }
