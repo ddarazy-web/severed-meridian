@@ -137,7 +137,7 @@ namespace Products.Editor
                 settings.profileSettings.SetValue(id, "Local.LoadPath", "{UnityEngine.AddressableAssets.Addressables.RuntimePath}/" + definition.ContentKey);
             }
             EditorUtility.SetDirty(settings); AssetDatabase.SaveAssetIfDirty(settings);
-            Debug.Log("다섯 제품의 설정·콘텐츠 경로 구성을 저장했습니다. 빌드는 실행하지 않았습니다.");
+            GameDiagnostics.GameLog.Debug("다섯 제품의 설정·콘텐츠 경로 구성을 저장했습니다. 빌드는 실행하지 않았습니다.");
         }
 
         public static void Select(string symbol)
@@ -163,7 +163,7 @@ namespace Products.Editor
             BuildProfile.SetActiveBuildProfile(profile);
             // 출력 위치는 전환한 프로필에 적용한다. Unity는 부모 폴더가 없는 상대 경로를 빈 값으로 기록하므로 절대 경로를 전달한다.
             EditorUserBuildSettings.SetBuildLocation(definition.Target, Path.GetFullPath(definition.Output));
-            Debug.Log(definition.Name + " 선택: " + definition.Output + " (빌드 안 함)");
+            GameDiagnostics.GameLog.Debug(definition.Name + " 선택: " + definition.Output + " (빌드 안 함)");
         }
         [MenuItem("Tools/Products/선택/Android 게임")] public static void Android() => Select("PRODUCT_ANDROID_GAME");
         [MenuItem("Tools/Products/선택/iOS 게임")] public static void IOS() => Select("PRODUCT_IOS_GAME");

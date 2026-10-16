@@ -78,7 +78,7 @@ namespace Elements.Editor
                 AssetDatabase.SaveAssetIfDirty(level);
             }
             ValidatePlanning(catalog);
-            Debug.Log("확정 요소 제작 원본: " + catalog.DefinitionAssets.Count + "개. 기존 편집값은 보존했습니다.");
+            GameDiagnostics.GameLog.Debug("확정 요소 제작 원본: " + catalog.DefinitionAssets.Count + "개. 기존 편집값은 보존했습니다.");
         }
 
         public static void ValidatePlanning(ElementCatalogAsset catalog)

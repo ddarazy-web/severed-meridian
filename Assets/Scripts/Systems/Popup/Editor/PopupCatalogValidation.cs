@@ -9,7 +9,7 @@ namespace PopupUI.Editor
         {
             PopupCatalog catalog = Selection.activeObject as PopupCatalog;
             string[] errors = Validate(catalog);
-            if (errors.Length == 0) UnityEngine.Debug.Log("팝업 등록 검사 통과: " + catalog.name);
+            if (errors.Length == 0) GameDiagnostics.GameLog.Debug("팝업 등록 검사 통과: " + catalog.name);
             else UnityEngine.Debug.LogWarning(string.Join("\n", errors), catalog);
         }
         public static string[] Validate(PopupCatalog catalog)

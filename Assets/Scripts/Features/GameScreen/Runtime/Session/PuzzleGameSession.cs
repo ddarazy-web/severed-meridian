@@ -94,6 +94,7 @@ namespace GameScreen
                 initialBytes = LevelPackCodec.Snapshot(definition);
                 levelNumber = number; seed = randomSeed;
                 await PrepareAsync(definition, randomSeed, linked.Token);
+                GameDiagnostics.GameLog.Debug("퍼즐 세션 시작 · 레벨 " + levelNumber + " · 시드 " + seed, this);
             }
             catch (OperationCanceledException)
             {

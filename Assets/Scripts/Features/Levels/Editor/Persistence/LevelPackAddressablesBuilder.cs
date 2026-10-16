@@ -10,7 +10,7 @@ namespace Levels.Editor
         protected override TResult BuildDataImplementation<TResult>(AddressablesDataBuilderInput builderInput)
         {
             Products.Editor.ProductProfiles.PrepareContentBuild();
-            LevelPackBuild.Generate();
+            if (!Products.Editor.BuildToolContentPreparation.PacksPrepared) LevelPackBuild.Generate();
             return base.BuildDataImplementation<TResult>(builderInput);
         }
     }

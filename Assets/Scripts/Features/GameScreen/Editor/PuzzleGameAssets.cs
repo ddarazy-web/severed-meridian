@@ -93,7 +93,7 @@ namespace GameScreen.Editor
                 if (previous.IsValid()) SceneManager.SetActiveScene(previous);
             }
             AssetDatabase.SaveAssets();
-            Debug.Log("월드 보드 프리팹과 씬 준비 완료: " + ScenePath);
+            GameDiagnostics.GameLog.Debug("월드 보드 프리팹과 씬 준비 완료: " + ScenePath);
         }
 
         private static SpriteRenderer Renderer(string name, Transform parent, int order)

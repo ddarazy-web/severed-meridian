@@ -16,7 +16,11 @@ namespace Levels.Editor
         public const string OutputFolder = "Assets/Data/LevelPacks";
         public const string BuilderPath = "Assets/AddressableAssetsData/DataBuilders/LevelPackAddressablesBuilder.asset";
         public override int callbackOrder => -950;
-        public override void PrepareForBuild(BuildPlayerContext context) => Generate();
+        public override void PrepareForBuild(BuildPlayerContext context)
+        {
+            Generate();
+            Products.Editor.BuildToolContentPreparation.MarkPacksPrepared(context.BuildPlayerOptions.locationPathName);
+        }
 
         public static string FilePath(int number) => OutputFolder + "/" + Path.GetFileName(LevelPackCodec.Address(number)) + ".bytes";
 
@@ -25,7 +29,7 @@ namespace Levels.Editor
             // 검증하여 채택한 JSON만 사용한다. 원본 선택 실패를 구형 SO 검색으로 숨기지 않는다.
             string folder = LevelAuthoring.Editor.AuthoringSourceSelection.ReadFolder(LevelAuthoring.Editor.AuthoringSourceSelection.DefaultConfiguration);
             LevelAuthoring.Editor.JsonPackRegistration.Publish(folder);
-            Debug.Log("선택한 JSON의 레벨·요소 MemoryPack 갱신 완료 (50레벨 구간)");
+            GameDiagnostics.GameLog.Debug("선택한 JSON의 레벨·요소 MemoryPack 갱신 완료 (50레벨 구간)");
         }
 
         public static void ValidateExclusion(AddressableAssetSettings settings)

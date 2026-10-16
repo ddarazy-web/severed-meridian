@@ -83,7 +83,7 @@ namespace LevelTool.Editor
                 data.ApplyModifiedPropertiesWithoutUndo();
             }
             AssetDatabase.SaveAssets();
-            Debug.Log("레벨툴 씬과 UI 프리팹 생성 완료. Player 빌드는 실행하지 않았습니다.");
+            GameDiagnostics.GameLog.Debug("레벨툴 씬과 UI 프리팹 생성 완료. Player 빌드는 실행하지 않았습니다.");
         }
     }
 

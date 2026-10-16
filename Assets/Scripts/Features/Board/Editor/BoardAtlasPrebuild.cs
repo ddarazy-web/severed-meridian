@@ -107,7 +107,7 @@ namespace Levels.Editor
             settings.BuildAddressablesWithPlayerBuild = AddressableAssetSettings.PlayerBuildOption.DoNotBuildWithPlayer;
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
-            Debug.Log("Board atlas source count: " + paths.Length + ", packer: " + EditorSettings.spritePackerMode);
+            GameDiagnostics.GameLog.Debug("Board atlas source count: " + paths.Length + ", packer: " + EditorSettings.spritePackerMode);
         }
 
         public static void Prepare()

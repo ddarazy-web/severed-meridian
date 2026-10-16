@@ -29,7 +29,7 @@ namespace GameScreen.Editor
             SpriteAtlasImporter atlasImporter = (SpriteAtlasImporter)AssetImporter.GetAtPath(path);
             atlasImporter.includeInBuild = false;
             atlasImporter.SaveAndReimport();
-            Debug.Log("Stage08: drone sheet and PowerBlocks atlas authored; no content build.");
+            GameDiagnostics.GameLog.Debug("Stage08: drone sheet and PowerBlocks atlas authored; no content build.");
         }
     }
 }

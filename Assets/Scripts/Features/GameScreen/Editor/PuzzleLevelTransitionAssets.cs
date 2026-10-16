@@ -25,7 +25,7 @@ namespace GameScreen.Editor
                 panel.Find("Detail").GetComponent<RectTransform>().sizeDelta = new Vector2(340, 100);
                 view.ConfigureNextButton(next); view.SetDefaultSelection(retry.gameObject);
                 PrefabUtility.SaveAsPrefabAsset(root, path);
-                Debug.Log("Stage13 기존 결과 팝업 다음 레벨 버튼 연결 완료");
+                GameDiagnostics.GameLog.Debug("Stage13 기존 결과 팝업 다음 레벨 버튼 연결 완료");
             }
             finally { PrefabUtility.UnloadPrefabContents(root); }
         }
