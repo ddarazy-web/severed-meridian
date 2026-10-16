@@ -3,8 +3,9 @@ using UnityEditor;
 
 namespace Products.Editor
 {
-    public sealed class AndroidBuildPlatform : IBuildToolPlatform, IBuildToolPlatformSettings, IBuildToolBuildSettings, IBuildToolVersionCode
+    public sealed class AndroidBuildPlatform : IBuildToolPlatform, IBuildToolPlatformSettings, IBuildToolBuildSettings, IBuildToolVersionCode, IBuildToolExternalSigning
     {
+        public Newtonsoft.Json.Linq.JObject ReadSigning(BuildToolProfileInfo profile) => BuildToolAndroidSigning.ReadMetadata(profile);
         public BuildTarget Target => BuildTarget.Android;
         public string PlayerSettingsKey => "Android";
         public bool OutputIsDirectory => false;

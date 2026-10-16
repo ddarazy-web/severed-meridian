@@ -177,6 +177,13 @@ namespace Products.Editor
             if (!(profiles[guid] is JObject)) profiles[guid] = new JObject();
             ((JObject)profiles[guid])[id] = enabled; Save(path, data);
         }
+        internal static void SaveChoices(string path, string guid, Dictionary<string, bool> choices)
+        {
+            var data = Read(path);
+            if (!(data["options"] is JObject)) data["options"] = new JObject();
+            data["options"][guid] = JObject.FromObject(choices);
+            Save(path, data);
+        }
         private static void Save(string path, JObject data)
         { Directory.CreateDirectory(Path.GetDirectoryName(path)); File.WriteAllText(path, data.ToString()); }
     }

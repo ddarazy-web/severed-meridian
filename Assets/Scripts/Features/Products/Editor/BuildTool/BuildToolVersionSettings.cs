@@ -35,14 +35,20 @@ namespace Products.Editor
                 Code = code == null ? null : code.propertyType == SerializedPropertyType.Integer ? code.intValue.ToString(CultureInfo.InvariantCulture) : code.stringValue };
         }
 
+        public static void Validate(BuildToolProfileInfo profile, string name, string code)
+        {
+            name = name?.Trim(); code = code?.Trim();
+            if (string.IsNullOrEmpty(name) || name.Contains("\n") || name.Contains("\r")) throw new ArgumentException("Version Name을 한 줄로 입력하세요. 예: 1.0.0");
+            CodeSettings(profile)?.ValidateVersionCode(code);
+        }
+
         public static void Save(BuildToolProfileInfo profile, string name, string code)
         {
             if (BuildToolController.Runner.IsLocked || BuildPipeline.isBuildingPlayer || EditorApplication.isCompiling || EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("빌드·컴파일·Play Mode 중에는 버전을 변경할 수 없습니다.");
             name = name?.Trim(); code = code?.Trim();
-            if (string.IsNullOrEmpty(name) || name.Contains("\n") || name.Contains("\r")) throw new ArgumentException("Version Name을 한 줄로 입력하세요. 예: 1.0.0");
+            Validate(profile, name, code);
             IBuildToolVersionCode platform = CodeSettings(profile);
-            platform?.ValidateVersionCode(code);
             MethodInfo serialize = typeof(BuildProfile).GetMethod("SerializePlayerSettings", BindingFlags.Instance | BindingFlags.NonPublic);
             if (serialize == null) throw new InvalidOperationException("프로필 설정 저장 API를 확인해야 합니다.");
             using var settings = new SerializedObject(ProductProfiles.ProfileSettings(profile.Profile, false));

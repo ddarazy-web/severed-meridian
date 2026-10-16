@@ -1,0 +1,28 @@
+# Windows 외부 빌드 앱 1단계 — 복사용 목표 실행문
+
+계획 작성과 구현 승인은 별개다. 아래 명령문을 복사해 요청하면 1단계만 진행한다.
+
+```text
+ServeredMeridian의 Windows 외부 빌드 앱 1단계를 구현·검증해.
+먼저 다음 문서를 읽어:
+Docs/Planning/project-wide/external-build-app-integration-plan.md
+Docs/Planning/project-wide/external-build-app-stage-01-plan.md
+Docs/Goals/project-wide/external-build-app-stage-01-goal.md
+
+기존 Unity 빌드 도구와 BAT가 사용하는 실행기·플랫폼·옵션·저장 방식을 재사용해.
+외부 UI용 프로필/현재 설정 조회와 명시적 버전·옵션 저장 계약을 추가하고,
+기존 v1 요청 호환·설정 충돌 검사·프로젝트 단일 실행 잠금을 유지해.
+외부 앱이 Unity asset을 직접 수정하거나 설정 원본을 이중 관리하지 않게 해.
+로그 정리는 기존 Clean-Logs.ps1을 재사용해 미리보기·후보 용량·보관 기간·실행 결과를 제공해.
+실행 중·미완료·잠긴 로그와 링크 경로를 보호하고 Busy를 완료로 처리하지 마.
+
+이번 단계는 연결부까지이며 WPF 화면은 아직 구현하지 마.
+복제 프로필과 임시 로그 fixture로 검사하고 실제 사용자 로그는 삭제하지 마.
+실제 비밀번호 사용·복호화·출력, SDK 설치, Player/Addressables 빌드,
+커밋·푸시·배포·HTML 매뉴얼 갱신은 하지 마.
+기존 미커밋 변경을 보존하고 질문은 제한시간 없는 일반 채팅으로 해.
+
+완료 후 변경·검증·미검증을 보고하고 단계 진행 기록을 작성해.
+2단계 계획서·목표 문서와 복사 가능한 목표 실행문을 작성하되 구현은 자동 시작하지 마.
+마지막에 실제 완료한 내용의 간략한 커밋 메시지만 복사 가능한 코드 블록으로 제시해.
+```

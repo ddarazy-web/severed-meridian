@@ -1,15 +1,16 @@
 ﻿[CmdletBinding()]
 param(
     [ValidateRange(1, 3650)][int]$RetentionDays = 7,
-    [switch]$Preview
+    [switch]$Preview,
+    [string]$ProjectPath = ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..')))
 )
 $ErrorActionPreference = 'Stop'
-$projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
+$projectRoot = [IO.Path]::GetFullPath($ProjectPath)
 $logsRoot = Join-Path $projectRoot 'Logs'
 $prefix = $logsRoot.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
 $gate = $null
 $editorGate = $null
-$result = [ordered]@{ Status = 'Complete'; RetentionDays = $RetentionDays; Preview = [bool]$Preview; DeletedEntries = 0; DeletedBytes = [long]0; Candidates = @(); Skipped = @(); Errors = @() }
+$result = [ordered]@{ Status = 'Complete'; RetentionDays = $RetentionDays; Preview = [bool]$Preview; DeletedEntries = 0; DeletedBytes = [long]0; Candidates = @(); CandidateDetails = @(); CandidateBytes = [long]0; Skipped = @(); Errors = @() }
 try {
     if (-not (Test-Path -LiteralPath $logsRoot)) { [pscustomobject]$result; return }
     if ((Get-Item -LiteralPath $logsRoot).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Logs must not be a link.' }
@@ -57,6 +58,8 @@ try {
                 $probe = [IO.File]::Open($file, 'Open', 'Read', 'None'); $probe.Dispose()
             }
             $result.Candidates += $relative
+            $result.CandidateDetails += [pscustomobject]@{ Path = $relative; Bytes = $bytes }
+            $result.CandidateBytes += $bytes
             if (-not $Preview) {
                 # 검사한 Logs 하위 경로만 삭제하며 링크가 포함된 트리는 제외한다.
                 Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction Stop

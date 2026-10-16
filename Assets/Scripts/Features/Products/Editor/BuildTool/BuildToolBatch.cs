@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEditor;
 
 namespace Products.Editor
@@ -34,7 +35,13 @@ namespace Products.Editor
                 int index = Array.IndexOf(arguments, "-matchBuildRequest");
                 if (index < 0 || index + 1 >= arguments.Length) throw new ArgumentException("외부 빌드 요청 파일이 필요합니다.");
                 path = Path.GetFullPath(arguments[index + 1]);
-                var input = JsonConvert.DeserializeObject<Input>(File.ReadAllText(path));
+                var document = JObject.Parse(File.ReadAllText(path));
+                if ((int?)document["version"] == 2)
+                {
+                    var result = ExecuteSettings(document);
+                    Finish(path, 0, result); return;
+                }
+                var input = document.ToObject<Input>();
                 if (input == null || input.version != 1) throw new InvalidDataException("지원하지 않는 외부 빌드 요청입니다.");
                 if (input.operation == "list")
                 {
@@ -79,6 +86,24 @@ namespace Products.Editor
             catch (Exception error) { Finish(path, 2, new { error = error.Message }); }
         }
 
+        public static JObject ExecuteSettings(JObject input)
+        {
+            if ((int?)input["version"] != 2 || input["requestId"]?.Type != JTokenType.String || string.IsNullOrWhiteSpace((string)input["requestId"]))
+                throw new ArgumentException("InvalidRequest: version와 requestId를 확인하세요.");
+            string operation = (string)input["operation"];
+            if (operation != "settings" && operation != "save-settings") throw new ArgumentException("UnsupportedOperation: 지원하지 않는 요청입니다.");
+            string[] fields = operation == "settings" ? new[] { "version", "requestId", "operation", "profileGuid" } :
+                new[] { "version", "requestId", "operation", "profileGuid", "expectedRevision", "appVersion", "options" };
+            if (input.Properties().Any(p => !fields.Contains(p.Name))) throw new ArgumentException("InvalidRequest: 지원하지 않는 필드입니다.");
+            var profiles = ProductProfiles.Definitions.Select(product => new UnityProfileBuildBackend().Read(AssetDatabase.AssetPathToGUID(product.ProfilePath))).ToArray();
+            string guid = (string)input["profileGuid"];
+            if (operation == "settings" && guid == null)
+                return new JObject { ["profiles"] = new JArray(profiles.Select(p => BuildToolExternalSettings.Read(p, BuildToolExternalSettings.PreferencesPath))) };
+            var profile = profiles.SingleOrDefault(p => p.Guid == guid) ?? throw new ArgumentException("UnknownProfile: 등록된 프로필 GUID가 아닙니다.");
+            return operation == "settings" ? BuildToolExternalSettings.Read(profile, BuildToolExternalSettings.PreferencesPath) :
+                BuildToolExternalSettings.Save(profile, input, BuildToolExternalSettings.PreferencesPath);
+        }
+
         private static void Poll()
         {
             string path = SessionState.GetString(InputKey, "");
@@ -102,8 +127,19 @@ namespace Products.Editor
             SessionState.EraseString(InputKey); SessionState.EraseString(IdKey);
             try
             {
-                if (path != null) File.WriteAllText(Path.Combine(Path.GetDirectoryName(path), "result.json"),
-                    JsonConvert.SerializeObject(new { version = 1, exitCode = code, data }, Formatting.Indented));
+                if (path != null)
+                {
+                    var input = JObject.Parse(File.ReadAllText(path));
+                    object response = new { version = 1, exitCode = code, data };
+                    if ((int?)input["version"] == 2)
+                    {
+                        string message = code == 0 ? null : (string)JObject.FromObject(data)["error"];
+                        string errorCode = message?.Split(':')[0];
+                        if (errorCode != "RevisionConflict" && errorCode != "RecoveryRequired" && errorCode != "Busy" && errorCode != "UnknownProfile" && errorCode != "UnsupportedOperation") errorCode = code == 0 ? null : "InvalidRequest";
+                        response = new { version = 2, requestId = (string)input["requestId"], exitCode = code, data = code == 0 ? data : null, errorCode, message };
+                    }
+                    File.WriteAllText(Path.Combine(Path.GetDirectoryName(path), "result.json"), JsonConvert.SerializeObject(response, Formatting.Indented));
+                }
             }
             catch (Exception error) { UnityEngine.Debug.LogError("외부 빌드 결과 저장 실패: " + error.Message); code = 2; }
             EditorApplication.Exit(code);

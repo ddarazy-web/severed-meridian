@@ -179,3 +179,62 @@ Clean-Logs.bat -RetentionDays 14
 - **강제 종료/전원 중단:** 빌드가 끝났다고 간주하지 않습니다. 자식 Unity가 살아 있는지 확인하고, 다음 실행 전 기존 빌드 도구에서 미완료 요청을 점검합니다.
 
 빌드 동안 플랫폼 전환과 재컴파일이 발생해도 동일 요청을 이어갑니다. 자동 재시도나 무제한 새 빌드를 수행하지 않으며, 종료 후 선택한 제품 프로필은 기존 빌드 도구와 마찬가지로 유지됩니다.
+
+## 외부 UI 연결 계약 (1단계)
+
+외부 WPF 화면은 아직 구현하지 않았습니다. 아래 연결부를 사용할 수 있습니다.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Build/Invoke-BuildTool.ps1 -ProjectPath 'C:/Projects/Git/ServeredMeridian' -RequestPath 'C:/작업/request.json'
+```
+
+요청마다 별도 폴더와 고유 requestId를 사용하세요. `RequestPath`의 같은 폴더에 `result.json`이 생깁니다. 콘솔 안내 문구를 파싱하지 말고 결과 파일과 종료 코드를 확인합니다. Unity 작업의 원본 요청/결과/로그는 `Logs/ExternalBuild/<실행별 폴더>`에도 남습니다. 두 진입점은 `BuildToolHost.ps1`을 공유합니다.
+
+### 조회와 저장
+
+```json
+{"version":2,"requestId":"조회-001","operation":"settings"}
+```
+
+등록된 5개 프로필을 반환합니다. `profileGuid`를 넣으면 해당 프로필만 반환합니다. 응답은 버전·지원 필드·옵션의 기본값/저장값/적용값·서명 경로/alias/저장 여부·revision을 포함합니다. `credentialsStored`는 암호화 파일 존재 여부이며 자격 증명의 유효성을 확인한 것은 아닙니다. 조회에서 비밀번호를 복호화하지 않습니다.
+
+```json
+{
+  "version":2,
+  "requestId":"저장-001",
+  "operation":"save-settings",
+  "profileGuid":"조회 응답의 profileGuid",
+  "expectedRevision":"조회 응답의 revision",
+  "appVersion":{"name":"1.2.0","code":"12"},
+  "options":{"debug-mode":false}
+}
+```
+
+`appVersion`과 `options`, 그 안의 필드는 생략하면 현재 값을 유지합니다. 빈 값·null은 생략을 대신하지 않습니다. Windows 프로필에는 `code`를 보내지 않습니다. code는 Android의 Version Code 또는 iOS Build Number에 해당하는 문자열입니다. 모든 옵션 값은 JSON boolean입니다. 지원하지 않는 항목은 거절합니다.
+
+설정이 바뀌었으면 `RevisionConflict`가 반환되므로 재조회 후 사용자가 변경을 다시 확인해야 합니다. revision에는 프로필 전체와 기존 개인 설정 파일이 포함되므로 다른 프로필의 개인 설정 변경도 충돌로 감지할 수 있습니다. 버전은 프로필에, 옵션은 기존 `UserSettings/MatchBuildTool.json`에 저장합니다. 설정 저장은 빌드 실행과 별개입니다. 저장 도중 실패하면 이전 값을 복원하고, 복원이 실패한 경우 `RecoveryRequired`를 반환합니다.
+
+### 로그 관리
+
+```json
+{"version":2,"requestId":"정리-미리보기-001","operation":"cleanup-preview","retentionDays":7}
+```
+
+삭제 실행은 `operation`을 `cleanup`으로 변경하여 **새 요청**으로 전달합니다. `retentionDays`는 기본7, 허용범위1~3650입니다. 수동 지정값은 그 실행에만 적용됩니다. 정리는 Unity를 시작하지 않고 현재 프로젝트 `Logs`만 대상으로 합니다.
+
+`data.Candidates`는 기존 호환용 상대 경로 배열이며, `CandidateDetails`는 Path/Bytes 목록, `CandidateBytes`는 전체 후보 용량입니다. `DeletedEntries/DeletedBytes`는 실제 삭제량입니다. `Skipped/Errors`와 `Status`를 함께 표시하세요. `Busy`는 실행 중/미완료 작업 보호로 정리하지 않은 상태이며 완료가 아닙니다. 미리보기 후 실행할 때도 잠금을 다시 검사합니다. 기존 자동 빌드 전 7일 정리 정책은 유지됩니다.
+
+### 결과와 호환 범위
+
+v2 결과는 `version`, `requestId`, `exitCode`, `data`, `errorCode`, `message`를 제공합니다. 성공은 종료 코드0, 실패·보류는0이 아닙니다. 주요 오류는 `RevisionConflict`, `RecoveryRequired`, `Busy`, `UnknownProfile`, `InvalidRequest`, `UnsupportedOperation`, `UnityNotFound`, `MissingResult`, `InvalidResult`입니다. 예외적인 IO 오류 등은 `HostError`로 분류될 수 있습니다.
+
+기존 BAT의 v1 list/check/build는 유지됩니다. 이번 v2는 settings/save-settings/cleanup-preview/cleanup만 지원합니다. 빌드·사전 검사·취소의 v2 UI 연결과 새 서명 입력은 2단계 범위입니다. 비밀번호는 요청 JSON이나 명령행에 넣지 마세요.
+
+### 개발 검증
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Testing/ExternalBuildContract.Tests.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Testing/LogCleanup.Tests.ps1
+```
+
+첫 검사는 임시 프로젝트와 모의 Unity 프로세스 경계를 사용하며 제품 빌드를 실행하지 않습니다. 두 검사 모두 Temp 하위 fixture만 삭제 대상으로 사용합니다. Unity 설정 검사는 `Tests/Editor/Features/Products/BuildToolExternalSettingsVerification.cs`의 Main을 CLI run_script로 실행합니다. 복제 프로필만 수정하고 검사 후 제거합니다.

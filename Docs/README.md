@@ -6,6 +6,8 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 
 ## 분류별 목차
 
+- Windows 외부 빌드 앱: [통합 계획](Planning/project-wide/external-build-app-integration-plan.md) · [1단계 계획](Planning/project-wide/external-build-app-stage-01-plan.md) · [목표·완료 조건](Goals/project-wide/external-build-app-stage-01-goal.md) · [복사용 실행문](Commands/project-wide/external-build-app-stage-01-command.md) — 1단계 연결부 완료. [2단계 UI 계획](Planning/project-wide/external-build-app-stage-02-plan.md) · [2단계 실행문](Commands/project-wide/external-build-app-stage-02-command.md).
+
 | 폴더 | 넣는 문서 | 기존 문서 수 |
 | --- | --- | ---: |
 | [Contents](Contents/README.md) | 게임 기획, 규칙, 스토리, 콘텐츠·아트 명세 | 32 |

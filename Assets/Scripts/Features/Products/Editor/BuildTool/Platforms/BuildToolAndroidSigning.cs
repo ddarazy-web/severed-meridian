@@ -13,6 +13,19 @@ namespace Products.Editor
     {
         private static string loadedContext, loadedStore;
 
+        internal static Newtonsoft.Json.Linq.JObject ReadMetadata(BuildToolProfileInfo profile)
+        {
+            using var data = new SerializedObject(ProductProfiles.ProfileSettings(profile.Profile, false));
+            string store = data.FindProperty("AndroidKeystoreName").stringValue;
+            string alias = data.FindProperty("AndroidKeyaliasName").stringValue;
+            string context = Path.GetFullPath(".") + "\n" + profile.Guid + "\n" + store + "\n" + alias;
+            return new Newtonsoft.Json.Linq.JObject {
+                ["customKeystore"] = data.FindProperty("androidUseCustomKeystore").boolValue,
+                ["keystorePath"] = store, ["alias"] = alias,
+                ["credentialsStored"] = File.Exists(new BuildToolSigningPasswords(context).FilePath),
+                ["credentialsValidated"] = false };
+        }
+
         internal static void RestoreForExternalBuild(BuildToolProfileInfo profile)
         {
             var data = new SerializedObject(ProductProfiles.ProfileSettings(profile.Profile, false));

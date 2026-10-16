@@ -3,6 +3,10 @@ using UnityEditor;
 
 namespace Products.Editor
 {
+    public interface IBuildToolExternalSigning
+    {
+        Newtonsoft.Json.Linq.JObject ReadSigning(BuildToolProfileInfo profile);
+    }
     public interface IBuildToolBuildSettings
     {
         string Output(ProductDefinition product, IReadOnlyList<BuildToolOptionState> options);
