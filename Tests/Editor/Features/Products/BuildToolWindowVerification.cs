@@ -16,6 +16,7 @@ namespace Products.Editor
         private static BuildToolStateSnapshot original, withCopy;
         private static string copyPath, selectionPath, copyGuid, selected;
         private static int phase;
+        private static Rect lastWindowBounds;
         private static double next, deadline;
         private const string ReloadJob = "Match.BuildTool.WindowVerification.Reload";
 
@@ -52,6 +53,8 @@ namespace Products.Editor
                         BuildToolPreflightVerification.Check(AssetDatabase.CopyAsset(ProductProfiles.Definitions[0].ProfilePath, copyPath), "owned temporary profile copied");
                         copyGuid = AssetDatabase.AssetPathToGUID(copyPath); withCopy = new BuildToolStateSnapshot();
                         window = ScriptableObject.CreateInstance<MatchBuildToolWindow>(); window.SelectionPath = selectionPath;
+                        window.RestoreWindowBounds();
+                        BuildToolPreflightVerification.Check(window.position.size == new Vector2(1040, 760), "new window uses readable default size");
                         window.Show(); window.CreateGUI(); window.position = new Rect(40, 40, 1040, 760);
                         Next(); break;
                     case 1:
@@ -65,22 +68,39 @@ namespace Products.Editor
                         selected = AssetDatabase.AssetPathToGUID(ProductProfiles.Definitions.Last().ProfilePath);
                         window.SelectProfile(selected); window.RunPreflight();
                         BuildToolPreflightVerification.Check(root.Q<Toggle>("option-debug-mode") != null, "registered debug option appears after valid profile selection");
+                        BuildToolPreflightVerification.Check(new[] { "profiles-section", "product-section", "options-section", "checks-section", "execution-section" }
+                            .All(name => root.Q(name) != null), "five clearly named workflow sections are present");
+                        BuildToolPreflightVerification.Check(root.ClassListContains("build-tool") && root.styleSheets.count > 0 && root.Q<Button>("profile-" + selected).ClassListContains("selected"),
+                            "theme stylesheet and explicit selected profile styling applied");
+                        BuildToolPreflightVerification.Check(new[] { "refresh-profiles", "inspect-profile", "build-product", "cancel-build", "resolve-build", "open-build-log", "open-build-output" }
+                            .All(name => !string.IsNullOrWhiteSpace(root.Q<Button>(name).tooltip)), "workflow actions explain their purpose with tooltips");
+                        BuildToolPreflightVerification.Check(root.Q<Label>("execution-headline").text.Contains("대기") && !root.Q<Button>("open-build-output").enabledSelf,
+                            "empty execution state is clear and unavailable output stays disabled");
                         BuildToolPreflightVerification.Check(root.Q<Label>("profile-information").text.Contains(ProductProfiles.Definitions.Last().ApplicationId), "selected actual profile detail shown");
                         BuildToolPreflightVerification.Check(File.ReadAllText(selectionPath).Contains(selected), "last GUID stored in owned local record");
                         withCopy.AssertUnchanged();
-                        window.position = new Rect(40, 40, 640, 600); Next(); break;
+                        window.position = new Rect(40, 40, 640, 540); Next(); break;
                     case 2:
                         var body = window.rootVisualElement.Q("build-tool-body");
                         var detail = window.rootVisualElement.Q("profile-detail");
                         BuildToolPreflightVerification.Check(body.worldBound.width > 0 && detail.worldBound.width > 0 && detail.worldBound.xMax <= window.rootVisualElement.worldBound.xMax + 1,
                             "narrow window detail stays inside visible area");
+                        BuildToolPreflightVerification.Check(body.worldBound.height >= 259 &&
+                            window.rootVisualElement.Q<ScrollView>("profile-list").contentViewport.worldBound.height >= 80,
+                            "minimum window preserves usable profile and detail viewports");
+                        BuildToolPreflightVerification.Check(window.rootVisualElement.Q<Button>("build-product").resolvedStyle.minHeight.value >= 30 &&
+                            window.rootVisualElement.Q<Label>("selected-profile-name").resolvedStyle.fontSize >= 17, "primary controls and product heading stay readable");
                         var scroll = (ScrollView)detail;
                         BuildToolPreflightVerification.Check(scroll.contentContainer.worldBound.height > scroll.contentViewport.worldBound.height, "long inspection results have scrollable overflow");
                         scroll.scrollOffset = new Vector2(0, 100);
                         BuildToolPreflightVerification.Check(scroll.scrollOffset.y > 0, "inspection result scroll responds");
+                        lastWindowBounds = window.position;
                         window.Close(); window = ScriptableObject.CreateInstance<MatchBuildToolWindow>(); window.SelectionPath = selectionPath;
+                        window.RestoreWindowBounds();
                         window.Show(); window.CreateGUI(); Next(); break;
                     case 3:
+                        BuildToolPreflightVerification.Check(window.position.size == new Vector2(640, 540), "last resized window size survives recreation");
+                        BuildToolPreflightVerification.Check(window.position == lastWindowBounds, "last window position and size survive recreation");
                         BuildToolPreflightVerification.Check(window.rootVisualElement.Q<Label>("profile-information").text.Contains(selected), "selection survives window recreation");
                         window.SelectProfile(copyGuid); window.RunPreflight(); withCopy.AssertUnchanged();
                         string renamed = "__BuildToolRenamed-" + Guid.NewGuid().ToString("N");
@@ -109,7 +129,11 @@ namespace Products.Editor
                         string preferences = "UserSettings/MatchBuildTool.json";
                         var job = new JObject { ["backup"] = File.Exists(preferences) ? Convert.ToBase64String(File.ReadAllBytes(preferences)) : null,
                             ["selectionPath"] = selectionPath, ["expectedGuid"] = selected,
-                            ["files"] = JObject.FromObject(BuildToolStateSnapshot.CaptureFiles()), ["routing"] = CaptureRouting() };
+                            ["files"] = JObject.FromObject(BuildToolStateSnapshot.CaptureFiles()), ["routing"] = CaptureRouting(),
+                            ["width"] = EditorPrefs.HasKey("Match.BuildTool.WindowSize." + Path.GetFullPath(preferences) + ".Width") ? (float?)EditorPrefs.GetFloat("Match.BuildTool.WindowSize." + Path.GetFullPath(preferences) + ".Width") : null,
+                            ["height"] = EditorPrefs.HasKey("Match.BuildTool.WindowSize." + Path.GetFullPath(preferences) + ".Height") ? (float?)EditorPrefs.GetFloat("Match.BuildTool.WindowSize." + Path.GetFullPath(preferences) + ".Height") : null,
+                            ["x"] = EditorPrefs.HasKey("Match.BuildTool.WindowSize." + Path.GetFullPath(preferences) + ".X") ? (float?)EditorPrefs.GetFloat("Match.BuildTool.WindowSize." + Path.GetFullPath(preferences) + ".X") : null,
+                            ["y"] = EditorPrefs.HasKey("Match.BuildTool.WindowSize." + Path.GetFullPath(preferences) + ".Y") ? (float?)EditorPrefs.GetFloat("Match.BuildTool.WindowSize." + Path.GetFullPath(preferences) + ".Y") : null };
                         SessionState.SetString(ReloadJob, job.ToString());
                         window.SelectionPath = preferences; window.SelectProfile(selected);
                         EditorApplication.update -= Update;
@@ -148,6 +172,13 @@ namespace Products.Editor
             EditorApplication.update -= VerifyReload; SessionState.EraseString(ReloadJob);
             foreach (var restored in Resources.FindObjectsOfTypeAll<MatchBuildToolWindow>()) restored.Close();
             string preferences = "UserSettings/MatchBuildTool.json";
+            foreach (string dimension in new[] { "Width", "Height", "X", "Y" })
+            {
+                string key = "Match.BuildTool.WindowSize." + Path.GetFullPath(preferences) + "." + dimension;
+                var value = job[dimension.ToLowerInvariant()];
+                if (value.Type == JTokenType.Null) EditorPrefs.DeleteKey(key); else EditorPrefs.SetFloat(key, (float)value);
+                EditorPrefs.DeleteKey("Match.BuildTool.WindowSize." + Path.GetFullPath((string)job["selectionPath"]) + "." + dimension);
+            }
             if (job["backup"].Type == JTokenType.Null) { if (File.Exists(preferences)) File.Delete(preferences); }
             else File.WriteAllBytes(preferences, Convert.FromBase64String((string)job["backup"]));
             if (File.Exists((string)job["selectionPath"])) File.Delete((string)job["selectionPath"]);
@@ -160,6 +191,13 @@ namespace Products.Editor
         {
             EditorApplication.update -= Update;
             if (window != null) window.Close();
+            if (!string.IsNullOrEmpty(selectionPath))
+            {
+                EditorPrefs.DeleteKey("Match.BuildTool.WindowSize." + Path.GetFullPath(selectionPath) + ".Width");
+                EditorPrefs.DeleteKey("Match.BuildTool.WindowSize." + Path.GetFullPath(selectionPath) + ".Height");
+                EditorPrefs.DeleteKey("Match.BuildTool.WindowSize." + Path.GetFullPath(selectionPath) + ".X");
+                EditorPrefs.DeleteKey("Match.BuildTool.WindowSize." + Path.GetFullPath(selectionPath) + ".Y");
+            }
             if (!string.IsNullOrEmpty(copyPath)) AssetDatabase.DeleteAsset(copyPath);
             if (!string.IsNullOrEmpty(selectionPath) && File.Exists(selectionPath)) File.Delete(selectionPath);
             if (error == null) Debug.Log("PASS BuildToolWindowVerification"); else Debug.LogException(error);

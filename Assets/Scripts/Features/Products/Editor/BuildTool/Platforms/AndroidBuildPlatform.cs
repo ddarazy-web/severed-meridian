@@ -3,11 +3,13 @@ using UnityEditor;
 
 namespace Products.Editor
 {
-    public sealed class AndroidBuildPlatform : IBuildToolPlatform
+    public sealed class AndroidBuildPlatform : IBuildToolPlatform, IBuildToolPlatformSettings
     {
         public BuildTarget Target => BuildTarget.Android;
         public string PlayerSettingsKey => "Android";
         public bool OutputIsDirectory => false;
+        public void DrawSettings(UnityEngine.UIElements.VisualElement parent, BuildToolProfileInfo profile, System.Action changed)
+            => BuildToolAndroidSigning.Draw(parent, profile, changed);
         public void Inspect(BuildToolProfileInfo profile, List<BuildToolIssue> issues)
         {
             if (EditorUserBuildSettings.buildAppBundle)

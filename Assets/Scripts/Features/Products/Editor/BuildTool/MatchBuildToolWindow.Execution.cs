@@ -10,17 +10,22 @@ namespace Products.Editor
     {
         private Button buildButton, cancelButton, resolveButton, openLogButton, openOutputButton;
         private Label executionResult;
+        private Label executionHeadline, executionHint;
         private string executionView;
         private BuildToolReport executionPreflight;
 
         private void CreateExecutionPanel(VisualElement root)
         {
-            var panel = new ScrollView { name = "build-run-results", style = { maxHeight = 180, minHeight = 70, flexShrink = 0, marginTop = 8 } };
+            var panel = new ScrollView { name = "build-run-results", style = { maxHeight = 200, minHeight = 115, flexShrink = 0, marginTop = 8 } };
             root.Add(panel);
-            executionResult = new Label { name = "build-run-status", style = { whiteSpace = WhiteSpace.Normal } }; panel.Add(executionResult);
-            var buttons = new VisualElement { style = { flexDirection = FlexDirection.Row } }; panel.Add(buttons);
-            openLogButton = new Button(() => EditorUtility.RevealInFinder(BuildToolController.Runner.Current.logPath)) { text = "요청 로그 위치", name = "open-build-log" }; buttons.Add(openLogButton);
-            openOutputButton = new Button(() => EditorUtility.RevealInFinder(BuildToolController.Runner.Current.output)) { text = "출력 위치 · 부분 결과 가능", name = "open-build-output" }; buttons.Add(openOutputButton);
+            var section = Section(panel, "execution-section", "05  실행 상태와 결과", "진행 중인 요청과 마지막 결과입니다. 위에서 조회하는 제품을 바꿔도 이미 확정한 요청은 바뀌지 않습니다.");
+            executionHeadline = new Label { name = "execution-headline" }; executionHeadline.AddToClassList("badge"); section.Add(executionHeadline);
+            executionHint = new Label(); executionHint.AddToClassList("caption"); section.Add(executionHint);
+            var technical = new Foldout { text = "실행 상세 · 시간 / 확정 옵션 / 오류 / 경로", value = false, tooltip = "Player 결과와 후처리·정리 오류를 구분해 확인합니다. 내용을 선택·복사할 수 있습니다." }; section.Add(technical);
+            executionResult = new Label { name = "build-run-status", selection = { isSelectable = true } }; executionResult.AddToClassList("technical"); technical.Add(executionResult);
+            var buttons = new VisualElement(); buttons.AddToClassList("result-actions"); section.Add(buttons);
+            openLogButton = new Button(() => EditorUtility.RevealInFinder(BuildToolController.Runner.Current.logPath)) { text = "로그 위치 열기", name = "open-build-log", tooltip = "현재 요청의 로그 파일이 실제 존재할 때 위치를 엽니다." }; buttons.Add(openLogButton);
+            openOutputButton = new Button(() => EditorUtility.RevealInFinder(BuildToolController.Runner.Current.output)) { text = "출력 위치 열기", name = "open-build-output", tooltip = "실제 출력이 존재할 때 엽니다. 실패한 빌드의 부분 파일도 있을 수 있으므로 성공 여부는 결과를 확인하세요." }; buttons.Add(openOutputButton);
             executionView = null;
         }
 
@@ -60,12 +65,26 @@ namespace Products.Editor
             var runner = BuildToolController.Runner; var request = runner.Current;
             var item = profiles.FirstOrDefault(value => value.Guid == selectedGuid);
             bool idle = !EditorApplication.isCompiling && !EditorApplication.isUpdating && !EditorApplication.isPlayingOrWillChangePlaymode && !BuildPipeline.isBuildingPlayer;
+            rootVisualElement.Q("platform-settings")?.SetEnabled(idle && !runner.IsLocked);
             buildButton.SetEnabled(idle && !EditorUtility.scriptCompilationFailed && !runner.IsLocked && item?.Product != null && !item.IsCopy && item.ReadIssues.Count == 0 &&
                 executionPreflight != null && !executionPreflight.HasErrors && !executionPreflight.IsDeferred && optionError == null);
             cancelButton.SetEnabled(idle && runner.CanCancel);
             resolveButton.SetEnabled(idle && request?.phase == BuildToolRunPhase.NeedsAttention && !request.isMock);
             openLogButton.SetEnabled(request != null && File.Exists(request.logPath));
             openOutputButton.SetEnabled(request != null && !request.isMock && (File.Exists(request.output) || Directory.Exists(request.output)));
+            string phase = request == null ? "대기 · 실행 요청 없음" : request.phase switch
+            {
+                BuildToolRunPhase.Succeeded => "완료 · 작업 성공", BuildToolRunPhase.Failed => "실패 · 상세 오류 확인",
+                BuildToolRunPhase.Canceled => "취소됨", BuildToolRunPhase.NeedsAttention => "확인 필요 · 자동 실행 중단",
+                BuildToolRunPhase.Building => "진행 · Player 빌드 중", BuildToolRunPhase.Postprocessing => "진행 · 후처리 중",
+                BuildToolRunPhase.Finalizing => "진행 · 임시 상태 정리", BuildToolRunPhase.WaitingForEditor => "대기 · 플랫폼 전환 / 컴파일",
+                _ => "진행 · 빌드 준비"
+            };
+            executionHeadline.text = (request == null ? "" : request.product + "  |  ") + phase;
+            executionHeadline.EnableInClassList("good", request?.phase == BuildToolRunPhase.Succeeded && runner.StoreError == null);
+            executionHeadline.EnableInClassList("error", runner.StoreError != null || request?.phase == BuildToolRunPhase.Failed || request?.phase == BuildToolRunPhase.NeedsAttention);
+            executionHeadline.EnableInClassList("unknown", request == null || !request.IsTerminal && request.phase != BuildToolRunPhase.NeedsAttention);
+            executionHint.text = runner.StoreError ?? request?.status ?? "먼저 제품과 옵션을 확인한 뒤 ‘선택 프로필 빌드…’를 누르세요. 확인 전에는 빌드를 실행하지 않습니다.";
             string view = (runner.StoreError == null ? "" : "기록 오류: " + runner.StoreError + "\n") + (request == null ? "실행 요청 없음 · 빌드 버튼에서 대상과 실제 실행 여부를 확인합니다." :
                 (request.isMock ? "[모의 실행 · 배포 결과 아님] " : "[실제 요청] ") + request.product + " · " + request.phase + "\n" + request.status +
                 "\n프로필: " + request.profilePath + "\n플랫폼: " + request.target + " · 출력: " + request.output +

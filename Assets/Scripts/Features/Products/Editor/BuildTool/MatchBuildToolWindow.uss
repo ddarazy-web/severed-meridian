@@ -1,0 +1,61 @@
+.build-tool {
+    --surface: #232b38;
+    --surface-raised: #2c3645;
+    --border: #435164;
+    --muted: #b3c0d1;
+    --text: #eef3fa;
+    --accent: #68dfce;
+    background-color: #19212d;
+    color: var(--text);
+    padding: 16px;
+}
+.build-tool.light {
+    --surface: #ffffff;
+    --surface-raised: #ecf1f6;
+    --border: #b9c5d3;
+    --muted: #45566c;
+    --text: #18283c;
+    --accent: #086c63;
+    background-color: #e4ebf2;
+}
+.build-tool Label { color: var(--text); white-space: normal; }
+.build-tool .window-title { font-size: 22px; -unity-font-style: bold; margin-bottom: 4px; }
+.build-tool .caption { color: var(--muted); font-size: 11px; margin-top: 4px; margin-bottom: 8px; }
+.build-tool .active-context { background-color: var(--surface-raised); color: var(--muted); padding: 8px 10px; border-radius: 5px; margin-top: 6px; }
+.build-tool .notice { color: var(--muted); margin-top: 8px; margin-bottom: 10px; }
+.build-tool .toolbar { flex-direction: row; flex-wrap: wrap; }
+.build-tool Button { background-color: var(--surface-raised); color: var(--text); border-color: var(--border); border-width: 1px; border-radius: 5px; padding: 7px 10px; margin: 2px; min-height: 32px; white-space: normal; }
+.build-tool Button:hover { border-color: var(--accent); background-color: #35495b; }
+.build-tool.light Button:hover { background-color: #d5e9e8; }
+.build-tool Button:focus { border-color: var(--accent); border-width: 2px; }
+.build-tool Button:disabled { opacity: 0.45; }
+.build-tool .primary { background-color: #66d6c5; border-color: #66d6c5; color: #122c30; -unity-font-style: bold; }
+.build-tool .primary:hover { background-color: #91efdf; }
+.build-tool .section { background-color: var(--surface); border-color: var(--border); border-width: 1px; border-radius: 7px; padding: 12px; margin-bottom: 12px; min-width: 0; }
+.build-tool .section-title { font-size: 14px; -unity-font-style: bold; color: var(--text); margin-bottom: 3px; }
+.build-tool .profile-sidebar { width: 218px; flex-shrink: 0; margin-right: 12px; }
+.build-tool .profile-row { min-height: 64px; -unity-text-align: middle-left; border-left-width: 3px; padding-left: 10px; margin-bottom: 6px; }
+.build-tool .profile-row.selected { background-color: #244944; border-color: #68dfce; color: #d9fff6; }
+.build-tool.light .profile-row.selected { background-color: #d1f2e9; border-color: #087769; color: #144338; }
+.build-tool .selected-title { font-size: 18px; -unity-font-style: bold; margin-bottom: 8px; }
+.build-tool .info-grid { flex-direction: row; flex-wrap: wrap; }
+.build-tool .info-field { flex-grow: 1; flex-basis: 180px; min-width: 0; margin-right: 10px; margin-bottom: 10px; }
+.build-tool .field-label { color: var(--muted); font-size: 11px; margin-bottom: 3px; }
+.build-tool .field-value { font-size: 12px; -unity-font-style: bold; }
+.build-tool .badge { padding: 5px 8px; border-radius: 4px; background-color: var(--surface-raised); margin: 4px 0; -unity-font-style: bold; }
+.build-tool .good { color: #8ce2b8; border-left-color: #8ce2b8; }
+.build-tool .warning { color: #f2c778; border-left-color: #f2c778; }
+.build-tool .error { color: #ffafb3; border-left-color: #ffafb3; }
+.build-tool .unknown { color: #a9c9fa; border-left-color: #a9c9fa; }
+.build-tool.light .good { color: #176642; border-left-color: #176642; }
+.build-tool.light .warning { color: #77500b; border-left-color: #77500b; }
+.build-tool.light .error { color: #a52938; border-left-color: #a52938; }
+.build-tool.light .unknown { color: #275da3; border-left-color: #275da3; }
+.build-tool .issue { border-left-width: 3px; background-color: var(--surface-raised); padding: 8px 10px; margin-top: 6px; border-radius: 3px; }
+.build-tool .option-card { background-color: var(--surface-raised); border-radius: 5px; padding: 10px; margin: 6px 0; border-width: 1px; border-color: var(--border); }
+.build-tool .option-card.enabled { border-color: var(--accent); }
+.build-tool Toggle { color: var(--text); -unity-font-style: bold; margin-bottom: 5px; }
+.build-tool Toggle > .unity-toggle__label { flex-grow: 1; white-space: normal; color: var(--text); }
+.build-tool .unity-foldout__text { color: var(--muted); }
+.build-tool .technical { color: var(--muted); font-size: 11px; margin-top: 8px; }
+.build-tool .result-actions { flex-direction: row; flex-wrap: wrap; margin-top: 8px; }

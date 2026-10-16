@@ -3,6 +3,11 @@ using UnityEditor;
 
 namespace Products.Editor
 {
+    public interface IBuildToolPlatformSettings
+    {
+        void DrawSettings(UnityEngine.UIElements.VisualElement parent, BuildToolProfileInfo profile, System.Action changed);
+    }
+
     public interface IBuildToolPlatform
     {
         BuildTarget Target { get; }
