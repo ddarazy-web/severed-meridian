@@ -1,0 +1,93 @@
+<Window x:Class="MoonRabbit.BuildApp.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Moon Rabbit · 빌드 도구" Width="1240" Height="840" MinWidth="1000" MinHeight="700" Background="#0F1721" Foreground="#EDF3F8" FontFamily="Malgun Gothic" FontSize="13">
+  <Window.InputBindings>
+    <KeyBinding Key="S" Modifiers="Control" Command="{Binding Save}"/>
+    <KeyBinding Key="F5" Command="{Binding Reload}"/>
+    <KeyBinding Key="F6" Command="{Binding Check}"/>
+    <KeyBinding Key="B" Modifiers="Control" Command="{Binding Build}"/>
+  </Window.InputBindings>
+  <Grid Margin="24,18,24,18" Background="#0F1721">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <Grid Margin="0,0,0,18"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+      <StackPanel><TextBlock Text="MOON RABBIT  /  BUILD WORKSPACE" Foreground="#77E2CB" FontSize="11" Margin="0,0,0,6"/><TextBlock Text="제품 빌드 도구" FontSize="25" FontWeight="SemiBold"/></StackPanel>
+      <Button Grid.Column="1" Content="사용 안내" Click="HelpClick" VerticalAlignment="Center" ToolTip="프로젝트의 Markdown 사용 안내를 엽니다."/>
+    </Grid>
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="254"/><ColumnDefinition Width="18"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+      <Border Style="{StaticResource Card}" Padding="16" Margin="0">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><StackPanel>
+          <StackPanel IsEnabled="{Binding CanEdit}">
+            <TextBlock Text="01  프로젝트와 제품" Style="{StaticResource Title}"/>
+            <TextBlock Text="작업할 Unity 프로젝트를 선택하세요." Style="{StaticResource Caption}"/>
+            <Button Content="프로젝트 폴더 선택…" Click="ProjectClick" Margin="0,0,0,8"/>
+            <TextBox Text="{Binding ProjectPath, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="70" VerticalScrollBarVisibility="Auto" ToolTip="{Binding ProjectPath}"/>
+            <TextBlock Text="Unity 실행 파일" Style="{StaticResource FieldLabel}"/>
+            <TextBox Text="{Binding UnityPath, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="70" VerticalScrollBarVisibility="Auto" ToolTip="{Binding UnityPath}"/>
+            <Button Content="Unity 경로 변경…" Click="UnityClick" Margin="0,8,0,12"/>
+            <Button Content="프로필 불러오기  F5" Command="{Binding Reload}" Margin="0,0,0,14"/>
+          </StackPanel>
+          <ListBox x:Name="ProfileList" ItemsSource="{Binding Profiles}" SelectedItem="{Binding Selected}" IsEnabled="{Binding CanEdit}" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem"><Setter Property="Padding" Value="10"/><Setter Property="Margin" Value="0,0,0,6"/><Setter Property="Background" Value="#203044"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="Item" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="2" CornerRadius="6" Padding="{TemplateBinding Padding}"><ContentPresenter/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="Item" Property="BorderBrush" Value="#77E2CB"/><Setter Property="Background" Value="#22433F"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Item" Property="BorderBrush" Value="#4B6A7E"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style></ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate><DataTemplate><StackPanel><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Text="{Binding Target}" Foreground="#A3B3C5" FontSize="11" Margin="0,4,0,0"/></StackPanel></DataTemplate></ListBox.ItemTemplate>
+          </ListBox>
+          <TextBlock Text="{Binding LastQuery}" Foreground="#A3B3C5" FontSize="11" Margin="0,12,0,0"/>
+        </StackPanel></ScrollViewer>
+      </Border>
+      <TabControl Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="0,14,0,0">
+        <TabItem Header="빌드 설정">
+          <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,12,0">
+            <StackPanel>
+              <StackPanel IsEnabled="{Binding CanEdit}">
+                <Border Style="{StaticResource Card}" Visibility="{Binding HasSigning, Converter={StaticResource VisibleIf}}">
+                  <StackPanel>
+                    <TextBlock Text="Android 서명" Style="{StaticResource Title}"/>
+                    <TextBlock Text="서명할 키를 선택합니다. 비밀번호는 현재 Windows 계정으로 암호화해 저장합니다." Style="{StaticResource Caption}"/>
+                    <CheckBox Content="사용자 Keystore 사용" IsChecked="{Binding CustomKeystore}"/>
+                    <StackPanel IsEnabled="{Binding CustomKeystore}">
+                      <TextBlock Text="Keystore 파일" Style="{StaticResource FieldLabel}"/>
+                      <DockPanel><Button DockPanel.Dock="Right" Content="찾기…" Click="KeystoreClick" Margin="8,0,0,0"/><TextBox Text="{Binding KeystorePath, UpdateSourceTrigger=PropertyChanged}" ToolTip="빌드에 사용할 keystore 파일의 전체 경로"/></DockPanel>
+                      <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel><TextBlock Text="Keystore 비밀번호" Style="{StaticResource FieldLabel}"/><PasswordBox x:Name="StorePassword" PasswordChanged="PasswordChanged" AutomationProperties.Name="Keystore 비밀번호"/></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Text="키 비밀번호" Style="{StaticResource FieldLabel}"/><PasswordBox x:Name="KeyPassword" PasswordChanged="PasswordChanged" AutomationProperties.Name="키 비밀번호"/></StackPanel>
+                      </Grid>
+                      <TextBlock Text="Alias · 서명할 키" Style="{StaticResource FieldLabel}"/>
+                      <DockPanel><Button DockPanel.Dock="Right" Content="Alias 조회" Click="AliasesClick" Margin="8,0,0,0" ToolTip="입력한 임시 비밀번호로 키 목록만 조회합니다."/><ComboBox ItemsSource="{Binding Aliases}" Text="{Binding Alias, UpdateSourceTrigger=PropertyChanged}" IsEditable="True"/></DockPanel>
+                    </StackPanel>
+                    <WrapPanel Margin="0,14,0,0"><Button Content="서명 설정 저장" Click="SigningSaveClick"/><TextBlock Text="{Binding SigningState}" Foreground="#A3B3C5" VerticalAlignment="Center"/></WrapPanel>
+                  </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}"><StackPanel>
+                  <TextBlock Text="02  선택한 제품 정보" Style="{StaticResource Title}"/>
+                  <TextBlock Text="{Binding ProductName}" FontSize="20" Margin="0,3,0,3"/><TextBlock Text="{Binding ApplicationId}" Style="{StaticResource Caption}"/>
+                  <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <StackPanel><TextBlock Text="Version Name" Style="{StaticResource FieldLabel}"/><TextBox Text="{Binding VersionName, UpdateSourceTrigger=PropertyChanged}" ToolTip="사용자에게 표시되는 버전. 예: 1.2.0. 자동 증가하지 않습니다."/></StackPanel>
+                    <StackPanel Grid.Column="2" Visibility="{Binding HasVersionCode, Converter={StaticResource VisibleIf}}"><TextBlock Text="{Binding CodeLabel}" Style="{StaticResource FieldLabel}"/><TextBox Text="{Binding VersionCode, UpdateSourceTrigger=PropertyChanged}" ToolTip="스토어에서 구분하는 빌드 번호. 프로필에 저장합니다."/></StackPanel>
+                  </Grid>
+                  <TextBlock Text="출력 위치" Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding OutputPath}" Foreground="#A3B3C5"/>
+                </StackPanel></Border>
+                <Border Style="{StaticResource Card}"><StackPanel>
+                  <TextBlock Text="03  빌드 옵션" Style="{StaticResource Title}"/><TextBlock Text="선택한 제품에서 지원하는 옵션만 표시합니다. 변경 후 설정을 저장하세요." Style="{StaticResource Caption}"/>
+                  <ItemsControl ItemsSource="{Binding Options}"><ItemsControl.ItemTemplate><DataTemplate><Border BorderBrush="#304154" BorderThickness="0,0,0,1" Padding="0,8"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><CheckBox Content="{Binding Label}" IsChecked="{Binding Enabled}" ToolTip="{Binding Description}"/><TextBlock Text="{Binding Description}" Foreground="#A3B3C5" FontSize="12"/></StackPanel><TextBlock Grid.Column="1" Text="{Binding StateLabel}" Foreground="#77E2CB" VerticalAlignment="Center" Margin="16,0,0,0"/></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+                </StackPanel></Border>
+              </StackPanel>
+              <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="실행 로그" Style="{StaticResource Title}"/><TextBlock Text="최근 64KB만 표시합니다. 전체 내용은 로그 폴더에서 확인할 수 있습니다." Style="{StaticResource Caption}"/><TextBox Text="{Binding LogText, Mode=OneWay}" IsReadOnly="True" Height="150" FontFamily="Consolas" FontSize="11" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/></StackPanel></Border>
+            </StackPanel>
+          </ScrollViewer>
+        </TabItem>
+        <TabItem Header="로그 관리">
+          <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,12,0"><StackPanel>
+            <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="오래된 로그 정리" Style="{StaticResource Title}"/><TextBlock Text="선택한 프로필만이 아니라 현재 프로젝트의 Logs 폴더 전체가 대상입니다. 빌드 중·미완료·사용 중 파일은 보호합니다." Style="{StaticResource Caption}"/><TextBlock Text="{Binding ProjectPath}" Foreground="#77E2CB"/><WrapPanel Margin="0,16,0,0" IsEnabled="{Binding CanEdit}"><TextBlock Text="보관 기간" VerticalAlignment="Center" Margin="0,0,10,0"/><TextBox Text="{Binding Logs.Days, UpdateSourceTrigger=PropertyChanged}" Width="70"/><TextBlock Text="일" VerticalAlignment="Center" Margin="8,0,20,0"/><Button Content="후보 미리보기" Command="{Binding PreviewLogs}"/><Button Content="확인한 후보 정리…" Command="{Binding CleanLogs}" ToolTip="실행 직전에 잠금과 보호 조건을 다시 검사합니다."/></WrapPanel></StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="후보와 처리 결과" Style="{StaticResource Title}"/><TextBox Text="{Binding Logs.Report, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" MinHeight="300" VerticalScrollBarVisibility="Auto"/></StackPanel></Border>
+          </StackPanel></ScrollViewer>
+        </TabItem>
+      </TabControl>
+    </Grid>
+    <Border Grid.Row="2" Background="#182330" CornerRadius="8" Padding="16" Margin="0,16,0,0">
+      <StackPanel><ProgressBar Height="3" IsIndeterminate="{Binding Busy}" Visibility="{Binding Busy, Converter={StaticResource VisibleIf}}" Foreground="#77E2CB" Margin="0,0,0,8"/>
+        <TextBlock Text="{Binding Status}" Margin="0,0,0,6"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="#77E2CB"/><Style.Triggers><DataTrigger Binding="{Binding StatusIsError}" Value="True"><Setter Property="Foreground" Value="#FFB0A5"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+        <TextBlock Text="{Binding SaveHint}" Foreground="#A3B3C5" FontSize="11" Margin="0,0,0,10"/>
+        <WrapPanel><Button Content="설정 저장" Command="{Binding Save}" ToolTip="버전·옵션 저장 (Ctrl+S)"/><Button Content="사전 검사" Command="{Binding Check}" ToolTip="설정 검사만 실행 (F6)"/><Button Content="빌드 시작…" Command="{Binding Build}" Style="{StaticResource PrimaryButton}" ToolTip="설정 확인 후 실제 빌드 (Ctrl+B)"/><Button Content="취소 요청" Command="{Binding Cancel}"/><Button Content="로그 폴더" Click="LogClick"/><Button Content="출력 폴더" Click="OutputClick"/></WrapPanel>
+      </StackPanel>
+    </Border>
+  </Grid>
+</Window>

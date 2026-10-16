@@ -7,6 +7,11 @@ namespace Products.Editor
     {
         Newtonsoft.Json.Linq.JObject ReadSigning(BuildToolProfileInfo profile);
     }
+    public interface IBuildToolExternalSigningActions
+    {
+        System.Threading.Tasks.Task<Newtonsoft.Json.Linq.JObject> ExecuteSigning(BuildToolProfileInfo profile, Newtonsoft.Json.Linq.JObject input);
+        void RestoreForBuild(BuildToolProfileInfo profile);
+    }
     public interface IBuildToolBuildSettings
     {
         string Output(ProductDefinition product, IReadOnlyList<BuildToolOptionState> options);

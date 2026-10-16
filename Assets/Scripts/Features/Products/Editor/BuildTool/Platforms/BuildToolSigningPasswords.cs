@@ -1,3 +1,4 @@
+#nullable disable
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -13,10 +14,10 @@ namespace Products.Editor
         private readonly byte[] entropy;
         internal readonly string FilePath;
 
-        internal BuildToolSigningPasswords(string context)
+        internal BuildToolSigningPasswords(string context, string root = null)
         {
             using (var hash = SHA256.Create()) entropy = hash.ComputeHash(Encoding.UTF8.GetBytes(context));
-            FilePath = Path.Combine(Root, BitConverter.ToString(entropy).Replace("-", "") + ".bin");
+            FilePath = Path.Combine(root ?? Root, BitConverter.ToString(entropy).Replace("-", "") + ".bin");
         }
 
         internal void Save(string storePassword, string keyPassword)

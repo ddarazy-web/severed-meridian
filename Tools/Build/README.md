@@ -193,7 +193,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Build/Invoke-BuildTool
 ### 조회와 저장
 
 ```json
-{"version":2,"requestId":"조회-001","operation":"settings"}
+{"version":2,"requestId":"settings-001","operation":"settings"}
 ```
 
 등록된 5개 프로필을 반환합니다. `profileGuid`를 넣으면 해당 프로필만 반환합니다. 응답은 버전·지원 필드·옵션의 기본값/저장값/적용값·서명 경로/alias/저장 여부·revision을 포함합니다. `credentialsStored`는 암호화 파일 존재 여부이며 자격 증명의 유효성을 확인한 것은 아닙니다. 조회에서 비밀번호를 복호화하지 않습니다.
@@ -201,7 +201,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Build/Invoke-BuildTool
 ```json
 {
   "version":2,
-  "requestId":"저장-001",
+  "requestId":"save-001",
   "operation":"save-settings",
   "profileGuid":"조회 응답의 profileGuid",
   "expectedRevision":"조회 응답의 revision",
@@ -217,7 +217,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Build/Invoke-BuildTool
 ### 로그 관리
 
 ```json
-{"version":2,"requestId":"정리-미리보기-001","operation":"cleanup-preview","retentionDays":7}
+{"version":2,"requestId":"cleanup-preview-001","operation":"cleanup-preview","retentionDays":7}
 ```
 
 삭제 실행은 `operation`을 `cleanup`으로 변경하여 **새 요청**으로 전달합니다. `retentionDays`는 기본7, 허용범위1~3650입니다. 수동 지정값은 그 실행에만 적용됩니다. 정리는 Unity를 시작하지 않고 현재 프로젝트 `Logs`만 대상으로 합니다.
@@ -228,7 +228,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Build/Invoke-BuildTool
 
 v2 결과는 `version`, `requestId`, `exitCode`, `data`, `errorCode`, `message`를 제공합니다. 성공은 종료 코드0, 실패·보류는0이 아닙니다. 주요 오류는 `RevisionConflict`, `RecoveryRequired`, `Busy`, `UnknownProfile`, `InvalidRequest`, `UnsupportedOperation`, `UnityNotFound`, `MissingResult`, `InvalidResult`입니다. 예외적인 IO 오류 등은 `HostError`로 분류될 수 있습니다.
 
-기존 BAT의 v1 list/check/build는 유지됩니다. 이번 v2는 settings/save-settings/cleanup-preview/cleanup만 지원합니다. 빌드·사전 검사·취소의 v2 UI 연결과 새 서명 입력은 2단계 범위입니다. 비밀번호는 요청 JSON이나 명령행에 넣지 마세요.
+기존 BAT의 v1 list/check/build는 유지됩니다. v2는 settings/save-settings/cleanup-preview/cleanup 및 check/build/signing-aliases/save-signing을 지원합니다. check/build는 profileGuid와 expectedRevision으로 저장된 옵션을 확정합니다. requestId는 영문·숫자·하이픈·밑줄 1~80자입니다. 진행·취소 파일은 Library/MatchBuildApp/<requestId>에 있으며 cancel.json의 requestId가 일치할 때 기존 Runner의 안전한 취소 경계로 전달합니다. 서명은 동일 경로의 DPAPI 일회성 파일만 참조하고 완료·실패 시 정리합니다. 앱 사용법은 ../BuildApp/README.md를 참고하세요. 비밀번호는 요청 JSON이나 명령행에 넣지 마세요.
 
 ### 개발 검증
 

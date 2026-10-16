@@ -3,9 +3,12 @@ using UnityEditor;
 
 namespace Products.Editor
 {
-    public sealed class AndroidBuildPlatform : IBuildToolPlatform, IBuildToolPlatformSettings, IBuildToolBuildSettings, IBuildToolVersionCode, IBuildToolExternalSigning
+    public sealed class AndroidBuildPlatform : IBuildToolPlatform, IBuildToolPlatformSettings, IBuildToolBuildSettings, IBuildToolVersionCode, IBuildToolExternalSigning, IBuildToolExternalSigningActions
     {
         public Newtonsoft.Json.Linq.JObject ReadSigning(BuildToolProfileInfo profile) => BuildToolAndroidSigning.ReadMetadata(profile);
+        public System.Threading.Tasks.Task<Newtonsoft.Json.Linq.JObject> ExecuteSigning(BuildToolProfileInfo profile, Newtonsoft.Json.Linq.JObject input) =>
+            BuildToolAndroidExternalSigning.Execute(profile, input, BuildToolExternalSettings.PreferencesPath);
+        public void RestoreForBuild(BuildToolProfileInfo profile) => BuildToolAndroidSigning.RestoreForExternalBuild(profile);
         public BuildTarget Target => BuildTarget.Android;
         public string PlayerSettingsKey => "Android";
         public bool OutputIsDirectory => false;

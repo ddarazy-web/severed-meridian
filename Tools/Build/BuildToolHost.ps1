@@ -9,12 +9,15 @@
         if (-not (Test-Path -LiteralPath $versionFile)) { throw 'InvalidProject: ProjectVersion.txt not found.' }
         if ($Request.version -notin @(1,2)) { throw 'InvalidRequest: unsupported version.' }
         $operation = [string]$Request.operation
-        $allowed = if ($Request.version -eq 1) { @('list','check','build') } else { @('settings','save-settings','cleanup-preview','cleanup') }
+        $allowed = if ($Request.version -eq 1) { @('list','check','build') } else { @('settings','save-settings','cleanup-preview','cleanup','check','build','signing-aliases','save-signing') }
         if ($operation -notin $allowed) { throw 'UnsupportedOperation: unknown operation.' }
         if ($Request.version -eq 2) {
             if ($Request.requestId -isnot [string] -or [string]::IsNullOrWhiteSpace($Request.requestId)) { throw 'InvalidRequest: requestId required.' }
+            if ($Request.requestId -notmatch '^[a-zA-Z0-9_-]{1,80}$') { throw 'InvalidRequest: unsafe requestId.' }
             $fields = @('version','requestId','operation','profileGuid')
             if ($operation -eq 'save-settings') { $fields += @('expectedRevision','appVersion','options') }
+            if ($operation -in @('check','build')) { $fields += 'expectedRevision' }
+            if ($operation -in @('signing-aliases','save-signing')) { $fields += @('expectedRevision','keystorePath','alias','customKeystore','credentialsFile') }
             if ($operation -like 'cleanup*') { $fields = @('version','requestId','operation','retentionDays') }
             foreach ($property in $Request.PSObject.Properties.Name) { if ($property -notin $fields) { throw 'InvalidRequest: unsupported field.' } }
             if ($Request.PSObject.Properties.Name -contains 'appVersion') {
@@ -62,11 +65,19 @@
         $requestPath = Join-Path $runDirectory 'request.json'
         $resultPath = Join-Path $runDirectory 'result.json'
         $logPath = Join-Path $runDirectory 'Unity.log'
+        if ($Request.version -eq 2) {
+            $bridgeDirectory = Join-Path $projectRoot ('Library/MatchBuildApp/' + $Request.requestId)
+            New-Item -ItemType Directory -Path $bridgeDirectory -Force | Out-Null
+            [IO.File]::WriteAllText((Join-Path $bridgeDirectory 'progress.json'), (@{requestId=$Request.requestId;status='Unity 준비 중 · 컴파일과 초기화를 기다립니다.';logPath=$logPath} | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
+        }
         [IO.File]::WriteAllText($requestPath, ($Request | ConvertTo-Json -Depth 20), [Text.UTF8Encoding]::new($false))
         Write-Host "Log: $logPath"
         $arguments = @('-batchmode','-projectPath',$projectRoot,'-logFile',$logPath,'-executeMethod','Products.Editor.BuildToolBatch.Run','-matchBuildRequest',$requestPath)
         if ($operation -eq 'build') {
-            $profileAssets = @(Get-ChildItem -LiteralPath (Join-Path $projectRoot 'Assets/Settings/BuildProfiles') -Filter '*.asset' | Where-Object { $_.BaseName -ceq $Request.profile })
+            $profileAssets = @(Get-ChildItem -LiteralPath (Join-Path $projectRoot 'Assets/Settings/BuildProfiles') -Filter '*.asset' | Where-Object {
+                if ($Request.version -eq 1) { $_.BaseName -ceq $Request.profile }
+                else { $Request.profileGuid -match '^[0-9a-fA-F]{32}$' -and (Select-String -LiteralPath ($_.FullName + '.meta') -Pattern ('^guid: ' + $Request.profileGuid + '$') -Quiet) }
+            })
             if ($profileAssets.Count -ne 1) { throw 'UnknownProfile: build profile not found.' }
             $arguments += @('-activeBuildProfile', ('Assets/Settings/BuildProfiles/' + $profileAssets[0].Name))
         }

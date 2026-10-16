@@ -14,6 +14,7 @@ namespace Products.Editor
     {
         private const string InputKey = "Match.BuildTool.Batch.Input";
         private const string IdKey = "Match.BuildTool.Batch.Id";
+        private static double nextProgress;
         private sealed class Input
         {
             public int version;
@@ -24,9 +25,10 @@ namespace Products.Editor
 
         static BuildToolBatch() { EditorApplication.update += Poll; }
 
-        public static void Run()
+        public static async void Run()
         {
             string path = null;
+            string operation = null;
             try
             {
                 if (!UnityEngine.Application.isBatchMode) throw new InvalidOperationException("외부 빌드 진입점은 batchmode 전용입니다.");
@@ -36,9 +38,17 @@ namespace Products.Editor
                 if (index < 0 || index + 1 >= arguments.Length) throw new ArgumentException("외부 빌드 요청 파일이 필요합니다.");
                 path = Path.GetFullPath(arguments[index + 1]);
                 var document = JObject.Parse(File.ReadAllText(path));
+                operation = (string)document["operation"];
                 if ((int?)document["version"] == 2)
                 {
-                    var result = ExecuteSettings(document);
+                    if (operation == "build")
+                    {
+                        if (BuildToolExternalOperations.CancellationRequested(document)) { Finish(path, 1, new { error = "Canceled: 빌드 시작 전에 취소했습니다." }); return; }
+                        BuildToolExternalOperations.Start(document);
+                        SessionState.SetString(IdKey, BuildToolController.Runner.Current.id); SessionState.SetString(InputKey, path); return;
+                    }
+                    var result = operation == "check" ? BuildToolExternalOperations.Check(document) :
+                        operation == "signing-aliases" || operation == "save-signing" ? await BuildToolExternalOperations.Signing(document) : ExecuteSettings(document);
                     Finish(path, 0, result); return;
                 }
                 var input = document.ToObject<Input>();
@@ -83,7 +93,13 @@ namespace Products.Editor
                 SessionState.SetString(IdKey, runner.Current.id);
                 SessionState.SetString(InputKey, path);
             }
-            catch (Exception error) { Finish(path, 2, new { error = error.Message }); }
+            catch (Exception error)
+            {
+                bool secretOperation = operation == "signing-aliases" || operation == "save-signing";
+                string message = secretOperation && !error.Message.StartsWith("RevisionConflict:", StringComparison.Ordinal) && !error.Message.StartsWith("Busy:", StringComparison.Ordinal)
+                    ? "SigningError: 서명 처리를 완료하지 못했습니다. 경로·Alias·비밀번호를 확인하세요. 비밀 입력은 기록하지 않습니다." : error.Message;
+                Finish(path, 2, new { error = message });
+            }
         }
 
         public static JObject ExecuteSettings(JObject input)
@@ -114,6 +130,13 @@ namespace Products.Editor
                 var request = runner.Current;
                 if (runner.StoreError != null) throw new InvalidOperationException(runner.StoreError);
                 if (request == null || request.id != SessionState.GetString(IdKey, "")) throw new InvalidOperationException("외부 빌드 요청 ID가 달라 자동 실행을 중단합니다.");
+                var input = JObject.Parse(File.ReadAllText(path));
+                if ((int?)input["version"] == 2)
+                {
+                    BuildToolExternalOperations.TryCancel(input, runner);
+                    if (EditorApplication.timeSinceStartup >= nextProgress)
+                    { BuildToolExternalOperations.Progress(input, request, runner.CanCancel); nextProgress = EditorApplication.timeSinceStartup + 0.5; }
+                }
                 if (!request.IsTerminal && request.phase != BuildToolRunPhase.NeedsAttention) return;
                 int code = request.phase == BuildToolRunPhase.Succeeded ? 0 : request.phase == BuildToolRunPhase.NeedsAttention ? 2 : 1;
                 Finish(path, code, new { request.id, request.product, phase = request.phase.ToString(), request.output,
@@ -134,9 +157,10 @@ namespace Products.Editor
                     if ((int?)input["version"] == 2)
                     {
                         string message = code == 0 ? null : (string)JObject.FromObject(data)["error"];
+                        if (code != 0 && message == null) message = (string)JObject.FromObject(data)["phase"] == "Canceled" ? "Canceled: 작업을 취소했습니다." : "OperationFailed: 작업 결과를 확인하세요.";
                         string errorCode = message?.Split(':')[0];
-                        if (errorCode != "RevisionConflict" && errorCode != "RecoveryRequired" && errorCode != "Busy" && errorCode != "UnknownProfile" && errorCode != "UnsupportedOperation") errorCode = code == 0 ? null : "InvalidRequest";
-                        response = new { version = 2, requestId = (string)input["requestId"], exitCode = code, data = code == 0 ? data : null, errorCode, message };
+                        if (errorCode != "RevisionConflict" && errorCode != "RecoveryRequired" && errorCode != "Busy" && errorCode != "UnknownProfile" && errorCode != "UnsupportedOperation" && errorCode != "Canceled" && errorCode != "SigningError" && errorCode != "OperationFailed") errorCode = code == 0 ? null : "InvalidRequest";
+                        response = new { version = 2, requestId = (string)input["requestId"], exitCode = code, data, errorCode, message };
                     }
                     File.WriteAllText(Path.Combine(Path.GetDirectoryName(path), "result.json"), JsonConvert.SerializeObject(response, Formatting.Indented));
                 }

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><TargetFramework>net8.0-windows</TargetFramework><UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><AssemblyName>MoonRabbit.BuildApp</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="BuildApp.Tests" />
+    <Compile Include="../../Assets/Scripts/Features/Products/Editor/BuildTool/Platforms/BuildToolSigningPasswords.cs" Link="Shared/BuildToolSigningPasswords.cs" />
+    <None Include="README.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
