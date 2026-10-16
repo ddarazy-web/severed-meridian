@@ -1,0 +1,24 @@
+/* 런타임 팝업은 UIDocument 밖의 패널 루트에 추가되므로 테마에서 배치한다. */
+.unity-base-dropdown { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+.unity-base-dropdown__container-outer { position: absolute; background-color: rgb(34, 43, 57); color: rgb(234, 241, 248); border-width: 1px; border-color: rgb(100, 137, 150); border-radius: 5px; padding: 4px; }
+.unity-base-dropdown__container-inner { flex-grow: 1; min-height: 0; }
+.unity-base-dropdown__item { flex-shrink: 0; min-height: 32px; padding: 5px 8px; }
+.unity-base-dropdown__item-content { flex-direction: row; align-items: center; }
+.unity-base-dropdown__label { flex-grow: 1; white-space: nowrap; }
+.unity-base-dropdown__item:hover, .unity-base-dropdown__item:checked { background-color: rgb(49, 80, 94); }
+.unity-base-dropdown__checkmark { width: 8px; height: 8px; flex-shrink: 0; margin-right: 8px; border-radius: 4px; }
+.unity-base-dropdown__item:checked .unity-base-dropdown__checkmark { background-color: rgb(105, 212, 187); }
+
+/* 기본 테마 없이 사용하는 필드의 라벨·입력·텍스트 최소 배치를 제공한다. */
+.unity-base-field { flex-direction: row; align-items: center; }
+.unity-base-field__label { flex-shrink: 0; margin-right: 6px; }
+.unity-base-field--no-label > .unity-base-field__label { display: none; }
+.unity-base-field__input { flex-grow: 1; flex-shrink: 1; min-width: 0; align-self: stretch; justify-content: center; }
+.unity-base-popup-field__input { flex-direction: row; align-items: center; }
+.unity-base-popup-field__text { flex-grow: 1; flex-shrink: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unity-text-field__input { overflow: hidden; }
+.unity-text-element--inner-input-field-component { flex-grow: 1; flex-shrink: 0; min-width: 0; -unity-text-align: middle-left; }
+.unity-base-text-field__input--single-line .unity-text-element--inner-input-field-component { white-space: nowrap; }
+.unity-toggle__input { flex-direction: row; align-items: center; }
+.unity-foldout__toggle { flex-direction: row; }
+.unity-foldout__content { flex-shrink: 0; }

@@ -9,6 +9,11 @@
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
+/[Bb]uilds/
+!/Tools/Build/
+!/Tools/Build/Build.ps1
+!/Tools/Build/Clean-Logs.ps1
+!/Tools/Build/README.md
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 

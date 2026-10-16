@@ -81,6 +81,7 @@ namespace Products.Editor
                 PluginImporter[] plugins = PluginImporter.GetAllImporters().Where(value => value.GetCompatibleWithPlatform(definition.Target)).ToArray();
                 foreach (PluginImporter plugin in plugins)
                 {
+                    if (!MatchesProductConstraints(plugin, profile.scriptingDefines)) continue;
                     ValidateDependency(plugin.assetPath, definition.IsTool);
                     PropertyInfo explicitProperty = typeof(PluginImporter).GetProperty("IsExplicitlyReferenced", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                     report.AppendLine("  platform-compatible plugin=" + plugin.assetPath + "; native=" + plugin.isNativePlugin + "; explicitReference=" + explicitProperty?.GetValue(plugin) + "; defineConstraints=" + string.Join(",", plugin.DefineConstraints));
@@ -108,13 +109,27 @@ namespace Products.Editor
                 foreach (string path in Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories).Select(value => value.Replace('\\', '/')).Where(value => !value.Contains("/Editor/")))
                 {
                     string guard = File.ReadLines(path).First().Trim('\ufeff', ' ', '\r', '\n', '\t');
-                    // Windows 네이티브 어댑터의 추가 플랫폼 제한도 제작 코드 경계로 인정한다.
+                    // 네이티브 어댑터의 추가 플랫폼 제한도 제작 코드 경계로 인정한다.
                     if (guard != "#if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR" &&
-                        guard != "#if (UNITY_EDITOR || PRODUCT_LEVEL_EDITOR) && (UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN)")
+                        guard != "#if (UNITY_EDITOR || PRODUCT_LEVEL_EDITOR) && (UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN)" &&
+                        guard != "#if (UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN) && (UNITY_EDITOR || PRODUCT_LEVEL_EDITOR)" &&
+                        guard != "#if UNITY_ANDROID && !UNITY_EDITOR && PRODUCT_LEVEL_EDITOR")
                         throw new BuildFailedException("게임에서 제작 코드가 컴파일되지 않도록 제품 경계가 필요합니다: " + path);
                 }
             report.AppendLine("앱 식별자는 프로젝트 구성값이며 스토어 등록/예약 완료를 뜻하지 않음. 검사 범위: 설정/직렬화 의존성/플러그인 포함 규칙. Player/Addressables 빌드, iOS Xcode, Steam SDK/스토어 인증 및 실기 실행은 수행하지 않음.");
             return report.ToString();
+        }
+
+        internal static bool MatchesProductConstraints(PluginImporter plugin, string[] defines)
+        {
+            // 전체 플랫폼 심볼을 추측하지 않는다. 제품 심볼만으로 배제되는 조건만 평가한다.
+            // 플랫폼·버전 조건이 섞인 플러그인은 보수적으로 포함하여 기존 의존성 검사를 유지한다.
+            if (plugin.DefineConstraints.Length == 0) return true;
+            if (plugin.DefineConstraints.Any(row => row.Split(new[] { "||" }, StringSplitOptions.None)
+                .Any(value => !value.Trim().TrimStart('!').StartsWith("PRODUCT_", StringComparison.Ordinal)))) return true;
+            var compatible = typeof(PluginImporter).GetMethod("IsCompatibleWithDefines", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (compatible == null) throw new BuildFailedException("Unity 플러그인 심볼 조건 검사 API를 확인하세요.");
+            return (bool)compatible.Invoke(plugin, new object[] { defines });
         }
 
         public static void ValidateBuildOptions(BuildOptions options)

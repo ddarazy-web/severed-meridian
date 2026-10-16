@@ -9,6 +9,7 @@ namespace Products.Editor
 {
     public static partial class ProductProfiles
     {
+        internal static bool ContentRoutingReady { get; private set; }
         [InitializeOnLoadMethod]
         private static void RestoreContentRoutingAfterReload()
         {
@@ -17,6 +18,16 @@ namespace Products.Editor
 
         public static void SynchronizeContentPaths()
         {
+            // Java 소스 플러그인은 심볼 조건만으로 복사가 제외되지 않아 실제 포함 콜백도 연결한다.
+            foreach (PluginImporter plugin in PluginImporter.GetAllImporters())
+            {
+                if (!System.Array.Exists(plugin.DefineConstraints, value => value.Contains("PRODUCT_"))) continue;
+                plugin.SetIncludeInBuildDelegate(path =>
+                {
+                    BuildProfile active = BuildProfile.GetActiveBuildProfile();
+                    return active == null || MatchesProductConstraints((PluginImporter)AssetImporter.GetAtPath(path), active.scriptingDefines);
+                });
+            }
             BuildProfile profile = BuildProfile.GetActiveBuildProfile();
             ProductDefinition definition = profile == null ? null : ValidateProfile(profile);
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -31,6 +42,7 @@ namespace Products.Editor
                 }
             }
             ApplyContentPaths(definition);
+            ContentRoutingReady = true;
         }
 
         // 번들 경로뿐 아니라 settings/catalog/content-state/report의 공통 루트도 제품별로 분리한다.

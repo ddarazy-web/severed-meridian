@@ -28,8 +28,10 @@ namespace LevelTool.Editor
             PanelSettings settings = AssetDatabase.LoadAssetAtPath<PanelSettings>(UI + "LevelToolPanel.asset");
             if (settings == null)
             {
-                ThemeStyleSheet theme = ScriptableObject.CreateInstance<ThemeStyleSheet>();
-                AssetDatabase.CreateAsset(theme, UI + "LevelToolTheme.tss");
+                if (!File.Exists(UI + "LevelToolTheme.tss"))
+                    File.WriteAllText(UI + "LevelToolTheme.tss", "@import url(\"LevelToolControls.uss\");\n");
+                AssetDatabase.ImportAsset(UI + "LevelToolTheme.tss");
+                ThemeStyleSheet theme = AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>(UI + "LevelToolTheme.tss");
                 settings = ScriptableObject.CreateInstance<PanelSettings>();
                 settings.themeStyleSheet = theme; settings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
                 settings.referenceResolution = new Vector2Int(1280, 800); settings.match = 0.5f;

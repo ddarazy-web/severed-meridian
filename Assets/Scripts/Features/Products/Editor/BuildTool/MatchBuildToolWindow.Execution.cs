@@ -37,7 +37,9 @@ namespace Products.Editor
                 var choices = BuildToolPreferences.Choices(SelectionPath, selectedGuid);
                 var resolved = OptionRegistry.Resolve(item.Product, choices);
                 string summary = string.Join("\n", resolved.Select(state => state.id + " v" + state.version + " : " + (state.enabled ? "ON" : "OFF")));
-                if (!EditorUtility.DisplayDialog("제품 빌드 실행", item.Product.Name + "\n플랫폼: " + item.Target + "\n출력: " + BuildToolPlatforms.Default.Output(item.Product, resolved) + "\n옵션:\n" + (summary.Length == 0 ? "없음" : summary) +
+                var version = BuildToolVersionSettings.Read(item);
+                string versionSummary = "\nVersion Name: " + version.Name + (version.CodeLabel == null ? "" : "\n" + version.CodeLabel + ": " + version.Code);
+                if (!EditorUtility.DisplayDialog("제품 빌드 실행", item.Product.Name + "\n플랫폼: " + item.Target + versionSummary + "\n출력: " + BuildToolPlatforms.Default.Output(item.Product, resolved) + "\n옵션:\n" + (summary.Length == 0 ? "없음" : summary) +
                     "\n\n실제 Player와 Addressables 콘텐츠를 빌드합니다. 활성 제품·플랫폼이 바뀔 수 있습니다. SDK·서명·배포 성공은 아직 확인되지 않았습니다.", "빌드 시작", "취소")) return;
                 BuildToolController.Runner.Start(selectedGuid, true, choices); RefreshExecution();
             }
@@ -66,6 +68,7 @@ namespace Products.Editor
             var item = profiles.FirstOrDefault(value => value.Guid == selectedGuid);
             bool idle = !EditorApplication.isCompiling && !EditorApplication.isUpdating && !EditorApplication.isPlayingOrWillChangePlaymode && !BuildPipeline.isBuildingPlayer;
             rootVisualElement.Q("platform-settings")?.SetEnabled(idle && !runner.IsLocked);
+            rootVisualElement.Q("version-settings")?.SetEnabled(idle && !runner.IsLocked);
             buildButton.SetEnabled(idle && !EditorUtility.scriptCompilationFailed && !runner.IsLocked && item?.Product != null && !item.IsCopy && item.ReadIssues.Count == 0 &&
                 executionPreflight != null && !executionPreflight.HasErrors && !executionPreflight.IsDeferred && optionError == null);
             cancelButton.SetEnabled(idle && runner.CanCancel);

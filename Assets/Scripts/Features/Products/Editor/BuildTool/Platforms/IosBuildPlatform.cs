@@ -4,11 +4,27 @@ using UnityEngine;
 
 namespace Products.Editor
 {
-    public sealed class IosBuildPlatform : IBuildToolPlatform
+    public sealed class IosBuildPlatform : IBuildToolPlatform, IBuildToolVersionCode
     {
         public BuildTarget Target => BuildTarget.iOS;
         public string PlayerSettingsKey => "iPhone";
         public bool OutputIsDirectory => true;
+        public string VersionCodeLabel => "Build Number";
+        public SerializedProperty FindVersionCode(SerializedObject settings)
+        {
+            SerializedProperty numbers = settings.FindProperty("buildNumber");
+            for (int i = 0; numbers != null && i < numbers.arraySize; i++)
+            {
+                SerializedProperty entry = numbers.GetArrayElementAtIndex(i);
+                if (entry.FindPropertyRelative("first").stringValue == PlayerSettingsKey) return entry.FindPropertyRelative("second");
+            }
+            return null;
+        }
+        public void ValidateVersionCode(string value)
+        {
+            if (value == null || !System.Text.RegularExpressions.Regex.IsMatch(value, @"\A[0-9]+(\.[0-9]+){0,2}\z"))
+                throw new System.ArgumentException("Build Number는 숫자 또는 점으로 구분한 최대 3개의 숫자로 입력하세요. 예: 17, 1.2.3");
+        }
         public void Inspect(BuildToolProfileInfo profile, List<BuildToolIssue> issues)
         {
             if (Application.platform != RuntimePlatform.OSXEditor)

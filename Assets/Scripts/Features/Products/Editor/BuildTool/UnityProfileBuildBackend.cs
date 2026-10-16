@@ -9,8 +9,10 @@ using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Rendering.Universal;
 
 namespace Products.Editor
 {
@@ -42,7 +44,11 @@ namespace Products.Editor
         {
             using (var hash = System.Security.Cryptography.SHA256.Create())
             {
-                string source = File.ReadAllText(profile.Path) + "\n" + EditorJsonUtility.ToJson(profile.Profile) + "\n" +
+                var profileData = JObject.Parse(EditorJsonUtility.ToJson(profile.Profile));
+                // 빌드 중 임시 preloadedAssets가 이 미러에 남아도 실제 PlayerSettings는 복원된다.
+                // 저장 파일과 아래 실제 설정을 각각 검사하므로 오래된 중복 직렬화 캐시만 제외한다.
+                ((JObject)profileData["MonoBehaviour"]).Property("m_PlayerSettingsYaml")?.Remove();
+                string source = File.ReadAllText(profile.Path) + "\n" + profileData.ToString(Newtonsoft.Json.Formatting.None) + "\n" +
                     EditorJsonUtility.ToJson(ProductProfiles.ProfileSettings(profile.Profile, false));
                 return Convert.ToBase64String(hash.ComputeHash(System.Text.Encoding.UTF8.GetBytes(source)));
             }
@@ -70,6 +76,9 @@ namespace Products.Editor
 
         public bool IsReady(BuildToolRequest request, out string reason)
         {
+            // 재로드 직후의 update가 예약된 콘텐츠 경로 복원보다 먼저 실행될 수 있다.
+            if (!ProductProfiles.ContentRoutingReady)
+            { reason = "재컴파일 후 콘텐츠 경로 복원 대기"; return false; }
             var snapshot = JObject.Parse(request.selectionSnapshot);
             var before = (JObject)snapshot["before"]; var expected = (JObject)snapshot["expected"];
             var current = CaptureRouting(request);
@@ -100,6 +109,7 @@ namespace Products.Editor
                 throw new InvalidOperationException("명시적으로 확인한 실제 빌드 요청이 아닙니다.");
             var profile = Read(request.profileGuid); Validate(profile);
             if (Fingerprint(profile) != (request.effectiveFingerprint ?? request.fingerprint)) throw new InvalidOperationException("실행 직전 프로필 파일이 변경됐습니다.");
+            PrepareRenderPipelineSettings(request, profile);
             BuildToolPlatforms.Default.TryGet(request.target, out var platform, out string reason);
             if (platform == null) throw new InvalidOperationException(reason);
             var platformSettings = platform as IBuildToolBuildSettings;
@@ -168,6 +178,27 @@ namespace Products.Editor
                 else errors.Add("활성 제품·플랫폼이 외부에서 변경됐거나 전환이 끝나지 않았습니다. 소유권을 확인한 뒤 정리하세요.");
             }
             if (errors.Count > 0) throw new InvalidOperationException(string.Join("\n", errors));
+        }
+
+        internal void PrepareRenderPipelineSettings(BuildToolRequest request, BuildToolProfileInfo profile)
+        {
+            if (BuildProfile.GetActiveBuildProfile() != profile.Profile || EditorUserBuildSettings.activeBuildTarget != request.target)
+                throw new InvalidOperationException("배칭 설정을 준비할 활성 프로필·플랫폼이 요청과 다릅니다.");
+            if (Fingerprint(profile) != (request.effectiveFingerprint ?? request.fingerprint))
+                throw new InvalidOperationException("배칭 설정 준비 전에 프로필이 외부에서 변경됐습니다.");
+            var assets = new List<UniversalRenderPipelineAsset>();
+            if (!request.target.TryGetRenderPipelineAssets(assets) || assets.Count == 0) return;
+            // URPBuildDataValidator와 동일하게 빌드 대상의 모든 URP 에셋을 반영한다.
+            // 첫 빌드가 배칭 항목을 뒤늦게 생성하지 않도록 미리 명시하고 저장한다.
+            PlayerSettings.SetDynamicBatchingForPlatform(request.target, assets.Any(asset => asset.supportsDynamicBatching));
+            var serialize = typeof(BuildProfile).GetMethod("SerializePlayerSettings", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            if (serialize == null) throw new InvalidOperationException("프로필 PlayerSettings 저장 API를 확인하세요.");
+            serialize.Invoke(profile.Profile, null);
+            EditorUtility.SetDirty(profile.Profile); AssetDatabase.SaveAssetIfDirty(profile.Profile);
+            // 이 동기 준비 단계에서 수행한 정규화만 기준에 반영한다. 빌드 후에는 다시 채택하지 않는다.
+            request.effectiveFingerprint = Fingerprint(profile);
+            var store = new BuildToolRunStore(BuildToolRunStore.DefaultRoot);
+            store.Save(request); store.Log(request, "URP 배칭 설정 준비 완료. 이후 프로필 변경 감지를 유지합니다.");
         }
 
         private static void RestoreOwned(string key, JObject current, JObject before, JObject expected, Action restore, List<string> errors)

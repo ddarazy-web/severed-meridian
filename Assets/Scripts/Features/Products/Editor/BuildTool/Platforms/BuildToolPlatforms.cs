@@ -14,6 +14,13 @@ namespace Products.Editor
         void DrawSettings(UnityEngine.UIElements.VisualElement parent, BuildToolProfileInfo profile, System.Action changed);
     }
 
+    public interface IBuildToolVersionCode
+    {
+        string VersionCodeLabel { get; }
+        SerializedProperty FindVersionCode(SerializedObject settings);
+        void ValidateVersionCode(string value);
+    }
+
     public interface IBuildToolPlatform
     {
         BuildTarget Target { get; }

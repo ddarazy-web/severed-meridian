@@ -13,6 +13,27 @@ namespace Products.Editor
     {
         private static string loadedContext, loadedStore;
 
+        internal static void RestoreForExternalBuild(BuildToolProfileInfo profile)
+        {
+            var data = new SerializedObject(ProductProfiles.ProfileSettings(profile.Profile, false));
+            if (!data.FindProperty("androidUseCustomKeystore").boolValue) return;
+            string store = data.FindProperty("AndroidKeystoreName").stringValue;
+            string alias = data.FindProperty("AndroidKeyaliasName").stringValue;
+            string context = Path.GetFullPath(".") + "\n" + profile.Guid + "\n" + store + "\n" + alias;
+            try
+            {
+                if (!BuildToolSigningPasswords.Supported || !new BuildToolSigningPasswords(context).TryRead(out string storePassword, out string keyPassword) ||
+                    string.IsNullOrEmpty(storePassword) || string.IsNullOrEmpty(keyPassword))
+                    throw new InvalidOperationException();
+                PlayerSettings.Android.keystorePass = storePassword;
+                PlayerSettings.Android.keyaliasPass = keyPassword;
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException("저장된 Android 서명을 불러올 수 없습니다. 같은 Windows 계정의 빌드 도구에서 해당 프로필·Keystore·Alias 비밀번호를 저장하세요.");
+            }
+        }
+
         internal static void Draw(VisualElement parent, BuildToolProfileInfo profile, Action changed)
         {
             var section = new VisualElement { name = "platform-settings" }; section.AddToClassList("section"); parent.Add(section);

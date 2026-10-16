@@ -37,9 +37,6 @@ Label { white-space: normal; }
 .unity-base-slider__tracker { background-color: rgb(15, 23, 33); min-height: 5px; min-width: 5px; }
 .level-tool .unity-base-slider__dragger { background-color: rgb(76, 106, 126); min-height: 12px; min-width: 12px; border-radius: 4px; }
 .unity-base-slider { min-height: 18px; }
-.unity-base-dropdown__container-outer { background-color: rgb(34, 43, 57); color: white; border-width: 1px; border-color: rgb(100, 137, 150); }
-.unity-base-dropdown__item { min-height: 28px; padding: 4px 8px; }
-.unity-base-dropdown__item:hover { background-color: rgb(65, 96, 117); }
 .editor-shell { flex-grow: 1; min-height: 0; }
 .menu-bar { flex-direction: row; flex-shrink: 0; border-bottom-width: 1px; border-bottom-color: rgb(40, 54, 69); padding-bottom: 4px; }
 .menu-bar > Button { background-color: transparent; border-width: 0; min-width: 60px; }

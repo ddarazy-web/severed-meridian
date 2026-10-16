@@ -172,6 +172,7 @@ namespace Products.Editor
             InfoField(grid, "앱 이름", item.ProductName ?? "미확인", "기기에 표시될 제품 이름입니다.");
             InfoField(grid, "앱 식별자", item.ApplicationId ?? "미확인", "스토어와 기기에서 앱을 구분하는 고유 식별자입니다.");
             InfoField(grid, "빌드 출력 위치", output, "제품별 출력 위치입니다. Android는 선택한 APK/AAB 형식에 따라 확장자가 바뀝니다.");
+            if (item.Profile != null && item.Product != null) BuildToolVersionSettings.Draw(overview, item, ReloadProfiles);
             string info = "제품: " + (item.Product?.Name ?? "미등록 / 읽기 오류") + "\n플랫폼: " + (item.Target == BuildTarget.NoTarget ? "미확인" : item.Target.ToString()) +
                 "\n앱 이름: " + (item.ProductName ?? "미확인") + "\n앱 식별자: " + (item.ApplicationId ?? "미확인") +
                 "\n시작 씬: " + string.Join(", ", item.Scenes) + "\n제품/기능 심볼: " + string.Join(", ", item.Symbols) +

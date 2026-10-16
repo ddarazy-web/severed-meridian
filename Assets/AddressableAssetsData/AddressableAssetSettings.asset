@@ -55,12 +55,12 @@ MonoBehaviour:
   m_CheckForContentUpdateRestrictionsOption: 0
   m_MonoScriptBundleCustomNaming: 
   m_RemoteCatalogBuildPath:
-    m_Id: 
+    m_Id: a6eca30c369dd4a4ebfee40505608903
   m_RemoteCatalogLoadPath:
     m_Id: 
   m_ContentStateBuildPathProfileVariableName: 
-  m_CustomContentStateBuildPath: 
-  m_ContentStateBuildPath: 
+  m_CustomContentStateBuildPath: Library/com.unity.addressables/Products/PRODUCT_LEVEL_EDITOR/StandaloneWindows64/ContentState
+  m_ContentStateBuildPath: Library/com.unity.addressables/Products/PRODUCT_LEVEL_EDITOR/StandaloneWindows64/ContentState
   m_BuildAddressablesWithPlayerBuild: 2
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
@@ -88,7 +88,7 @@ MonoBehaviour:
         m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
       - m_Id: f06fc74d07899e549ac4be122bd687c7
         m_Value: <undefined>
-    - m_InheritedParent:
+    - m_InheritedParent: 
       m_Id: 256e495c077450e409f544d9a588f0c3
       m_ProfileName: Android Level Editor
       m_Values:
@@ -192,7 +192,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d19e382ef6ae8234582a4a2156e171e8, type: 2}
   - {fileID: 11400000, guid: ec38ed60ab6d96c41b58ffa5016e95b9, type: 2}
   - {fileID: 11400000, guid: 456afcaa6fbabf640a2e04d67b657c55, type: 2}
-  m_ActiveProfileId: 138f7737ceab55f4faf10cee4d2eb6c9
+  m_ActiveProfileId: e9dd39b656f2be448970bd6cf7348cd4
   m_ContentDirectoryCatalogNameMigrated: 0
   m_CatalogFormatMigrated: 1
   m_CrcCachedBundleFlagMigrated: 1

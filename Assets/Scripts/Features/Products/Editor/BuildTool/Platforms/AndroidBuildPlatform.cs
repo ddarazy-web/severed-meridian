@@ -3,11 +3,18 @@ using UnityEditor;
 
 namespace Products.Editor
 {
-    public sealed class AndroidBuildPlatform : IBuildToolPlatform, IBuildToolPlatformSettings, IBuildToolBuildSettings
+    public sealed class AndroidBuildPlatform : IBuildToolPlatform, IBuildToolPlatformSettings, IBuildToolBuildSettings, IBuildToolVersionCode
     {
         public BuildTarget Target => BuildTarget.Android;
         public string PlayerSettingsKey => "Android";
         public bool OutputIsDirectory => false;
+        public string VersionCodeLabel => "Version Code";
+        public SerializedProperty FindVersionCode(SerializedObject settings) => settings.FindProperty("AndroidBundleVersionCode");
+        public void ValidateVersionCode(string value)
+        {
+            if (!int.TryParse(value, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out int code) || code < 1 || code > 2100000000)
+                throw new System.ArgumentException("Version Code는 1~2100000000 사이의 정수로 입력하세요.");
+        }
         public string Output(ProductDefinition product, IReadOnlyList<BuildToolOptionState> options) => BuildToolAndroidBundle.Output(product, options);
         public void Apply(BuildToolRequest request) => BuildToolAndroidBundle.Apply(request, new BuildToolRunStore(BuildToolRunStore.DefaultRoot));
         public void Restore(BuildToolRequest request) => BuildToolAndroidBundle.Restore(request, new BuildToolRunStore(BuildToolRunStore.DefaultRoot));
