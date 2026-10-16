@@ -160,6 +160,9 @@ namespace Products.Editor
             inspect.SetEnabled(item != null && !EditorApplication.isCompiling && !EditorApplication.isUpdating && !EditorApplication.isPlayingOrWillChangePlaymode);
             executionPreflight = null;
             if (item == null) { detail.Add(new Label("조회할 프로필을 선택하세요.")); return; }
+            string output = item.Product?.Output ?? "미등록";
+            try { if (item.Product != null) output = BuildToolPlatforms.Default.Output(item.Product, OptionRegistry.Resolve(item.Product, BuildToolPreferences.Choices(SelectionPath, selectedGuid))); }
+            catch (Exception) { output = "옵션 설정 오류 · 아래 안내를 확인하세요."; }
             if (BuildToolPlatforms.Default.TryGet(item.Target, out var platform, out _) && platform is IBuildToolPlatformSettings settings)
                 settings.DrawSettings(detail, item, ReloadProfiles);
             var overview = Section(detail, "product-section", "02  선택한 제품 정보", "이번에 빌드할 대상입니다. 현재 활성 프로필과 달라도 정상입니다.");
@@ -168,11 +171,11 @@ namespace Products.Editor
             InfoField(grid, "대상 플랫폼", item.Target.ToString(), "선택한 제품이 실행될 플랫폼입니다. 게임과 레벨툴은 별도 제품입니다.");
             InfoField(grid, "앱 이름", item.ProductName ?? "미확인", "기기에 표시될 제품 이름입니다.");
             InfoField(grid, "앱 식별자", item.ApplicationId ?? "미확인", "스토어와 기기에서 앱을 구분하는 고유 식별자입니다.");
-            InfoField(grid, "고정 출력 위치", item.Product?.Output ?? "미등록", "완성된 빌드가 저장될 위치입니다. 이 도구에서는 제품별 고정 경로를 사용합니다.");
+            InfoField(grid, "빌드 출력 위치", output, "제품별 출력 위치입니다. Android는 선택한 APK/AAB 형식에 따라 확장자가 바뀝니다.");
             string info = "제품: " + (item.Product?.Name ?? "미등록 / 읽기 오류") + "\n플랫폼: " + (item.Target == BuildTarget.NoTarget ? "미확인" : item.Target.ToString()) +
                 "\n앱 이름: " + (item.ProductName ?? "미확인") + "\n앱 식별자: " + (item.ApplicationId ?? "미확인") +
                 "\n시작 씬: " + string.Join(", ", item.Scenes) + "\n제품/기능 심볼: " + string.Join(", ", item.Symbols) +
-                "\n기본 출력: " + (item.Product?.Output ?? "미등록") + "\n에셋: " + item.Path + "\nGUID: " + item.Guid +
+                "\n빌드 출력: " + output + "\n에셋: " + item.Path + "\nGUID: " + item.Guid +
                 "\n활성 여부: " + (item.Profile != null && BuildProfile.GetActiveBuildProfile() == item.Profile ? "현재 활성 프로필" : "활성 아님 · 선택만으로 전환하지 않음");
             var technical = new Foldout { text = "기술 정보 · 씬 / 심볼 / 에셋 경로", value = false, tooltip = "문제 확인에 필요한 내부 식별 정보입니다. 펼쳐서 내용을 선택·복사할 수 있습니다." }; overview.Add(technical);
             var information = new Label(info) { name = "profile-information", selection = { isSelectable = true } }; information.AddToClassList("technical"); technical.Add(information);

@@ -86,7 +86,7 @@ namespace Products.Editor
             string output = (string)current["output"];
             if (!SameOutput(output, request.output))
             {
-                if (output != (string)before["output"] && !string.IsNullOrEmpty(output))
+                if (output != (string)before["output"] && !string.IsNullOrEmpty(output) && !SameOutput(output, Read(request.profileGuid).Product.Output))
                     throw new InvalidOperationException("실행 전에 출력 설정이 외부에서 변경됐습니다.");
                 // 프로필 전환 도중 재로드로 Select의 마지막 줄이 중단된 경우만 마무리한다.
                 EditorUserBuildSettings.SetBuildLocation(request.target, request.output);
@@ -100,29 +100,37 @@ namespace Products.Editor
                 throw new InvalidOperationException("명시적으로 확인한 실제 빌드 요청이 아닙니다.");
             var profile = Read(request.profileGuid); Validate(profile);
             if (Fingerprint(profile) != (request.effectiveFingerprint ?? request.fingerprint)) throw new InvalidOperationException("실행 직전 프로필 파일이 변경됐습니다.");
-            BuildPlayerOptions? debugOptions = request.debugMode.HasValue ? BuildToolDebugMode.CreateBuildOptions(request) : (BuildPlayerOptions?)null;
             BuildToolPlatforms.Default.TryGet(request.target, out var platform, out string reason);
             if (platform == null) throw new InvalidOperationException(reason);
-            Directory.CreateDirectory(platform.OutputIsDirectory ? request.output : Path.GetDirectoryName(request.output));
-            var settings = AddressableAssetSettingsDefaultObject.Settings;
-            settings.BuildAddressablesWithPlayerBuild = AddressableAssetSettings.PlayerBuildOption.BuildWithPlayer;
-            EditorUtility.SetDirty(settings); AssetDatabase.SaveAssetIfDirty(settings);
-            BuildReport report = debugOptions.HasValue ? BuildPipeline.BuildPlayer(debugOptions.Value) : BuildPipeline.BuildPlayer(new BuildPlayerWithProfileOptions
+            var platformSettings = platform as IBuildToolBuildSettings;
+            try
             {
-                buildProfile = profile.Profile, locationPathName = request.output, options = BuildOptions.None
-            });
-            if (report == null) throw new InvalidDataException("Unity BuildReport가 없습니다. 결과를 확인하세요.");
-            if (report.summary.result != BuildResult.Succeeded && report.summary.result != BuildResult.Cancelled && report.summary.result != BuildResult.Failed)
-                throw new InvalidDataException("Unity가 확정된 빌드 결과를 제공하지 않았습니다. 결과를 확인하세요.");
-            string errors = string.Join("\n", report.steps.SelectMany(step => step.messages)
-                .Where(message => message.type == LogType.Error || message.type == LogType.Exception).Select(message => message.content));
-            return new BuildToolResult { outcome = report.summary.result == BuildResult.Succeeded ? BuildToolRunPhase.Succeeded :
-                report.summary.result == BuildResult.Cancelled ? BuildToolRunPhase.Canceled : BuildToolRunPhase.Failed,
-                error = errors, bytes = report.summary.totalSize };
+                platformSettings?.Apply(request);
+                BuildPlayerOptions? debugOptions = request.debugMode.HasValue ? BuildToolDebugMode.CreateBuildOptions(request) : (BuildPlayerOptions?)null;
+                Directory.CreateDirectory(platform.OutputIsDirectory ? request.output : Path.GetDirectoryName(request.output));
+                var settings = AddressableAssetSettingsDefaultObject.Settings;
+                settings.BuildAddressablesWithPlayerBuild = AddressableAssetSettings.PlayerBuildOption.BuildWithPlayer;
+                EditorUtility.SetDirty(settings); AssetDatabase.SaveAssetIfDirty(settings);
+                BuildReport report = debugOptions.HasValue ? BuildPipeline.BuildPlayer(debugOptions.Value) : BuildPipeline.BuildPlayer(new BuildPlayerWithProfileOptions
+                {
+                    buildProfile = profile.Profile, locationPathName = request.output, options = BuildOptions.None
+                });
+                if (report == null) throw new InvalidDataException("Unity BuildReport가 없습니다. 결과를 확인하세요.");
+                if (report.summary.result != BuildResult.Succeeded && report.summary.result != BuildResult.Cancelled && report.summary.result != BuildResult.Failed)
+                    throw new InvalidDataException("Unity가 확정된 빌드 결과를 제공하지 않았습니다. 결과를 확인하세요.");
+                string errors = string.Join("\n", report.steps.SelectMany(step => step.messages)
+                    .Where(message => message.type == LogType.Error || message.type == LogType.Exception).Select(message => message.content));
+                return new BuildToolResult { outcome = report.summary.result == BuildResult.Succeeded ? BuildToolRunPhase.Succeeded :
+                    report.summary.result == BuildResult.Cancelled ? BuildToolRunPhase.Canceled : BuildToolRunPhase.Failed,
+                    error = errors, bytes = report.summary.totalSize };
+            }
+            finally { platformSettings?.Restore(request); }
         }
 
         public void Cleanup(BuildToolRequest request)
         {
+            if (BuildToolPlatforms.Default.TryGet(request.target, out var platform, out _) && platform is IBuildToolBuildSettings settingsToRestore)
+                settingsToRestore.Restore(request);
             var snapshot = JObject.Parse(request.selectionSnapshot);
             var before = (JObject)snapshot["before"]; var expected = (JObject)snapshot["expected"];
             var current = CaptureRouting(request); var errors = new List<string>();
@@ -186,6 +194,6 @@ namespace Products.Editor
         }
 
         private static bool SameOutput(string actual, string expected) => !string.IsNullOrEmpty(actual) &&
-            string.Equals(Path.GetFullPath(actual), expected, StringComparison.OrdinalIgnoreCase);
+            string.Equals(Path.GetFullPath(actual), Path.GetFullPath(expected), StringComparison.OrdinalIgnoreCase);
     }
 }

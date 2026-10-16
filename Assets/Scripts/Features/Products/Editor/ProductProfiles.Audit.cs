@@ -142,7 +142,7 @@ namespace Products.Editor
         {
             ProductProfiles.ValidateBuildOptions(report.summary.options);
             ProductDefinition definition = ProductProfiles.ValidateProfile(BuildProfile.GetActiveBuildProfile());
-            if (definition.Target != report.summary.platform || !string.Equals(Path.GetFullPath(definition.Output), Path.GetFullPath(report.summary.outputPath), StringComparison.OrdinalIgnoreCase))
+            if (definition.Target != report.summary.platform || !string.Equals(Path.GetFullPath(BuildToolContentPreparation.ExpectedOutput(definition)), Path.GetFullPath(report.summary.outputPath), StringComparison.OrdinalIgnoreCase))
                 throw new BuildFailedException("선택한 제품의 플랫폼/출력 경로가 다릅니다. Tools/Products에서 제품을 선택하세요.");
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null || settings.activeProfileId != settings.profileSettings.GetProfileId(definition.Name))

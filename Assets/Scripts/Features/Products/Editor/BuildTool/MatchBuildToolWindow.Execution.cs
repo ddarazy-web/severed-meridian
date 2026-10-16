@@ -37,7 +37,7 @@ namespace Products.Editor
                 var choices = BuildToolPreferences.Choices(SelectionPath, selectedGuid);
                 var resolved = OptionRegistry.Resolve(item.Product, choices);
                 string summary = string.Join("\n", resolved.Select(state => state.id + " v" + state.version + " : " + (state.enabled ? "ON" : "OFF")));
-                if (!EditorUtility.DisplayDialog("제품 빌드 실행", item.Product.Name + "\n플랫폼: " + item.Target + "\n출력: " + item.Product.Output + "\n옵션:\n" + (summary.Length == 0 ? "없음" : summary) +
+                if (!EditorUtility.DisplayDialog("제품 빌드 실행", item.Product.Name + "\n플랫폼: " + item.Target + "\n출력: " + BuildToolPlatforms.Default.Output(item.Product, resolved) + "\n옵션:\n" + (summary.Length == 0 ? "없음" : summary) +
                     "\n\n실제 Player와 Addressables 콘텐츠를 빌드합니다. 활성 제품·플랫폼이 바뀔 수 있습니다. SDK·서명·배포 성공은 아직 확인되지 않았습니다.", "빌드 시작", "취소")) return;
                 BuildToolController.Runner.Start(selectedGuid, true, choices); RefreshExecution();
             }

@@ -18,6 +18,11 @@ namespace Products.Editor
             return request;
         }
         public static bool PacksPrepared => Current()?.packsPrepared == true;
+        public static string ExpectedOutput(ProductDefinition product)
+        {
+            var request = Current();
+            return request != null && request.product == product.Name ? BuildToolPlatforms.Default.Output(product, request.options) : product.Output;
+        }
         public static void MarkPacksPrepared(string output)
         {
             var request = Current();

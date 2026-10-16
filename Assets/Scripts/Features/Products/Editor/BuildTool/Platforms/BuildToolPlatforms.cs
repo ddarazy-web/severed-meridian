@@ -3,6 +3,12 @@ using UnityEditor;
 
 namespace Products.Editor
 {
+    public interface IBuildToolBuildSettings
+    {
+        string Output(ProductDefinition product, IReadOnlyList<BuildToolOptionState> options);
+        void Apply(BuildToolRequest request);
+        void Restore(BuildToolRequest request);
+    }
     public interface IBuildToolPlatformSettings
     {
         void DrawSettings(UnityEngine.UIElements.VisualElement parent, BuildToolProfileInfo profile, System.Action changed);
@@ -20,6 +26,12 @@ namespace Products.Editor
     {
         public static readonly BuildToolPlatforms Default = new BuildToolPlatforms(new AndroidBuildPlatform(), new IosBuildPlatform(), new WindowsBuildPlatform());
         private readonly Dictionary<BuildTarget, List<IBuildToolPlatform>> handlers = new Dictionary<BuildTarget, List<IBuildToolPlatform>>();
+
+        public string Output(ProductDefinition product, IReadOnlyList<BuildToolOptionState> options)
+        {
+            if (!TryGet(product.Target, out var platform, out string reason)) throw new System.InvalidOperationException(reason);
+            return platform is IBuildToolBuildSettings settings ? settings.Output(product, options) : product.Output;
+        }
 
         public BuildToolPlatforms(params IBuildToolPlatform[] registrations)
         {

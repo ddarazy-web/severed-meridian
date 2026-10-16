@@ -39,7 +39,7 @@ namespace Products.Editor
             {
                 id = Guid.NewGuid().ToString("N"), session = session, isMock = backend.IsMock, userConfirmed = userConfirmed,
                 profileGuid = guid, profilePath = profile.Path, product = product.Name, symbol = product.Symbol, target = profile.Target,
-                output = Path.GetFullPath(product.Output), fingerprint = backend.Fingerprint(profile), startedUtc = DateTime.UtcNow.ToString("O"),
+                output = Path.GetFullPath(BuildToolPlatforms.Default.Output(product, resolvedOptions)), fingerprint = backend.Fingerprint(profile), startedUtc = DateTime.UtcNow.ToString("O"),
                 phase = BuildToolRunPhase.Preparing, status = "빌드 요청을 확정했습니다.", options = resolvedOptions
             };
             request.logPath = Path.GetFullPath(Path.Combine(Store.Root, request.id + ".log"));
@@ -75,7 +75,7 @@ namespace Products.Editor
                 }
                 var profile = backend.Read(Current.profileGuid); backend.Validate(profile);
                 if (profile.Path != Current.profilePath || profile.Product.Name != Current.product || profile.Target != Current.target ||
-                    Path.GetFullPath(profile.Product.Output) != Current.output)
+                    Path.GetFullPath(BuildToolPlatforms.Default.Output(profile.Product, Current.options)) != Current.output)
                     throw new InvalidOperationException("확정 후 프로필 설정이 변경됐습니다. 새 요청으로 다시 검사하세요.");
                 options.CheckFingerprint(Current, backend);
                 if (Current.phase == BuildToolRunPhase.Preparing)

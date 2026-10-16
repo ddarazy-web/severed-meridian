@@ -11,6 +11,7 @@ namespace Products.Editor
         public string Id, Label, Tooltip;
         public int Version = 1;
         public bool DefaultEnabled;
+        public string DisabledLabel, EnabledLabel;
         public string[] Requires = Array.Empty<string>(), Conflicts = Array.Empty<string>(), Settings = Array.Empty<string>(), Symbols = Array.Empty<string>();
         public Func<ProductDefinition, bool> AppliesTo = product => true;
     }
@@ -35,7 +36,7 @@ namespace Products.Editor
 
     public sealed partial class BuildToolOptions
     {
-        public static readonly BuildToolOptions Default = new BuildToolOptions(new IBuildToolOptionHandler[] { new BuildToolDebugMode() });
+        public static readonly BuildToolOptions Default = new BuildToolOptions(new IBuildToolOptionHandler[] { new BuildToolDebugMode(), new BuildToolAndroidBundle() });
         private readonly Dictionary<string, IBuildToolOptionHandler> handlers;
         private readonly Dictionary<string, BuildToolOptionSetting> settings;
 

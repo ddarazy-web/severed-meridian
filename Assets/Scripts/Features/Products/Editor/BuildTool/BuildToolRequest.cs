@@ -26,6 +26,7 @@ namespace Products.Editor
         public BuildToolResult result;
         public string effectiveFingerprint, postprocessError;
         public bool? debugMode;
+        public bool? androidAppBundle, androidAppBundleBefore;
         public bool sharedSymbolsPrepared;
         public List<BuildToolOptionState> options = new List<BuildToolOptionState>();
         public List<BuildToolOptionMutation> optionMutations = new List<BuildToolOptionMutation>();

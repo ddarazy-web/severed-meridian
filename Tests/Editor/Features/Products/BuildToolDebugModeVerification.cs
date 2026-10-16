@@ -19,7 +19,7 @@ namespace Products.Editor
                 foreach (var product in ProductProfiles.Definitions)
                 {
                     var definitions = BuildToolOptions.Default.Available(product);
-                    Check(definitions.Count == 1 && definitions[0].Id == BuildToolDebugMode.Id && !definitions[0].DefaultEnabled, "debug option registered OFF by default: " + product.Name);
+                    Check(definitions.Any(definition => definition.Id == BuildToolDebugMode.Id && !definition.DefaultEnabled), "debug option registered OFF by default: " + product.Name);
                 }
                 var backend = new MockBuildToolBackend();
                 var choices = new Dictionary<string, bool> { [BuildToolDebugMode.Id] = true };
