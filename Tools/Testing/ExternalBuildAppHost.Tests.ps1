@@ -26,6 +26,13 @@ foreach ($operation in @('check','build')) {
     Check ($progress.requestId -eq $request.requestId -and $progress.logPath) 'progress is correlated'
     if ($operation -eq 'build') { Check ($r.data.arguments -match '-activeBuildProfile') 'v2 build selects GUID profile' }
 }
+Put 'Logs/old-user.log' 'keep this log'
+$oldLog = Join-Path $fixture 'Logs/old-user.log'
+(Get-Item $oldLog).LastWriteTimeUtc = [DateTime]::UtcNow.AddDays(-30)
+$beforeHash = (Get-FileHash $oldLog).Hash
+$request = [pscustomobject]@{version=2;requestId=[guid]::NewGuid().ToString('N');operation='build';profileGuid='0123456789abcdef0123456789abcdef';expectedRevision='revision'}
+$r = Invoke-BuildToolHost -ProjectPath $fixture -Request $request -UnityPath (Join-Path $fixture 'Unity.exe') -PreserveLogs
+Check ($r.exitCode -eq 0 -and (Test-Path $oldLog) -and (Get-FileHash $oldLog).Hash -eq $beforeHash) 'PreserveLogs builds without removing old logs'
 $request = [pscustomobject]@{version=2;requestId='..\escape';operation='settings'}
 $r = Invoke-BuildToolHost -ProjectPath $fixture -Request $request -UnityPath (Join-Path $fixture 'Unity.exe')
 Check ($r.errorCode -eq 'InvalidRequest') 'unsafe request ID rejected'

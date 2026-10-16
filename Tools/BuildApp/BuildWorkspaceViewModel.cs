@@ -14,12 +14,18 @@ public sealed class BuildWorkspaceViewModel : Observable
     private bool customKeystore;
     private string operation = "";
     private int operationGeneration;
+    private DateTimeOffset profilesQueriedAt;
     private readonly List<ActionCommand> commands = [];
     public Func<string, bool> Confirm { get; set; } = _ => false;
     public ObservableCollection<ProfileItem> Profiles { get; } = [];
     public ObservableCollection<OptionItem> Options { get; } = [];
     public ObservableCollection<string> Aliases { get; } = [];
     public LogCleanupViewModel Logs { get; } = new();
+    private RecoveryState recovery=new(false,false,false,"이전 작업 상태를 확인하세요.");
+    public string RecoveryReport=>recovery.Report;
+    public ActionCommand InspectRecovery {get;}
+    public ActionCommand AcknowledgeRecovery {get;}
+    public ActionCommand CleanupTransfers {get;}
     public ActionCommand Reload { get; }
     public ActionCommand Save { get; }
     public ActionCommand Check { get; }
@@ -39,11 +45,27 @@ public sealed class BuildWorkspaceViewModel : Observable
         PreviewLogs = Command(() => RunCommand(() => CleanupAsync(true)), () => CanEdit && ProjectPath.Length > 0);
         CleanLogs = Command(() => RunCommand(() => CleanupAsync(false)), () => CanEdit && Logs.HasPreview);
         Logs.PropertyChanged += (_, _) => RefreshCommands();
+        InspectRecovery=Command(RefreshRecovery,()=>!Busy&&ProjectPath.Length>0);
+        AcknowledgeRecovery=Command(()=>{
+            if(!Confirm("실행 로그를 확인했나요? 결과가 없는 외부 요청을 확인됨으로 표시합니다. 기존 Unity 실행기 기록은 변경하지 않습니다."))return;
+            try{BuildRecovery.Acknowledge(ProjectPath);RefreshRecovery();}catch(Exception e){Error(e);}
+        },()=>!Busy&&!recovery.Active&&!recovery.RunnerBlocked&&recovery.NeedsAttention);
+        CleanupTransfers=Command(()=>{
+            if(!Confirm("종료된 요청의 24시간 이상 지난 암호화 임시 파일만 정리할까요? 사용자 서명 저장소와 로그는 삭제하지 않습니다."))return;
+            try{int removed=BuildRecovery.CleanupSecrets(ProjectPath);RefreshRecovery();Status=$"암호화 임시 파일 {removed}개 정리. 실행 중·최근 파일은 보존했습니다.";}catch(Exception e){Error(e);}
+        },()=>!Busy&&ProjectPath.Length>0&&!recovery.Active&&!recovery.RunnerBlocked);
+    }
+    public void RefreshRecovery()
+    {
+        if(Busy)return;
+        recovery=BuildRecovery.Inspect(ProjectPath);Changed(nameof(RecoveryReport));RefreshCommands();
     }
     private ActionCommand Command(Action action, Func<bool> can) { var command = new ActionCommand(action, can); commands.Add(command); return command; }
     private async void RunCommand(Func<Task<bool>> action) { try { await action(); } catch (Exception error) { Error(error); } }
     private void RefreshCommands() { foreach (var command in commands) command.Refresh(); }
-    public bool Busy { get => busy; private set { if (Set(ref busy, value)) { Changed(nameof(CanEdit)); RefreshCommands(); } } }
+    public bool Busy { get => busy; private set { if (Set(ref busy, value)) { Changed(nameof(CanEdit)); Changed(nameof(IsLoadingProfiles)); Changed(nameof(CanUseWorkspace)); RefreshCommands(); } } }
+    public bool IsLoadingProfiles => Busy && operation == "settings";
+    public bool CanUseWorkspace => !IsLoadingProfiles;
     public bool CanEdit => !Busy;
     public bool Dirty { get => dirty; private set { if (Set(ref dirty, value)) { Changed(nameof(SaveHint)); RefreshCommands(); } } }
     public bool SigningDirty { get => signingDirty; private set { Set(ref signingDirty, value); Changed(nameof(SaveHint)); } }
@@ -65,9 +87,15 @@ public sealed class BuildWorkspaceViewModel : Observable
     public string ProductName => Selected?.Data.Text("productName") ?? "프로필을 선택하세요";
     public string ApplicationId => Selected?.Data.Text("applicationId") ?? "";
     public string SigningState => Selected?.Data["signing"].Flag("credentialsStored") == true ? "암호화된 비밀번호 저장됨 · 유효성 미검증" : "저장된 비밀번호 없음";
-    public string KeystorePath { get => keystorePath; set { if (Set(ref keystorePath, value) && !applying) { SigningDirty = true; Aliases.Clear(); } } }
-    public string Alias { get => alias; set { if (Set(ref alias, value) && !applying) SigningDirty = true; } }
-    public bool CustomKeystore { get => customKeystore; set { if (Set(ref customKeystore, value) && !applying) SigningDirty = true; } }
+    public bool HasSavedSigning => CustomKeystore && Selected?.Data["signing"].Flag("credentialsStored") == true
+        && KeystorePath == Selected.Data["signing"].Text("keystorePath") && Alias == Selected.Data["signing"].Text("alias");
+    public string SigningPasswordHint => HasSavedSigning
+        ? "비밀번호가 암호화되어 저장되어 있습니다. 재입력 없이 빌드할 수 있습니다. 변경하거나 Alias를 조회할 때만 다시 입력하세요."
+        : "서명 저장 시 Keystore와 키 비밀번호를 입력하세요.";
+    private void RefreshSigningHint() { Changed(nameof(HasSavedSigning)); Changed(nameof(SigningPasswordHint)); }
+    public string KeystorePath { get => keystorePath; set { if (Set(ref keystorePath, value)) { if (!applying) { SigningDirty = true; Aliases.Clear(); } RefreshSigningHint(); } } }
+    public string Alias { get => alias; set { if (Set(ref alias, value)) { if (!applying) SigningDirty = true; RefreshSigningHint(); } } }
+    public bool CustomKeystore { get => customKeystore; set { if (Set(ref customKeystore, value)) { if (!applying) SigningDirty = true; RefreshSigningHint(); } } }
     public void MarkSigningInputChanged() { if (!applying && HasSigning) SigningDirty = true; }
     private bool DiscardChanges() => !(Dirty || SigningDirty) || Confirm("저장하지 않은 변경을 버리고 이동할까요? 취소하면 현재 편집을 유지합니다.");
     public bool ChangeProject(string path)
@@ -81,9 +109,13 @@ public sealed class BuildWorkspaceViewModel : Observable
         applying = true;
         selected = profile; Changed(nameof(Selected));
         VersionName = profile?.Data["appVersion"].Text("name") ?? ""; VersionCode = profile?.Data["appVersion"].Text("code") ?? "";
-        KeystorePath = profile?.Data["signing"].Text("keystorePath") ?? ""; Alias = profile?.Data["signing"].Text("alias") ?? "";
+        KeystorePath = profile?.Data["signing"].Text("keystorePath") ?? "";
         CustomKeystore = profile?.Data["signing"].Flag("customKeystore") ?? false;
-        Aliases.Clear(); if (Alias.Length > 0) Aliases.Add(Alias);
+        // Clearing a selected ComboBox item writes empty Text back through the binding.
+        // Restore the saved value after rebuilding its items.
+        string savedAlias = profile?.Data["signing"].Text("alias") ?? "";
+        Aliases.Clear(); if (savedAlias.Length > 0) Aliases.Add(savedAlias);
+        Alias = savedAlias;
         Options.Clear();
         foreach (JsonNode? option in profile?.Data["options"] as JsonArray ?? [])
         {
@@ -93,6 +125,7 @@ public sealed class BuildWorkspaceViewModel : Observable
         }
         OutputPath = profile?.Data.Text("output") ?? ""; Dirty = SigningDirty = false; applying = false;
         foreach (string name in new[] { nameof(CodeLabel), nameof(HasVersionCode), nameof(HasSigning), nameof(ProductName), nameof(ApplicationId), nameof(SigningState) }) Changed(name);
+        RefreshSigningHint();
         RefreshCommands();
     }
     public async Task<bool> ReloadAsync(string? preferredGuid = null)
@@ -106,8 +139,28 @@ public sealed class BuildWorkspaceViewModel : Observable
             Profiles.Clear();
             foreach (JsonObject profile in items.OfType<JsonObject>()) Profiles.Add(new(profile.Text("profileGuid"), profile.Text("name"), profile.Text("target"), profile));
             Apply(Profiles.FirstOrDefault(p => p.Guid == previous) ?? Profiles.FirstOrDefault());
-            LastQuery = "마지막 조회 " + DateTime.Now.ToString("HH:mm:ss"); Status = $"프로필 {Profiles.Count}개를 불러왔습니다.";
+            profilesQueriedAt = DateTimeOffset.Now;
+            LastQuery = "마지막 조회 " + profilesQueriedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"); Status = $"프로필 {Profiles.Count}개를 불러왔습니다.";
+            SaveProfileCache();
         });
+    }
+    public Task<bool> InitializeProfilesAsync(string? preferredGuid = null)
+    {
+        if (Busy || !DiscardChanges()) return Task.FromResult(false);
+        if (!ProfileCache.TryRead(ProjectPath, out var items, out profilesQueriedAt)) return ReloadAsync(preferredGuid);
+        Profiles.Clear();
+        foreach (JsonObject profile in items.OfType<JsonObject>()) Profiles.Add(new(profile.Text("profileGuid"), profile.Text("name"), profile.Text("target"), profile));
+        Apply(Profiles.FirstOrDefault(p => p.Guid == preferredGuid) ?? Profiles.FirstOrDefault());
+        LastQuery = "저장된 조회 " + profilesQueriedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+        StatusIsError = false;
+        Status = "이전 조회 결과를 표시합니다. 최신 설정이 필요하면 프로젝트 → 프로필 불러오기(F5)를 선택하세요.";
+        return Task.FromResult(true);
+    }
+    private void SaveProfileCache()
+    {
+        try { ProfileCache.Write(ProjectPath, Profiles.Select(p => p.Data), profilesQueriedAt); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        { Status += " 다음 실행용 캐시를 저장하지 못했습니다."; }
     }
     public async Task<bool> SaveAsync()
     {
@@ -125,6 +178,7 @@ public sealed class BuildWorkspaceViewModel : Observable
             if (pendingSigning.SigningDirty)
             { KeystorePath = pendingSigning.KeystorePath; Alias = pendingSigning.Alias; CustomKeystore = pendingSigning.CustomKeystore; SigningDirty = true; }
             Status = "버전과 옵션을 프로필에 저장했습니다.";
+            SaveProfileCache();
         });
     }
     private void ReplaceProfile(JsonObject data)
@@ -162,7 +216,7 @@ public sealed class BuildWorkspaceViewModel : Observable
         return await RunAsync(request.Text("operation"), async progress =>
         {
             var response = await client.SendAsync(ProjectPath, UnityPath, request, progress, CustomKeystore ? new(storePassword, keyPassword) : null);
-            if (save) { ReplaceProfile((JsonObject)response["data"]!); Status = "서명 설정과 암호화 비밀번호를 저장했습니다."; }
+            if (save) { ReplaceProfile((JsonObject)response["data"]!); Status = "서명 설정과 암호화 비밀번호를 저장했습니다."; SaveProfileCache(); }
             else { Aliases.Clear(); foreach (JsonNode? item in response["data"]?["aliases"] as JsonArray ?? []) Aliases.Add(item!.GetValue<string>()); Status = $"Alias {Aliases.Count}개를 조회했습니다. 사용할 키를 선택하세요."; }
         });
     }
@@ -185,6 +239,12 @@ public sealed class BuildWorkspaceViewModel : Observable
     private async Task<bool> RunAsync(string action, Func<IProgress<BuildProgress>, Task> body)
     {
         if (Busy) return false;
+        if(client is BuildToolClient)
+        {
+            RefreshRecovery();
+            if(recovery.Active || (action!="settings" && action!="check" && recovery.BlocksExecution))
+            { Error(new InvalidOperationException("이전 작업/복구 탭을 확인하세요. 진행 중이거나 확인이 필요한 작업을 자동 재실행하지 않습니다."));return false; }
+        }
         operation = action; Busy = true; StatusIsError = false;
         int generation = ++operationGeneration;
         Status = action.StartsWith("cleanup") ? "로그 보호 조건을 확인하는 중…" : "Unity 연결 중… 최초 시작·컴파일에는 시간이 걸릴 수 있습니다.";

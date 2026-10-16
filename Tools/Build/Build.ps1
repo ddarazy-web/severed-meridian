@@ -8,6 +8,7 @@ param(
     [switch]$ListProfiles,
     [switch]$Check,
     [string]$UnityPath,
+    [switch]$PreserveLogs,
     [switch]$Help
 )
 $ErrorActionPreference = 'Stop'
@@ -15,7 +16,7 @@ if ($Help) {
     Write-Output 'Build.bat -ListProfiles'
     Write-Output 'Build.bat -Profile "Android Game" -Format apk -DebugMode off [-Check]'
     Write-Output 'Build.bat -Profile "Windows Level Editor" -Option "debug-mode=off"'
-    Write-Output 'Options: -UseDefaults, -UnityPath "C:\...\Unity.exe". See Tools/Build/README.md.'
+    Write-Output 'Options: -UseDefaults, -PreserveLogs, -UnityPath "C:\...\Unity.exe". See Tools/Build/README.md.'
     exit 0
 }
 $exitCode = 2
@@ -45,7 +46,7 @@ try {
     $operation = if ($ListProfiles) { 'list' } elseif ($Check) { 'check' } else { 'build' }
     $request = [pscustomobject]@{ version=1; operation=$operation; profile=$Profile; options=$choices; useSavedSettings=(-not $UseDefaults) }
     . (Join-Path $PSScriptRoot 'BuildToolHost.ps1')
-    $result = Invoke-BuildToolHost -ProjectPath $projectRoot -Request $request -UnityPath $UnityPath
+    $result = Invoke-BuildToolHost -ProjectPath $projectRoot -Request $request -UnityPath $UnityPath -PreserveLogs:$PreserveLogs
     Write-Output ($result | ConvertTo-Json -Depth 30)
     $exitCode = [int]$result.exitCode
 } catch { [Console]::Error.WriteLine($_.Exception.Message); $exitCode = 2 }

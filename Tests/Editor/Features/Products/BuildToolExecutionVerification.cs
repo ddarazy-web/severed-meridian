@@ -72,6 +72,21 @@ namespace Products.Editor
                 Check(runner.Current.phase == BuildToolRunPhase.Failed && backend.BuildCalls == 0, "deleted GUID rejected");
                 backend = new MockBuildToolBackend(); runner = Create(backend); runner.Start(backend.Profile.Guid); runner.Step(); backend.Ready = false; runner.Cancel();
                 Check(runner.Current.phase == BuildToolRunPhase.Canceled && backend.BuildCalls == 0 && backend.SelectedValue == 0, "waiting cancel cleans selection without invocation");
+                // 결과 수신 뒤 늦게 도착한 취소가 성공 결과를 덮어쓰지 않아야 한다.
+                backend = new MockBuildToolBackend(); runner = Create(backend); runner.Start(backend.Profile.Guid);
+                runner.Current.callStarted = true;
+                runner.Current.result = new BuildToolResult { outcome = BuildToolRunPhase.Succeeded };
+                runner.Current.pendingOutcome = BuildToolRunPhase.Succeeded;
+                foreach (var phase in new[] { BuildToolRunPhase.Postprocessing, BuildToolRunPhase.Finalizing })
+                {
+                    runner.Current.phase = phase; runner.Store.Save(runner.Current);
+                    Check(!runner.CanCancel, "late cancel unavailable during " + phase);
+                    Reject(() => runner.Cancel(), "late cancel rejected during " + phase);
+                    Check(runner.Current.pendingOutcome == BuildToolRunPhase.Succeeded, "late cancel preserves receipt during " + phase);
+                }
+                runner.Step(); runner.Step();
+                Check(runner.Current.phase == BuildToolRunPhase.Succeeded && backend.BuildCalls == 0 && backend.CleanupCalls == 1,
+                    "late cancel finalizes receipt exactly once without rebuild");
                 backend = new MockBuildToolBackend { FailCleanup = true }; runner = Create(backend); Complete(runner, backend);
                 Check(runner.Current.phase == BuildToolRunPhase.NeedsAttention && runner.Current.cleanupError != null && runner.IsLocked, "cleanup failure blocks new request");
                 backend.FailCleanup = false; runner.ResolveInterrupted(); Check(runner.Current.IsTerminal && backend.BuildCalls == 1, "explicit cleanup never rebuilds");

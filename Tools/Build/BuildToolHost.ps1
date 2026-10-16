@@ -1,5 +1,5 @@
 ﻿function Invoke-BuildToolHost {
-    param([string]$ProjectPath, [object]$Request, [string]$UnityPath)
+    param([string]$ProjectPath, [object]$Request, [string]$UnityPath, [switch]$PreserveLogs)
     $ErrorActionPreference = 'Stop'
     $gate = $null
     $runDirectory = $null
@@ -47,10 +47,11 @@
         if (-not $UnityPath) { $UnityPath = Join-Path $env:ProgramFiles "Unity/Hub/Editor/$version/Editor/Unity.exe" }
         if (-not (Test-Path -LiteralPath $UnityPath -PathType Leaf)) { throw 'UnityNotFound: Unity executable not found.' }
         $UnityPath = (Resolve-Path -LiteralPath $UnityPath).Path
-        if ($operation -eq 'build') {
+        if ($operation -eq 'build' -and -not $PreserveLogs) {
             $cleanup = & (Join-Path $PSScriptRoot 'Clean-Logs.ps1') -ProjectPath $projectRoot
             Write-Host ("Log cleanup: {0}, removed {1} entries." -f $cleanup.Status, $cleanup.DeletedEntries)
         }
+        elseif ($operation -eq 'build') { Write-Host 'Log cleanup skipped: PreserveLogs.' }
         $logsRoot = Join-Path $projectRoot 'Logs/ExternalBuild'
         New-Item -ItemType Directory -Path $logsRoot -Force | Out-Null
         try { $gate = [IO.File]::Open((Join-Path $logsRoot 'operation.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
@@ -68,6 +69,8 @@
         if ($Request.version -eq 2) {
             $bridgeDirectory = Join-Path $projectRoot ('Library/MatchBuildApp/' + $Request.requestId)
             New-Item -ItemType Directory -Path $bridgeDirectory -Force | Out-Null
+            $hostOwner = [Diagnostics.Process]::GetCurrentProcess()
+            [IO.File]::WriteAllText((Join-Path $bridgeDirectory 'host-owner.json'), (@{pid=$hostOwner.Id;startUtcTicks=$hostOwner.StartTime.ToUniversalTime().Ticks} | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
             [IO.File]::WriteAllText((Join-Path $bridgeDirectory 'progress.json'), (@{requestId=$Request.requestId;status='Unity 준비 중 · 컴파일과 초기화를 기다립니다.';logPath=$logPath} | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
         }
         [IO.File]::WriteAllText($requestPath, ($Request | ConvertTo-Json -Depth 20), [Text.UTF8Encoding]::new($false))
@@ -87,6 +90,9 @@
         }) -join ' '
         $startedUtc = [DateTime]::UtcNow
         $process = Start-Process -FilePath $UnityPath -ArgumentList $quotedArguments -WorkingDirectory $projectRoot -WindowStyle Hidden -PassThru
+        if ($Request.version -eq 2 -and $process.Id -and $process.StartTime) {
+            [IO.File]::WriteAllText((Join-Path $bridgeDirectory 'unity-owner.json'), (@{pid=$process.Id;startUtcTicks=$process.StartTime.ToUniversalTime().Ticks} | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
+        }
         $lastStatus = ''
         while (-not $process.WaitForExit(5000)) {
             $currentPath = Join-Path $projectRoot 'Library/MatchBuildTool/current.json'

@@ -22,6 +22,7 @@ public sealed class BuildToolClient : IBuildToolClient
             requestId = Guid.NewGuid().ToString("N");
             requestDirectory = Path.Combine(project, "Library", "MatchBuildApp", requestId);
             Directory.CreateDirectory(requestDirectory);
+            BuildRecovery.WriteOwner(requestDirectory,"client-owner.json",Process.GetCurrentProcess());
             var input = (JsonObject)request.DeepClone(); input["version"] = 2; input["requestId"] = requestId;
             if (secrets != null)
             {
@@ -35,6 +36,7 @@ public sealed class BuildToolClient : IBuildToolClient
             var start = new ProcessStartInfo("powershell.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true, WorkingDirectory = project };
             foreach (string argument in new[] { "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", host, "-ProjectPath", project, "-RequestPath", requestPath }) start.ArgumentList.Add(argument);
             if (!string.IsNullOrWhiteSpace(unity)) { start.ArgumentList.Add("-UnityPath"); start.ArgumentList.Add(unity); }
+            if (request.Text("operation") == "build") start.ArgumentList.Add("-PreserveLogs");
             using var process = Process.Start(start) ?? throw new IOException("실행 호스트를 시작하지 못했습니다.");
             Task stdout = process.StandardOutput.ReadToEndAsync(), stderr = process.StandardError.ReadToEndAsync();
             Task exit = process.WaitForExitAsync();
@@ -79,7 +81,11 @@ public sealed class BuildToolClient : IBuildToolClient
         }
         finally
         {
-            try { if (encryptedPath != null && File.Exists(encryptedPath)) File.Delete(encryptedPath); }
+            try
+            {
+                if(requestDirectory!=null) File.Delete(Path.Combine(requestDirectory,"client-owner.json"));
+                if (encryptedPath != null && File.Exists(encryptedPath) && (requestDirectory==null||!BuildRecovery.HasLiveOwner(requestDirectory))) File.Delete(encryptedPath);
+            }
             finally { requestDirectory = requestId = null; Interlocked.Exchange(ref running, 0); }
         }
     }

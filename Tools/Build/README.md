@@ -216,6 +216,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Build/Invoke-BuildTool
 
 ### 로그 관리
 
+기존 로그를 모두 보존하면서 빌드하려면 `Build.bat -Profile "Android Game" -Format apk -PreserveLogs`를 사용합니다. `Invoke-BuildTool.ps1`도 같은 스위치를 지원합니다. 이 옵션은 해당 빌드 시작 전 자동 정리만 건너뛰며, 새 빌드 로그는 정상 생성합니다. 명시적인 로그 정리 요청에는 적용되지 않습니다.
+
 ```json
 {"version":2,"requestId":"cleanup-preview-001","operation":"cleanup-preview","retentionDays":7}
 ```

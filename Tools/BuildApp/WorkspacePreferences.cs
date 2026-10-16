@@ -13,6 +13,7 @@ public sealed class WorkspacePreferences
     public double Width { get; set; } = 1240;
     public double Height { get; set; } = 840;
     public bool Maximized { get; set; }
+    public PixelBounds? PhysicalBounds {get;set;}
     public static string DefaultPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MoonRabbit", "BuildApp", "workspace.json");
     public static WorkspacePreferences Load(string path)
     {

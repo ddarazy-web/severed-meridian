@@ -9,6 +9,10 @@ Docs/Planning/project-wide/external-build-app-integration-plan.md
 Docs/Planning/project-wide/external-build-app-stage-01-plan.md
 Docs/Goals/project-wide/external-build-app-stage-01-goal.md
 
+기존 1단계 진행 기록과 현재 구현을 먼저 대조해.
+이미 충족한 기능은 보존하고 누락·회귀가 확인된 부분만 보완해.
+기존 2·3단계 변경을 되돌리거나 중복 구현하지 마.
+
 기존 Unity 빌드 도구와 BAT가 사용하는 실행기·플랫폼·옵션·저장 방식을 재사용해.
 외부 UI용 프로필/현재 설정 조회와 명시적 버전·옵션 저장 계약을 추가하고,
 기존 v1 요청 호환·설정 충돌 검사·프로젝트 단일 실행 잠금을 유지해.

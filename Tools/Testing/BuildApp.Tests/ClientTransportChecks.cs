@@ -8,7 +8,7 @@ internal static class ClientTransportChecks
     {
         string host=Path.Combine(fixture,"Tools","Build"); Directory.CreateDirectory(host);
         await File.WriteAllTextAsync(Path.Combine(host,"Invoke-BuildTool.ps1"), """
-param($ProjectPath,$RequestPath,$UnityPath)
+param($ProjectPath,$RequestPath,$UnityPath,[switch]$PreserveLogs)
 $r=Get-Content -LiteralPath $RequestPath -Raw | ConvertFrom-Json
 $dir=Split-Path $RequestPath
 if($r.operation -eq 'missing'){exit 0}
@@ -18,6 +18,7 @@ if($r.operation -eq 'signing-aliases'){
   if([Text.Encoding]::UTF8.GetString($cipher).Contains('transport-secret')){exit 10}
 }
 if($r.operation -eq 'build'){
+  if(!$PreserveLogs){exit 12}
   @{requestId=$r.requestId;status='fixture waiting';logPath='';output=''} | ConvertTo-Json | Set-Content (Join-Path $dir 'progress.json')
   $limit=[DateTime]::UtcNow.AddSeconds(10)
   while(!(Test-Path (Join-Path $dir 'cancel.json')) -and [DateTime]::UtcNow -lt $limit){Start-Sleep -Milliseconds 50}
