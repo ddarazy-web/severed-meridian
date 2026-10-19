@@ -77,13 +77,7 @@ namespace LevelTool
             connectionGenerator = null; connectionTarget = null; selectedConnection = 0;
             moveBody = null; anchor = -1;
         }
-        private void Change(string label, Action<JObject> action) => Edit(() =>
-            Session.Apply(label, docs =>
-            {
-                JObject level = docs[Session.SelectedLevelId].Data;
-                if ((int)level["schemaVersion"] != 5) throw new InvalidOperationException("먼저 ‘편집 형식으로 전환’을 눌러 주세요. 이전 형식의 원본은 저장 전까지 바뀌지 않습니다.");
-                action(level);
-            }));
+        private void Change(string label, Action<JObject> action) => Edit(() => Session.EditLevel(label, action));
 
         private void AddLevel(bool duplicate)
         {
@@ -93,8 +87,7 @@ namespace LevelTool
                 if (duplicate) DocumentEditing.DuplicateLevel(Session, Session.SelectedLevelId, number, "레벨 " + number + " 사본");
                 else
                 {
-                    JObject value = LevelToolDocuments.NewLevel();
-                    value["catalogId"] = Session.Get(Session.SelectedLevelId).Data["catalogId"].DeepClone();
+                    JObject value = LevelToolDocuments.NewLevel(Session.Get(Session.SelectedLevelId).Data["catalogId"]);
                     DocumentEditing.AddLevel(Session, value, number, "레벨 " + number);
                 }
             });

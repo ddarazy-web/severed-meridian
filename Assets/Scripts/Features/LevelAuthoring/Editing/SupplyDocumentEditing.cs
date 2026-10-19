@@ -9,11 +9,47 @@ namespace LevelAuthoring.Editing
 {
     public static class SupplyDocumentEditing
     {
+        public static JObject TutorialPreview(JObject level)
+        {
+            JObject candidate = (JObject)level.DeepClone();
+            candidate["elementSupply"] = level["tutorial"]["supply"].DeepClone();
+            return candidate;
+        }
+
+        public static void PlaceTutorialSources(JObject level, IEnumerable<int> cells)
+        {
+            int count = level["elementSupply"]["sources"].Count();
+            PlaceSources(level, cells, false);
+            foreach (JObject source in level["elementSupply"]["sources"].Skip(count)) source["mode"] = "Fixed";
+        }
+
+        public static void AppendItem(JObject level, IReadOnlyDictionary<string, JObject> definitions, IEnumerable<int> indices,
+            string definitionId, int count, string color, string direction, int durability)
+        {
+            SetItems(level, definitions, indices, new JArray(new JObject { ["definitionId"] = definitionId, ["count"] = count,
+                ["color"] = color, ["direction"] = direction, ["durability"] = durability }), true);
+        }
+
+        public static void SetItemProperty(JObject level, IReadOnlyDictionary<string, JObject> definitions,
+            int sourceIndex, int itemIndex, string field, JToken value)
+        {
+            JArray updated = (JArray)level["elementSupply"]["sources"][sourceIndex]["items"].DeepClone();
+            updated[itemIndex][field] = value;
+            SetItems(level, definitions, new[] { sourceIndex }, updated, false);
+        }
+
+        public static void ReorderItem(JObject level, IReadOnlyDictionary<string, JObject> definitions, int sourceIndex, int itemIndex, bool remove)
+        {
+            JArray updated = (JArray)level["elementSupply"]["sources"][sourceIndex]["items"].DeepClone();
+            JToken moved = updated[itemIndex]; updated.RemoveAt(itemIndex);
+            if (!remove) updated.Insert(itemIndex - 1, moved);
+            SetItems(level, definitions, new[] { sourceIndex }, updated, false);
+        }
+
         public static void EditTutorial(JObject level, IReadOnlyDictionary<string, JObject> definitions, System.Action<JObject> edit)
         {
             // 일반 공급과 같은 편집 규칙을 사용하되 결과는 튜토리얼 영역에만 반영한다.
-            JObject candidate = (JObject)level.DeepClone();
-            candidate["elementSupply"] = level["tutorial"]["supply"].DeepClone();
+            JObject candidate = TutorialPreview(level);
             edit(candidate);
             foreach (JObject source in List(candidate, "elementSupply.sources"))
             {

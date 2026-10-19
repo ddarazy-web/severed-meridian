@@ -60,7 +60,7 @@ namespace LevelTool
             TextField newName = new TextField("새 레벨 이름") { value = "새 레벨" }; inspector.Add(number); inspector.Add(newName);
             Button(inspector, "shape-create-level", "이 모양으로 새 레벨 만들기", () => Edit(() =>
             {
-                JObject template = LevelToolDocuments.NewLevel(); template["catalogId"] = level["catalogId"].DeepClone();
+                JObject template = LevelToolDocuments.NewLevel(Session.Get(Session.SelectedLevelId).Data["catalogId"]);
                 ShapeDocumentEditing.ApplyToNewLevel(template, shape.Data);
                 DocumentEditing.AddLevel(Session, template, number.value, newName.value);
                 CancelFlowTool(); wireDrawing = false; anchor = -1;

@@ -55,6 +55,17 @@ namespace LevelAuthoring.Editing
             if (selection.Any(cell => cell < 0 || cell >= 81)) throw new ArgumentOutOfRangeException(nameof(cells));
             current.Cells = selection;
         }
+        public void EditLevel(string label, Action<JObject> edit)
+        {
+            if (edit == null) throw new ArgumentNullException(nameof(edit));
+            Apply(label, docs =>
+            {
+                JObject level = docs[SelectedLevelId].Data;
+                if ((int)level["schemaVersion"] != 5) throw new InvalidOperationException("먼저 ‘편집 형식으로 전환’을 눌러 주세요. 이전 형식의 원본은 저장 전까지 바뀌지 않습니다.");
+                edit(level);
+            });
+        }
+
         public void Apply(string label, Action<IDictionary<string, ContentDocument>> edit)
         {
             if (string.IsNullOrWhiteSpace(label)) throw new ArgumentException("변경 이름이 필요합니다.", nameof(label));

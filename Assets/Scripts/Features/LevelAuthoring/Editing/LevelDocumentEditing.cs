@@ -10,6 +10,68 @@ namespace LevelAuthoring.Editing
     // 저장 문서의 배치 연산. 호출자는 세션 Apply로 사용자 동작과 실행 취소를 묶는다.
     public static class LevelDocumentEditing
     {
+        // 초안 값은 보존하며 유효성 검사는 기존 저장·시험 시점에 수행한다.
+        public static void SetName(JObject level, string value) => level["displayName"] = value;
+        public static void SetNumber(JObject level, int value) => level["levelNumber"] = value;
+        public static void SetMoveCount(JObject level, int value) => level["moveCount"] = value;
+        public static void SetColorEnabled(JObject level, string color, bool enabled)
+        {
+            JArray colors = (JArray)level["colors"];
+            if (enabled) { if (!colors.Values<string>().Contains(color)) colors.Add(color); }
+            else colors.FirstOrDefault(token => (string)token == color)?.Remove();
+        }
+        public static void SetElementDurability(JObject level, string instanceId, int value) =>
+            level["elements"].First(item => (string)item["instanceId"] == instanceId)["durability"] = value;
+        public static void SetElementAppearance(JObject level, string instanceId, string color, string direction)
+        {
+            JToken target = level["elements"].First(item => (string)item["instanceId"] == instanceId);
+            target["color"] = color; target["rocketDirection"] = direction;
+        }
+
+        public static void PlaceSelection(JObject level, IReadOnlyDictionary<string, JObject> definitions, string definitionId,
+            IEnumerable<int> cells, bool replace, string color, string direction, string protectedLayer = null)
+        {
+            List<int> targets = new List<int>();
+            HashSet<string> edited = new HashSet<string>();
+            foreach (int selectedCell in cells)
+            {
+                int cell = selectedCell;
+                if (protectedLayer != null && replace)
+                {
+                    JObject existing = level["elements"].OfType<JObject>().FirstOrDefault(item => (string)item["layer"] == protectedLayer &&
+                        Covers(item, Definition(definitions, (string)item["definitionId"]), cell / 9, cell % 9));
+                    if (existing != null)
+                    {
+                        if (!edited.Add((string)existing["instanceId"])) continue;
+                        cell = (int)existing["coordinate"]["row"] * 9 + (int)existing["coordinate"]["column"];
+                    }
+                }
+                targets.Add(cell);
+            }
+            // 원본 본체 기준으로 대상을 먼저 고정한다. 작은 요소로 교체해도 남은 점유 칸을 새 배치하지 않는다.
+            foreach (int cell in targets)
+                if (protectedLayer == null) Place(level, definitions, definitionId, cell / 9, cell % 9, replace, color: color, direction: direction);
+                else PlaceOnLayer(level, definitions, definitionId, cell, replace, protectedLayer, color, direction);
+        }
+
+        public static void PlaceOnLayer(JObject level, IReadOnlyDictionary<string, JObject> definitions, string definitionId,
+            int cell, bool replace, string layer, string color, string direction)
+        {
+            if (!replace && level["elements"].OfType<JObject>().Any(item => (string)item["layer"] == layer &&
+                Covers(item, Definition(definitions, (string)item["definitionId"]), cell / 9, cell % 9)))
+                throw new InvalidOperationException("이미 요소가 있는 칸입니다. 교체를 켜거나 작업 메뉴에서 교체하세요.");
+            JArray before = new JArray(level["elements"].Where(item => (string)item["layer"] != layer).Select(item => item.DeepClone()));
+            Place(level, definitions, definitionId, cell / 9, cell % 9, replace, color: color, direction: direction);
+            JArray after = new JArray(level["elements"].Where(item => (string)item["layer"] != layer).Select(item => item.DeepClone()));
+            if (!JToken.DeepEquals(before, after))
+                throw new InvalidOperationException("다른 층의 요소와 겹칩니다. 해당 층에서 먼저 편집하세요.");
+        }
+
+        public static void EraseSelection(JObject level, IReadOnlyDictionary<string, JObject> definitions, string layer, IEnumerable<int> cells)
+        {
+            foreach (int cell in cells) Erase(level, definitions, layer, cell / 9, cell % 9);
+        }
+
         public static void Place(JObject level, IReadOnlyDictionary<string, JObject> definitions, string definitionId,
             int row, int column, bool replace, int durability = -1, int charge = -1, string color = "Type1", string direction = "Horizontal")
         {

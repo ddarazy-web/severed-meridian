@@ -59,14 +59,14 @@ namespace LevelTool
                 else { anchor = cell; if (touch) SelectBoardCells(new[] { cell }); else Session.SelectCells(new[] { cell }); }
                 if (moveBody != null)
                 {
-                    Session.Apply("장애물 이동", docs => LevelDocumentEditing.Move(docs[Session.SelectedLevelId].Data, definitions, moveBody, cell / 9, cell % 9));
+                    Session.EditLevel("장애물 이동", data => LevelDocumentEditing.Move(data, definitions, moveBody, cell / 9, cell % 9));
                     moveBody = null; return;
                 }
                 if (brush != null && !shift)
-                    Session.Apply("요소 배치", docs =>
+                    Session.EditLevel("요소 배치", data =>
                     {
-                        if (touch) PlaceOnCurrentLayer(docs[Session.SelectedLevelId].Data, cell, replace);
-                        else LevelDocumentEditing.Place(docs[Session.SelectedLevelId].Data, definitions, brush, cell / 9, cell % 9, replace, color: color, direction: direction);
+                        if (touch) LevelDocumentEditing.PlaceOnLayer(data, definitions, brush, cell, replace, layer, color, direction);
+                        else LevelDocumentEditing.Place(data, definitions, brush, cell / 9, cell % 9, replace, color: color, direction: direction);
                     });
             });
         }
@@ -82,15 +82,7 @@ namespace LevelTool
             if ((int)level["schemaVersion"] != 5)
             {
                 inspector.Add(new Label("이전 형식의 레벨입니다. 보드·게임 시험은 미리 볼 수 있으며 편집에는 형식 전환이 필요합니다."));
-                Button(inspector, "upgrade-level", "편집 형식으로 전환 (Undo 가능)", () => Edit(() =>
-                {
-                    JObject converted = LevelToolDocuments.UpgradePreview(level);
-                    Session.Apply("레벨 편집 형식 전환", docs =>
-                    {
-                        foreach (string field in new[] { "schemaVersion", "elements", "elementSupply" })
-                            docs[Session.SelectedLevelId].Data[field] = converted[field].DeepClone();
-                    });
-                }));
+                Button(inspector, "upgrade-level", "편집 형식으로 전환 (Undo 가능)", () => Edit(() => LevelToolDocuments.UpgradeSelectedLevel(Session)));
                 return;
             }
             if (inspectorPage == "튜토리얼 공급") { DrawSupply(level, true); return; }
@@ -104,21 +96,16 @@ namespace LevelTool
             VisualElement container = inspector;
             var settings = new VisualElement { name = "level-settings" }; container.Add(settings); inspector = settings;
             TextField name = new TextField("이름") { name = "level-name", value = (string)level["displayName"], isDelayed = true };
-            name.RegisterValueChangedCallback(e => Change("이름 변경", data => data["displayName"] = e.newValue)); inspector.Add(name);
+            name.RegisterValueChangedCallback(e => Change("이름 변경", data => LevelDocumentEditing.SetName(data, e.newValue))); inspector.Add(name);
             IntegerField number = new IntegerField("레벨 번호") { name = "level-number", value = (int)level["levelNumber"], isDelayed = true };
-            number.RegisterValueChangedCallback(e => Change("번호 변경", data => data["levelNumber"] = e.newValue)); inspector.Add(number);
+            number.RegisterValueChangedCallback(e => Change("번호 변경", data => LevelDocumentEditing.SetNumber(data, e.newValue))); inspector.Add(number);
             IntegerField moves = new IntegerField("이동 횟수") { name = "level-moves", value = (int)level["moveCount"], isDelayed = true };
-            moves.RegisterValueChangedCallback(e => Change("이동 횟수", data => data["moveCount"] = e.newValue)); inspector.Add(moves);
+            moves.RegisterValueChangedCallback(e => Change("이동 횟수", data => LevelDocumentEditing.SetMoveCount(data, e.newValue))); inspector.Add(moves);
             for (int i = 1; i <= 5; i++)
             {
                 string value = "Type" + i;
                 Toggle toggle = new Toggle("사용 색 " + i) { value = level["colors"].Values<string>().Contains(value) };
-                toggle.RegisterValueChangedCallback(e => Change("사용 색", data =>
-                {
-                    JArray colors = (JArray)data["colors"];
-                    if (e.newValue) { if (!colors.Values<string>().Contains(value)) colors.Add(value); }
-                    else colors.FirstOrDefault(token => (string)token == value)?.Remove();
-                })); inspector.Add(toggle);
+                toggle.RegisterValueChangedCallback(e => Change("사용 색", data => LevelDocumentEditing.SetColorEnabled(data, value, e.newValue))); inspector.Add(toggle);
             }
             var selection = new VisualElement { name = "selection-properties" }; container.Add(selection); inspector = selection;
             DropdownField brushColor = new DropdownField("배치 색", Enumerable.Range(1, 5).Select(i => "Type" + i).ToList(), int.Parse(color.Substring(4)) - 1);
@@ -132,12 +119,9 @@ namespace LevelTool
             Button(inspector, "place-area", "선택 영역에 현재 도구 배치", () => Change("영역 배치", data =>
             {
                 if (brush == null) throw new InvalidOperationException("먼저 왼쪽에서 배치할 요소를 선택하세요.");
-                foreach (int cell in Session.SelectedCells) LevelDocumentEditing.Place(data, definitions, brush, cell / 9, cell % 9, false, color: color, direction: direction);
+                LevelDocumentEditing.PlaceSelection(data, definitions, brush, Session.SelectedCells, false, color, direction);
             }));
-            Button(inspector, "erase", "선택 층 지우기", () => Change("선택 삭제", data =>
-            {
-                foreach (int cell in Session.SelectedCells) LevelDocumentEditing.Erase(data, definitions, layer, cell / 9, cell % 9);
-            }));
+            Button(inspector, "erase", "선택 층 지우기", () => Change("선택 삭제", data => LevelDocumentEditing.EraseSelection(data, definitions, layer, Session.SelectedCells)));
             Button(inspector, "sources", "선택 칸에 생성구 추가", () => Change("생성구 추가", data => SupplyDocumentEditing.PlaceSources(data, Session.SelectedCells, false)));
             Button(inspector, "erase-sources", "선택 칸 생성구 삭제", () => Change("생성구 삭제", data => SupplyDocumentEditing.PlaceSources(data, Session.SelectedCells, true)));
             string[] selectedIds = SelectedBoardInstanceIds(out string selectionReason);
@@ -151,13 +135,9 @@ namespace LevelTool
                     inspector.Add(new Label((string)item["definitionId"]));
                     IntegerField durability = new IntegerField("남은 내구도") { value = (int)item["durability"], isDelayed = true };
                     durability.name = "selected-durability";
-                    durability.RegisterValueChangedCallback(e => Change("내구도 변경", data =>
-                        data["elements"].First(value => (string)value["instanceId"] == id)["durability"] = e.newValue)); inspector.Add(durability);
+                    durability.RegisterValueChangedCallback(e => Change("내구도 변경", data => LevelDocumentEditing.SetElementDurability(data, id, e.newValue))); inspector.Add(durability);
                     Button(inspector, "apply-color-direction", "선택 요소에 배치 색·방향 적용", () => Change("요소 색·방향", data =>
-                    {
-                        JToken target = data["elements"].First(value => (string)value["instanceId"] == id);
-                        target["color"] = color; target["rocketDirection"] = direction;
-                    }));
+                        LevelDocumentEditing.SetElementAppearance(data, id, color, direction)));
                     if ((string)item["layer"] == "Obstacle")
                         Button(inspector, "move-body", "이 장애물 이동 → 목적지 클릭", () => { moveBody = id; brush = null; Show("장애물이 이동할 기준 칸을 클릭하세요."); });
                 }

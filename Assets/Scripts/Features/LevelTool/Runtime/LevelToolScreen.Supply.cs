@@ -21,8 +21,7 @@ namespace LevelTool
             });
             if (tutorial)
             {
-                level = (JObject)level.DeepClone();
-                level["elementSupply"] = level["tutorial"]["supply"].DeepClone();
+                level = SupplyDocumentEditing.TutorialPreview(level);
                 inspector.Add(new Label("튜토리얼 진행 중 생성할 순서입니다. 고정 목록을 다 쓰면 생성이 멈춥니다. 일반 공급 설정은 바뀌지 않습니다."));
             }
             JArray sources = (JArray)level["elementSupply"]["sources"];
@@ -32,10 +31,8 @@ namespace LevelTool
             inspector.Add(new Label("보드에서 생성구 칸을 선택하세요. Shift+클릭으로 여러 생성구를 선택할 수 있습니다."));
             Button(inspector, "sources", "선택 칸에 생성구 추가", () => SupplyChange("생성구 추가", data =>
             {
-                int count = data["elementSupply"]["sources"].Count();
-                SupplyDocumentEditing.PlaceSources(data, Session.SelectedCells, false);
-                if (tutorial)
-                    foreach (JObject source in data["elementSupply"]["sources"].Skip(count)) source["mode"] = "Fixed";
+                if (tutorial) SupplyDocumentEditing.PlaceTutorialSources(data, Session.SelectedCells);
+                else SupplyDocumentEditing.PlaceSources(data, Session.SelectedCells, false);
             }));
             Button(inspector, "erase-sources", "선택 칸 생성구 삭제", () => SupplyChange("생성구 삭제", data => SupplyDocumentEditing.PlaceSources(data, Session.SelectedCells, true)));
             string[] supplies = definitions.Where(pair => (bool?)pair.Value["supply"]?["enabled"] == true && (!tutorial || !new[] { "RandomNormal", "RandomPower" }.Contains((string)pair.Value["supply"]?["behavior"]))).Select(pair => pair.Key).ToArray();
@@ -61,9 +58,8 @@ namespace LevelTool
                     new[] { "분홍", "노랑", "파랑", "초록", "다섯째 색" }, supplyColor, value => supplyColor = value);
                 Choice(inspector, "supply-add-direction", "로켓 방향", new[] { "Horizontal", "Vertical" }, new[] { "가로", "세로" }, supplyDirection, value => supplyDirection = value);
                 Number(inspector, "supply-add-durability", "장애물 내구도", supplyDurability, value => supplyDurability = value);
-                JArray NewItems() => new JArray(new JObject { ["definitionId"] = supplyToAdd, ["count"] = supplyCount,
-                    ["color"] = supplyColor, ["direction"] = supplyDirection, ["durability"] = supplyDurability });
-                Button(inspector, "append-supply", "선택한 고정 생성구에 추가", () => SupplyChange("고정 공급 추가", data => SupplyDocumentEditing.SetItems(data, definitions, selected, NewItems(), true)));
+                Button(inspector, "append-supply", "선택한 고정 생성구에 추가", () => SupplyChange("고정 공급 추가", data =>
+                    SupplyDocumentEditing.AppendItem(data, definitions, selected, supplyToAdd, supplyCount, supplyColor, supplyDirection, supplyDurability)));
                 Button(inspector, "clear-supply", "선택한 생성구의 목록 비우기", () => SupplyChange("고정 공급 비우기", data => SupplyDocumentEditing.SetItems(data, definitions, selected, new JArray(), false)));
                 foreach (int sourceIndex in selected)
                 {
@@ -74,11 +70,7 @@ namespace LevelTool
                     {
                         int itemIndex = i; JObject item = (JObject)items[i];
                         void Modify(string field, JToken value) => SupplyChange("공급 항목 수정", data =>
-                        {
-                            JArray updated = (JArray)data["elementSupply"]["sources"][sourceIndex]["items"].DeepClone();
-                            updated[itemIndex][field] = value;
-                            SupplyDocumentEditing.SetItems(data, definitions, new[] { sourceIndex }, updated, false);
-                        });
+                            SupplyDocumentEditing.SetItemProperty(data, definitions, sourceIndex, itemIndex, field, value));
                         string prefix = "source-" + sourceIndex + "-item-" + i;
                         Choice(list, prefix + "-kind", (i + 1) + "번째 종류", supplies, Names(supplies), (string)item["definitionId"], value => Modify("definitionId", value));
                         Number(list, prefix + "-count", "개수", (int)item["count"], value => Modify("count", value));
@@ -87,12 +79,7 @@ namespace LevelTool
                         Choice(list, prefix + "-direction", "로켓 방향", new[] { "Horizontal", "Vertical" }, new[] { "가로", "세로" }, (string)item["direction"], value => Modify("direction", value));
                         Number(list, prefix + "-durability", "장애물 내구도", (int)item["durability"], value => Modify("durability", value));
                         void Reorder(bool remove) => SupplyChange(remove ? "공급 항목 삭제" : "공급 순서 변경", data =>
-                        {
-                            JArray updated = (JArray)data["elementSupply"]["sources"][sourceIndex]["items"].DeepClone();
-                            JToken moved = updated[itemIndex]; updated.RemoveAt(itemIndex);
-                            if (!remove) updated.Insert(itemIndex - 1, moved);
-                            SupplyDocumentEditing.SetItems(data, definitions, new[] { sourceIndex }, updated, false);
-                        });
+                            SupplyDocumentEditing.ReorderItem(data, definitions, sourceIndex, itemIndex, remove));
                         Button(list, prefix + "-up", "위로", () => Reorder(false)).SetEnabled(i > 0);
                         Button(list, prefix + "-remove", "이 항목 삭제", () => Reorder(true));
                     }

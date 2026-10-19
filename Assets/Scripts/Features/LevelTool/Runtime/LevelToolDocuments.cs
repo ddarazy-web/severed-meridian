@@ -44,13 +44,24 @@ namespace LevelTool
         }
         [Serializable] private sealed class PlacementList { public ElementPlacementDefinition[] elements; }
 
-        public static JObject NewLevel()
+        public static void UpgradeSelectedLevel(AuthoringEditSession session)
+        {
+            JObject converted = UpgradePreview(session.Get(session.SelectedLevelId).Data);
+            session.Apply("레벨 편집 형식 전환", docs =>
+            {
+                foreach (string field in new[] { "schemaVersion", "elements", "elementSupply" })
+                    docs[session.SelectedLevelId].Data[field] = converted[field].DeepClone();
+            });
+        }
+
+        public static JObject NewLevel(JToken catalogId = null)
         {
             LevelDefinition source = ScriptableObject.CreateInstance<LevelDefinition>();
             try
             {
                 JObject data = UnityAuthoringCodec.WriteDraft(source, "level", "template", _ => null, _ => null).Data;
                 data["schemaVersion"] = 5;
+                if (catalogId != null) data["catalogId"] = catalogId.DeepClone();
                 SupplyDocumentEditing.PlaceSources(data, Enumerable.Range(0, 9), false);
                 return data;
             }

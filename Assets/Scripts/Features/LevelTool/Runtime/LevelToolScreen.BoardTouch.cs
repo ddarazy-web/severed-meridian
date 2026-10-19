@@ -172,35 +172,10 @@ namespace LevelTool
             Change(replace ? "선택 교체" : "선택 배치", data =>
             {
                 if (brush == null) throw new InvalidOperationException("먼저 소재에서 배치할 요소를 선택하세요.");
-                var edited = new HashSet<string>();
-                var targets = new List<int>();
-                foreach (int selectedCell in Session.SelectedCells)
-                {
-                    int cell = selectedCell;
-                    var existing = Placement(data, cell);
-                    if (replace && existing != null)
-                    {
-                        if (!edited.Add((string)existing["instanceId"])) continue;
-                        cell = (int)existing["coordinate"]["row"] * 9 + (int)existing["coordinate"]["column"];
-                    }
-                    targets.Add(cell);
-                }
-                // 원본 선택에서 대상 기준 칸을 먼저 고정한다. 작은 요소로 바뀌어도 나머지 점유 칸을 새 배치로 해석하지 않는다.
-                foreach (int cell in targets) PlaceOnCurrentLayer(data, cell, replace);
+                LevelDocumentEditing.PlaceSelection(data, definitions, brush, Session.SelectedCells, replace, color, direction, layer);
             });
         }
 
-        private void PlaceOnCurrentLayer(Newtonsoft.Json.Linq.JObject data, int cell, bool replace)
-        {
-            if (!replace && Placement(data, cell) != null)
-                throw new InvalidOperationException("이미 요소가 있는 칸입니다. 교체를 켜거나 작업 메뉴에서 교체하세요.");
-            // 교체도 다른 층을 지우지 않는다. 장애물과 블록 간 충돌은 기존 검증이 거절한다.
-            Newtonsoft.Json.Linq.JArray before = new Newtonsoft.Json.Linq.JArray(data["elements"].Where(item => (string)item["layer"] != layer).Select(item => item.DeepClone()));
-            LevelDocumentEditing.Place(data, definitions, brush, cell / 9, cell % 9, replace, color: color, direction: direction);
-            Newtonsoft.Json.Linq.JArray after = new Newtonsoft.Json.Linq.JArray(data["elements"].Where(item => (string)item["layer"] != layer).Select(item => item.DeepClone()));
-            if (!Newtonsoft.Json.Linq.JToken.DeepEquals(before, after))
-                throw new InvalidOperationException("다른 층의 요소와 겹칩니다. 해당 층에서 먼저 편집하세요.");
-        }
     }
 }
 #endif
