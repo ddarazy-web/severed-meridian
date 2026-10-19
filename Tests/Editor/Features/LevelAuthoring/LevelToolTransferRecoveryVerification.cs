@@ -243,6 +243,9 @@ namespace LevelAuthoring.Editor
                     Check(screen.Workspace.ExportState() == expected && input.text == "재실행 전 미확정 한글", "live resume preserves pending text and history");
                     // 새 컴포넌트의 빈 작업공간이 실제 EnableRecovery 선택 경로를 타게 한다.
                     screen.enabled = false;
+                    JObject disabledRecord = new ToolDraftStore(directory).Read();
+                    Check(JToken.DeepEquals(disabledRecord["view"]["pendingInputs"], recoveryRecord["view"]["pendingInputs"]),
+                        "disable captures pending inputs before disposing panels");
                     GameObject previous = screen.gameObject;
                     GameObject replacement = UnityEngine.Object.Instantiate(previous);
                     UnityEngine.Object.Destroy(previous);

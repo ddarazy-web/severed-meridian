@@ -32,7 +32,7 @@ namespace LevelAuthoring.Editor
                 foreach (int number in new[] { 50, 51, 100, 101 }) DocumentEditing.DuplicateLevel(session, source, number, "구간 검사 " + number);
                 var snapshot = session.CreateSnapshot();
                 string contentHash = LevelAuthoring.Documents.ContentSnapshotFingerprint.Compute(snapshot);
-                string copyFolder = Path.GetFullPath("ContentData/Candidates/verification-fingerprint-" + Guid.NewGuid().ToString("N"));
+                string copyFolder = Path.GetFullPath("Logs/LevelToolRefactorStage04/fingerprint-" + Guid.NewGuid().ToString("N"));
                 var copyStore = new LevelAuthoring.Storage.ContentSnapshotStore(copyFolder);
                 var copy = copyStore.Publish(snapshot, null);
                 Check(LevelAuthoring.Documents.ContentSnapshotFingerprint.Compute(copy.Snapshot) == contentHash, "save copy retains content fingerprint");
@@ -96,7 +96,14 @@ namespace LevelAuthoring.Editor
                     catch (LevelAuthoring.Documents.ContentFormatException error) when (error.Message.Contains("중복")) { }
                     Check(true, "duplicate " + kind + " rejected before publication");
                 }
-                var fixture = new LevelAuthoring.Storage.ContentSnapshotStore(File.ReadAllText("Logs/GameAuthoringStage02/latest-fixtures.txt")).Read().Snapshot;
+                var fixture = LevelToolDataFlowVerification.CreateFixture(Path.Combine(copyFolder, "shared-fixture")).Session.CreateSnapshot();
+                // 빈 제작 프로젝트의 기본 정의는 런타임 팩이 아니므로 기존 시험 카탈로그를 명시적으로 연결한다.
+                string fixtureCatalog = (string)snapshot.Documents.First(doc => doc.Kind == "level").Data["catalogId"];
+                var fixtureDocuments = fixture.Documents.Concat(snapshot.Documents.Where(doc =>
+                    doc.Kind == "element" || doc.Kind == "catalog" || doc.Kind == "visual")).ToArray();
+                fixtureDocuments.Single(doc => doc.Kind == "project").Data["resources"] = snapshot.Project.Data["resources"].DeepClone();
+                foreach (var document in fixtureDocuments.Where(doc => doc.Kind == "level")) document.Data["catalogId"] = fixtureCatalog;
+                fixture = new LevelAuthoring.Documents.ContentSnapshot(fixtureDocuments);
                 Check(fixture.Documents.Any(document => document.Kind == "tutorialFlow"), "shared tutorial fixture exists");
                 var fixtureOutputs = JsonContentPackBuild.CreateBytes(fixture);
                 var fixtureElements = ElementContentPackCodec.Decode(fixtureOutputs[ElementContentPackBuild.OutputPath]);

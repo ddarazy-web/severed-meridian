@@ -229,6 +229,9 @@ namespace LevelTool
         private void OnDisable()
         {
             bool storageWasBusy = busy;
+            // 패널 해제가 필드를 지우기 전에 미확정 입력과 화면 상태를 기록한다.
+            try { if (!storageWasBusy) FlushRecovery(); }
+            catch (Exception error) { Debug.LogError("레벨툴 복구 기록 실패: " + error.Message); }
             recoveryReadRevision++;
             DisposeFileTransfer();
             DisposeBoardTouch();
@@ -251,8 +254,6 @@ namespace LevelTool
             CloseToolBatch().Forget();
             CloseToolMulti().Forget();
             Application.wantsToQuit -= WantsToQuit;
-            try { if (!storageWasBusy) FlushRecovery(); }
-            catch (Exception error) { Debug.LogError("레벨툴 복구 기록 실패: " + error.Message); }
         }
 
         public void RequestLeave(Action continuation)

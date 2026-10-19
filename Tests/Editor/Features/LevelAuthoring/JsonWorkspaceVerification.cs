@@ -66,7 +66,9 @@ namespace LevelAuthoring.Editor
                 if (rejectedFlow != null) throw new Exception("실패한 등록 사본 누수");
                 workspace.Dispose(); workspace = null;
                 if (Resources.FindObjectsOfTypeAll<LevelDefinition>().Length != baseline) throw new Exception("표시 사본 해제 누락");
-                File.WriteAllText("Logs/GameAuthoringStage03/workspace-results.txt", "PASS transient display\nPASS capture\nPASS undo display\nPASS redo display\nPASS failed action rollback\nPASS display cleanup\n");
+                string resultFolder = Path.GetFullPath("Logs/LevelToolRefactorStage04/workspace-" + Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(resultFolder);
+                File.WriteAllText(Path.Combine(resultFolder, "result.txt"), "PASS transient display\nPASS capture\nPASS undo display\nPASS redo display\nPASS failed action rollback\nPASS display cleanup\n");
                 EditorApplication.Exit(0);
             }
             catch (Exception error) { workspace?.Dispose(); Debug.LogException(error); EditorApplication.Exit(1); }

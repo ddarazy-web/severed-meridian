@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using GameScreen;
+using LevelAuthoring.Documents;
 using LevelAuthoring.Runtime;
 using LevelAuthoring.Storage;
 using Levels;
@@ -21,8 +22,16 @@ namespace LevelAuthoring.Editor
     public static class JsonPlayVerification
     {
         private static bool packed;
-        private static string Output => packed ? "Logs/GameAuthoringStage06/packed-action-results.txt" : "Logs/GameAuthoringStage02/play-results.txt";
+        private static bool isolatedPacked;
+        private static string isolatedOutput;
+        private static string Output => isolatedPacked ? isolatedOutput : packed ? "Logs/GameAuthoringStage06/packed-action-results.txt" : "Logs/GameAuthoringStage02/play-results.txt";
         public static void RunPacked() { packed = true; Run(); }
+        public static void RunIsolatedPacked()
+        {
+            packed = isolatedPacked = true;
+            string folder = Path.GetFullPath("Logs/LevelToolRefactorStage04/packed-play-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(folder); isolatedOutput = Path.Combine(folder, "results.txt"); Run();
+        }
         private static readonly List<GameObject> Owners = new List<GameObject>();
         private static bool previousEnabled;
         private static EnterPlayModeOptions previousOptions;
@@ -92,18 +101,52 @@ namespace LevelAuthoring.Editor
                 "|tutorial=" + session.TutorialState?.State + ":" + session.TutorialState?.StepIndex;
         }
         private static object Field(object value, string name) => value.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance).GetValue(value);
+        private static ContentSnapshot CreateIsolatedSnapshot()
+        {
+            var source = new ContentSnapshotStore(Path.GetFullPath("ContentData/Candidates/main")).Read().Snapshot;
+            var project = LevelTool.LevelToolDocuments.NewProject().Project;
+            project.Data["resources"] = source.Project.Data["resources"].DeepClone();
+            string catalog = (string)source.Documents.First(doc => doc.Kind == "level").Data["catalogId"];
+            var documents = source.Documents.Where(doc => doc.Kind == "element" || doc.Kind == "catalog" || doc.Kind == "visual").ToList();
+            documents.Add(project);
+            int number = 990401;
+            foreach (string sampleId in new[] { "swap", "rocket-h", "combine", "damage" })
+            {
+                LevelDefinition sample = TutorialSampleBoards.All.Single(value => value.Id == sampleId).CreateBoard();
+                try
+                {
+                    JsonUtility.FromJsonOverwrite("{\"levelNumber\":" + number + "}", sample);
+                    sample.Tutorial.completionId = "stage04-" + Guid.NewGuid().ToString("N");
+                    sample.Tutorial.steps.Insert(0, new TutorialStepDefinition
+                    { authoringId = "intro", kind = TutorialStepKind.Description, instructions = "시험 안내" });
+                    var document = UnityAuthoringCodec.WriteDraft(sample, "level", "stage04-level-" + number, _ => null, _ => null);
+                    document.Data["catalogId"] = catalog; documents.Add(document); number++;
+                }
+                finally { Object.DestroyImmediate(sample); }
+            }
+            return new ContentSnapshot(documents);
+        }
         private static async UniTask Execute()
         {
             try
             {
-                var snapshot = new ContentSnapshotStore(packed ? AuthoringSourceSelection.ReadFolder(AuthoringSourceSelection.DefaultConfiguration) : File.ReadAllText("Logs/GameAuthoringStage02/latest-export.txt")).Read().Snapshot;
-                var sources = LegacyContentExporter.Discover().Where(item => item.Kind == "level").OrderBy(item => ((LevelDefinition)item.Asset).LevelNumber).ToArray();
+                var snapshot = isolatedPacked ? CreateIsolatedSnapshot() : new ContentSnapshotStore(packed ? AuthoringSourceSelection.ReadFolder(AuthoringSourceSelection.DefaultConfiguration) : File.ReadAllText("Logs/GameAuthoringStage02/latest-export.txt")).Read().Snapshot;
+                Dictionary<string, byte[]> isolatedBytes = isolatedPacked ? JsonContentPackBuild.CreateBytes(snapshot).ToDictionary(
+                    pair => pair.Key == Elements.Editor.ElementContentPackBuild.OutputPath ? Elements.ElementContentPackCodec.Address :
+                        "Levels/" + Path.GetFileNameWithoutExtension(pair.Key), pair => pair.Value) : null;
+                using var isolatedGraph = isolatedPacked ? new AuthoringObjectGraph(snapshot.Documents) : null;
+                var sources = isolatedPacked ? snapshot.Documents.Where(doc => doc.Kind == "level").Select(doc =>
+                    new LegacyContentSource(doc.Id, "level", isolatedGraph.Resolve(doc.Id))).ToArray() :
+                    LegacyContentExporter.Discover().Where(item => item.Kind == "level").OrderBy(item => ((LevelDefinition)item.Asset).LevelNumber).ToArray();
+                // 팩 생성 그래프가 예약한 임시 객체 해제를 마친 후 누수 기준을 잡는다.
+                if (isolatedPacked) { await UniTask.Yield(); await UniTask.Yield(); }
                 int baseline = Resources.FindObjectsOfTypeAll<LevelDefinition>().Length;
                 foreach (var source in sources)
                 {
                     var level = (LevelDefinition)source.Asset;
                     string original = EditorJsonUtility.ToJson(level);
-                    string id = (string)snapshot.Project.Data["sourceIds"].Single(entry => (string)entry["sourceGuid"] == source.Guid)["documentId"];
+                    bool originalDirty = EditorUtility.IsDirty(level);
+                    string id = isolatedPacked ? source.Guid : (string)snapshot.Project.Data["sourceIds"].Single(entry => (string)entry["sourceGuid"] == source.Guid)["documentId"];
                     var jsonRequest = JsonPuzzlePlayAdapter.CreateRequest(snapshot, id, 12345);
                     string levelKey = "MoonRabbit.Tutorial.Completed." + level.LevelNumber;
                     string identityKey = "MoonRabbit.Tutorial.Identity." + level.Tutorial.completionId;
@@ -114,10 +157,11 @@ namespace LevelAuthoring.Editor
                     PuzzlePlayRequest comparison = PuzzlePlayRequest.Capture(level, 12345);
                     if (packed)
                     {
-                        var settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
+                        var settings = isolatedPacked ? null : UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
                         Func<string, CancellationToken, UniTask<byte[]>> read = (address, token) =>
                         {
                             token.ThrowIfCancellationRequested();
+                            if (isolatedPacked) return UniTask.FromResult(isolatedBytes[address]);
                             string path = settings.groups.Where(group => group != null).SelectMany(group => group.entries).Single(entry => entry.address == address).AssetPath;
                             return UniTask.FromResult(AssetDatabase.LoadAssetAtPath<TextAsset>(path).bytes);
                         };
@@ -143,7 +187,8 @@ namespace LevelAuthoring.Editor
                     Check(json.PlayContext.IsTest, "restart remains test " + level.LevelNumber);
                     Check(PlayerPrefs.HasKey(levelKey) == hadLevel && PlayerPrefs.HasKey(identityKey) == hadIdentity &&
                         PlayerPrefs.GetInt(levelKey) == savedLevel && PlayerPrefs.GetInt(identityKey) == savedIdentity, "formal completion unchanged " + level.LevelNumber);
-                    Check(EditorJsonUtility.ToJson(level) == original && !EditorUtility.IsDirty(level), "SO unchanged " + level.LevelNumber);
+                    Check(EditorJsonUtility.ToJson(level) == original, "source contents unchanged " + level.LevelNumber);
+                    Check(isolatedPacked ? EditorUtility.IsDirty(level) == originalDirty : !EditorUtility.IsDirty(level), "source dirty state preserved " + level.LevelNumber);
                     await Clear();
                 }
                 Check(Resources.FindObjectsOfTypeAll<LevelDefinition>().Length == baseline, "level objects released after four runs");
