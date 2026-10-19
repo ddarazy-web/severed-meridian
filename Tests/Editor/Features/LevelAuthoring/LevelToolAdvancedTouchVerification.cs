@@ -331,7 +331,13 @@ namespace LevelAuthoring.Editor
             evt.target = target; target.SendEvent(evt);
         }
 
-        private static object Get(string name) => typeof(LevelToolScreen).GetField(name, Flags).GetValue(screen);
+        private static object Get(string name)
+        {
+            FieldInfo field = typeof(LevelToolScreen).GetField(name, Flags);
+            if (field != null) return field.GetValue(screen);
+            object input = typeof(LevelToolScreen).GetField("boardInput", Flags).GetValue(screen);
+            return input.GetType().GetField(name, Flags).GetValue(input);
+        }
         private static void Set(string name, object value) => typeof(LevelToolScreen).GetField(name, Flags).SetValue(screen, value);
         private static object Call(string name, params object[] arguments) => typeof(LevelToolScreen).GetMethod(name, Flags).Invoke(screen, arguments);
         private static void Check(bool value, string message) { if (!value) throw new Exception("FAIL " + message); Evidence.AppendLine("PASS " + message); Debug.Log("PASS " + message); }

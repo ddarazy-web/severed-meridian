@@ -48,6 +48,7 @@ namespace LevelAuthoring.Editor
         public static void RunAdditionalCapture() => Begin(false, 9);
         public static void RunLayerClipboard() => Begin(false, 10);
         public static void RunFinePinch() => Begin(false, 11);
+        public static void RunInputLifecycle() => Begin(false, 12);
 
         private static void Begin(bool onlyTap, int focus = 0)
         {
@@ -83,7 +84,7 @@ namespace LevelAuthoring.Editor
             string evidenceFile = tapOnly ? "touch-tap" : focusedRun == 1 ? "touch-modal-input" : focusedRun == 2 ? "touch-interrupted" :
                 focusedRun == 4 ? "touch-pinch-pivot" : focusedRun == 5 ? "touch-body-properties" : focusedRun == 6 ? "touch-explicit-replace" :
                 focusedRun == 7 ? "touch-capture-ownership" : focusedRun == 8 ? "touch-body-replace" : focusedRun == 9 ? "touch-additional-capture" :
-                focusedRun == 10 ? "touch-layer-clipboard" : focusedRun == 11 ? "touch-fine-pinch" : "touch";
+                focusedRun == 10 ? "touch-layer-clipboard" : focusedRun == 11 ? "touch-fine-pinch" : focusedRun == 12 ? "touch-input-lifecycle" : "touch";
             File.WriteAllText(Output + "/" + evidenceFile + "-verification.txt", Evidence.ToString());
             EditorApplication.Exit(exit);
         }
@@ -113,7 +114,7 @@ namespace LevelAuthoring.Editor
                         baseline = session.Get(levelId).Data.ToString();
                         SetViewport(new Vector2Int(412, 915)); Advance(1); break;
                     case 1:
-                        if (focusedRun != 0) { Advance(focusedRun == 1 ? 30 : focusedRun == 2 ? 20 : focusedRun == 4 ? 50 : focusedRun == 5 ? 40 : focusedRun == 6 ? 70 : focusedRun == 7 ? 80 : focusedRun == 8 ? 90 : focusedRun == 9 ? 100 : focusedRun == 10 ? 110 : 120); break; }
+                        if (focusedRun != 0) { Advance(focusedRun == 1 ? 30 : focusedRun == 2 ? 20 : focusedRun == 4 ? 50 : focusedRun == 5 ? 40 : focusedRun == 6 ? 70 : focusedRun == 7 ? 80 : focusedRun == 8 ? 90 : focusedRun == 9 ? 100 : focusedRun == 10 ? 110 : focusedRun == 12 ? 130 : 120); break; }
                         VerifyTap();
                         if (tapOnly) { Finish(); break; }
                         Advance(2); break;
@@ -310,6 +311,45 @@ namespace LevelAuthoring.Editor
                             (int)item["coordinate"]["row"] == 4 && (int)item["coordinate"]["column"] == 5),
                             "returning to Block restores actual menu Paste into selected target");
                         session.Undo(); Check(JToken.DeepEquals(savedDocument, session.Get(levelId).Data), "same-layer paste is one shared Undo"); Finish(); break;
+                    case 130:
+                        ScrollView disposedScroll = Root.Q<ScrollView>("board-scroll");
+                        StartInterruptedTouch();
+                        object retiringInput = Get("boardInput");
+                        Call("ZoomBoard", (float)Get("cellSize") * 1.2f, Root.Q("cell-40").worldBound.center, null);
+                        Check((bool)Get("boardZoomPending"), "zoom correction is scheduled before disposal");
+                        Call("DisposeBoardTouch"); Call("DisposeBoardTouch");
+                        Check(!Root.HasPointerCapture(1), "disposed input releases captured pointer");
+                        Check(retiringInput.GetType().GetField("boardZoomAdjustment", Flags).GetValue(retiringInput) == null &&
+                            !(bool)retiringInput.GetType().GetField("boardZoomPending", Flags).GetValue(retiringInput),
+                            "disposed input clears scheduled zoom correction");
+                        StyleLength previousMinimum = disposedScroll.contentContainer.style.minWidth;
+                        using (GeometryChangedEvent geometry = GeometryChangedEvent.GetPooled(new Rect(0, 0, 100, 100), new Rect(0, 0, 2000, 100)))
+                        { geometry.target = disposedScroll.contentViewport; disposedScroll.contentViewport.SendEvent(geometry); }
+                        Check(disposedScroll.contentContainer.style.minWidth == previousMinimum, "disposed input no longer handles viewport geometry");
+                        screen.enabled = false; screen.enabled = true; Advance(131); break;
+                    case 131:
+                        if ((bool)Get("busy")) return;
+                        Call("CloseModal"); Set("brush", definitionId); Call("Refresh");
+                        SetViewport(new Vector2Int(412, 915)); Advance(132); break;
+                    case 132:
+                        object activeInput = Get("boardInput");
+                        activeInput.GetType().GetMethod("Attach", Flags).Invoke(activeInput, null);
+                        activeInput.GetType().GetMethod("Attach", Flags).Invoke(activeInput, null);
+                        VerifyFreshPointer(1, "reactivated screen commits a fresh tap once");
+                        Advance(133); break;
+                    case 133:
+                        StartInterruptedTouch();
+                        Call("OpenModal", "입력 취소 검사"); Call("CloseModal");
+                        Touch(Root.Q("cell-40"), EventType.MouseUp, 1, Root.Q("cell-40").worldBound.center);
+                        Unchanged("modal cancels pending touch even after closing before Up");
+                        Advance(134); break;
+                    case 134:
+                        StartInterruptedTouch(); Call("AddLevel", true);
+                        Check(session.SelectedLevelId != levelId, "actual duplicate action selects another level");
+                        JObject changedLevel = session.Get(session.SelectedLevelId).Data;
+                        Touch(Root.Q("cell-40"), EventType.MouseUp, 1, Root.Q("cell-40").worldBound.center);
+                        Check(JToken.DeepEquals(changedLevel, session.Get(session.SelectedLevelId).Data), "level transition cancellation prevents late touch edit");
+                        Finish(); break;
                     case 120:
                         Click("board-touch-pan"); Click("board-zoom-in"); Click("board-zoom-in");
                         Click("board-zoom-in"); Click("board-zoom-in"); Advance(121); break;
@@ -528,7 +568,9 @@ namespace LevelAuthoring.Editor
         {
             Unchanged("interruption itself preserves document");
             VisualElement cell = Root.Q("cell-40"); Vector2 point = cell.worldBound.center;
+            DiagnoseTouch(context + " before fresh pointer", cell);
             Touch(cell, EventType.MouseDown, pointerId, point); Touch(cell, EventType.MouseUp, pointerId, point);
+            DiagnoseTouch(context + " after fresh pointer", Root.Q("cell-40"));
             Check(session.IsDirty && session.CanUndo && session.Get(levelId).Data["elements"].Any(item =>
                 (int)item["coordinate"]["row"] == 4 && (int)item["coordinate"]["column"] == 4), context);
             session.Undo(); Unchanged("fresh tap commits exactly one shared Undo"); session.Discard(); Call("Refresh");
@@ -723,7 +765,13 @@ namespace LevelAuthoring.Editor
         private static void Unchanged(string message) => Check(session.Get(levelId).Data.ToString() == baseline && !session.IsDirty && !session.CanUndo, message);
         private static void Advance(int target) { phase = target; next = EditorApplication.timeSinceStartup + 1.5; }
         private static void Finish() { Evidence.AppendLine("PASS requested touch replay checks completed; physical Android interaction remains unverified."); done = true; EditorApplication.ExitPlaymode(); }
-        private static object Get(string name) => typeof(LevelToolScreen).GetField(name, Flags).GetValue(screen);
+        private static object Get(string name)
+        {
+            FieldInfo field = typeof(LevelToolScreen).GetField(name, Flags);
+            if (field != null) return field.GetValue(screen);
+            object input = typeof(LevelToolScreen).GetField("boardInput", Flags).GetValue(screen);
+            return input.GetType().GetField(name, Flags).GetValue(input);
+        }
         private static void Set(string name, object value) => typeof(LevelToolScreen).GetField(name, Flags).SetValue(screen, value);
         private static object Call(string name, params object[] arguments) => (typeof(LevelToolScreen).GetMethod(name, Flags) ?? throw new Exception("Missing LevelToolScreen." + name)).Invoke(screen, arguments);
         private static void Check(bool value, string message) { if (!value) throw new Exception("FAIL " + message); Evidence.AppendLine("PASS " + message); Debug.Log("PASS " + message); }

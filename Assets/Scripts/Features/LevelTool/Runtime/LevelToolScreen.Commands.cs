@@ -64,7 +64,7 @@ namespace LevelTool
             else if (busy || playRoot != null || commandAwaitingInput) reason = "진행 중인 처리가 끝난 뒤 실행하세요.";
             else if (id == ToolCommandId.Cancel)
             {
-                if (tutorialPick == null && flowTool == null && !wireDrawing && brush == null && moveBody == null && boardTouchPoints.Count == 0 && boardAreaStart < 0)
+                if (tutorialPick == null && flowTool == null && !wireDrawing && brush == null && moveBody == null && boardInput?.HasPendingGesture != true)
                     reason = "취소할 조작이 없습니다.";
             }
             else if (id == ToolCommandId.Help || id == ToolCommandId.Manual) return true;

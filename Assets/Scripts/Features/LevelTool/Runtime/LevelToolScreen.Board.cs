@@ -32,7 +32,6 @@ namespace LevelTool
             board.style.width = cellSize * 9; board.style.height = cellSize * 9;
             for (int index = 0; index < 81; index++)
             {
-                int cell = index;
                 bool active = (bool)level["board"]["cells"][index]["isActive"];
                 Label tile = new Label { name = "cell-" + index };
                 tile.AddToClassList("cell"); tile.style.width = cellSize; tile.style.height = cellSize;
@@ -41,11 +40,6 @@ namespace LevelTool
                 JObject item = Placement(level, index);
                 tile.text = active ? "·" : "×";
                 tile.tooltip = "행 " + (index / 9 + 1) + " · 열 " + (index % 9 + 1) + (item == null ? "" : "\n" + item["definitionId"]);
-                tile.RegisterCallback<PointerDownEvent>(e =>
-                {
-                    if (e.pointerType == UnityEngine.UIElements.PointerType.touch || e.button != 0 || busy || modal != null) return;
-                    ExecuteBoardCell(cell, e.shiftKey, e.clickCount >= 2, false);
-                });
                 board.Add(tile);
             }
             DrawFlowOverlay(level);

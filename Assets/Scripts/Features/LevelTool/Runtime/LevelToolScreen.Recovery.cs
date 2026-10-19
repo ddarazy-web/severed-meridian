@@ -231,7 +231,6 @@ namespace LevelTool
             bool storageWasBusy = busy;
             recoveryReadRevision++;
             DisposeFileTransfer();
-            ResetBoardTouch();
             DisposeBoardTouch();
             DisposeMobileLayout();
             DisposeMobileViewport();
