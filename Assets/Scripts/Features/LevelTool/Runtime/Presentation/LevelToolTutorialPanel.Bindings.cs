@@ -6,9 +6,9 @@ using Levels;
 using Tutorial;
 using UnityEngine.UIElements;
 
-namespace LevelTool
+namespace LevelTool.Presentation
 {
-    public sealed partial class LevelToolScreen
+    public sealed partial class LevelToolTutorialPanel
     {
         private void BindingEdit(string key, TutorialFlowField field, Action<TutorialFlowBinding> edit) => Edit(() =>
             TutorialDraftEditing.EditLevel(Session, "레벨별 튜토리얼 값", level => edit(level.Tutorial.bindings.Single(value => value.key == key && value.field == field))));

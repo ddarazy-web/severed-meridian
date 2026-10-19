@@ -105,13 +105,13 @@ namespace LevelTool
 
         private void FitBoardToViewport()
         {
-            if (!autoFitBoard || Session == null || inspectorPage == "자동 시험" || inspectorPage == "시험 기록") return;
+            if (!isActiveAndEnabled || boardView == null || !autoFitBoard || Session == null || inspectorPage == "자동 시험" || inspectorPage == "시험 기록") return;
             // 스크롤바 출현에 따라 맞춤 크기가 왕복하지 않도록 바깥 뷰포트에서 여유를 예약한다.
             float available = Mathf.Min(boardScroll.resolvedStyle.width, boardScroll.resolvedStyle.height) - 52;
             if (float.IsNaN(available) || available <= 0) return;
             float fitted = Mathf.Clamp(Mathf.Floor(available / 9), 32, 72);
             if (Mathf.Abs(cellSize - fitted) < .5f) return;
-            cellSize = fitted; board.Clear(); DrawBoard(); DrawTutorialPreview(); DrawTutorialPicking();
+            cellSize = fitted; DrawBoard(); DrawTutorialPreview(); DrawTutorialPicking();
         }
     }
 }

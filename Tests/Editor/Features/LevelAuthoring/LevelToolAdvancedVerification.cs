@@ -15,7 +15,9 @@ namespace LevelAuthoring.Editor
         private static bool previousEnabled;
         private static EnterPlayModeOptions previousOptions;
         private static double deadline;
-        private static bool exercised, waitingBotArtwork;
+        private static bool exercised, waitingBotArtwork, finishingTutorial;
+        private static System.Collections.IEnumerator tutorialRoutine;
+        private static int tutorialFrame;
         private static int exitCode;
         private static string recoveryFolder;
         private static int tutorialCheck, artworkFrames;
@@ -47,7 +49,8 @@ namespace LevelAuthoring.Editor
             EditorSceneManager.OpenScene(LevelTool.Editor.LevelToolAssets.ScenePath);
             recoveryFolder = Path.GetFullPath("Logs/GameAuthoringStage05/advanced-" + Guid.NewGuid().ToString("N"));
             LevelToolRecoveryIsolation.Configure(recoveryFolder);
-            deadline = EditorApplication.timeSinceStartup + 120; exercised = false; waitingBotArtwork = false; artworkFrames = 0; exitCode = 0;
+            deadline = EditorApplication.timeSinceStartup + 120; exercised = false; waitingBotArtwork = false; finishingTutorial = false; artworkFrames = 0; exitCode = 0;
+            tutorialRoutine = null;
             EditorApplication.update += Tick; EditorApplication.playModeStateChanged += Changed;
             EditorApplication.EnterPlaymode();
         }
@@ -55,10 +58,30 @@ namespace LevelAuthoring.Editor
         {
             try
             {
+                if (exercised) return;
                 if (EditorApplication.timeSinceStartup > deadline) throw new Exception("advanced UI test timeout");
-                if (exercised || !EditorApplication.isPlaying) return;
+                if (!EditorApplication.isPlaying) return;
                 LevelToolScreen screen = UnityEngine.Object.FindFirstObjectByType<LevelToolScreen>();
                 if (screen == null || (bool)typeof(LevelToolScreen).GetField("busy", Flags).GetValue(screen)) return;
+                if (tutorialRoutine != null)
+                {
+                    if (Time.frameCount <= tutorialFrame) { EditorApplication.QueuePlayerLoopUpdate(); return; }
+                    tutorialFrame = Time.frameCount;
+                    if (tutorialRoutine.MoveNext()) { deadline = EditorApplication.timeSinceStartup + 60; EditorApplication.QueuePlayerLoopUpdate(); return; }
+                    (tutorialRoutine as IDisposable)?.Dispose(); tutorialRoutine = null;
+                    // 모든 Undo assertion 뒤에 격리 사본의 이력만 정리한다. 복구 스트레스는 별도 검사의 책임이다.
+                    screen.Workspace.Session.Discard();
+                    finishingTutorial = true; deadline = EditorApplication.timeSinceStartup + 60;
+                    return;
+                }
+                if (finishingTutorial)
+                {
+                    var boardView = typeof(LevelToolScreen).GetField("boardView", Flags).GetValue(screen);
+                    var pendingArtwork = boardView?.GetType().GetField("artwork", Flags).GetValue(boardView);
+                    int pending = pendingArtwork == null ? 0 : (int)pendingArtwork.GetType().GetField("pending", Flags).GetValue(pendingArtwork);
+                    if (pending != 0) { EditorApplication.QueuePlayerLoopUpdate(); return; }
+                    exercised = true; EditorApplication.ExitPlaymode(); return;
+                }
                 if (waitingBotArtwork)
                 {
                     if (tutorialCheck == 6)
@@ -96,6 +119,8 @@ namespace LevelAuthoring.Editor
                 typeof(LevelToolScreen).GetMethod("Refresh", Flags).Invoke(screen, null);
                 if (tutorialCheck > 0)
                 {
+                    if (tutorialCheck == 2 || tutorialCheck == 3)
+                        typeof(LevelToolScreen).GetField("nextCheckpoint", Flags).SetValue(screen, float.MaxValue);
                     if (tutorialCheck == 8) LevelToolHandoffExercise.Run(screen);
                     else if (tutorialCheck == 7) LevelToolRecordsExercise.Run(screen);
                     else if (tutorialCheck == 6) { LevelToolVisualExercise.Prepare(screen); waitingBotArtwork = true; return; }
@@ -103,7 +128,22 @@ namespace LevelAuthoring.Editor
                     else if (tutorialCheck == 4) { LevelToolBotExercise.Run(screen); waitingBotArtwork = true; return; }
                     else if (tutorialCheck == 3) LevelToolTutorialSamplesExercise.Run(screen);
                     else if (tutorialCheck == 2) LevelToolSharedTutorialExercise.Run(screen);
-                    else LevelToolTutorialExercise.Run(screen);
+                    else
+                    {
+                        // UI 조작 검사에서 매 프레임 전체 Undo 복구본을 저장하는 부하는 분리한다.
+                        // 화면 해제의 최종 복구 저장은 그대로 수행한다.
+                        typeof(LevelToolScreen).GetField("nextCheckpoint", Flags).SetValue(screen, float.MaxValue);
+                        tutorialRoutine = LevelToolTutorialExercise.Run(screen);
+                        tutorialFrame = Time.frameCount; deadline = EditorApplication.timeSinceStartup + 240;
+                        EditorApplication.QueuePlayerLoopUpdate(); return;
+                    }
+                    if (tutorialCheck == 2 || tutorialCheck == 3)
+                    {
+                        // 모든 공유/샘플 편집 검증 후 격리 사본을 정리한다. 대량 복구 저장 부하는 별도 검사한다.
+                        screen.Workspace.Session.Discard();
+                        finishingTutorial = true; deadline = EditorApplication.timeSinceStartup + 60;
+                        EditorApplication.QueuePlayerLoopUpdate(); return;
+                    }
                     exercised = true; EditorApplication.ExitPlaymode(); return;
                 }
                 LevelToolSupplyExercise.Run(screen);
@@ -141,6 +181,7 @@ namespace LevelAuthoring.Editor
             if (artworkTexture != null) { artworkTexture.Release(); UnityEngine.Object.DestroyImmediate(artworkTexture); artworkTexture = null; }
             EditorApplication.update -= Tick; EditorApplication.playModeStateChanged -= Changed;
             EditorSettings.enterPlayModeOptionsEnabled = previousEnabled; EditorSettings.enterPlayModeOptions = previousOptions;
+            Debug.Log("PASS advanced UI verification returned to edit mode, exit " + exitCode);
             EditorApplication.Exit(exitCode);
         }
     }

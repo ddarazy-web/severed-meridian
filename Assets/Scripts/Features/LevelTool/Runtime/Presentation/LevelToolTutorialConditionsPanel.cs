@@ -1,17 +1,87 @@
 #if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Board;
 using Elements;
+using LevelAuthoring.Editing;
 using Levels;
 using Simulation;
 using Tutorial;
 using UnityEngine.UIElements;
 
-namespace LevelTool
+namespace LevelTool.Presentation
 {
-    public sealed partial class LevelToolScreen
+    public sealed class LevelToolTutorialConditionsPanel : IDisposable
     {
+        private readonly Func<AuthoringEditSession> currentSession;
+        private readonly Action<string, Action<LevelDefinition>> TutorialEdit;
+        private readonly Func<List<BoardCoordinate>> selectedCoordinates;
+        private readonly Action<string, string> BeginTutorialPick;
+        private readonly Func<TutorialConditionKind> readKind;
+        private readonly Action<TutorialConditionKind> writeKind;
+        private int tutorialStep, revision;
+        private bool disposed;
+        public VisualElement Root { get; } = new VisualElement();
+        private VisualElement inspector => Root;
+        private TutorialConditionKind newTutorialCondition { get => readKind(); set => writeKind(value); }
+
+        public LevelToolTutorialConditionsPanel(Func<AuthoringEditSession> currentSession, Action<string, Action<LevelDefinition>> edit,
+            Func<List<BoardCoordinate>> selectedCoordinates, Action<string, string> pick,
+            Func<TutorialConditionKind> readKind, Action<TutorialConditionKind> writeKind)
+        {
+            this.currentSession = currentSession; TutorialEdit = edit; this.selectedCoordinates = selectedCoordinates;
+            BeginTutorialPick = pick; this.readKind = readKind; this.writeKind = writeKind;
+            Root.style.flexShrink = 0;
+        }
+        public void Clear() { revision++; Root.Clear(); }
+        public void Dispose() { if (disposed) return; disposed = true; Clear(); }
+        public void Refresh(LevelDefinition level, int stepIndex)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(LevelToolTutorialConditionsPanel));
+            Clear(); tutorialStep = stepIndex;
+            DrawTutorialConditions(level, level.Tutorial.steps[stepIndex]);
+        }
+        private Func<bool> CaptureValidity()
+        {
+            int generation = revision;
+            AuthoringEditSession session = currentSession();
+            string levelId = session.SelectedLevelId;
+            return () => !disposed && revision == generation && ReferenceEquals(session, currentSession()) && session.SelectedLevelId == levelId;
+        }
+        private Action<T> Guard<T>(Action<T> action)
+        {
+            Func<bool> active = CaptureValidity();
+            return value => { if (active()) action(value); };
+        }
+        private Button Button(VisualElement parent, string name, string text, Action action)
+        {
+            Func<bool> active = CaptureValidity();
+            return LevelToolPanelFields.Button(parent, name, text, () => { if (active()) action(); });
+        }
+        private void Choice(VisualElement parent, string name, string label, string[] values, string[] labels, string current, Action<string> changed) =>
+            LevelToolPanelFields.Choice(parent, name, label, values, labels, current, Guard(changed));
+        private void Number(VisualElement parent, string name, string label, int current, Action<int> changed) =>
+            LevelToolPanelFields.Number(parent, name, label, current, Guard(changed));
+        private void TutorialText(VisualElement host, string name, string label, string current, Action<string> changed, string hint = "") =>
+            LevelToolPanelFields.TutorialText(host, name, label, current, Guard(changed), hint);
+        private void TutorialToggle(VisualElement host, string name, string label, bool current, Action<bool> changed) =>
+            LevelToolPanelFields.TutorialToggle(host, name, label, current, Guard(changed));
+        private void TutorialEnum<T>(VisualElement host, string name, string label, T current, Action<T> changed, Func<T, string> display = null) where T : struct, Enum =>
+            LevelToolPanelFields.TutorialEnum(host, name, label, current, Guard(changed), display);
+        private void TutorialPower(VisualElement host, LevelDefinition level, string name, string label, string current, Action<string> changed) =>
+            LevelToolPanelFields.TutorialPower(host, level, name, label, current, Guard(changed));
+        private static string ItemLabel(BoardItem value) => LevelToolPanelFields.ItemLabel(value);
+        private void StepEdit(Action<TutorialStepDefinition> edit) => TutorialEdit("튜토리얼 단계 편집", level => edit(level.Tutorial.steps[tutorialStep]));
+        private void ConditionEdit(int index, Action<TutorialConditionDefinition> edit) => StepEdit(step => edit(step.conditions[index]));
+        private void DrawTutorialTarget(VisualElement card, LevelDefinition level, TutorialConditionDefinition condition, int index)
+        {
+            Func<bool> active = CaptureValidity();
+            LevelToolTutorialTargetFields.Draw(card, level, condition, index,
+                edit => { if (active()) ConditionEdit(index, edit); }, selectedCoordinates,
+                () => { if (active()) BeginTutorialPick("target", condition.authoringId); },
+                level.Tutorial.steps.Take(tutorialStep).All(value => value.kind == TutorialStepKind.Description));
+        }
         private void DrawTutorialConditions(LevelDefinition level, TutorialStepDefinition step)
         {
             var registry = TutorialHandlerRegistry.CreateDefault();
@@ -81,45 +151,6 @@ namespace LevelTool
                         Button(card, "tutorial-clear-origins-" + i, "대상에 맞지 않는 원인 제거", () => ConditionEdit(index, data => data.allowedOrigins.RemoveAll(origin => TutorialTargetCapabilities.OriginError(target, origin) != null)));
                 }
             }
-        }
-        private static void TutorialPower(VisualElement host, LevelDefinition level, string name, string label, string selected, Action<string> changed)
-        {
-            var powers = level.CreateElementCatalog().Definitions.Where(value => value.Supply?.Behavior == ElementSupplyBehavior.Power).ToArray();
-            Choice(host, name, label, new[] { "" }.Concat(powers.Select(value => value.Id.Value)).ToArray(), new[] { "선택하세요" }.Concat(powers.Select(value => value.DisplayName)).ToArray(), selected, changed);
-        }
-        private void DrawTutorialTarget(VisualElement card, LevelDefinition level, TutorialConditionDefinition condition, int index, Action<Action<TutorialConditionDefinition>> customChange = null, bool? initialAction = null)
-        {
-            void Change(Action<TutorialConditionDefinition> edit) { if (customChange != null) customChange(edit); else ConditionEdit(index, edit); }
-            if (condition.target == null)
-            { Button(card, "tutorial-create-target-" + index, "조건 대상 지정", () => Change(data => data.target = new TutorialTargetDefinition())); return; }
-            var target = condition.target;
-            var kinds = condition.kind == TutorialConditionKind.Generated ? new[] { TutorialTargetKind.Board, TutorialTargetKind.Area } : Enum.GetValues(typeof(TutorialTargetKind)).Cast<TutorialTargetKind>().ToArray();
-            string[] names = { "보드 전체", "특정 개체", "종류", "선택 영역", "이전 생성 결과" };
-            Choice(card, "tutorial-target-kind-" + index, "조건 대상", kinds.Select(value => value.ToString()).ToArray(), kinds.Select(value => names[(int)value]).ToArray(), target.kind.ToString(),
-                value => Change(data => data.target.kind = (TutorialTargetKind)Enum.Parse(typeof(TutorialTargetKind), value)));
-            if (condition.kind < TutorialConditionKind.Generated) TutorialEnum(card, "tutorial-target-layer-" + index, "대상 층", target.layer, value => Change(data => data.target.layer = value),
-                value => value == TutorialTargetLayer.Content ? "블록 / 장애물" : value == TutorialTargetLayer.Cover ? "덮개" : "바닥");
-            if (target.kind == TutorialTargetKind.Area || target.kind == TutorialTargetKind.Entity)
-            {
-                if (customChange == null) Button(card, "tutorial-target-select-" + index, "보드에서 조건 대상 선택", () => BeginTutorialPick("target", condition.authoringId));
-                card.Add(new Label(target.kind == TutorialTargetKind.Entity ? "대상 위치: " + target.coordinate : "대상 영역: " + target.cells.Count + "칸"));
-                Button(card, "tutorial-target-pick-" + index, "현재 선택 칸을 조건 대상으로", () => Change(data =>
-                {
-                    var cells = SelectedCoordinates();
-                    if (cells.Count == 0 || data.target.kind == TutorialTargetKind.Entity && cells.Count != 1) throw new ArgumentException("개체는 한 칸, 영역은 한 칸 이상 선택하세요.");
-                    if (data.target.kind == TutorialTargetKind.Entity) data.target.coordinate = cells[0]; else data.target.cells = cells;
-                }));
-            }
-            if (target.kind == TutorialTargetKind.Generated) TutorialText(card, "tutorial-target-binding-" + index, "이전 생성 연결 이름", target.binding, value => Change(data => data.target.binding = value));
-            if (target.kind == TutorialTargetKind.Definition)
-            {
-                var definitions = level.CreateElementCatalog().Definitions.ToArray();
-                Choice(card, "tutorial-target-definition-" + index, "대상 종류", new[] { "" }.Concat(definitions.Select(value => value.Id.Value)).ToArray(), new[] { "선택하세요" }.Concat(definitions.Select(value => value.DisplayName)).ToArray(), target.definitionId,
-                    value => Change(data => data.target.definitionId = value));
-            }
-            string warning = TutorialTargetCapabilities.ConditionError(TutorialTargetCapabilities.Resolve(level, target,
-                initialAction ?? level.Tutorial.steps.Take(tutorialStep).All(value => value.kind == TutorialStepKind.Description)), condition.kind);
-            if (warning != null) card.Add(new Label(warning) { style = { whiteSpace = WhiteSpace.Normal } });
         }
     }
 }

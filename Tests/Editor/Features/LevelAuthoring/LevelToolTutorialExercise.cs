@@ -9,7 +9,7 @@ namespace LevelAuthoring.Editor
 {
     internal static class LevelToolTutorialExercise
     {
-        internal static void Run(LevelToolScreen screen)
+        internal static System.Collections.IEnumerator Run(LevelToolScreen screen)
         {
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
             VisualElement root = screen.GetComponent<UIDocument>().rootVisualElement;
@@ -27,6 +27,7 @@ namespace LevelAuthoring.Editor
             Check(session.Get(id).Data["tutorial"]["steps"].Count() == previous + 1, "step added through runtime UI");
             root.Q<TextField>("tutorial-instructions").value = "블록 두 칸을 바꿔 주세요";
             Check((string)session.Get(id).Data["tutorial"]["steps"].Last["instructions"] == "블록 두 칸을 바꿔 주세요", "step instructions editable");
+            yield return null;
             root.Q<DropdownField>("tutorial-kind").value = "교환";
             session.SelectCells(new[] { 20, 21 }); typeof(LevelToolScreen).GetMethod("Refresh", flags).Invoke(screen, null);
             Click("tutorial-set-action");
@@ -37,6 +38,7 @@ namespace LevelAuthoring.Editor
             Check((string)step["conditions"].Last["kind"] == "Match", "registered matching condition added");
             root.Q<IntegerField>("tutorial-condition-count-0").value = 2;
             Check((int)session.Get(id).Data["tutorial"]["steps"].Last["conditions"][0]["requiredCount"] == 2, "condition count editable");
+            yield return null;
             string stepId = (string)step["authoringId"];
             Click("tutorial-copy-step");
             var steps = session.Get(id).Data["tutorial"]["steps"];
@@ -70,6 +72,7 @@ namespace LevelAuthoring.Editor
                     }
                 }
                 Click("tutorial-remove-condition-1");
+                yield return null;
             }
             var preview = root.Q<Toggle>("tutorial-preview");
             Check(preview != null, "tutorial spotlight preview control exists");
@@ -85,6 +88,7 @@ namespace LevelAuthoring.Editor
             Check(session.ExportState() == beforePreview, "tutorial preview does not edit source");
             preview = root.Q<Toggle>("tutorial-preview"); preview.value = false;
             Check(root.Q("tutorial-preview-overlay") == null, "tutorial preview can be hidden");
+            yield return null;
             string beforePicking = session.ExportState();
             Click("tutorial-pick-action");
             Check(root.Q("tutorial-pick-panel") != null && !root.Q<Button>("save").enabledInHierarchy, "picking locks other edits until confirm or cancel");
@@ -93,6 +97,7 @@ namespace LevelAuthoring.Editor
             Check(session.ExportState() == beforePicking, "pending picks do not change document or undo history");
             Click("tutorial-pick-cancel");
             Check(session.ExportState() == beforePicking && root.Q("tutorial-pick-panel") == null, "cancel preserves original selection and content");
+            yield return null;
             Click("tutorial-pick-action");
             pick.Invoke(screen, new object[] { 30 }); pick.Invoke(screen, new object[] { 31 });
             view = (Newtonsoft.Json.Linq.JObject)typeof(LevelToolScreen).GetMethod("CaptureView", flags).Invoke(screen, null);

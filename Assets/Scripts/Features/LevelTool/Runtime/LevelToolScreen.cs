@@ -27,6 +27,8 @@ namespace LevelTool
         private bool busy;
         private Camera backgroundCamera;
         private LevelToolWindowController windowController;
+        private Presentation.LevelToolBoardView boardView;
+        private Presentation.LevelToolPropertiesPanel propertiesPanel;
         private string levelListKey, paletteKey, boardKey;
         private Dictionary<string, JObject> definitions = new Dictionary<string, JObject>();
         private AuthoringEditSession Session => Workspace.Session;
@@ -45,6 +47,30 @@ namespace LevelTool
             navigationPage = null;
             levelListKey = paletteKey = boardKey = null;
             BuildEditorLayout();
+            boardView = new Presentation.LevelToolBoardView(board, Show, SelectConnectionVertex, () => busy);
+            supplyPanel = new Presentation.LevelToolSupplyPanel(() => Session, Change, supplyState);
+            propertiesPanel = new Presentation.LevelToolPropertiesPanel(() => Session, Change,
+                () => new Presentation.LevelToolPropertiesOptions
+                {
+                    Layer = layer, Brush = brush, Color = color, Direction = direction,
+                    CellSize = cellSize, Seed = seed, TutorialMode = tutorialMode
+                }, new Presentation.LevelToolPropertiesActions
+                {
+                    SetColor = value => color = value, SetDirection = value => direction = value,
+                    Zoom = value => ZoomBoard(value, boardScroll.contentViewport.worldBound.center),
+                    Fit = () => { autoFitBoard = true; FitBoardToViewport(); },
+                    BeginMove = id => { moveBody = id; brush = null; Show("장애물이 이동할 기준 칸을 클릭하세요."); },
+                    SetSeed = value => seed = value, SetTutorialMode = value => tutorialMode = value
+                });
+            tutorialPanel = new Presentation.LevelToolTutorialPanel(new Presentation.LevelToolTutorialActions
+            {
+                Session = () => Session, Draft = () => sharedTutorialDraft, Edit = Edit, Refresh = Refresh,
+                Preview = () => tutorialPreview, SetPreview = value => tutorialPreview = value, Layer = () => layer,
+                Pick = BeginTutorialPick,
+                BeginSharedDraft = () => Edit(() => { sharedTutorialDraft = new LevelAuthoring.Runtime.SharedTutorialDraft(Session); tutorialStep = 0; CancelPendingInput(); brush = null; }),
+                ApplySharedDraft = ApplySharedTutorialDraft,
+                DiscardSharedDraft = () => { sharedTutorialDraft = null; Refresh(); }
+            }, tutorialState);
             editor.SetEnabled(!busy);
             RegisterShortcuts();
             Refresh();
@@ -118,13 +144,14 @@ namespace LevelTool
             var focus = committingCommandInput ? null : CaptureFocusedInput();
             Vector2 levelOffset = levelList.scrollOffset, paletteOffset = palette.scrollOffset, propertyOffset = properties.scrollOffset, boardOffset = boardScroll.scrollOffset;
             inspector = properties.contentContainer; inspector.Clear();
+            supplyPanel.Clear(); propertiesPanel.Clear(); tutorialPanel.Clear();
             botBoard?.Root.RemoveFromHierarchy(); botBoard?.Dispose(); botBoard = null;
             batchBoard?.Root.RemoveFromHierarchy(); batchBoard?.Dispose(); batchBoard = null;
             multiBoard?.Root.RemoveFromHierarchy(); multiBoard?.Dispose(); multiBoard = null;
             historyBoard?.Root.RemoveFromHierarchy(); historyBoard?.Dispose(); historyBoard = null;
             board.style.display = (inspectorPage == "자동 시험" || inspectorPage == "시험 기록") ? DisplayStyle.None : DisplayStyle.Flex;
             RefreshNavigation(); RefreshCommandStates();
-            if (Session == null) { levelList.Clear(); palette.Clear(); board.Clear(); return; }
+            if (Session == null) { levelList.Clear(); palette.Clear(); boardView.Clear(); return; }
             try
             {
                 definitions = LevelToolDocuments.Definitions(Session);
@@ -164,7 +191,7 @@ namespace LevelTool
                     "|" + string.Join("|", Session.Documents.Where(doc => doc.Kind != "level").Select(doc => doc.Data.ToString(Newtonsoft.Json.Formatting.None)));
                 if (nextBoard != boardKey)
                 {
-                    boardKey = nextBoard; board.Clear(); DrawBoard();
+                    boardKey = nextBoard; DrawBoard();
                 }
                 DrawProperties(); DrawTutorialPreview();
             }

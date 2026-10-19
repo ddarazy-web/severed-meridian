@@ -253,11 +253,12 @@ namespace LevelAuthoring.Editor
             {
                 before = Data.ToString(); expected = (JObject)Data.DeepClone();
                 Dictionary<string, JObject> definitions = LevelToolDocuments.Definitions(session);
-                string supply = (string)Get("supplyToAdd");
+                LevelTool.Presentation.LevelToolSupplyState supplyState = (LevelTool.Presentation.LevelToolSupplyState)Get("supplyState");
+                string supply = supplyState.DefinitionId;
                 SupplyDocumentEditing.SetItems(expected, definitions, new[] { 0 }, new JArray(new JObject
                 {
-                    ["definitionId"] = supply, ["count"] = (int)Get("supplyCount"), ["color"] = (string)Get("supplyColor"),
-                    ["direction"] = (string)Get("supplyDirection"), ["durability"] = (int)Get("supplyDurability")
+                    ["definitionId"] = supply, ["count"] = supplyState.Count, ["color"] = supplyState.Color,
+                    ["direction"] = supplyState.Direction, ["durability"] = supplyState.Durability
                 }), true);
             });
             ButtonStep("append-supply"); Steps.Enqueue(() => { Check(JToken.DeepEquals(Data, expected), "touch regular fixed supply equals common command"); after = Data.ToString(); });

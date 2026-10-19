@@ -72,7 +72,7 @@ namespace LevelAuthoring.Editor
             Button issueButton = root.Query<Button>().ToList().FirstOrDefault(button => button.name.StartsWith("validation-issue-") && button.tooltip.Contains("steps.Array.data[1]"));
             Check(issueButton != null, "invalid tutorial reports exact step path");
             typeof(Clickable).GetMethod("Invoke", flags).Invoke(issueButton.clickable, new object[] { null });
-            Check(root.Q<DropdownField>("inspector-page").value == "튜토리얼" && (int)typeof(LevelToolScreen).GetField("tutorialStep", flags).GetValue(screen) == 1, "issue button selects tutorial step");
+            Check(root.Q<DropdownField>("inspector-page").value == "튜토리얼" && (int)typeof(LevelToolScreen).GetProperty("tutorialStep", flags).GetValue(screen) == 1, "issue button selects tutorial step");
             session.Undo();
             foreach (string sample in new[] { "match", "two", "follow" })
             {

@@ -5,7 +5,6 @@ using LevelAuthoring.Editing;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Cysharp.Threading.Tasks;
 
 namespace LevelTool
 {
@@ -28,25 +27,19 @@ namespace LevelTool
             cellSize = Mathf.Clamp(Mathf.Round(cellSize), 32, 144);
             float viewportWidth = boardScroll.contentViewport.resolvedStyle.width;
             boardScroll.contentContainer.style.minWidth = Mathf.Max(float.IsNaN(viewportWidth) ? 0 : viewportWidth, cellSize * 9 + 32);
-            JObject level = LevelToolDocuments.UpgradePreview(Session.Get(Session.SelectedLevelId).Data);
-            board.style.width = cellSize * 9; board.style.height = cellSize * 9;
-            for (int index = 0; index < 81; index++)
+            boardView.Refresh(Session, Workspace.Folder, definitions, layer, cellSize, new Presentation.LevelToolBoardOverlayState
             {
-                bool active = (bool)level["board"]["cells"][index]["isActive"];
-                Label tile = new Label { name = "cell-" + index };
-                tile.AddToClassList("cell"); tile.style.width = cellSize; tile.style.height = cellSize;
-                tile.EnableInClassList("inactive", !active);
-                tile.EnableInClassList("selected", Session.SelectedCells.Contains(index));
-                JObject item = Placement(level, index);
-                tile.text = active ? "·" : "×";
-                tile.tooltip = "행 " + (index / 9 + 1) + " · 열 " + (index % 9 + 1) + (item == null ? "" : "\n" + item["definitionId"]);
-                board.Add(tile);
-            }
-            DrawFlowOverlay(level);
-            DrawConnectionOverlay(level);
-            DrawArtwork(level).Forget();
+                Page = inspectorPage, FlowFirst = flowFirst, FlowRoute = flowRoute.ToArray(),
+                WireDrawing = wireDrawing, WireRoute = wireRoute.ToArray(), SelectedConnection = selectedConnection,
+                Mobile = mobileNavigation != null
+            });
         }
 
+        private void SelectConnectionVertex(int vertex)
+        {
+            if (wireRoute.Contains(vertex)) { Show("이미 찍은 점입니다. ‘찍은 점 비우기’로 다시 그릴 수 있습니다."); return; }
+            wireRoute.Add(vertex); Refresh();
+        }
         private void ExecuteBoardCell(int cell, bool shift, bool replace, bool touch)
         {
             board.Focus();
@@ -93,85 +86,9 @@ namespace LevelTool
             if (inspectorPage == "연결") { DrawConnections(level); return; }
             if (inspectorPage == "모양") { DrawShapes(level); return; }
             if (inspectorPage == "튜토리얼") { DrawTutorial(); return; }
-            VisualElement container = inspector;
-            var settings = new VisualElement { name = "level-settings" }; container.Add(settings); inspector = settings;
-            TextField name = new TextField("이름") { name = "level-name", value = (string)level["displayName"], isDelayed = true };
-            name.RegisterValueChangedCallback(e => Change("이름 변경", data => LevelDocumentEditing.SetName(data, e.newValue))); inspector.Add(name);
-            IntegerField number = new IntegerField("레벨 번호") { name = "level-number", value = (int)level["levelNumber"], isDelayed = true };
-            number.RegisterValueChangedCallback(e => Change("번호 변경", data => LevelDocumentEditing.SetNumber(data, e.newValue))); inspector.Add(number);
-            IntegerField moves = new IntegerField("이동 횟수") { name = "level-moves", value = (int)level["moveCount"], isDelayed = true };
-            moves.RegisterValueChangedCallback(e => Change("이동 횟수", data => LevelDocumentEditing.SetMoveCount(data, e.newValue))); inspector.Add(moves);
-            for (int i = 1; i <= 5; i++)
-            {
-                string value = "Type" + i;
-                Toggle toggle = new Toggle("사용 색 " + i) { value = level["colors"].Values<string>().Contains(value) };
-                toggle.RegisterValueChangedCallback(e => Change("사용 색", data => LevelDocumentEditing.SetColorEnabled(data, value, e.newValue))); inspector.Add(toggle);
-            }
-            var selection = new VisualElement { name = "selection-properties" }; container.Add(selection); inspector = selection;
-            DropdownField brushColor = new DropdownField("배치 색", Enumerable.Range(1, 5).Select(i => "Type" + i).ToList(), int.Parse(color.Substring(4)) - 1);
-            brushColor.RegisterValueChangedCallback(e => color = e.newValue); inspector.Add(brushColor);
-            DropdownField orientation = new DropdownField("로켓 방향", new System.Collections.Generic.List<string> { "Horizontal", "Vertical" }, direction == "Horizontal" ? 0 : 1);
-            orientation.RegisterValueChangedCallback(e => direction = e.newValue); inspector.Add(orientation);
-            Slider zoom = new Slider("보드 확대", 32, 144) { value = cellSize };
-            zoom.RegisterValueChangedCallback(e => ZoomBoard(e.newValue, boardScroll.contentViewport.worldBound.center)); inspector.Add(zoom);
-            Button(inspector, "fit-board", "보드를 화면에 맞추기", () => { autoFitBoard = true; FitBoardToViewport(); });
-            inspector.Add(new Label("선택 칸 " + Session.SelectedCells.Length + "개 · Shift+클릭으로 영역 선택"));
-            Button(inspector, "place-area", "선택 영역에 현재 도구 배치", () => Change("영역 배치", data =>
-            {
-                if (brush == null) throw new InvalidOperationException("먼저 왼쪽에서 배치할 요소를 선택하세요.");
-                LevelDocumentEditing.PlaceSelection(data, definitions, brush, Session.SelectedCells, false, color, direction);
-            }));
-            Button(inspector, "erase", "선택 층 지우기", () => Change("선택 삭제", data => LevelDocumentEditing.EraseSelection(data, definitions, layer, Session.SelectedCells)));
-            Button(inspector, "sources", "선택 칸에 생성구 추가", () => Change("생성구 추가", data => SupplyDocumentEditing.PlaceSources(data, Session.SelectedCells, false)));
-            Button(inspector, "erase-sources", "선택 칸 생성구 삭제", () => Change("생성구 삭제", data => SupplyDocumentEditing.PlaceSources(data, Session.SelectedCells, true)));
             string[] selectedIds = SelectedBoardInstanceIds(out string selectionReason);
-            if (selectionReason != null) inspector.Add(new Label(selectionReason));
-            if (selectedIds.Length == 1)
-            {
-                JObject item = ((JArray)level["elements"]).OfType<JObject>().FirstOrDefault(value => (string)value["instanceId"] == selectedIds[0]);
-                if (item != null)
-                {
-                    string id = (string)item["instanceId"];
-                    inspector.Add(new Label((string)item["definitionId"]));
-                    IntegerField durability = new IntegerField("남은 내구도") { value = (int)item["durability"], isDelayed = true };
-                    durability.name = "selected-durability";
-                    durability.RegisterValueChangedCallback(e => Change("내구도 변경", data => LevelDocumentEditing.SetElementDurability(data, id, e.newValue))); inspector.Add(durability);
-                    Button(inspector, "apply-color-direction", "선택 요소에 배치 색·방향 적용", () => Change("요소 색·방향", data =>
-                        LevelDocumentEditing.SetElementAppearance(data, id, color, direction)));
-                    if ((string)item["layer"] == "Obstacle")
-                        Button(inspector, "move-body", "이 장애물 이동 → 목적지 클릭", () => { moveBody = id; brush = null; Show("장애물이 이동할 기준 칸을 클릭하세요."); });
-                }
-            }
-            inspector = settings;
-            DrawMissions(level);
-            IntegerField seedInput = new IntegerField("시험 시드") { value = seed, isDelayed = true };
-            seedInput.RegisterValueChangedCallback(e => seed = e.newValue); inspector.Add(seedInput);
-            DropdownField tutorial = new DropdownField("튜토리얼 시험", Enum.GetNames(typeof(Tutorial.TutorialRunMode)).ToList(), (int)tutorialMode);
-            tutorial.RegisterValueChangedCallback(e => tutorialMode = (Tutorial.TutorialRunMode)Enum.Parse(typeof(Tutorial.TutorialRunMode), e.newValue)); inspector.Add(tutorial);
-            inspector.Add(new Label("튜토리얼·고정 공급 목록·연결/흐름은 원본 그대로 보존됩니다."));
-            inspector = container;
-        }
-
-        private void DrawMissions(JObject level)
-        {
-            string[] kinds = { "Color", "Crate", "Web", "Scrap", "Dust", "Safe", "ColorLock", "Appliance", "Mold", "Recovery" };
-            JArray missions = (JArray)level["missions"];
-            inspector.Add(new Label("미션 (최대 4개)"));
-            for (int i = 0; i < missions.Count; i++)
-            {
-                int index = i;
-                string kind = (string)missions[i]["kind"], missionColor = (string)missions[i]["color"];
-                int count = (int)missions[i]["count"];
-                DropdownField target = new DropdownField("대상", kinds.ToList(), Math.Max(0, Array.IndexOf(kinds, kind)));
-                target.RegisterValueChangedCallback(e => Change("미션 대상", data => MissionDocumentEditing.Set(data, index, e.newValue, missionColor, Math.Max(1, count)))); inspector.Add(target);
-                DropdownField colors = new DropdownField("색", Enumerable.Range(1, 5).Select(n => "Type" + n).ToList(), Math.Max(0, int.Parse(missionColor.Substring(4)) - 1));
-                colors.RegisterValueChangedCallback(e => Change("미션 색", data => MissionDocumentEditing.Set(data, index, kind, e.newValue, count))); inspector.Add(colors);
-                IntegerField amount = new IntegerField("목표 수량") { value = count, isDelayed = true };
-                amount.RegisterValueChangedCallback(e => Change("미션 수량", data => MissionDocumentEditing.Set(data, index, kind, missionColor, e.newValue))); inspector.Add(amount);
-                Button(inspector, "remove-mission-" + i, "미션 삭제", () => Change("미션 삭제", data => MissionDocumentEditing.Remove(data, index)));
-            }
-            Button(inspector, "add-mission", "미션 추가", () => Change("미션 추가", data =>
-                MissionDocumentEditing.Set(data, ((JArray)data["missions"]).Count, "Color", color, 10)));
+            propertiesPanel.Refresh(level, definitions, selectedIds, selectionReason);
+            inspector.Add(propertiesPanel.Root);
         }
     }
 }

@@ -61,6 +61,22 @@ namespace LevelAuthoring.Editor
                 throw new Exception("FAIL trial uses wrong custom size/pivot/offset/angle or current edited catalog");
             if (labels.Count(label => label.ClassListContains("trial-cell") && string.IsNullOrEmpty(label.text)) != 81)
                 throw new Exception("FAIL footprint fallback labels not cleared");
+            var editorBoard = screen.GetComponent<UIDocument>().rootVisualElement.Q("board");
+            var editorBodies = editorBoard.Query<Image>().ToList().Where(image => image.sprite != null && image.sprite.name == body.sprite.name).ToArray();
+            if (editorBodies.Length == 0) return false;
+            if (editorBodies.Length != 1) throw new Exception("FAIL editor draws the 2x2 body more than once");
+            float editorCell = (float)typeof(LevelToolScreen).GetField("cellSize", Flags).GetValue(screen);
+            float editorSide = editorCell * .83f;
+            float editorWidth = editorSide * body.sprite.rect.width / Mathf.Max(body.sprite.rect.width, body.sprite.rect.height);
+            float editorHeight = editorSide * body.sprite.rect.height / Mathf.Max(body.sprite.rect.width, body.sprite.rect.height);
+            var editorBody = editorBodies[0];
+            if (Mathf.Abs(editorBody.style.width.value.value - editorWidth) > .01f ||
+                Mathf.Abs(editorBody.style.height.value.value - editorHeight) > .01f ||
+                Mathf.Abs(editorBody.style.left.value.value - (editorCell * 4 + .1f * editorSide - editorWidth * .25f)) > .01f ||
+                Mathf.Abs(editorBody.style.top.value.value - (editorCell * 4 + .1f * editorSide - editorHeight * .25f)) > .01f ||
+                Mathf.Abs(editorBody.style.rotate.value.angle.value + 30) > .01f)
+                throw new Exception("FAIL editor board did not apply latest catalog size/pivot/offset/rotation");
+            Debug.Log("PASS editor 2x2 draws once with the latest custom catalog while trial retains its snapshot");
             Debug.Log("PASS trial 2x2 draws once; frozen custom catalog size/pivot/offset/rotation survives later authoring edits");
             return true;
         }

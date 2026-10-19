@@ -58,7 +58,7 @@ namespace LevelTool
                 size =>
                 {
                     autoFitBoard = false; cellSize = size;
-                    board.Clear(); DrawBoard(); DrawTutorialPreview(); DrawTutorialPicking();
+                    DrawBoard(); DrawTutorialPreview(); DrawTutorialPicking();
                 });
             boardInput.Attach();
             boardScroll.tooltip = "Ctrl + 마우스 휠: 커서 위치를 기준으로 확대·축소 / 마우스 휠: 스크롤";

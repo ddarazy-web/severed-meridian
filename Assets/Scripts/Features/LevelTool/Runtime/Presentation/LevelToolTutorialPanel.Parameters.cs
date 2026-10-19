@@ -4,9 +4,9 @@ using System.Linq;
 using Tutorial;
 using UnityEngine.UIElements;
 
-namespace LevelTool
+namespace LevelTool.Presentation
 {
-    public sealed partial class LevelToolScreen
+    public sealed partial class LevelToolTutorialPanel
     {
         private void DrawTutorialParameters(TutorialFlowDefinition flow)
         {

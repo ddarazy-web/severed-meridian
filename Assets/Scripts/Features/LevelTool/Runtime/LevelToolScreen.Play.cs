@@ -122,7 +122,14 @@ namespace LevelTool
             returnButton.style.minWidth = 48; returnButton.style.minHeight = 48;
         }
 
-        private void OnDestroy() { artworkRevision++; artwork?.Dispose(); artwork = null; ReturnToEditor(); }
+        private void OnDestroy()
+        {
+            boardView?.Dispose(); boardView = null;
+            supplyPanel?.Dispose(); supplyPanel = null;
+            propertiesPanel?.Dispose(); propertiesPanel = null;
+            tutorialPanel?.Dispose(); tutorialPanel = null;
+            ReturnToEditor();
+        }
     }
 }
 #endif

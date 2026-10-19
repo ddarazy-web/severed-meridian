@@ -232,6 +232,10 @@ namespace LevelTool
             recoveryReadRevision++;
             DisposeFileTransfer();
             DisposeBoardTouch();
+            boardView?.Dispose(); boardView = null;
+            supplyPanel?.Dispose(); supplyPanel = null;
+            propertiesPanel?.Dispose(); propertiesPanel = null;
+            tutorialPanel?.Dispose(); tutorialPanel = null;
             DisposeMobileLayout();
             DisposeMobileViewport();
             windowController?.Dispose(); windowController = null;

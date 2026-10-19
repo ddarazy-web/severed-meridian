@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using LevelTool;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -23,6 +24,53 @@ namespace LevelAuthoring.Editor
         private static string originalState;
         private static readonly StringBuilder Evidence = new StringBuilder();
         private static readonly Vector2Int[] Sizes = { new Vector2Int(1280, 800), new Vector2Int(1920, 1200) };
+        private static bool batch, previousEnabled;
+        private static EnterPlayModeOptions previousOptions;
+        private static int batchExit;
+        private static double batchDeadline;
+        private static string recoveryFolder;
+
+        public static void Run()
+        {
+            batch = true; batchExit = 0;
+            previousEnabled = EditorSettings.enterPlayModeOptionsEnabled; previousOptions = EditorSettings.enterPlayModeOptions;
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload;
+            EditorSceneManager.OpenScene(LevelTool.Editor.LevelToolAssets.ScenePath);
+            recoveryFolder = Path.GetFullPath("Logs/LevelToolRefactorStage03/controls-" + Guid.NewGuid().ToString("N"));
+            LevelToolRecoveryIsolation.Configure(recoveryFolder);
+            batchDeadline = EditorApplication.timeSinceStartup + 120;
+            EditorApplication.update += StartBatch;
+            EditorApplication.playModeStateChanged += BatchChanged;
+            EditorApplication.EnterPlaymode();
+        }
+
+        private static void StartBatch()
+        {
+            try
+            {
+                if (EditorApplication.timeSinceStartup > batchDeadline) throw new Exception("Control layout setup timeout");
+                if (!EditorApplication.isPlaying) return;
+                LevelToolScreen screen = UnityEngine.Object.FindFirstObjectByType<LevelToolScreen>();
+                const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+                if (screen == null || (bool)typeof(LevelToolScreen).GetField("busy", flags).GetValue(screen)) return;
+                LevelToolRecoveryIsolation.Verify(screen, recoveryFolder);
+                screen.Workspace.Create(Path.Combine(recoveryFolder, "Project"), LevelToolDocuments.NewProject());
+                typeof(LevelToolScreen).GetField("levelSettingsVisible", flags).SetValue(screen, true);
+                typeof(LevelToolScreen).GetMethod("Refresh", flags).Invoke(screen, null);
+                EditorApplication.update -= StartBatch;
+                Main();
+            }
+            catch (Exception error) { Debug.LogException(error); batchExit = 1; EditorApplication.update -= StartBatch; EditorApplication.ExitPlaymode(); }
+        }
+
+        private static void BatchChanged(PlayModeStateChange state)
+        {
+            if (state != PlayModeStateChange.EnteredEditMode) return;
+            EditorApplication.playModeStateChanged -= BatchChanged;
+            EditorSettings.enterPlayModeOptionsEnabled = previousEnabled; EditorSettings.enterPlayModeOptions = previousOptions;
+            batch = false; EditorApplication.Exit(batchExit);
+        }
 
         public static object Main()
         {
@@ -126,6 +174,12 @@ namespace LevelAuthoring.Editor
             if (texture != null) { texture.Release(); UnityEngine.Object.DestroyImmediate(texture); }
             UnityEngine.Object.DestroyImmediate(panel);
             File.WriteAllText("Logs/LevelToolControlsVerification.txt", Evidence.ToString());
+            if (batch)
+            {
+                batchExit = Evidence.ToString().Contains("FAIL ") ? 1 : 0;
+                Debug.Log(Evidence.ToString());
+                EditorApplication.ExitPlaymode();
+            }
         }
     }
 }
