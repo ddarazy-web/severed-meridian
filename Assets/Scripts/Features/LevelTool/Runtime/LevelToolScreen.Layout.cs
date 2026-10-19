@@ -12,7 +12,7 @@ namespace LevelTool
         private Label levelTitle;
         private bool materialsVisible, levelSettingsVisible, boardFocus;
         private bool autoFitBoard = true;
-        private IVisualElementScheduledItem boardFitSchedule;
+
 
         private void BuildEditorLayout()
         {
@@ -37,6 +37,9 @@ namespace LevelTool
             }
             pageTools = new VisualElement { name = "page-tools" }; pageTools.AddToClassList("page-tools"); editor.Add(pageTools);
             DrawTrialSource();
+            VisualElement contextBar = new VisualElement { name = "workspace-context" };
+            contextBar.AddToClassList("workspace-context"); editor.Add(contextBar);
+            contextBar.Add(pageTools); contextBar.Add(editor.Q("trial-input-bar"));
             body = new VisualElement { name = "workspace-body" }; body.AddToClassList("body"); editor.Add(body);
             leftPanel = new VisualElement { name = "left-panel" }; leftPanel.AddToClassList("sidebar"); body.Add(leftPanel);
             var leftTabs = new VisualElement(); leftTabs.AddToClassList("panel-tabs"); leftPanel.Add(leftTabs);
@@ -46,27 +49,27 @@ namespace LevelTool
             var levelActions = new VisualElement(); levelActions.AddToClassList("panel-tabs"); levelPanel.Add(levelActions);
             Button(levelActions, "new-level", "새 레벨", () => AddLevel(false));
             Button(levelActions, "duplicate", "복제", () => AddLevel(true));
-            levelList = new ScrollView { name = "levels" }; levelList.style.flexGrow = 1; levelPanel.Add(levelList);
+            levelList = new ScrollView(ScrollViewMode.Vertical) { name = "levels", horizontalScrollerVisibility = ScrollerVisibility.Hidden }; levelList.style.flexGrow = 1; levelPanel.Add(levelList);
             materialPanel = new VisualElement(); materialPanel.AddToClassList("panel-content"); leftPanel.Add(materialPanel);
             var layers = new DropdownField("편집 층", new List<string> { "Block", "Obstacle", "Cover", "Dust" }, 0) { name = "edit-layer" };
             layers.SetValueWithoutNotify(layer);
             layers.tooltip = "Block: 일반·파워 블록 / Obstacle: 장애물 / Cover: 덮개 / Dust: 바닥";
             layers.RegisterValueChangedCallback(e => { CancelBoardTouch(); layer = e.newValue; brush = null; moveBody = null; Refresh(); }); materialPanel.Add(layers);
             Button(materialPanel, "select", "선택 도구", () => SetBoardTouchTool("tap"));
-            palette = new ScrollView { name = "palette" }; palette.style.flexGrow = 1; materialPanel.Add(palette);
+            palette = new ScrollView(ScrollViewMode.Vertical) { name = "palette", horizontalScrollerVisibility = ScrollerVisibility.Hidden }; palette.style.flexGrow = 1; materialPanel.Add(palette);
             boardScroll = new ScrollView(ScrollViewMode.VerticalAndHorizontal) { name = "board-scroll" }; boardScroll.AddToClassList("board-viewport"); body.Add(boardScroll);
             board = new VisualElement { name = "board", focusable = true }; board.AddToClassList("board"); boardScroll.Add(board);
             boardScroll.contentContainer.style.alignItems = Align.Center;
-            boardScroll.contentViewport.RegisterCallback<GeometryChangedEvent>(_ =>
+            boardScroll.RegisterCallback<GeometryChangedEvent>(_ =>
             {
-                boardFitSchedule?.Pause();
-                boardFitSchedule = boardScroll.schedule.Execute(FitBoardToViewport).StartingIn(1);
+
+                FitBoardToViewport();
             });
             rightPanel = new VisualElement { name = "right-panel" }; rightPanel.AddToClassList("sidebar"); body.Add(rightPanel);
             rightTabs = new VisualElement(); rightTabs.AddToClassList("panel-tabs"); rightPanel.Add(rightTabs);
             Button(rightTabs, "inspector-selection", "선택 속성", () => { levelSettingsVisible = false; UpdatePanelVisibility(); });
             Button(rightTabs, "inspector-level", "레벨 설정", () => { levelSettingsVisible = true; UpdatePanelVisibility(); });
-            properties = new ScrollView { name = "properties" }; properties.style.flexGrow = 1; rightPanel.Add(properties); inspector = properties.contentContainer;
+            properties = new ScrollView(ScrollViewMode.Vertical) { name = "properties", horizontalScrollerVisibility = ScrollerVisibility.Hidden }; properties.style.flexGrow = 1; rightPanel.Add(properties); inspector = properties.contentContainer;
             validationPanel = new ScrollView { name = "validation-panel" }; validationPanel.AddToClassList("validation-panel"); editor.Add(validationPanel);
             status = new Label("왼쪽에서 레벨을 선택하고, 소재 탭에서 배치할 블록을 고르세요.") { name = "status" }; status.AddToClassList("status"); editor.Add(status);
             UpdatePanelVisibility();
@@ -77,6 +80,9 @@ namespace LevelTool
         private void UpdatePanelVisibility()
         {
             if (leftPanel == null) return;
+            root.EnableInClassList("board-focus", boardFocus);
+            Button focusButton = root.Q<Button>("board-focus-toggle");
+            if (focusButton != null) focusButton.text = boardFocus ? "편집 패널 복원" : "보드 넓게";
             leftPanel.style.display = rightPanel.style.display = boardFocus ? DisplayStyle.None : DisplayStyle.Flex;
             levelPanel.style.display = materialsVisible ? DisplayStyle.None : DisplayStyle.Flex;
             materialPanel.style.display = materialsVisible ? DisplayStyle.Flex : DisplayStyle.None;
@@ -100,7 +106,6 @@ namespace LevelTool
         private void FitBoardToViewport()
         {
             if (!autoFitBoard || Session == null || inspectorPage == "자동 시험" || inspectorPage == "시험 기록") return;
-            boardScroll.contentContainer.style.minWidth = boardScroll.contentViewport.resolvedStyle.width;
             // 스크롤바 출현에 따라 맞춤 크기가 왕복하지 않도록 바깥 뷰포트에서 여유를 예약한다.
             float available = Mathf.Min(boardScroll.resolvedStyle.width, boardScroll.resolvedStyle.height) - 52;
             if (float.IsNaN(available) || available <= 0) return;

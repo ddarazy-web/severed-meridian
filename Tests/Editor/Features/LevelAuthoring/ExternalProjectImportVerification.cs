@@ -60,6 +60,17 @@ namespace LevelAuthoring.Editor
             string root = Path.GetFullPath("Logs/LevelDataTransferStage02/ui-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));
             Directory.CreateDirectory(root);
             ContentImportWindow window = null;
+            void Click(VisualElement view, string name) =>
+                typeof(Clickable).GetMethod("Invoke", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                    .Invoke(view.Q<Button>(name).clickable, new object[] { null });
+            void Step(VisualElement view, int expected)
+            {
+                for (int i = 0; i < 3; i++)
+                    if ((view.Q("import-stage-" + i).style.display == DisplayStyle.Flex) != (i == expected))
+                        throw new Exception("한 단계만 표시해야 함: " + expected + " / " + i);
+                if (string.IsNullOrWhiteSpace(view.Q<Label>("import-guidance").text))
+                    throw new Exception("현재 단계 행동 안내 누락");
+            }
             void Finish(Exception error)
             {
                 File.WriteAllText(Path.Combine(root, "result.txt"), error == null ? "PASS EditorWindow panel, review gating, adoption, pending resources / FAIL 0" : "FAIL " + error);
@@ -81,7 +92,13 @@ namespace LevelAuthoring.Editor
                     {
                         var view = window.rootVisualElement;
                         if (view.panel == null) throw new Exception("EditorWindow 패널 미연결");
+                        Step(view, 0);
+                        if (view.Q<Button>("import-step-1").enabledSelf) throw new Exception("검사 전 다음 단계 접근");
                         window.LoadZip(zip);
+                        Step(view, 1);
+                        Click(view, "previous-step"); Step(view, 0);
+                        Click(view, "next-step"); Step(view, 1);
+                        if (File.Exists(window.ConfigurationPath)) throw new Exception("단계 이동만으로 원본이 변경됨");
                         var button = view.Q<Button>("adopt-candidate");
                         if (button.enabledSelf) throw new Exception("확인 전 반영 버튼 활성화");
                         view.Q<Toggle>("confirm-replacement").value = true;
@@ -92,9 +109,16 @@ namespace LevelAuthoring.Editor
                         {
                             try
                             {
-                                if (!File.Exists(window.ConfigurationPath) || !view.Q<Label>("import-status").text.Contains("리소스 갱신 필요"))
+                                if (!File.Exists(window.ConfigurationPath) || !view.Q<Label>("import-status").text.Contains("JSON 원본 반영 완료"))
                                     throw new Exception("실제 반영 버튼 실행/팩 미변환 안내 실패");
                                 if (button.enabledSelf) throw new Exception("중복 반영 버튼 잠금 실패");
+                                Step(view, 2);
+                                string selection = File.ReadAllText(window.ConfigurationPath);
+                                Click(view, "previous-step");
+                                if (view.Q("import-stage-1").style.display != DisplayStyle.Flex) throw new Exception("완료 단계 재조회 실패");
+                                if (!view.Q<Button>("import-step-1").text.Contains("완료")) throw new Exception("원본 반영 완료 표시 누락");
+                                Click(view, "next-step"); Step(view, 2);
+                                if (File.ReadAllText(window.ConfigurationPath) != selection) throw new Exception("이전 단계 이동이 반영을 되돌림");
                                 _ = new ContentSnapshotStore(AuthoringSourceSelection.ReadFolder(window.ConfigurationPath)).Read();
                                 Finish(null);
                             }

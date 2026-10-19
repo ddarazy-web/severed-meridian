@@ -173,4 +173,8 @@ ServerData/*
 # 2단계 검사·내보내기의 재생성 가능한 시험 스냅샷
 /ContentData/Trials/game-authoring-stage-02/
 /ContentData/Trials/game-authoring-stage-03/
-/ContentData/Candidates/verification-*/
+# ZIP에서 풀어 검사·변환하는 로컬 후보 데이터
+/ContentData/Candidates/
+
+# 제작 원본 반영의 로컬 동시 실행 잠금
+/ProjectSettings/*.import.lock

@@ -31,6 +31,7 @@ namespace LevelTool
             if (toolSkin == null || !toolSkin.IsLoaded || root == null) return;
             foreach (var element in root.Query<VisualElement>().ToList())
             {
+                if (element.GetFirstAncestorOfType<Scroller>() != null) continue;
                 string sprite = null;
                 if (element == leftPanel || element == rightPanel || element.ClassListContains("dialog")) sprite = "panel";
                 else if (element is Button && element.parent != workspaceTabs && element.parent?.name != "menu-bar")

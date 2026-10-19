@@ -53,6 +53,8 @@ namespace LevelTool
 
         private void InitializeBoardTouch()
         {
+            boardScroll.RegisterCallback<WheelEvent>(OnBoardZoomWheel, TrickleDown.TrickleDown);
+            boardScroll.tooltip = "Ctrl + 마우스 휠: 커서 위치를 기준으로 확대·축소 / 마우스 휠: 스크롤";
             root.RegisterCallback<PointerDownEvent>(OnBoardTouchDown, TrickleDown.TrickleDown);
             root.RegisterCallback<PointerMoveEvent>(OnBoardTouchMove, TrickleDown.TrickleDown);
             root.RegisterCallback<PointerUpEvent>(OnBoardTouchUp, TrickleDown.TrickleDown);
@@ -80,6 +82,8 @@ namespace LevelTool
             replace.RegisterValueChangedCallback(e => { CancelBoardTouch(); boardTouchReplace = e.newValue; }); tools.Add(replace);
             Button(tools, "board-zoom-out", "−", () => ZoomBoard(cellSize / 1.2f, boardScroll.contentViewport.worldBound.center));
             Button(tools, "board-zoom-in", "+", () => ZoomBoard(cellSize * 1.2f, boardScroll.contentViewport.worldBound.center));
+            Button(tools, "board-fit", "화면 맞춤", () => { autoFitBoard = true; FitBoardToViewport(); });
+            Button(tools, "board-focus-toggle", "보드 넓게", ToggleBoardFocus).tooltip = "상단과 좌우 편집 패널을 접어 보드 공간을 넓힙니다. Shift+Space로도 전환할 수 있습니다.";
             Button(tools, "board-actions", "작업", OpenBoardActions);
             Button(tools, "board-touch-cancel", "취소", () => { CancelBoardTouch(); Show("진행 중 터치와 영역 지정을 취소했습니다."); });
             foreach (VisualElement control in tools.contentContainer.Children())
@@ -97,6 +101,7 @@ namespace LevelTool
 
         private void DisposeBoardTouch()
         {
+            boardScroll?.UnregisterCallback<WheelEvent>(OnBoardZoomWheel, TrickleDown.TrickleDown);
             root?.UnregisterCallback<PointerDownEvent>(OnBoardTouchDown, TrickleDown.TrickleDown);
             root?.UnregisterCallback<PointerMoveEvent>(OnBoardTouchMove, TrickleDown.TrickleDown);
             root?.UnregisterCallback<PointerUpEvent>(OnBoardTouchUp, TrickleDown.TrickleDown);
@@ -299,6 +304,15 @@ namespace LevelTool
             Session.SelectCells(previous.Concat(cells));
             // 본체가 포함된 선택은 점유 칸 전체로 확장한다. 빈 칸도 영역 선택에서 유지한다.
             Session.SelectCells(Session.SelectedCells.Concat(ElementClipboard.SelectedCells(layer)));
+        }
+
+        private void OnBoardZoomWheel(WheelEvent evt)
+        {
+            if (!evt.ctrlKey || busy || Session == null || modal != null ||
+                !boardScroll.contentViewport.worldBound.Contains(evt.mousePosition) || Mathf.Approximately(evt.delta.y, 0)) return;
+            evt.StopImmediatePropagation();
+            evt.PreventDefault();
+            ZoomBoard(cellSize * Mathf.Pow(1.2f, -Mathf.Clamp(evt.delta.y / 3f, -2f, 2f)), evt.mousePosition);
         }
 
         private void ZoomBoard(float size, Vector2 pivot, Vector2? sourceCoordinate = null)

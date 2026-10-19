@@ -1,0 +1,37 @@
+.content-import { background-color: #19212b; color: #e2e9ef; }
+.import-header { flex-shrink: 0; padding: 16px 20px; background-color: #202d39; border-bottom-width: 2px; border-bottom-color: #62c5b6; }
+.import-header .unity-label { white-space: normal; flex-shrink: 0; color: #aabdc9; }
+.import-header .import-title { font-size: 22px; -unity-font-style: bold; color: #f0f6fa; margin-bottom: 4px; }
+.import-page { flex-grow: 1; flex-shrink: 1; min-height: 0; }
+.import-page > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container { padding: 14px; }
+.import-section { flex-shrink: 0; margin: 12px 12px 0; padding: 14px; background-color: #242f3b; border-width: 1px; border-color: #394957; border-radius: 8px; }
+.import-section > * { flex-shrink: 0; }
+.import-section .unity-label { white-space: normal; flex-shrink: 0; }
+.import-section-title { font-size: 15px; -unity-font-style: bold; color: #8de0d0; margin-bottom: 5px; }
+.import-hint { color: #adbcc8; margin-bottom: 10px; }
+.import-actions { flex-direction: row; flex-wrap: wrap; margin-bottom: 6px; }
+.content-import .unity-button { min-height: 34px; flex-shrink: 0; padding: 7px 12px; margin: 2px 6px 4px 0; border-width: 1px; border-color: #526575; border-radius: 5px; background-color: #344454; color: #ecf3f8; white-space: normal; }
+.content-import .unity-button:hover { background-color: #41596c; border-color: #8aa8bc; }
+.content-import .primary-action { background-color: #28675f; border-color: #69b7a8; -unity-font-style: bold; }
+.content-import .primary-action:hover { background-color: #338276; }
+.content-import .unity-button:disabled { background-color: #2a3540; color: #7f8e9b; border-color: #3a4754; }
+.import-note { margin: 4px 0 10px; color: #b9c8d4; }
+.import-changes { height: 180px; min-height: 180px; flex-shrink: 0; background-color: #19232d; border-radius: 5px; padding: 8px; }
+.import-change-row { padding: 6px; border-bottom-width: 1px; border-bottom-color: #30404e; }
+#confirm-replacement { margin: 4px 0 12px; min-height: 24px; flex-direction: row-reverse; justify-content: flex-end; }
+#confirm-replacement > .unity-toggle__label { min-width: 0; flex-shrink: 1; flex-grow: 1; margin-left: 8px; white-space: normal; }
+#confirm-replacement > .unity-toggle__input { flex-grow: 0; flex-shrink: 0; }
+.import-section .unity-foldout .unity-toggle { flex-direction: row; margin-bottom: 4px; }
+.import-pack-status { padding: 10px; margin-bottom: 8px; background-color: #193c3c; border-radius: 5px; color: #a2e4d6; }
+.import-pack-details { height: 160px; min-height: 160px; flex-shrink: 0; background-color: #19232d; padding: 8px; }
+.import-result { height: 90px; min-height: 90px; flex-shrink: 0; background-color: #19232d; padding: 10px; border-radius: 5px; }
+
+.import-steps { flex-direction: row; flex-shrink: 0; margin: 8px 12px 0; }
+.import-steps > .unity-button { flex-grow: 1; flex-basis: 0; min-width: 0; padding: 8px 4px; font-size: 12px; }
+.import-steps > .current-step { background-color: #28675f; border-color: #8de0d0; -unity-font-style: bold; }
+.import-step-state { flex-shrink: 0; margin: 6px 16px 0; color: #8de0d0; -unity-font-style: bold; }
+.import-guidance { flex-shrink: 0; margin: 5px 16px; white-space: normal; color: #e2e9ef; }
+.import-navigation { flex-direction: row; flex-shrink: 0; justify-content: space-between; padding: 6px 14px 0; }
+.import-result-section { margin: 4px 12px 10px; padding: 8px; }
+.import-result-section .import-hint { display: none; }
+.import-result-section .import-result { height: 48px; min-height: 48px; padding: 4px; }

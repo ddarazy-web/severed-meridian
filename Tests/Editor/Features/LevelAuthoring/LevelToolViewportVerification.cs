@@ -99,9 +99,19 @@ namespace LevelAuthoring.Editor
                 }
                 else if (phase == 2)
                 {
+                    Capture("layout-review");
                     VerifyLayout("default");
                     Capture("default");
                     normalBoardWidth = Root.Q("board-scroll").worldBound.width;
+                    float beforeZoom = (float)typeof(LevelToolScreen).GetField("cellSize", Flags).GetValue(screen);
+                    SendWheel(true, -3);
+                    float afterZoom = (float)typeof(LevelToolScreen).GetField("cellSize", Flags).GetValue(screen);
+                    Check(afterZoom > beforeZoom, "Ctrl wheel up enlarges board");
+                    SendWheel(false, 3);
+                    Check((float)typeof(LevelToolScreen).GetField("cellSize", Flags).GetValue(screen) == afterZoom, "plain wheel does not zoom");
+                    SendWheel(true, 3);
+                    Check((float)typeof(LevelToolScreen).GetField("cellSize", Flags).GetValue(screen) < afterZoom, "Ctrl wheel down reduces board");
+                    Click("board-fit");
                     Invoke("ValidateLevel", false);
                     Advance(3);
                 }
@@ -179,7 +189,8 @@ namespace LevelAuthoring.Editor
                     Check(Root.Q("left-panel").resolvedStyle.display == DisplayStyle.None && Root.Q("right-panel").resolvedStyle.display == DisplayStyle.None, "1024 panels collapse");
                     Check(Root.Q("board-scroll").worldBound.width > normalBoardWidth + 300, "1024 board gains panel space");
                     Within(Root.Q("board-scroll"), Root.worldBound, "focused board viewport");
-                    foreach (string id in new[] { "menu-view", "save", "undo", "redo", "play" }) Within(Root.Q(id), Root.worldBound, "focused command " + id);
+                    foreach (string id in new[] { "menu-view", "board-focus-toggle", "board-fit" }) Within(Root.Q(id), Root.worldBound, "focused command " + id);
+                    Check(Root.Q("header").resolvedStyle.display == DisplayStyle.None && Root.Q("workspace-context").resolvedStyle.display == DisplayStyle.None, "focus mode collapses upper controls");
                     Capture("board-focus");
                     Invoke("ToggleBoardFocus");
                     Advance(9);
@@ -231,7 +242,9 @@ namespace LevelAuthoring.Editor
             ScrollView board = Root.Q<ScrollView>("board-scroll");
             Within(left, window, "left panel"); Within(right, window, "right panel"); Within(board, window, "board viewport");
             Check(left.worldBound.xMax <= board.worldBound.xMin + 2 && board.worldBound.xMax <= right.worldBound.xMin + 2, "side panels do not overlap board");
+            Measurements.AppendLine("fit=" + typeof(LevelToolScreen).GetField("autoFitBoard", Flags).GetValue(screen) + " cell=" + typeof(LevelToolScreen).GetField("cellSize", Flags).GetValue(screen) + " resolved=" + board.resolvedStyle.width + "x" + board.resolvedStyle.height);
             Rect boardArea = board.contentViewport.worldBound;
+            Measurements.AppendLine("layout body=" + Root.Q("workspace-body").worldBound + " scroll=" + board.worldBound + " viewport=" + boardArea + " board=" + Root.Q("board").worldBound);
             Check(boardArea.width >= 160 && boardArea.height >= 120, "usable board viewport");
             Check(Root.Q("board").Query<Label>(className: "cell").ToList().Count == 81, "all board cells exist");
             Check(Root.Q("board").worldBound.width >= 252, "board keeps readable minimum cell size");
@@ -242,6 +255,15 @@ namespace LevelAuthoring.Editor
                 ScrollView scroll = Root.Q<ScrollView>(id);
                 if (scroll.contentContainer.worldBound.height > scroll.contentViewport.worldBound.height + 2)
                     Check(scroll.verticalScroller.highValue > 0, "overflow is vertically scrollable " + id);
+                if (id != "board-scroll")
+                {
+                    Check(scroll.horizontalScrollerVisibility == ScrollerVisibility.Hidden, "sidebar has no horizontal scrollbar " + id);
+                    if (scroll.verticalScroller.resolvedStyle.display != DisplayStyle.None)
+                    {
+                        Within(scroll.verticalScroller, scroll.worldBound, "vertical scrollbar inside " + id);
+                        Check(scroll.verticalScroller.worldBound.height > scroll.verticalScroller.worldBound.width, "vertical scrollbar is upright " + id);
+                    }
+                }
                 if (id == "board-scroll" && Root.Q("board").worldBound.width > scroll.contentViewport.worldBound.width + 2)
                     Check(scroll.horizontalScroller.highValue > 0, "board overflow is horizontally scrollable");
             }
@@ -280,6 +302,18 @@ namespace LevelAuthoring.Editor
         {
             MethodInfo method = typeof(LevelToolScreen).GetMethod(name, Flags) ?? throw new Exception("Missing LevelToolScreen." + name);
             return method.Invoke(screen, arguments);
+        }
+
+        private static void SendWheel(bool control, float delta)
+        {
+            using WheelEvent wheel = WheelEvent.GetPooled(new Event
+            {
+                type = EventType.ScrollWheel, delta = new Vector2(0, delta),
+                mousePosition = Root.Q<ScrollView>("board-scroll").contentViewport.worldBound.center,
+                modifiers = control ? EventModifiers.Control : EventModifiers.None
+            });
+            wheel.target = Root.Q("board");
+            Root.Q("board").SendEvent(wheel);
         }
 
         private static void Click(string name)
