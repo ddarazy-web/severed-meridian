@@ -34,7 +34,9 @@ namespace LevelAuthoring.Storage
                     byte[] bytes = new UTF8Encoding(false).GetBytes(record.ToString(Formatting.None));
                     using (FileStream stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                     { stream.Write(bytes, 0, bytes.Length); stream.Flush(true); }
-                    Validate(JObject.Parse(File.ReadAllText(temporary)));
+                    // 이미 검증한 입력과 실제 디스크 바이트가 같으면 재구성 없이 같은 유효성을 보장한다.
+                    if (!bytes.SequenceEqual(File.ReadAllBytes(temporary)))
+                        throw new IOException("복구 임시 파일의 기록 내용이 다릅니다.");
                     if (File.Exists(path))
                     {
                         bool preservePrevious = false;
@@ -52,34 +54,64 @@ namespace LevelAuthoring.Storage
             }
         }
 
-        public JObject Read()
+        public JObject Read() => ReadPrepared()?.Record;
+        public JObject ReadPrevious() => ReadPreviousPrepared()?.Record;
+
+        // 검증한 작업공간은 이 결과가 독점 소유하며 화면에 한 번만 넘긴다.
+        internal sealed class PreparedDraft
+        {
+            private AuthoringToolWorkspace workspace;
+            private readonly JObject record;
+            internal PreparedDraft(JObject record, AuthoringToolWorkspace workspace)
+            { this.record = record; this.workspace = workspace; }
+            internal JObject Record => (JObject)record.DeepClone();
+            internal JObject View => (JObject)record["view"].DeepClone();
+            internal string Folder => workspace.Folder;
+            internal bool IsDirty => workspace.Session.IsDirty;
+            internal void ApplyTo(AuthoringToolWorkspace target, bool discard)
+            {
+                if (workspace == null) throw new InvalidOperationException("이미 적용한 복구 결과입니다.");
+                if (discard) workspace.Open(workspace.Folder, "Discard");
+                target.TakeRestoredState(workspace);
+                workspace = null;
+            }
+        }
+
+        internal PreparedDraft ReadPrepared()
         {
             lock (gate)
             {
                 ReadWarning = null;
                 if (!File.Exists(path) && !File.Exists(path + ".previous")) return null;
-                try { JObject record = JObject.Parse(File.ReadAllText(path)); Validate(record); return record; }
+                try
+                {
+                    JObject record = JObject.Parse(File.ReadAllText(path));
+                    return new PreparedDraft(record, Validate(record));
+                }
                 catch (Exception error) when (error is IOException || error is JsonException || error is ContentFormatException)
                 {
                     if (!File.Exists(path + ".previous")) throw new ContentFormatException("레벨툴 복구 기록을 읽을 수 없습니다.", error);
-                    JObject previous = ReadPrevious();
+                    PreparedDraft previous = ReadPreviousPrepared();
                     ReadWarning = "현재 복구 기록을 읽을 수 없어 이전 복구 기록을 사용했습니다.";
                     return previous;
                 }
             }
         }
 
-        public JObject ReadPrevious()
+        internal PreparedDraft ReadPreviousPrepared()
         {
             lock (gate)
             {
                 if (!File.Exists(path + ".previous")) return null;
-                try { JObject previous = JObject.Parse(File.ReadAllText(path + ".previous")); Validate(previous); return previous; }
+                try
+                {
+                    JObject previous = JObject.Parse(File.ReadAllText(path + ".previous"));
+                    return new PreparedDraft(previous, Validate(previous));
+                }
                 catch (Exception error) when (error is IOException || error is JsonException || error is ContentFormatException)
                 { throw new ContentFormatException("레벨툴의 이전 복구 기록을 읽을 수 없습니다.", error); }
             }
         }
-
         // view는 복구 화면과 입력 초안이다. 구버전에서 없던 필드는 생략을 허용한다.
         // 반환값은 없으며 복원할 수 없는 형식은 ContentFormatException으로 거절한다.
         public static void ValidateView(JObject view)
@@ -141,15 +173,17 @@ namespace LevelAuthoring.Storage
             { throw new ContentFormatException("복구 화면 또는 공유 튜토리얼 초안 형식이 잘못됐습니다.", error); }
         }
 
-        private static void Validate(JObject record)
+        private static AuthoringToolWorkspace Validate(JObject record)
         {
             if (record["version"]?.Type != JTokenType.Integer || record["version"].ToString() != "1" ||
                 record["workspace"]?.Type != JTokenType.String || !(record["view"] is JObject))
                 throw new ContentFormatException("레벨툴 복구 기록 형식이 잘못됐습니다.");
             try
             {
-                new AuthoringToolWorkspace().RestoreState((string)record["workspace"]);
+                AuthoringToolWorkspace restored = new AuthoringToolWorkspace();
+                restored.RestoreState((string)record["workspace"]);
                 ValidateView((JObject)record["view"]);
+                return restored;
             }
             catch (Exception error) when (error is ArgumentException || error is InvalidCastException || error is FormatException || error is OverflowException)
             { throw new ContentFormatException("레벨툴 복구 작업공간 형식이 잘못됐습니다.", error); }

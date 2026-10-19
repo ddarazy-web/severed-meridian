@@ -47,6 +47,14 @@ namespace LevelAuthoring.Editing
             catch (JsonException error) { throw new ContentFormatException("레벨툴 복구본이 손상됐습니다.", error); }
         }
 
+        // 검증을 마친 임시 작업공간의 세션을 이동한다. 대상 객체와 패널의 참조는 유지한다.
+        internal void TakeRestoredState(AuthoringToolWorkspace restored)
+        {
+            if (restored == null || restored.Session == null || ReferenceEquals(restored, this))
+                throw new InvalidOperationException("이동할 복구 작업공간이 없습니다.");
+            Session = restored.Session; Folder = restored.Folder; IsRecovery = restored.IsRecovery;
+            restored.Session = null; restored.Folder = null; restored.IsRecovery = false;
+        }
         public bool Open(string folder, string dirtyChoice) => OpenCore(folder, dirtyChoice, false);
         public bool OpenBackup(string folder, string dirtyChoice) => OpenCore(folder, dirtyChoice, true);
 

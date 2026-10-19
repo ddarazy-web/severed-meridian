@@ -34,16 +34,14 @@ namespace LevelTool
             busy = true; editor.SetEnabled(false);
             try
             {
-                JObject record = await UniTask.RunOnThreadPool(draftStore.Read);
+                ToolDraftStore.PreparedDraft record = await UniTask.RunOnThreadPool(draftStore.ReadPrepared);
                 if (this == null || !isActiveAndEnabled || readRevision != recoveryReadRevision || record == null) return;
-                AuthoringToolWorkspace previous = new AuthoringToolWorkspace();
-                previous.RestoreState((string)record["workspace"]);
-                ToolDraftStore.ValidateView(record["view"] as JObject);
+                JObject view = record.View;
                 string warning = draftStore.ReadWarning;
-                if (!File.Exists(Path.Combine(previous.Folder, "project.json")))
+                if (!File.Exists(Path.Combine(record.Folder, "project.json")))
                     warning = (warning == null ? "" : warning + "\n") + "프로젝트 저장본이 없습니다. 복구 초안을 복원하거나 다른 프로젝트를 열어 주세요.";
-                bool hasPendingInputs = record["view"]?["pendingInputs"] is JArray pending && pending.Count > 0;
-                if (warning == null && !previous.Session.IsDirty && record["view"]?["sharedTutorialDraft"]?.Type != JTokenType.String &&
+                bool hasPendingInputs = view["pendingInputs"] is JArray pending && pending.Count > 0;
+                if (warning == null && !record.IsDirty && view["sharedTutorialDraft"]?.Type != JTokenType.String &&
                     !hasPendingInputs)
                     RestoreRecovery(record, false);
                 else
@@ -88,7 +86,7 @@ namespace LevelTool
             busy = true; editor.SetEnabled(false);
             try
             {
-                JObject previous = await UniTask.RunOnThreadPool(draftStore.ReadPrevious);
+                ToolDraftStore.PreparedDraft previous = await UniTask.RunOnThreadPool(draftStore.ReadPreviousPrepared);
                 if (this == null || !isActiveAndEnabled || readRevision != recoveryReadRevision) return;
                 if (previous == null) { Show("이전 복구 기록이 없습니다. 다른 프로젝트를 열어 주세요."); return; }
                 RestoreRecovery(previous, false);
@@ -104,19 +102,15 @@ namespace LevelTool
             }
         }
 
-        private void RestoreRecovery(JObject record, bool discard)
+        private void RestoreRecovery(ToolDraftStore.PreparedDraft record, bool discard)
         {
             try
             {
-                AuthoringToolWorkspace restored = new AuthoringToolWorkspace();
-                restored.RestoreState((string)record["workspace"]);
-                if (discard) restored.Open(restored.Folder, "Discard");
-                JObject view = record["view"] as JObject;
-                ToolDraftStore.ValidateView(view);
+                JObject view = record.View;
                 SharedTutorialDraft restoredShared = !discard && view["sharedTutorialDraft"]?.Type == JTokenType.String && (string)view["sharedTutorialDraft"] != null
                     ? SharedTutorialDraft.Restore((string)view["sharedTutorialDraft"]) : null;
                 // 작업공간과 화면 초안 검증을 모두 마친 뒤 현재 세션의 소유권을 바꾼다.
-                Workspace.RestoreState(restored.ExportState());
+                record.ApplyTo(Workspace, discard);
                 recoveryBlocksDefault = false;
                 layer = (string)view["layer"] ?? "Block"; brush = (string)view["brush"];
                 color = (string)view["color"] ?? "Type1"; direction = (string)view["direction"] ?? "Horizontal";
