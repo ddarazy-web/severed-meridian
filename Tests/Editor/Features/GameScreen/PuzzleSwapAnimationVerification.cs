@@ -35,7 +35,7 @@ namespace GameScreen.Editor
             };
         }
 
-        [MenuItem("Match/검증/스와이프 교환 연출 검증")]
+        [MenuItem("Match/개발 도구/검증/스와이프 교환 연출 검증")]
         public static void Run()
         {
             if (EditorSceneManager.GetActiveScene().isDirty) throw new InvalidOperationException("미저장 씬 보존: 검사를 시작하지 않습니다.");

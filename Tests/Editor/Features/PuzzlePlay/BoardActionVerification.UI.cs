@@ -47,7 +47,7 @@ namespace Levels.Editor
                 Set(copy.State.Supply.Sources[0], "ItemIndex", 1); Set(copy.State.Supply.Sources[0], "ItemConsumed", 1);
                 Set(copy.State.Supply, "ScrapGenerated", 1); Set(copy.State.Missions[0], "Progress", 1);
                 Check(Snapshot(source) == snapshot, "복사본 본체/충전/공급/미션 변경은 원본 독립");
-                Check(EditorApplication.ExecuteMenuItem("Match/초기 보드 확인"), "Match 메뉴 진입");
+                Check(EditorApplication.ExecuteMenuItem("Match/레벨 제작/레벨툴 실행"), "Match 메뉴 진입");
                 window = Resources.FindObjectsOfTypeAll<LevelEditorWindow>().Single().ActiveSimulationPanel; window.Owner.position = new Rect(10, 10, 1000, 780); window.Owner.Focus();
                 sequence = UI(); EditorApplication.update += Tick;
             }

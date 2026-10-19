@@ -29,7 +29,7 @@ namespace GameScreen.Editor
                 { SessionState.SetBool(Key, false); VerifyAsync().Forget(Debug.LogException); }
             };
         }
-        [MenuItem("Match/검증/UI 조작 통합 검증")]
+        [MenuItem("Match/개발 도구/검증/UI 조작 통합 검증")]
         public static void Run()
         { PuzzleUIRenderVerification.RememberSize(); SessionState.SetBool(Key, true); PuzzleGameSceneVerification.OpenInteractive(); }
 

@@ -231,7 +231,7 @@ namespace Levels.Editor
             window.Focus();
             yield return null; yield return null;
             Check(JsonUtility.ToJson(level) == beforeCancel, "창 닫기·다시 열기: 완료 데이터 유지, 미완료 입력 취소");
-            Check(EditorApplication.ExecuteMenuItem("Match/레벨 에디터"), "메뉴에서 편집 창 열기");
+            Check(EditorApplication.ExecuteMenuItem("Match/레벨 제작/레벨툴 실행"), "메뉴에서 편집 창 열기");
 
             FocusWindow inspectorHost = ScriptableObject.CreateInstance<FocusWindow>();
             inspectorHost.position = new Rect(1230, 80, 330, 600);

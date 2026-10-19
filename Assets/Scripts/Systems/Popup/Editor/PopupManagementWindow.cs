@@ -19,7 +19,7 @@ namespace PopupUI.Editor
         private bool shownPending;
         private int shownStored;
 
-        [MenuItem("Match/팝업/관리")]
+        [MenuItem("Match/개발 도구/팝업/관리")]
         public static void OpenWindow() { GetWindow<PopupManagementWindow>("팝업 관리").Show(); }
 
         public void CreateGUI()

@@ -49,7 +49,7 @@ namespace Levels.Editor
                 Check(Snapshot(raw.Obstacles) == Snapshot(result.State.Obstacles) && Snapshot(raw.Missions) == Snapshot(result.State.Missions) &&
                     Snapshot(raw.Flow) == Snapshot(result.State.Flow) && Snapshot(raw.Connections) == Snapshot(result.State.Connections) &&
                     Snapshot(raw.Supply) == Snapshot(result.State.Supply), "복합 본체/미션/흐름/연결/공급 전체 보존");
-                Check(EditorApplication.ExecuteMenuItem("Match/초기 보드 확인"), "Match 메뉴 진입");
+                Check(EditorApplication.ExecuteMenuItem("Match/레벨 제작/레벨툴 실행"), "Match 메뉴 진입");
                 window = Resources.FindObjectsOfTypeAll<LevelEditorWindow>().Single().ActiveSimulationPanel;
                 window.Owner.position = new Rect(10, 10, 1000, 780); window.Owner.Focus();
                 sequence = UI(); EditorApplication.update += Tick;

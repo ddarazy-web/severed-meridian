@@ -9,7 +9,7 @@ namespace GameScreen.Editor
     {
         public const string Output = "Logs/PuzzleUIVerification/";
 
-        [MenuItem("Match/검증/UI 세션 계약 검증")]
+        [MenuItem("Match/개발 도구/검증/UI 세션 계약 검증")]
         public static void Run()
         {
             Directory.CreateDirectory(Output);

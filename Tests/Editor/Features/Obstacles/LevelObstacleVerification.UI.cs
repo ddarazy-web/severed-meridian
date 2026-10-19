@@ -71,7 +71,7 @@ namespace Levels.Editor
             yield return null; yield return null;
             LevelBoardView board = window.rootVisualElement.Q<LevelBoardView>();
             Check(board.panel != null && board.Children().OfType<Label>().Count() == BoardDefinition.DefaultRows * BoardDefinition.DefaultColumns, "실제 UI 패널·81칸 표시");
-            Check(EditorApplication.ExecuteMenuItem("Match/레벨 에디터"), "Match 메뉴 실행");
+            Check(EditorApplication.ExecuteMenuItem("Match/레벨 제작/레벨툴 실행"), "Match 메뉴 실행");
             window.Focus(); yield return null;
             Layer("장애물/장치"); yield return null;
             Check(window.rootVisualElement.Q<PopupField<string>>("placement-layer").Q(className: "unity-base-field__input").worldBound.width > 70,

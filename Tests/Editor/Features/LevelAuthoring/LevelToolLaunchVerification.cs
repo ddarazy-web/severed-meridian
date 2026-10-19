@@ -48,7 +48,7 @@ namespace LevelAuthoring.Editor
                 if (incoming != null) LevelToolLauncher.LaunchWorkspace(incoming);
                 else if (defaultEntry)
                 {
-                    if (!EditorApplication.ExecuteMenuItem("Match/레벨 에디터") || !EditorApplication.isPlayingOrWillChangePlaymode)
+                    if (!EditorApplication.ExecuteMenuItem("Match/레벨 제작/레벨툴 실행") || !EditorApplication.isPlayingOrWillChangePlaymode)
                         throw new Exception("기본 레벨 편집 메뉴가 공통 씬으로 진입하지 않습니다.");
                 }
                 else LevelToolLauncher.Launch();

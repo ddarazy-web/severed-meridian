@@ -8,7 +8,7 @@ namespace PopupUI.Editor
     {
         private IVisualElementScheduledItem polling;
         private string observedDetails;
-        [MenuItem("Match/팝업/템플릿 생성")]
+        [MenuItem("Match/개발 도구/팝업/템플릿 생성")]
         public static void OpenWindow() { GetWindow<PopupTemplateWindow>("팝업 템플릿").Show(); }
         public void CreateGUI()
         {

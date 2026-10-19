@@ -52,7 +52,7 @@ namespace Levels.Editor
             {
                 fixture = PlayFixture(); AssetDatabase.CreateAsset(fixture, folder + "/Items.asset"); AssetDatabase.SaveAssets();
                 Check(LevelDefinitionValidator.Validate(fixture).Count == 0 && new StartConditionReport(Build(fixture)).IsSatisfied, "실제 아이템 시험 정합성·시작 조건");
-                Check(EditorApplication.ExecuteMenuItem("Match/초기 보드 확인"), "Match 메뉴 진입");
+                Check(EditorApplication.ExecuteMenuItem("Match/레벨 제작/레벨툴 실행"), "Match 메뉴 진입");
                 window = Resources.FindObjectsOfTypeAll<LevelEditorWindow>().Single().ActiveSimulationPanel;
                 window.Owner.position = new Rect(10, 10, 1000, 780); window.Owner.Focus();
                 sequence = UI(); EditorApplication.update += Tick;

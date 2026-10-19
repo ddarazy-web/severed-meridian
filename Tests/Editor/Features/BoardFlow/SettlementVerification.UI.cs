@@ -35,7 +35,7 @@ namespace Levels.Editor
                 AssetDatabase.CreateAsset(matchesLevel, folder + "/Matches.asset");
                 LevelDefinition random = FallingBoard(); LevelSupplyEditing.SetItems(random, 0, new[] { new SupplyItem(SupplyKind.RandomNormal, 20) });
                 AssetDatabase.CreateAsset(random, folder + "/Random.asset");
-                Check(EditorApplication.ExecuteMenuItem("Match/초기 보드 확인"), "Match 메뉴 진입");
+                Check(EditorApplication.ExecuteMenuItem("Match/레벨 제작/레벨툴 실행"), "Match 메뉴 진입");
                 window = Resources.FindObjectsOfTypeAll<LevelEditorWindow>().Single().ActiveSimulationPanel; window.Owner.position = new Rect(10, 10, 1000, 780); window.Owner.Focus();
                 sequence = UI(); EditorApplication.update += Tick;
             }

@@ -60,7 +60,7 @@ namespace Levels.Editor
                 levels = new[] { CreateFixture(1), CreateFixture(6), CreateFixture(8) };
                 for (int i = 0; i < levels.Length; i++) AssetDatabase.CreateAsset(levels[i], folder + "/Pair" + i + ".asset");
                 AssetDatabase.SaveAssets();
-                Check(EditorApplication.ExecuteMenuItem("Match/초기 보드 확인"), "Match 메뉴 진입");
+                Check(EditorApplication.ExecuteMenuItem("Match/레벨 제작/레벨툴 실행"), "Match 메뉴 진입");
                 window = Resources.FindObjectsOfTypeAll<LevelEditorWindow>().Single().ActiveSimulationPanel; window.Owner.position = new Rect(10, 10, 1000, 780); window.Owner.Focus();
                 sequence = UI(); EditorApplication.update += Tick;
             }

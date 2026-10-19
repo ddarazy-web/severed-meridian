@@ -66,7 +66,7 @@ namespace Levels.Editor
             input.Focus(); input.SelectAll();
         }
 
-        [MenuItem("Match/사용 설명서")]
+        [MenuItem("Match/도움말/사용 설명서")]
         public static void OpenManual()
         {
             LevelEditorHelp.Open("index.html");

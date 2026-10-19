@@ -8,7 +8,7 @@ namespace GameScreen.Editor
 {
     public static class PuzzleUILayoutVerification
     {
-        [MenuItem("Match/검증/UI 배치 검증")]
+        [MenuItem("Match/개발 도구/검증/UI 배치 검증")]
         public static void Run()
         {
             var results = new List<string>(); int failures = 0;

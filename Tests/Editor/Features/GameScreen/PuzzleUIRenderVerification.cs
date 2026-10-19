@@ -20,7 +20,7 @@ namespace GameScreen.Editor
                 { SessionState.SetBool(Key, false); CaptureAsync().Forget(Debug.LogException); }
             };
         }
-        [MenuItem("Match/검증/UI 화면 검증")]
+        [MenuItem("Match/개발 도구/검증/UI 화면 검증")]
         public static void Run()
         { RememberSize(); SessionState.SetBool(Key, true); PuzzleGameSceneVerification.OpenInteractive(); }
 

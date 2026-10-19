@@ -21,7 +21,7 @@ namespace GameScreen.Editor
     {
         private const string Output = "Logs/PuzzleIntegrationVerification/";
 
-        [MenuItem("Match/검증/플레이어 빌드 씬 제외 검증")]
+        [MenuItem("Match/개발 도구/검증/플레이어 빌드 씬 제외 검증")]
         public static void VerifyExclusion()
         {
             const string folder = "Assets/__PuzzlePlayerExclusionVerification";
@@ -114,7 +114,7 @@ namespace GameScreen.Editor
             }
         }
 
-        [MenuItem("Match/검증/빌드 설정 복원 검증")]
+        [MenuItem("Match/개발 도구/검증/빌드 설정 복원 검증")]
         public static void VerifySettingsRestoration()
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -171,7 +171,7 @@ namespace GameScreen.Editor
             }
         }
 
-        [MenuItem("Match/검증/Android 개발 빌드 검증")]
+        [MenuItem("Match/개발 도구/검증/Android 개발 빌드 검증")]
         public static void RunAndroid()
         {
             const string apk = "Builds/Stage05/Android/PuzzleStage05.apk";

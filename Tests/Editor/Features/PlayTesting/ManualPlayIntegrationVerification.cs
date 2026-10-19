@@ -117,7 +117,7 @@ namespace Levels.Editor
             Check(diagnostic.CurrentState == diagnosticState, "진단 탭 왕복 시 기존 후보 보존");
             Click(editor.rootVisualElement, "workspace-tab-1");
             Check(root.Q<Button>("item-cancel").style.display == DisplayStyle.None && window.Execution == tabSession, "탭 이동 시 아이템 선택만 해제·실행 세션 보존");
-            Check(EditorApplication.ExecuteMenuItem("Match/플레이 테스트") && Resources.FindObjectsOfTypeAll<LevelEditorWindow>().Length == 1 && editor.ActiveSimulationPanel.Execution == tabSession,
+            Check(EditorApplication.ExecuteMenuItem("Match/레벨 제작/레벨툴 실행") && Resources.FindObjectsOfTypeAll<LevelEditorWindow>().Length == 1 && editor.ActiveSimulationPanel.Execution == tabSession,
                 "기존 메뉴도 같은 통합 창·플레이 세션 재사용");
             Check(root.Q<Label>("manual-summary").text.Contains("남은 이동 20"), "기본 화면 이동·미션 표시 유지");
             yield return null; Capture("manual-wide.png");

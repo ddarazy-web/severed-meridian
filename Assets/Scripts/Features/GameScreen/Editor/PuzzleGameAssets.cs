@@ -13,7 +13,6 @@ namespace GameScreen.Editor
         public const string Folder = "Assets/Prefabs/Game/Puzzle";
         public const string ScenePath = "Assets/Scenes/PuzzleGame.unity";
 
-        [MenuItem("Match/제작 도구/게임 플레이 씬 연결")]
         public static void GenerateGameplay()
         {
             string path = Folder + "/PuzzleGameSession.prefab";
@@ -51,7 +50,6 @@ namespace GameScreen.Editor
             AssetDatabase.SaveAssets();
         }
 
-        [MenuItem("Match/제작 도구/월드 보드 프리팹 생성")]
         public static void Generate()
         {
             Directory.CreateDirectory(Folder);

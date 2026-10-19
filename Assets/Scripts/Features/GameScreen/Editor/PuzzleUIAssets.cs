@@ -41,7 +41,6 @@ namespace GameScreen.Editor
             finally { saveFolder = previousFolder; }
         }
 
-        [MenuItem("Match/제작 도구/목업 UI 프리팹 연결")]
         public static void Generate()
         {
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Play 종료 후 생성하세요.");

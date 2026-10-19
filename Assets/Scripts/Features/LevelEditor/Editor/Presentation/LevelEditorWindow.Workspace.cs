@@ -21,7 +21,6 @@ namespace Levels.Editor
         internal LevelInitialStatePanel ActiveSimulationPanel => workspaceTab == 1 ? playPanel : diagnosticPanel;
         internal int WorkspaceTab => workspaceTab;
 
-        [MenuItem("Match/통합 작업창", false, 0)]
         public static void OpenWorkspaceMenu() => LevelTool.Editor.LevelToolLauncher.Launch();
 
         internal static LevelEditorWindow OpenWorkspace(int tab, LevelDefinition target = null, bool replaceLevel = false)

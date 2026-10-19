@@ -22,7 +22,7 @@ namespace Levels.Editor
         }
 
         // 사용자 씬·Play Mode·Editor 종료 상태를 바꾸지 않는 순수 규칙 검사다.
-        [MenuItem("Match/검증/신규 공급 대각선 규칙 검증")]
+        [MenuItem("Match/개발 도구/검증/신규 공급 대각선 규칙 검증")]
         public static void FreshSupply() => VerifyFreshSupply("manual");
 
         private static void VerifyFreshSupply(string label)

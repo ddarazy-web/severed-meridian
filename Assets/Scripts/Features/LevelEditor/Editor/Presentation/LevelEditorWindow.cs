@@ -37,7 +37,6 @@ namespace Levels.Editor
 
         public LevelDefinition CurrentLevel => level;
 
-        [MenuItem("Match/레벨 에디터")]
         public static void Open()
         {
             LevelTool.Editor.LevelToolLauncher.Launch();

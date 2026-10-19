@@ -75,7 +75,6 @@ namespace Elements.Editor
             AssetDatabase.SaveAssetIfDirty(bundle); AssetDatabase.SaveAssetIfDirty(group); AssetDatabase.SaveAssetIfDirty(settings);
         }
 
-        [MenuItem("Match/제작 데이터/요소 및 레벨 MemoryPack 갱신")]
         public static void Export() => Levels.Editor.LevelPackBuild.Generate();
 
         // 별도 Editor 자동화에서 초기 생성과 변환만 실행한다.
