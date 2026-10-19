@@ -1,0 +1,68 @@
+{
+  "kind": "element",
+  "schemaVersion": 1,
+  "id": "element-1c095c23ee284aa9a7edef97055de51d",
+  "data": {
+    "definition": {
+      "aggregation": {
+        "enabled": true,
+        "perHitCell": false
+      },
+      "charge": {
+        "enabled": false,
+        "maxRequired": 5,
+        "minRequired": 3,
+        "perHit": 1,
+        "size": 2
+      },
+      "color": {
+        "enabled": false,
+        "requiresMatchingColor": false
+      },
+      "damage": {
+        "adjacentMatch": false,
+        "enabled": true,
+        "hammer": true,
+        "magnetAdjacent": false,
+        "power": true
+      },
+      "displayName": "고물 회수 캡슐",
+      "id": "obstacle.recovery-capsule",
+      "layer": {
+        "behavior": "Unspecified",
+        "damage": 1,
+        "enabled": false,
+        "mission": "Color"
+      },
+      "placement": {
+        "enabled": true,
+        "maxDurability": 5,
+        "size": 1
+      },
+      "reaction": "Durability",
+      "removal": {
+        "enabled": true,
+        "kind": "Safe"
+      },
+      "supply": {
+        "behavior": "Unspecified",
+        "bodyIdPrefix": "",
+        "choiceDefinitionIds": [],
+        "choices": [],
+        "content": "Empty",
+        "enabled": false,
+        "hasObstacle": false,
+        "obstacle": "Crate",
+        "obstacleDefinitionId": ""
+      },
+      "turn": {
+        "behavior": "Unspecified",
+        "enabled": false,
+        "initialDurability": 1
+      }
+    },
+    "displayName": "obstacle.recovery-capsule",
+    "planningDocument": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+    "planningSection": "고물 회수 캡슐 — 확정 수치/행동과 기존 구현을 대조"
+  }
+}

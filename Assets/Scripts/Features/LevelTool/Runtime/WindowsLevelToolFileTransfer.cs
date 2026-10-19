@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using AOT;
 using Cysharp.Threading.Tasks;
@@ -25,16 +24,25 @@ namespace LevelTool
                 Thread thread = new Thread(() =>
                 {
                     Stream stream = null;
+                    IntPtr file = IntPtr.Zero;
                     try
                     {
                         if (!Requests.IsActive(id)) return;
-                        StringBuilder file = new StringBuilder(32768);
-                        if (create) file.Append(Path.GetFileName(name ?? "Project.zip"));
+                        // 구조체 안의 StringBuilder 마샬링을 피하고 Win32의 LPWSTR 버퍼를 직접 소유한다.
+                        const int capacity = 32768;
+                        char[] initial = new char[capacity];
+                        if (create)
+                        {
+                            string suggested = Path.GetFileName(name ?? "Project.zip");
+                            suggested.CopyTo(0, initial, 0, Math.Min(suggested.Length, capacity - 1));
+                        }
+                        file = Marshal.AllocHGlobal(capacity * sizeof(char));
+                        Marshal.Copy(initial, 0, file, capacity);
                         currentDialog = dialog;
                         OpenFileName options = new OpenFileName
                         {
                             size = Marshal.SizeOf<OpenFileName>(), filter = "ZIP 프로젝트\0*.zip\0\0",
-                            file = file, maxFile = file.Capacity, title = create ? "ZIP 내보내기" : "ZIP 가져오기",
+                            file = file, maxFile = capacity, title = create ? "ZIP 내보내기" : "ZIP 가져오기",
                             defaultExtension = "zip", hook = DialogHook,
                             flags = 0x00080000 | 0x00000020 | 0x00000008 | 0x00000800 | (create ? 0x00000002 : 0x00001000)
                         };
@@ -43,7 +51,7 @@ namespace LevelTool
                         dialog.Attach(IntPtr.Zero);
                         if (error != 0) throw new IOException("Windows 파일 선택기 오류: " + error);
                         if (selected && Requests.IsActive(id))
-                            stream = new FileStream(file.ToString(), create ? FileMode.Create : FileMode.Open,
+                            stream = new FileStream(Marshal.PtrToStringUni(file), create ? FileMode.Create : FileMode.Open,
                                 create ? FileAccess.Write : FileAccess.Read, FileShare.None);
                         Stream result = stream;
                         stream = null;
@@ -55,7 +63,7 @@ namespace LevelTool
                         stream?.Dispose();
                         UniTask.Post(() => Requests.Complete(id, null, error));
                     }
-                    finally { currentDialog = null; }
+                    finally { if (file != IntPtr.Zero) Marshal.FreeHGlobal(file); currentDialog = null; }
                 });
                 thread.IsBackground = true;
                 thread.SetApartmentState(ApartmentState.STA);
@@ -104,7 +112,7 @@ namespace LevelTool
             public string filter;
             public IntPtr customFilter;
             public int maxCustomFilter, filterIndex;
-            public StringBuilder file;
+            public IntPtr file;
             public int maxFile;
             public IntPtr fileTitle;
             public int maxFileTitle;

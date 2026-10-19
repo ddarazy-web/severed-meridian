@@ -36,7 +36,7 @@ namespace GameScreen.Editor
             };
         }
 
-        [MenuItem("Tools/Match/게임 실행 왕복 검증")]
+        [MenuItem("Match/검증/게임 실행 왕복 검증")]
         public static void Run() => RunFrom(0);
         public static void RunEarlyExit() => RunFrom(8);
         private static void RunFrom(int firstCase)

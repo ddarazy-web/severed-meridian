@@ -75,7 +75,7 @@ namespace PopupUI.Editor
                 { Check(catalog.Entries[0].Id == "original", "실제 UI catalog 편집 Undo 복원"); Undo.PerformRedo(); windowTestPhase = 3; return; }
                 Check(catalog.Entries[0].Id == "changed" && toolWindow.SaveSelectedCatalog() && !EditorUtility.IsDirty(catalog) && File.ReadAllText(WindowCatalogPath).Contains("changed"), "실제 UI catalog Redo와 명시 저장");
                 Selection.activeObject = catalog;
-                Check(EditorApplication.ExecuteMenuItem("Tools/Popup/등록 검사"), "등록 검사 메뉴 실제 실행");
+                Check(EditorApplication.ExecuteMenuItem("Match/팝업/등록 검사"), "등록 검사 메뉴 실제 실행");
                 toolWindow.Close(); toolWindow = null; Selection.activeObject = null;
                 previousTemplateRequest = SessionState.GetString("PopupUI.TemplateRequest", "");
                 SessionState.SetString("PopupUI.TemplateRequest", "{\"Feature\":\"OwnedDiagnostic\",\"Name\":\"Previous\",\"Id\":\"owned.previous\",\"Status\":\"Completed\",\"Error\":\"old success\"}");

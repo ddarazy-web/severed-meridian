@@ -52,7 +52,7 @@ namespace LevelTool
             LoadToolSkin().Forget();
         }
 
-        private void Show(string text) { if (status != null) status.text = text; }
+        private void Show(string text) { if (status != null) { status.text = text; status.tooltip = text; } }
         private static Button Button(VisualElement parent, string name, string text, Action action)
         {
             Button value = new Button(action) { name = name, text = text }; parent.Add(value); return value;

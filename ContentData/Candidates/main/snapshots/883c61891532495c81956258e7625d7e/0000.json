@@ -1,0 +1,29 @@
+{
+  "kind": "catalog",
+  "schemaVersion": 1,
+  "id": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+  "data": {
+    "definitionIds": [
+      "element-26cc4f57499845659071b5a07f8e9798",
+      "element-b914266c7529487e97723076fac4a5c3",
+      "element-faac530173aa422e89c3b12b868a6105",
+      "element-7b45bb5da5fe401e8b647ff3387adb53",
+      "element-cb5a4b10ab3b40bdbf0b74a41028d486",
+      "element-39abc33d5bd046ed9e205e8b35e7c448",
+      "element-180a89acacce40b0b47e5cb698e6b4fe",
+      "element-1c095c23ee284aa9a7edef97055de51d",
+      "element-43c5dd84c6f0476b84b5b140bd71964f",
+      "element-7bb42b50a3394be98efa6fd4cd6713b8",
+      "element-938967dba657416ebf9bbc9685f04faa",
+      "element-5c946f6e4c6f466cb1e5645a578a70dc",
+      "element-c656ce4b36ce49cfaeee9e191e6efbcd",
+      "element-750e8ab379c24e36af76571cefbb0923",
+      "element-f91baa94af4f4a1a8f739045361221d1",
+      "element-a743ce838c2e48c1b056977fdddd8057",
+      "element-190847babf4f4d45abac1136766295f2",
+      "element-a8db92745fe5401180f50807c7a75546"
+    ],
+    "displayName": "DefaultElementCatalog",
+    "visualId": "visual-39d32a17fab04590841af320d59c56c7"
+  }
+}

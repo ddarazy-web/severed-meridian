@@ -17,6 +17,15 @@ namespace LevelAuthoring.Validation
         }
         public static void Validate(ContentDocument document)
         {
+            try { ValidateDocument(document); }
+            catch (ContentFormatException error) { throw new ContentFormatException(Context(document) + " · " + error.Message, error); }
+        }
+
+        internal static string Context(ContentDocument document) => document == null ? "빈 문서" :
+            document.Id + (document.Kind == "level" ? " · 레벨 " + document.Data["levelNumber"] : " · " + document.Kind);
+
+        private static void ValidateDocument(ContentDocument document)
+        {
             if (document == null || string.IsNullOrWhiteSpace(document.Id)) throw new ContentFormatException("문서 ID가 없습니다.");
             if (document.Kind == "project") { ValidateProject(document.Data); return; }
             string type = (string)Schema["roots"][document.Kind];
@@ -90,7 +99,7 @@ namespace LevelAuthoring.Validation
                 Validate(document);
                 if (byId.ContainsKey(document.Id)) throw new ContentFormatException("중복 문서 ID: " + document.Id);
                 byId.Add(document.Id, document);
-                if (document.Kind == "level" && !numbers.Add((int)document.Data["levelNumber"])) throw new ContentFormatException("중복 레벨 번호입니다.");
+                if (document.Kind == "level" && !numbers.Add((int)document.Data["levelNumber"])) throw new ContentFormatException(Context(document) + " · levelNumber: 중복 레벨 번호입니다.");
                 if (document.Kind == "element" && !elements.Add((string)document.Data["definition"]["id"])) throw new ContentFormatException("중복 게임 요소 ID입니다.");
             }
             var projects = byId.Values.Where(document => document.Kind == "project").ToArray();
@@ -99,12 +108,12 @@ namespace LevelAuthoring.Validation
             var resources = new HashSet<string>(((JArray)projects[0].Data["resources"]).Select(item => (string)item["id"]), StringComparer.Ordinal);
             foreach (var document in byId.Values.Where(document => document.Kind != "project"))
             {
-                References(document.Data, new JObject { ["type"] = (string)Schema["roots"][document.Kind] }, byId, document.Id);
+                References(document.Data, new JObject { ["type"] = (string)Schema["roots"][document.Kind] }, byId, Context(document) + ".data");
                 if (document.Kind == "visual")
                     foreach (var property in document.Data.Descendants().OfType<JProperty>().Where(property => property.Name == "resourceId" || property.Name == "effectResourceIds"))
                         foreach (var reference in property.Value is JArray list ? list.ToArray() : new[] { property.Value })
                             if (reference.Type != JTokenType.Null && !string.IsNullOrEmpty((string)reference) && !resources.Contains((string)reference))
-                                throw new ContentFormatException("없는 리소스 ID: " + reference);
+                                throw new ContentFormatException(Context(document) + " · " + property.Path + ": 없는 리소스 ID " + reference);
             }
             ContentReferenceValidator.Validate(byId);
         }

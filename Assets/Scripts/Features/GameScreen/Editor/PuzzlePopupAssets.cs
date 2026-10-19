@@ -12,7 +12,7 @@ namespace GameScreen.Editor
     public static class PuzzlePopupAssets
     {
         public const string CatalogPath = "Assets/Data/UI/PuzzlePopupCatalog.asset";
-        [MenuItem("Tools/Popup/게임 팝업 연결")]
+        [MenuItem("Match/팝업/게임 팝업 연결")]
         public static void Apply() { ApplyToPrefabs(PuzzleUIAssets.Folder, CatalogPath); }
         public static void ApplyToPrefabs(string folder, string catalogPath)
         {

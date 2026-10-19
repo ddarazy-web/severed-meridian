@@ -16,7 +16,7 @@ namespace Levels.Editor
         private const string Output = "Logs/BoardArtworkLifecycleVerification/results.txt";
         static BoardArtworkLifecycleVerification() => EditorApplication.update += Tick;
 
-        [MenuItem("Tools/Match/편집 보드 이미지 수명 검증")]
+        [MenuItem("Match/검증/편집 보드 이미지 수명 검증")]
         public static void Run()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || SessionState.GetInt(Key, 0) != 0)

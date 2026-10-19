@@ -28,7 +28,7 @@ namespace GameScreen.Editor
             };
         }
 
-        [MenuItem("Tools/Match/UI 세션 동작 검증")]
+        [MenuItem("Match/검증/UI 세션 동작 검증")]
         public static void Run()
         { SessionState.SetBool(Key, true); EditorApplication.EnterPlaymode(); }
 

@@ -23,14 +23,18 @@ namespace LevelAuthoring.Validation
         {
             foreach (var document in documents.Values)
             {
-                switch (document.Kind)
+                try
                 {
-                    case "tutorialFlow": Flow(document.Data); break;
-                    case "tutorialSample": GeneratedNames(Objects(document.Data["steps"], "sample.steps")); break;
-                    case "visual": Visual(document.Data); break;
-                    case "catalog": Catalog(document.Data, documents); break;
-                    case "level": Level(document.Data, documents); break;
+                    switch (document.Kind)
+                    {
+                        case "tutorialFlow": Flow(document.Data); break;
+                        case "tutorialSample": GeneratedNames(Objects(document.Data["steps"], "sample.steps")); break;
+                        case "visual": Visual(document.Data); break;
+                        case "catalog": Catalog(document.Data, documents); break;
+                        case "level": Level(document.Data, documents); break;
+                    }
                 }
+                catch (ContentFormatException error) { throw new ContentFormatException(ContentDocumentValidator.Context(document) + " · " + error.Message, error); }
             }
         }
 

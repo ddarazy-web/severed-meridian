@@ -20,7 +20,7 @@ namespace LevelTool.Editor
             catch (Exception error) { Debug.LogException(error); EditorApplication.Exit(1); }
         }
 
-        [MenuItem("MATCH/제작 도구/레벨툴 기본 자산 생성")]
+        [MenuItem("Match/제작 도구/레벨툴 기본 자산 생성")]
         public static void Generate()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("편집 모드에서 생성하세요.");
@@ -124,7 +124,7 @@ namespace LevelTool.Editor
             catch { SessionState.EraseString(Key + "workspace"); throw; }
         }
 
-        [MenuItem("MATCH/레벨툴 씬 실행")]
+        [MenuItem("Match/레벨툴 씬 실행")]
         public static void Launch()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling)

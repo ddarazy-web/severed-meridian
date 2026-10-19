@@ -32,14 +32,16 @@ namespace LevelAuthoring.Editor
         private static FakeTransfer fakeTransfer;
         private static JObject recoveryRecord;
         private static readonly string[] SuiteCases = { "Export", "ImportSuccess", "ImportCancel", "ImportTransitionCancel",
-            "ImportReadFailure", "ImportCloseFailure", "ExportFlushFailure", "ExportCloseFailure", "ExportCancel",
-            "Back", "LeaveSaveFailure", "Pause", "ReloadRecovery" };
+            "ImportReadFailure", "ImportCloseFailure", "ExportWriteFailure", "ExportFlushFailure", "ExportCloseFailure", "ExportCancel", "ExportSaveFailure",
+            "ExportOpenFailure", "ExportSourceChanged", "Back", "LeaveSaveFailure", "Pause", "ReloadRecovery" };
         private static bool suiteRun;
         private static int suiteIndex;
         private static string suiteDirectory;
         private static bool exitRaised;
         public static void RunPause() { suiteRun = false; extendedMode = null; transferRun = false; Begin(); }
         public static void RunExport() { suiteRun = false; extendedMode = null; transferRun = true; Begin(); }
+        public static void RunExportOpenFailure() { suiteRun = false; extendedMode = "ExportOpenFailure"; Begin(); }
+        public static void RunExportSourceChanged() { suiteRun = false; extendedMode = "ExportSourceChanged"; Begin(); }
         public static void RunImportSuccess() { suiteRun = false; extendedMode = "ImportSuccess"; Begin(); }
         public static void RunImportCancel() { suiteRun = false; extendedMode = "ImportCancel"; Begin(); }
         public static void RunImportTransitionCancel() { suiteRun = false; extendedMode = "ImportTransitionCancel"; Begin(); }
@@ -86,10 +88,14 @@ namespace LevelAuthoring.Editor
                     if (transferRun)
                     {
                         ToolDraftStore.ValidateView((JObject)typeof(LevelToolScreen).GetMethod("CaptureView", Flags).Invoke(screen, null));
-                        exported = new MemoryStream(); Set("fileTransfer", new FakeTransfer(exported));
+                        exported = new MemoryStream(); fakeTransfer = new FakeTransfer(exported); Set("fileTransfer", fakeTransfer);
                         var commandType = typeof(LevelToolScreen).GetNestedType("ToolCommandId", BindingFlags.NonPublic);
                         object command = Enum.Parse(commandType, "ExportProject");
                         Check((bool)typeof(LevelToolScreen).GetMethod("TryExecuteCommand", Flags).Invoke(screen, new[] { command }), "export command connected");
+                        Check(Root.Q<Label>("export-summary") != null, "export preview shows project metadata before choosing destination");
+                        string summary = Root.Q<Label>("export-summary").text;
+                        Check(summary.Contains(screen.Workspace.Session.CreateSnapshot().Project.Id) && summary.Contains("레벨 1개") && summary.Contains("콘텐츠 버전 1"), "preview project ID count and version are exact");
+                        Click("export-project-confirm");
                     }
                     else Root.Q<TextField>("level-name").Focus();
                     phase = 2; next = EditorApplication.timeSinceStartup + 1;
@@ -100,6 +106,8 @@ namespace LevelAuthoring.Editor
                     {
                         if ((bool)Get("busy")) return;
                         Check(!exported.CanWrite, "export closes caller-owned output before completion");
+                        Check(System.Text.RegularExpressions.Regex.IsMatch(fakeTransfer.SuggestedName, @"^project_\d{8}-\d{6}-\d{3}\.zip$"), "dated ZIP filename");
+                        Check(Root.Q<Label>("status").text.Contains("클라우드 동기화는 해당 서비스"), "local success does not claim cloud sync");
                         using (var archive = new ZipArchive(new MemoryStream(exported.ToArray()), ZipArchiveMode.Read))
                             Check(archive.GetEntry("project.json") != null && archive.Entries.Count > 1, "actual UI exports project archive");
                         Check(!screen.Workspace.Session.IsDirty && Root.Q<Label>("status").text.Contains("ZIP 내보내기 완료"),
@@ -184,12 +192,24 @@ namespace LevelAuthoring.Editor
                 bool import = extendedMode.StartsWith("Import", StringComparison.Ordinal);
                 transferStream = new FaultStream(import ? package : Array.Empty<byte>(),
                     extendedMode == "ImportReadFailure", extendedMode == "ExportFlushFailure",
-                    extendedMode == "ImportCloseFailure" || extendedMode == "ExportCloseFailure");
+                    extendedMode == "ImportCloseFailure" || extendedMode == "ExportCloseFailure", extendedMode == "ExportWriteFailure");
                 fakeTransfer = new FakeTransfer(import ? null : transferStream,
                     import && extendedMode != "ImportCancel" ? transferStream : null);
                 if (extendedMode == "ExportCancel") fakeTransfer = new FakeTransfer(null);
+                if (extendedMode == "ExportOpenFailure") fakeTransfer = new FakeTransfer(null, onCreate: () => throw new IOException("provider-open-fixture"));
+                if (extendedMode == "ExportSourceChanged") fakeTransfer = new FakeTransfer(transferStream, onCreate: () =>
+                {
+                    File.AppendAllText(Path.Combine(originalFolder, "project.json"), "\n");
+                    originalHash = new ContentSnapshotStore(originalFolder).Read().Hash;
+                });
                 Set("fileTransfer", fakeTransfer);
+                if (extendedMode == "ExportSaveFailure")
+                {
+                    File.AppendAllText(Path.Combine(originalFolder, "project.json"), "\n");
+                    originalHash = new ContentSnapshotStore(originalFolder).Read().Hash;
+                }
                 Execute(import ? "ImportProject" : "ExportProject");
+                if (!import) Click("export-project-confirm");
                 phase = 2; next = EditorApplication.timeSinceStartup + 1; return;
             }
             if (extendedMode == "LeaveSaveFailure")
@@ -299,7 +319,22 @@ namespace LevelAuthoring.Editor
                 Check(new ContentSnapshotStore(originalFolder).Read().Hash == originalHash, "successful import leaves outgoing source JSON unchanged");
                 Finish(0); return;
             }
+            if (extendedMode == "ExportSaveFailure")
+            {
+                Check(fakeTransfer.CreateCalls == 0, "failed internal save never opens output picker");
+                Check(screen.Workspace.Session.IsDirty && new ContentSnapshotStore(originalFolder).Read().Hash == originalHash, "failed save preserves unsaved draft and external changes");
+                Check(Root.Q<Label>("status").text.Contains("내보내기 실패") && !Root.Q<Label>("status").text.Contains("ZIP 내보내기 완료"), "failed save never reports export success");
+                Finish(0); return;
+            }
             Check(fakeTransfer.CreateCalls == 1, "actual export calls output picker after internal save");
+            if (extendedMode == "ExportOpenFailure" || extendedMode == "ExportSourceChanged")
+            {
+                string message = Root.Q<Label>("status").text;
+                Check(message.Contains("내보내기 실패") && message.Contains("불완전") && !message.Contains("ZIP 내보내기 완료"), "provider open failure or source conflict warns without success");
+                if (extendedMode == "ExportSourceChanged")
+                    Check(transferStream.Closed && new ContentSnapshotStore(originalFolder).Read().Hash == originalHash, "source conflict closes output and preserves external data");
+                Finish(0); return;
+            }
             Check(ReferenceEquals(screen.Workspace.Session, originalSession) && screen.Workspace.Folder == originalFolder,
                 "export failure does not replace the current session or folder");
             Check(!screen.Workspace.Session.IsDirty && new ContentSnapshotStore(originalFolder).Read().Hash != originalHash,
@@ -312,7 +347,7 @@ namespace LevelAuthoring.Editor
             {
                 Check(transferStream.Closed, "failed export disposes output");
                 Check(resultStatus.Contains("내보내기 실패") && resultStatus.Contains("내부 저장본 유지") &&
-                    resultStatus.Contains(extendedMode == "ExportFlushFailure" ? "flush-fixture" : "close-fixture") && !resultStatus.Contains("ZIP 내보내기 완료"),
+                    resultStatus.Contains(extendedMode == "ExportWriteFailure" ? "write-fixture" : extendedMode == "ExportFlushFailure" ? "flush-fixture" : "close-fixture") && !resultStatus.Contains("ZIP 내보내기 완료"),
                     "flush or close failure cannot display ZIP export success");
             }
             Finish(0);
@@ -372,21 +407,29 @@ namespace LevelAuthoring.Editor
         private sealed class FakeTransfer : ILevelToolFileTransfer
         {
             private readonly Stream output, input;
+            private readonly Action onCreate;
             public int OpenCalls { get; private set; }
             public int CreateCalls { get; private set; }
-            public FakeTransfer(Stream output, Stream input = null) { this.output = output; this.input = input; }
+            public string SuggestedName { get; private set; }
+            public FakeTransfer(Stream output, Stream input = null, Action onCreate = null) { this.output = output; this.input = input; this.onCreate = onCreate; }
             public UniTask<Stream> OpenProject(CancellationToken token) { OpenCalls++; return UniTask.FromResult(input); }
-            public UniTask<Stream> CreateProject(string suggestedName, CancellationToken token) { CreateCalls++; return UniTask.FromResult(output); }
+            public UniTask<Stream> CreateProject(string suggestedName, CancellationToken token) { CreateCalls++; SuggestedName = suggestedName; onCreate?.Invoke(); return UniTask.FromResult(output); }
         }
 
         private sealed class FaultStream : MemoryStream
         {
-            private readonly bool failRead, failFlush, failClose;
+            private readonly bool failRead, failFlush, failClose, failWrite;
             public bool Closed { get; private set; }
-            public FaultStream(byte[] bytes, bool failRead, bool failFlush, bool failClose)
+            public FaultStream(byte[] bytes, bool failRead, bool failFlush, bool failClose, bool failWrite = false)
             {
                 this.failRead = failRead; this.failFlush = failFlush; this.failClose = failClose;
                 Write(bytes, 0, bytes.Length); Position = 0;
+                this.failWrite = failWrite;
+            }
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                if (failWrite) throw new IOException("write-fixture");
+                base.Write(buffer, offset, count);
             }
             public override int Read(byte[] buffer, int offset, int count)
             {

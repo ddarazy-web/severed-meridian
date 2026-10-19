@@ -19,7 +19,7 @@ namespace LevelAuthoring.Storage
         private const int MaxEntries = 10000;
 
         // savedProjectFolder의 정상 저장본을 destination에 쓴다. 스트림 닫기·외부 전송 완료는 호출자 책임이다.
-        public static void Export(string savedProjectFolder, Stream destination, CancellationToken cancellationToken)
+        public static void Export(string savedProjectFolder, Stream destination, CancellationToken cancellationToken, string expectedHash = null)
         {
             if (destination == null) throw new ArgumentNullException(nameof(destination));
             if (!destination.CanWrite) throw new ArgumentException("쓸 수 없는 스트림입니다.", nameof(destination));
@@ -35,7 +35,9 @@ namespace LevelAuthoring.Storage
                 string[] paths = PublicPaths(temporary);
                 foreach (string path in paths.Where(path => path != "project.json"))
                     CopyDocument(savedProjectFolder, temporary, path, buffer, ref total, cancellationToken);
-                new ContentSnapshotStore(temporary).Read();
+                StoredContentSnapshot staged = new ContentSnapshotStore(temporary).Read();
+                if (expectedHash != null && staged.Hash != expectedHash)
+                    throw new ContentFormatException("ZIP 저장 위치를 선택하는 동안 제작 데이터가 변경됐습니다. 다시 저장한 뒤 내보내세요.");
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var limited = new PackageWriteStream(destination, cancellationToken))
                 using (var archive = new ZipArchive(limited, ZipArchiveMode.Create, true))
@@ -56,6 +58,8 @@ namespace LevelAuthoring.Storage
                     }
                 }
                 cancellationToken.ThrowIfCancellationRequested();
+                if (expectedHash != null && new ContentSnapshotStore(savedProjectFolder).Read().Hash != expectedHash)
+                    throw new ContentFormatException("ZIP 내보내기 중 제작 데이터가 변경됐습니다. 다시 저장한 뒤 내보내세요.");
             }
             finally { Directory.Delete(temporary, true); }
         }

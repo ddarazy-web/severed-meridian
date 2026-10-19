@@ -14,10 +14,25 @@ namespace LevelAuthoring.Editor
 {
     public static class JsonPackRegistration
     {
+        public static void PublishSelected(string configurationPath, Action afterRegistration = null)
+        {
+            RecoverPending();
+            string selected = File.ReadAllText(configurationPath);
+            string folder = AuthoringSourceSelection.ReadFolder(configurationPath);
+            var source = new Storage.ContentSnapshotStore(folder).Read();
+            AuthoringSourceSelection.ValidateResources(source.Snapshot, true);
+            Publish(folder, () =>
+            {
+                afterRegistration?.Invoke();
+                if (File.ReadAllText(configurationPath) != selected || new Storage.ContentSnapshotStore(folder).Read().Hash != source.Hash)
+                    throw new InvalidOperationException("변환 중 정식 원본 또는 선택 설정이 변경됐습니다.");
+            });
+        }
+
         public static void Publish(string sourceFolder, Action afterRegistration = null)
         {
             string root = Path.GetFullPath(".");
-            JsonPackPublication.Recover(root);
+            RecoverPending();
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null) throw new InvalidOperationException("Addressables 설정이 없습니다.");
@@ -64,10 +79,29 @@ namespace LevelAuthoring.Editor
             }
             finally
             {
-                // 실패 복구로 디스크가 돌아온 경우 로드된 그룹/주소도 다시 읽는다.
-                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
-                foreach (string path in assets) AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+                RefreshRegistration(assets);
             }
+        }
+
+        private static void RecoverPending()
+        {
+            if (!File.Exists("Library/AuthoringPacks/publication.json")) return;
+            string[] assets = Directory.GetFiles("Assets/AddressableAssetsData", "*.asset", SearchOption.AllDirectories)
+                .Select(path => path.Replace('\\', '/')).ToArray();
+            // 이전 세대 복구는 새 원본의 유효성에 의존하지 않는다.
+            try { JsonPackPublication.Recover(Path.GetFullPath(".")); }
+            finally { RefreshRegistration(assets); }
+        }
+
+        private static void RefreshRegistration(string[] assets)
+        {
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+            foreach (string path in assets) AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+            // 디스크 복원만으로는 Addressables의 비직렬화 조회 캐시가 무효화되지 않는다.
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null) return;
+            foreach (var group in settings.groups.Where(group => group != null))
+                group.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, false, false);
         }
     }
 }

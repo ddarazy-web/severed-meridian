@@ -4,7 +4,7 @@ namespace PopupUI.Editor
 {
     public static class PopupCatalogValidation
     {
-        [MenuItem("Tools/Popup/등록 검사")]
+        [MenuItem("Match/팝업/등록 검사")]
         public static void ValidateSelection()
         {
             PopupCatalog catalog = Selection.activeObject as PopupCatalog;

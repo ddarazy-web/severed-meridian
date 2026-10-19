@@ -125,7 +125,7 @@ namespace LevelTool
                 case ToolCommandId.NewProject: NewProject(); break;
                 case ToolCommandId.Save: Storage(() => Workspace.Save()).Forget(); break;
                 case ToolCommandId.ImportProject: ImportProject(); break;
-                case ToolCommandId.ExportProject: RunProjectTransfer(false).Forget(); break;
+                case ToolCommandId.ExportProject: ExportProject(); break;
                 case ToolCommandId.RecentProjects: OpenRecentProjects(); break;
                 case ToolCommandId.SaveCopy: ChooseFolder(path => Storage(() => Workspace.SaveCopy(path)).Forget(), true); break;
                 case ToolCommandId.Reload: WithDirty(choice => Workspace.Reload(choice)); break;

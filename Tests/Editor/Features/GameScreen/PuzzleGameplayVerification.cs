@@ -32,7 +32,7 @@ namespace GameScreen.Editor
                 { SessionState.SetBool(Key, false); VerifyAsync().Forget(Debug.LogException); }
             };
         }
-        [MenuItem("Tools/Match/게임 플레이 검증")]
+        [MenuItem("Match/검증/게임 플레이 검증")]
         public static void Run()
         {
             Directory.CreateDirectory(Output);

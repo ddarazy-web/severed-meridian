@@ -1,6 +1,8 @@
 #if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
 using System.IO;
+using System.Linq;
+using System.Globalization;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using LevelAuthoring.Storage;
@@ -14,6 +16,24 @@ namespace LevelTool
         private ILevelToolFileTransfer fileTransfer;
         private CancellationTokenSource fileTransferCancellation;
         private RecentProjectStore recentProjects;
+
+        private void ExportProject()
+        {
+            try
+            {
+                var snapshot = Session.CreateSnapshot();
+                VisualElement panel = OpenModal("프로젝트 ZIP 백업·전달");
+                Label summary = new Label($"프로젝트: {Path.GetFileName(Workspace.Folder)}\nID: {snapshot.Project.Id}\n레벨 {snapshot.Documents.Count(value => value.Kind == "level")}개 · 콘텐츠 버전 {snapshot.Project.Data["contentVersion"]}")
+                    { name = "export-summary" };
+                summary.style.whiteSpace = WhiteSpace.Normal; panel.Add(summary);
+                Label guide = new Label("현재 편집 내용을 먼저 저장하고, 참조하는 JSON 전체를 ZIP으로 내보냅니다. 이미지·프리팹·로그·과거 백업은 포함하지 않습니다.\nZIP을 USB나 공유 폴더로 옮길 수 있습니다. 클라우드 업로드·동기화 완료는 해당 서비스에서 확인하세요.");
+                guide.style.whiteSpace = WhiteSpace.Normal; panel.Add(guide);
+                Button(panel, "export-project-confirm", "저장 후 ZIP 위치 선택", () =>
+                { CloseModal(); RunProjectTransfer(false).Forget(); });
+                Button(panel, "cancel", "취소", CloseModal);
+            }
+            catch (Exception failure) { Show("내보내기 준비 실패: " + failure.Message); }
+        }
 
         private void ImportProject()
         {
@@ -45,19 +65,24 @@ namespace LevelTool
             string imported = null;
             bool saved = false;
             bool transferred = false;
+            string destination = null;
+            string savedHash = null;
             try
             {
                 fileTransfer ??= LevelToolFileTransfer.CreateDefault();
                 if (!import)
                 {
                     await UniTask.RunOnThreadPool(Workspace.Save); saved = true;
+                    savedHash = Session.Revision;
                     cancellation.Token.ThrowIfCancellationRequested();
                     Show("내부 저장 완료 · ZIP 저장 위치를 선택하세요.");
                 }
                 else Show("가져올 프로젝트 ZIP을 선택하세요.");
                 Stream stream = import ? await fileTransfer.OpenProject(cancellation.Token) :
-                    await fileTransfer.CreateProject(Path.GetFileName(Workspace.Folder) + ".zip", cancellation.Token);
+                    await fileTransfer.CreateProject(Path.GetFileName(Workspace.Folder) + "_" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff", CultureInfo.InvariantCulture) + ".zip", cancellation.Token);
                 if (stream == null) { Show(saved ? "전송 취소 · 내부 저장본 유지" : "전송 취소"); return; }
+                // Windows 파일 스트림은 실제 경로를 제공한다. SAF 등은 경로를 추정하지 않는다.
+                destination = stream is FileStream file ? file.Name : "시스템 파일 선택기에서 지정한 문서";
                 string savedFolder = Workspace.Folder, projectsRoot = InternalProjectsRoot;
                 await UniTask.RunOnThreadPool(() =>
                 {
@@ -65,18 +90,19 @@ namespace LevelTool
                     using (stream)
                     {
                         if (import) imported = ProjectPackageStore.Import(stream, projectsRoot, projectName, cancellation.Token);
-                        else { ProjectPackageStore.Export(savedFolder, stream, cancellation.Token); stream.Flush(); }
+                        else { ProjectPackageStore.Export(savedFolder, stream, cancellation.Token, savedHash); stream.Flush(); }
                     }
                 });
                 cancellation.Token.ThrowIfCancellationRequested();
                 transferred = true;
-                Show(import ? "ZIP 검사·내부 프로젝트 등록 완료" : "ZIP 내보내기 완료");
+                Show(import ? "ZIP 검사·내부 프로젝트 등록 완료" : "ZIP 내보내기 완료 · " + destination + " · 클라우드 동기화는 해당 서비스에서 확인하세요.");
             }
-            catch (OperationCanceledException) { Show(saved ? "전송 취소 · 내부 저장본 유지" : "전송 취소"); }
+            catch (OperationCanceledException) { Show((saved ? "전송 취소 · 내부 저장본 유지" : "전송 취소") +
+                (!import && saved ? " · 생성된 외부 파일이 있다면 불완전할 수 있습니다." : "")); }
             catch (Exception failure)
             {
-                Show((import ? "가져오기 실패: " : "내보내기 실패 · 내부 저장본 유지: ") + failure.Message +
-                    (import ? "" : " · 외부 파일은 불완전할 수 있습니다."));
+                Show((import ? "가져오기 실패: " : saved ? "내보내기 실패 · 내부 저장본 유지: " : "내부 저장 실패 · ZIP 내보내기 실패: ") + failure.Message +
+                    (!import && saved ? " · 생성된 외부 파일이 있다면 불완전할 수 있습니다." : ""));
             }
             finally
             {

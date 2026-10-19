@@ -26,21 +26,7 @@ namespace LevelAuthoring.Editor
                 throw new ContentFormatException("이관 목록의 원본 수 또는 GUID가 다릅니다.");
             var ids = stored.Snapshot.Project.Data["sourceIds"].ToDictionary(entry => (string)entry["sourceGuid"], entry => (string)entry["documentId"]);
             var resources = stored.Snapshot.Project.Data["resources"].ToDictionary(entry => (string)entry["path"], entry => (string)entry["id"]);
-            var atlasSprites = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
-            foreach (string path in Levels.Editor.BoardAtlasPrebuild.SourcePaths())
-            {
-                string address = Levels.Editor.BoardAtlasPrebuild.AddressForPath(path);
-                var atlas = AssetDatabase.LoadAssetAtPath<UnityEngine.U2D.SpriteAtlas>(Levels.Editor.BoardAtlasPrebuild.AtlasPath(address));
-                if (atlas == null) continue;
-                var texture = AssetDatabase.LoadAssetAtPath<UnityEngine.Texture2D>(path);
-                if (!UnityEditor.U2D.SpriteAtlasExtensions.GetPackables(atlas).Contains(texture)) continue;
-                foreach (var sprite in AssetDatabase.LoadAllAssetsAtPath(path).OfType<UnityEngine.Sprite>())
-                    atlasSprites.Add(address + "|" + sprite.name);
-            }
-            foreach (string resource in resources.Keys)
-                if (AssetDatabase.LoadMainAssetAtPath(resource) == null &&
-                    !atlasSprites.Contains(Board.BoardSpriteAtlas.AddressFor(resource) + "|" + Path.GetFileName(resource)))
-                    throw new ContentFormatException("후보 표현 리소스가 없습니다: " + resource);
+            ValidateResources(stored.Snapshot);
             foreach (LegacyContentSource source in sources)
             {
                 JObject entry = entries.OfType<JObject>().SingleOrDefault(item => (string)item["sourceGuid"] == source.Guid);
@@ -61,6 +47,31 @@ namespace LevelAuthoring.Editor
             if (stored.Snapshot.Documents.Length != sources.Length + 1)
                 throw new ContentFormatException("원본 목록과 후보 문서 수가 다릅니다.");
             return stored;
+        }
+
+        public static void ValidateResources(ContentSnapshot snapshot, bool requireRuntimeAtlas = false)
+        {
+            var atlasSprites = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
+            foreach (string path in Levels.Editor.BoardAtlasPrebuild.SourcePaths())
+            {
+                string address = Levels.Editor.BoardAtlasPrebuild.AddressForPath(path);
+                var atlas = AssetDatabase.LoadAssetAtPath<UnityEngine.U2D.SpriteAtlas>(Levels.Editor.BoardAtlasPrebuild.AtlasPath(address));
+                if (atlas == null) continue;
+                if (requireRuntimeAtlas)
+                {
+                    var settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
+                    var entry = settings?.FindAssetEntry(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(atlas)));
+                    if (entry == null || entry.address != address) continue;
+                }
+                var texture = AssetDatabase.LoadAssetAtPath<UnityEngine.Texture2D>(path);
+                if (!UnityEditor.U2D.SpriteAtlasExtensions.GetPackables(atlas).Contains(texture)) continue;
+                foreach (var sprite in AssetDatabase.LoadAllAssetsAtPath(path).OfType<UnityEngine.Sprite>())
+                    atlasSprites.Add(address + "|" + sprite.name);
+            }
+            foreach (string resource in snapshot.Project.Data["resources"].Select(entry => (string)entry["path"]))
+                if ((requireRuntimeAtlas || AssetDatabase.LoadMainAssetAtPath(resource) == null) &&
+                    !atlasSprites.Contains(Board.BoardSpriteAtlas.AddressFor(resource) + "|" + Path.GetFileName(resource)))
+                    throw new ContentFormatException("후보 표현 리소스가 없습니다: " + resource);
         }
 
         public static void Adopt(string folder, string configurationPath)

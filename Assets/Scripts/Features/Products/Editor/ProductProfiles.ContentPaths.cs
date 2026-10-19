@@ -61,7 +61,7 @@ namespace Products.Editor
             ProductDefinition definition = ValidateProfile(BuildProfile.GetActiveBuildProfile());
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null || settings.activeProfileId != settings.profileSettings.GetProfileId(definition.Name))
-                throw new BuildFailedException("콘텐츠를 생성할 제품을 Tools/Products에서 먼저 선택하세요.");
+                throw new BuildFailedException("콘텐츠를 생성할 제품을 Match/Build/제품 설정에서 먼저 선택하세요.");
             ValidateBuildOptions(BuildOptions.None);
             ApplyContentPaths(definition);
             AuditAll();

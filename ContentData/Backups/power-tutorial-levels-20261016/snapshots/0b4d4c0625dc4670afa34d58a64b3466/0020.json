@@ -1,0 +1,1402 @@
+{
+  "kind": "level",
+  "schemaVersion": 1,
+  "id": "level-60f267ee0c5a453bb09291a997bd660a",
+  "data": {
+    "board": {
+      "cells": [
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        }
+      ],
+      "columns": 9,
+      "rows": 9
+    },
+    "catalogId": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+    "colors": [
+      "Type1",
+      "Type2",
+      "Type3",
+      "Type4"
+    ],
+    "connections": [],
+    "covers": [],
+    "displayName": "Level_01",
+    "dust": [],
+    "elementSupply": {
+      "recoveryDefinitionId": "supply.recovery",
+      "recoveryTarget": 0,
+      "scrapDefinitionId": "supply.scrap",
+      "scrapDurability": 1,
+      "scrapLimit": 0,
+      "scrapTarget": 0,
+      "sources": []
+    },
+    "elements": [],
+    "embeddedDefinitions": [],
+    "flow": {
+      "arrivals": [],
+      "gravity": [],
+      "merges": [],
+      "paths": [],
+      "portals": [],
+      "walls": []
+    },
+    "initialBlocks": [
+      {
+        "coordinate": {
+          "column": 1,
+          "row": 0
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 2,
+          "row": 0
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 3,
+          "row": 0
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 4,
+          "row": 0
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 5,
+          "row": 0
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 6,
+          "row": 0
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 7,
+          "row": 0
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 8,
+          "row": 0
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 0,
+          "row": 1
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 1,
+          "row": 1
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 2,
+          "row": 1
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 3,
+          "row": 1
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 4,
+          "row": 1
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 5,
+          "row": 1
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 6,
+          "row": 1
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 7,
+          "row": 1
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 8,
+          "row": 1
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 0,
+          "row": 2
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 0,
+          "row": 3
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 0,
+          "row": 4
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 0,
+          "row": 5
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 0,
+          "row": 6
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 0,
+          "row": 7
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 0,
+          "row": 8
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 8,
+          "row": 8
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 6,
+          "row": 8
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 5,
+          "row": 8
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 4,
+          "row": 8
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 3,
+          "row": 8
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 2,
+          "row": 8
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 1,
+          "row": 8
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 1,
+          "row": 7
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 1,
+          "row": 6
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 1,
+          "row": 5
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 1,
+          "row": 4
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 1,
+          "row": 3
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 1,
+          "row": 2
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 2,
+          "row": 2
+        },
+        "fixedColor": "Type3",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 3,
+          "row": 2
+        },
+        "fixedColor": "Type2",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 4,
+          "row": 2
+        },
+        "fixedColor": "Type4",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 5,
+          "row": 2
+        },
+        "fixedColor": "Type2",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 6,
+          "row": 2
+        },
+        "fixedColor": "Type3",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 7,
+          "row": 2
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 8,
+          "row": 2
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 8,
+          "row": 3
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 7,
+          "row": 3
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 6,
+          "row": 3
+        },
+        "fixedColor": "Type4",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 5,
+          "row": 3
+        },
+        "fixedColor": "Type1",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 4,
+          "row": 3
+        },
+        "fixedColor": "Type3",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 3,
+          "row": 3
+        },
+        "fixedColor": "Type1",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 2,
+          "row": 3
+        },
+        "fixedColor": "Type4",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 2,
+          "row": 4
+        },
+        "fixedColor": "Type2",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 3,
+          "row": 4
+        },
+        "fixedColor": "Type3",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 4,
+          "row": 4
+        },
+        "fixedColor": "Type2",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 5,
+          "row": 4
+        },
+        "fixedColor": "Type3",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 6,
+          "row": 4
+        },
+        "fixedColor": "Type2",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 7,
+          "row": 4
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 8,
+          "row": 4
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 2,
+          "row": 5
+        },
+        "fixedColor": "Type4",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 3,
+          "row": 5
+        },
+        "fixedColor": "Type1",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 4,
+          "row": 5
+        },
+        "fixedColor": "Type3",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 5,
+          "row": 5
+        },
+        "fixedColor": "Type1",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 6,
+          "row": 5
+        },
+        "fixedColor": "Type4",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 7,
+          "row": 5
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 8,
+          "row": 5
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 2,
+          "row": 6
+        },
+        "fixedColor": "Type3",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 3,
+          "row": 6
+        },
+        "fixedColor": "Type2",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 4,
+          "row": 6
+        },
+        "fixedColor": "Type4",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 5,
+          "row": 6
+        },
+        "fixedColor": "Type2",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 6,
+          "row": 6
+        },
+        "fixedColor": "Type3",
+        "kind": "FixedNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 7,
+          "row": 6
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 8,
+          "row": 6
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 8,
+          "row": 7
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 7,
+          "row": 7
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 6,
+          "row": 7
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 5,
+          "row": 7
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 4,
+          "row": 7
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 3,
+          "row": 7
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 2,
+          "row": 7
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 0,
+          "row": 0
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "coordinate": {
+          "column": 7,
+          "row": 8
+        },
+        "fixedColor": "Type1",
+        "kind": "RandomNormal",
+        "rocketDirection": "Horizontal"
+      }
+    ],
+    "levelNumber": 1,
+    "missions": [
+      {
+        "color": "Type1",
+        "count": 30,
+        "kind": "Color"
+      },
+      {
+        "color": "Type2",
+        "count": 30,
+        "kind": "Color"
+      }
+    ],
+    "moveCount": 20,
+    "obstacles": [],
+    "recoveryParts": [],
+    "schemaVersion": 4,
+    "supply": {
+      "recoveryTarget": 0,
+      "scrapDurability": 1,
+      "scrapLimit": 0,
+      "scrapTarget": 0,
+      "sources": [
+        {
+          "coordinate": {
+            "column": 1,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random"
+        },
+        {
+          "coordinate": {
+            "column": 2,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random"
+        },
+        {
+          "coordinate": {
+            "column": 3,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random"
+        },
+        {
+          "coordinate": {
+            "column": 4,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random"
+        },
+        {
+          "coordinate": {
+            "column": 5,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random"
+        },
+        {
+          "coordinate": {
+            "column": 6,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random"
+        },
+        {
+          "coordinate": {
+            "column": 7,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random"
+        },
+        {
+          "coordinate": {
+            "column": 8,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random"
+        },
+        {
+          "coordinate": {
+            "column": 0,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random"
+        }
+      ]
+    },
+    "tutorial": {
+      "bindings": [],
+      "completionId": "",
+      "flowId": null,
+      "previousLevelNumbers": [],
+      "seed": 12345,
+      "steps": [
+        {
+          "actionArea": [],
+          "actionDefinitionId": "",
+          "authoringId": "",
+          "automaticHighlights": false,
+          "combination": "All",
+          "conditions": [],
+          "first": {
+            "column": 0,
+            "row": 0
+          },
+          "firstBinding": "",
+          "freeItemCount": 1,
+          "hasFirst": false,
+          "hasSecond": false,
+          "highlights": [
+            {
+              "column": 4,
+              "row": 3
+            },
+            {
+              "column": 4,
+              "row": 4
+            }
+          ],
+          "instructions": "같은 색 토끼 3개를 맞추면 고물을 정리할 수 있어요.",
+          "item": "Hammer",
+          "kind": "Description",
+          "results": [],
+          "second": {
+            "column": 0,
+            "row": 0
+          },
+          "secondBinding": ""
+        },
+        {
+          "actionArea": [],
+          "actionDefinitionId": "",
+          "authoringId": "",
+          "automaticHighlights": false,
+          "combination": "All",
+          "conditions": [],
+          "first": {
+            "column": 4,
+            "row": 3
+          },
+          "firstBinding": "",
+          "freeItemCount": 1,
+          "hasFirst": true,
+          "hasSecond": true,
+          "highlights": [],
+          "instructions": "손가락 방향으로 두 칸을 바꿔 보세요.",
+          "item": "Hammer",
+          "kind": "Swap",
+          "results": [
+            {
+              "coordinate": {
+                "column": 0,
+                "row": 0
+              },
+              "count": 3,
+              "definitionId": "supply.normal.fixed",
+              "hasCoordinate": false,
+              "kind": "Removed"
+            }
+          ],
+          "second": {
+            "column": 4,
+            "row": 4
+          },
+          "secondBinding": ""
+        },
+        {
+          "actionArea": [],
+          "actionDefinitionId": "",
+          "authoringId": "",
+          "automaticHighlights": false,
+          "combination": "All",
+          "conditions": [],
+          "first": {
+            "column": 0,
+            "row": 0
+          },
+          "firstBinding": "",
+          "freeItemCount": 1,
+          "hasFirst": false,
+          "hasSecond": false,
+          "highlights": [],
+          "instructions": "잘했어요! 남은 이동 안에 미션 토끼를 모두 모아 보세요.",
+          "item": "Hammer",
+          "kind": "Description",
+          "results": [],
+          "second": {
+            "column": 0,
+            "row": 0
+          },
+          "secondBinding": ""
+        }
+      ],
+      "supply": {
+        "recoveryDefinitionId": "supply.recovery",
+        "recoveryTarget": 0,
+        "scrapDefinitionId": "supply.scrap",
+        "scrapDurability": 1,
+        "scrapLimit": 0,
+        "scrapTarget": 0,
+        "sources": [
+          {
+            "coordinate": {
+              "column": 1,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 2,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 3,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 4,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 5,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 6,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 7,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 8,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 0,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          }
+        ]
+      }
+    }
+  }
+}

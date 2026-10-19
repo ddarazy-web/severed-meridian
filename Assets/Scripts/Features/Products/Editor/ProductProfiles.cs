@@ -71,7 +71,7 @@ namespace Products.Editor
             return value;
         }
 
-        [MenuItem("Tools/Products/제품 구성 갱신 (빌드 안 함)")]
+        [MenuItem("Match/Build/제품 설정/제품 구성 갱신 (빌드 안 함)")]
         public static void Configure()
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -165,10 +165,10 @@ namespace Products.Editor
             EditorUserBuildSettings.SetBuildLocation(definition.Target, Path.GetFullPath(definition.Output));
             GameDiagnostics.GameLog.Debug(definition.Name + " 선택: " + definition.Output + " (빌드 안 함)");
         }
-        [MenuItem("Tools/Products/선택/Android 게임")] public static void Android() => Select("PRODUCT_ANDROID_GAME");
-        [MenuItem("Tools/Products/선택/iOS 게임")] public static void IOS() => Select("PRODUCT_IOS_GAME");
-        [MenuItem("Tools/Products/선택/Steam 게임")] public static void Steam() => Select("PRODUCT_STEAM_GAME");
-        [MenuItem("Tools/Products/선택/Windows 레벨툴")] public static void LevelTool() => Select("PRODUCT_LEVEL_EDITOR");
-        [MenuItem("Tools/Products/선택/Android 레벨툴")] public static void AndroidLevelTool() => Select("PRODUCT_LEVEL_EDITOR", BuildTarget.Android);
+        [MenuItem("Match/Build/제품 설정/선택/Android 게임")] public static void Android() => Select("PRODUCT_ANDROID_GAME");
+        [MenuItem("Match/Build/제품 설정/선택/iOS 게임")] public static void IOS() => Select("PRODUCT_IOS_GAME");
+        [MenuItem("Match/Build/제품 설정/선택/Steam 게임")] public static void Steam() => Select("PRODUCT_STEAM_GAME");
+        [MenuItem("Match/Build/제품 설정/선택/Windows 레벨툴")] public static void LevelTool() => Select("PRODUCT_LEVEL_EDITOR");
+        [MenuItem("Match/Build/제품 설정/선택/Android 레벨툴")] public static void AndroidLevelTool() => Select("PRODUCT_LEVEL_EDITOR", BuildTarget.Android);
     }
 }

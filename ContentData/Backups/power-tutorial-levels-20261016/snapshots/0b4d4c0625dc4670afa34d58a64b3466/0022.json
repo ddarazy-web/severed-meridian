@@ -1,0 +1,2035 @@
+{
+  "kind": "level",
+  "schemaVersion": 1,
+  "id": "level-9476d3b3a91c4563b712bfb753f46c98",
+  "data": {
+    "board": {
+      "cells": [
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        },
+        {
+          "isActive": true
+        }
+      ],
+      "columns": 9,
+      "rows": 9
+    },
+    "catalogId": "catalog-3dca08e6adb246c09c7ef6724e5d1dc9",
+    "colors": [
+      "Type1",
+      "Type2",
+      "Type3",
+      "Type4"
+    ],
+    "connections": [],
+    "covers": [],
+    "displayName": "Level_04",
+    "dust": [],
+    "elementSupply": {
+      "recoveryDefinitionId": "supply.recovery",
+      "recoveryTarget": 0,
+      "scrapDefinitionId": "supply.scrap",
+      "scrapDurability": 1,
+      "scrapLimit": 0,
+      "scrapTarget": 0,
+      "sources": [
+        {
+          "coordinate": {
+            "column": 1,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 2,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 3,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 4,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 5,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 6,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 7,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 8,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        },
+        {
+          "coordinate": {
+            "column": 0,
+            "row": 0
+          },
+          "exhaustion": "Stop",
+          "items": [],
+          "mode": "Random",
+          "randomDefinitionId": "supply.normal.random"
+        }
+      ]
+    },
+    "elements": [
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 3,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 0
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 0,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 1,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 2,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 3,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 4,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 5,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 6,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 7,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 8,
+          "row": 1
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 3,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 2
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 0,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 1,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 2,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 3,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 4,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 5,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 6,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 7,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 8,
+          "row": 3
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 3,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 4
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 0,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 1,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 2,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 3,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 4,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 5,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 6,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 7,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 8,
+          "row": 5
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 3,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 6
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 0,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 1,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 2,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 3,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 4,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 5,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 6,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 7,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 8,
+          "row": 7
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 0,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 1,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 2,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 3,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 4,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type2",
+        "coordinate": {
+          "column": 5,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type3",
+        "coordinate": {
+          "column": 6,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type4",
+        "coordinate": {
+          "column": 7,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      },
+      {
+        "color": "Type1",
+        "coordinate": {
+          "column": 8,
+          "row": 8
+        },
+        "definitionId": "supply.normal.fixed",
+        "durability": 0,
+        "hasColor": true,
+        "instanceId": "",
+        "layer": "Block",
+        "requiredCharge": 0,
+        "rocketDirection": "Horizontal"
+      }
+    ],
+    "embeddedDefinitions": [],
+    "flow": {
+      "arrivals": [],
+      "gravity": [],
+      "merges": [],
+      "paths": [],
+      "portals": [],
+      "walls": []
+    },
+    "initialBlocks": [],
+    "levelNumber": 4,
+    "missions": [
+      {
+        "color": "Type1",
+        "count": 30,
+        "kind": "Color"
+      },
+      {
+        "color": "Type2",
+        "count": 30,
+        "kind": "Color"
+      }
+    ],
+    "moveCount": 20,
+    "obstacles": [],
+    "recoveryParts": [],
+    "schemaVersion": 5,
+    "supply": {
+      "recoveryTarget": 0,
+      "scrapDurability": 1,
+      "scrapLimit": 0,
+      "scrapTarget": 0,
+      "sources": []
+    },
+    "tutorial": {
+      "bindings": [],
+      "completionId": "",
+      "flowId": null,
+      "previousLevelNumbers": [],
+      "seed": 12345,
+      "steps": [
+        {
+          "actionArea": [],
+          "actionDefinitionId": "",
+          "authoringId": "",
+          "automaticHighlights": false,
+          "combination": "All",
+          "conditions": [],
+          "first": {
+            "column": 0,
+            "row": 0
+          },
+          "firstBinding": "",
+          "freeItemCount": 1,
+          "hasFirst": false,
+          "hasSecond": false,
+          "highlights": [
+            {
+              "column": 4,
+              "row": 2
+            },
+            {
+              "column": 4,
+              "row": 3
+            }
+          ],
+          "instructions": "같은 색 4개를 2×2로 맞추면 수거 드론이 생겨요.",
+          "item": "Hammer",
+          "kind": "Description",
+          "results": [],
+          "second": {
+            "column": 0,
+            "row": 0
+          },
+          "secondBinding": ""
+        },
+        {
+          "actionArea": [],
+          "actionDefinitionId": "",
+          "authoringId": "",
+          "automaticHighlights": false,
+          "combination": "All",
+          "conditions": [],
+          "first": {
+            "column": 4,
+            "row": 2
+          },
+          "firstBinding": "",
+          "freeItemCount": 1,
+          "hasFirst": true,
+          "hasSecond": true,
+          "highlights": [],
+          "instructions": "표시된 두 칸을 바꿔 2×2로 수거 드론을 만들어 보세요.",
+          "item": "Hammer",
+          "kind": "Swap",
+          "results": [
+            {
+              "coordinate": {
+                "column": 4,
+                "row": 3
+              },
+              "count": 1,
+              "definitionId": "power.drone",
+              "hasCoordinate": true,
+              "kind": "Generated"
+            }
+          ],
+          "second": {
+            "column": 4,
+            "row": 3
+          },
+          "secondBinding": ""
+        },
+        {
+          "actionArea": [],
+          "actionDefinitionId": "",
+          "authoringId": "",
+          "automaticHighlights": false,
+          "combination": "All",
+          "conditions": [],
+          "first": {
+            "column": 0,
+            "row": 0
+          },
+          "firstBinding": "",
+          "freeItemCount": 1,
+          "hasFirst": false,
+          "hasSecond": false,
+          "highlights": [
+            {
+              "column": 4,
+              "row": 4
+            },
+            {
+              "column": 5,
+              "row": 4
+            }
+          ],
+          "instructions": "수거 드론이 생겨 아래로 내려왔어요. 옆 블록과 바꾸면 가까운 칸을 정리하고 다른 목표로 날아가요.",
+          "item": "Hammer",
+          "kind": "Description",
+          "results": [],
+          "second": {
+            "column": 0,
+            "row": 0
+          },
+          "secondBinding": ""
+        },
+        {
+          "actionArea": [],
+          "actionDefinitionId": "power.drone",
+          "authoringId": "",
+          "automaticHighlights": false,
+          "combination": "All",
+          "conditions": [],
+          "first": {
+            "column": 4,
+            "row": 4
+          },
+          "firstBinding": "",
+          "freeItemCount": 1,
+          "hasFirst": true,
+          "hasSecond": true,
+          "highlights": [],
+          "instructions": "수거 드론을 표시된 옆 블록과 바꿔 보세요.",
+          "item": "Hammer",
+          "kind": "PowerSwap",
+          "results": [
+            {
+              "coordinate": {
+                "column": 5,
+                "row": 4
+              },
+              "count": 1,
+              "definitionId": "power.drone",
+              "hasCoordinate": true,
+              "kind": "Activated"
+            }
+          ],
+          "second": {
+            "column": 5,
+            "row": 4
+          },
+          "secondBinding": ""
+        },
+        {
+          "actionArea": [],
+          "actionDefinitionId": "",
+          "authoringId": "",
+          "automaticHighlights": false,
+          "combination": "All",
+          "conditions": [],
+          "first": {
+            "column": 0,
+            "row": 0
+          },
+          "firstBinding": "",
+          "freeItemCount": 1,
+          "hasFirst": false,
+          "hasSecond": false,
+          "highlights": [],
+          "instructions": "잘했어요! 이제 남은 달토끼를 모아 보세요.",
+          "item": "Hammer",
+          "kind": "Description",
+          "results": [],
+          "second": {
+            "column": 0,
+            "row": 0
+          },
+          "secondBinding": ""
+        }
+      ],
+      "supply": {
+        "recoveryDefinitionId": "supply.recovery",
+        "recoveryTarget": 0,
+        "scrapDefinitionId": "supply.scrap",
+        "scrapDurability": 1,
+        "scrapLimit": 0,
+        "scrapTarget": 0,
+        "sources": [
+          {
+            "coordinate": {
+              "column": 1,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 2,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 3,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 4,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 5,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 6,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 7,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type4",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type2",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 8,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          },
+          {
+            "coordinate": {
+              "column": 0,
+              "row": 0
+            },
+            "exhaustion": "Stop",
+            "items": [
+              {
+                "color": "Type1",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              },
+              {
+                "color": "Type3",
+                "count": 1,
+                "definitionId": "supply.normal.fixed",
+                "direction": "Horizontal",
+                "durability": 1
+              }
+            ],
+            "mode": "Fixed",
+            "randomDefinitionId": "supply.normal.random"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -71,7 +71,7 @@ namespace GameScreen.Editor
             finally { window.Close(); }
         }
 
-        [MenuItem("Tools/Match/게임 실행 입력 검증")]
+        [MenuItem("Match/검증/게임 실행 입력 검증")]
         public static void RunData()
         {
             string output = "Logs/PuzzleEditorLaunchVerification/data-results.txt";

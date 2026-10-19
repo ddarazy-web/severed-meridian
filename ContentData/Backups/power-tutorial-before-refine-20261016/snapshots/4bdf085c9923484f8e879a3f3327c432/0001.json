@@ -1,0 +1,68 @@
+{
+  "kind": "element",
+  "schemaVersion": 1,
+  "id": "element-180a89acacce40b0b47e5cb698e6b4fe",
+  "data": {
+    "definition": {
+      "aggregation": {
+        "enabled": true,
+        "perHitCell": true
+      },
+      "charge": {
+        "enabled": false,
+        "maxRequired": 5,
+        "minRequired": 3,
+        "perHit": 1,
+        "size": 2
+      },
+      "color": {
+        "enabled": false,
+        "requiresMatchingColor": false
+      },
+      "damage": {
+        "adjacentMatch": true,
+        "enabled": true,
+        "hammer": true,
+        "magnetAdjacent": false,
+        "power": true
+      },
+      "displayName": "금속기둥 상자",
+      "id": "obstacle.metal-rod-box",
+      "layer": {
+        "behavior": "Unspecified",
+        "damage": 1,
+        "enabled": false,
+        "mission": "Color"
+      },
+      "placement": {
+        "enabled": true,
+        "maxDurability": 9,
+        "size": 2
+      },
+      "reaction": "Durability",
+      "removal": {
+        "enabled": true,
+        "kind": "Appliance"
+      },
+      "supply": {
+        "behavior": "Unspecified",
+        "bodyIdPrefix": "",
+        "choiceDefinitionIds": [],
+        "choices": [],
+        "content": "Empty",
+        "enabled": false,
+        "hasObstacle": false,
+        "obstacle": "Crate",
+        "obstacleDefinitionId": ""
+      },
+      "turn": {
+        "behavior": "Unspecified",
+        "enabled": false,
+        "initialDurability": 1
+      }
+    },
+    "displayName": "obstacle.metal-rod-box",
+    "planningDocument": "Docs/Contents/MoonRabbitJunkyard/04_게임규칙.md",
+    "planningSection": "금속기둥 상자 — 확정 수치/행동과 기존 구현을 대조"
+  }
+}
