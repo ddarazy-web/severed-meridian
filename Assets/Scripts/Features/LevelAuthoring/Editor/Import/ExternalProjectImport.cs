@@ -28,6 +28,11 @@ namespace LevelAuthoring.Editor
     {
         public static ExternalImportReport Import(Stream zip, string candidatesRoot, string configurationPath, CancellationToken token, Action<string, float> progress = null)
         {
+            string configuration = Path.GetFullPath(configurationPath);
+            new JsonContentStore(configuration);
+            new JsonContentStore(configuration + ".import.lock");
+            Directory.CreateDirectory(Path.GetDirectoryName(configuration));
+            using var gate = new FileStream(configuration + ".import.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
             string folder = ProjectPackageStore.Import(zip, candidatesRoot,
                 "import-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N"), token);
             return Inspect(folder, configurationPath, token, progress);

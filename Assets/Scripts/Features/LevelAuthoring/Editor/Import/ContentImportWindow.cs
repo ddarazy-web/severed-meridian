@@ -41,6 +41,9 @@ namespace LevelAuthoring.Editor
             VisualElement header = new VisualElement(); header.AddToClassList("import-header");
             Label title = new Label("제작 데이터"); title.AddToClassList("import-title"); header.Add(title);
             header.Add(new Label("레벨툴의 ZIP을 확인하고 게임 리소스로 연결합니다."));
+            header.Add(new Button(() => ContentImportHistoryWindow.Open(
+                () => this == null ? null : report?.Folder, () => this != null && busy))
+                { text = "히스토리 정리", name = "cleanup-history", tooltip = "사용하지 않는 후보·백업·임시 파일을 미리 확인하고 정리합니다. 현재 원본과 게임 리소스는 보존합니다." });
             root.Add(header);
             VisualElement progress = new VisualElement { name = "import-steps" };
             progress.AddToClassList("import-steps"); root.Add(progress);
