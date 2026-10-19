@@ -178,3 +178,6 @@ ServerData/*
 
 # 제작 원본 반영의 로컬 동시 실행 잠금
 /ProjectSettings/*.import.lock
+
+# 제작 원본 선택 변경 전 로컬 설정 백업
+/ProjectSettings/AuthoringSource.json.previous-*
