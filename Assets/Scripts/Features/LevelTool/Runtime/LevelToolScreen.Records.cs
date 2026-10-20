@@ -69,11 +69,11 @@ namespace LevelTool
                 {
                     SetRecordMessage($"삭제 완료 {recordCleanup.Deleted}개 · 실패 {recordCleanup.Failed}개 · 삭제 파일 {recordCleanup.FilesDeleted}개" +
                         (recordCleanup.Errors.Count == 0 ? "" : "\n보존/오류: " + string.Join("\n", recordCleanup.Errors.Take(5))));
-                    EndToolRecords(); Refresh(); StartHistoryScan();
+                    EndToolRecords(); RefreshProperties(); StartHistoryScan();
                 }
                 else SetRecordMessage($"기록 삭제 중 · 완료 {recordCleanup.Deleted}개 · 실패 {recordCleanup.Failed}개");
             }
-            catch (Exception error) { SetRecordMessage("기록 정리 실패: " + error.Message); CloseModal(); EndToolRecords(); Refresh(); }
+            catch (Exception error) { SetRecordMessage("기록 정리 실패: " + error.Message); CloseModal(); EndToolRecords(); RefreshProperties(); }
         }
 
         private void ConfirmToolRecords()

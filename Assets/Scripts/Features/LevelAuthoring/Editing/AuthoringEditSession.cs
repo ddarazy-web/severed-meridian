@@ -44,6 +44,16 @@ namespace LevelAuthoring.Editing
             return Clone(document);
         }
         public ContentDocument[] Documents => current.Documents.Values.Select(Clone).ToArray();
+        private sealed class DocumentStamp
+        {
+            internal readonly long Value = System.Threading.Interlocked.Increment(ref nextDocumentStamp);
+        }
+        private static long nextDocumentStamp;
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<ContentDocument, DocumentStamp> documentStamps =
+            new System.Runtime.CompilerServices.ConditionalWeakTable<ContentDocument, DocumentStamp>();
+        // 게시 후 불변인 문서의 식별자만 제공한다. 화면 캐시에 내부 JObject 참조를 노출하지 않는다.
+        public string[] DocumentIds => current.Documents.Keys.ToArray();
+        public long GetDocumentVersion(string id) => documentStamps.GetValue(current.Documents[id], _ => new DocumentStamp()).Value;
         public void SelectLevel(string id)
         {
             if (Get(id).Kind != "level") throw new ContentFormatException("레벨 문서를 선택하세요.");

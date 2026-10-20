@@ -14,6 +14,8 @@ namespace LevelTool
         private string checkedPackHash;
         private Label packStatus;
         private int packCheckRevision;
+        private string packComparisonKey, packComparisonHash;
+        private int packComparisonCount;
 
         private void DrawTrialSource()
         {
@@ -52,7 +54,14 @@ namespace LevelTool
             if (checkedPackHash == null) { packStatus.text = input + "팩 상태 확인을 눌러 최신 여부를 확인하세요."; return; }
             try
             {
-                string hash = ContentSnapshotFingerprint.Compute(sharedTutorialDraft?.Preview(Session) ?? Session.CreateSnapshot());
+                string key = DisplayContentKey();
+                if (packComparisonKey != key)
+                {
+                    packComparisonCount++;
+                    packComparisonHash = ContentSnapshotFingerprint.Compute(sharedTutorialDraft?.Preview(Session) ?? Session.CreateSnapshot());
+                    packComparisonKey = key;
+                }
+                string hash = packComparisonHash;
                 packStatus.text = input + (hash == checkedPackHash ? "팩과 현재 편집본이 일치합니다." : "팩과 현재 편집본이 다릅니다. 팩 시험에는 현재 수정이 반영되지 않습니다.");
             }
             catch (Exception error) { packStatus.text = input + "편집본 비교 불가: " + error.Message; }

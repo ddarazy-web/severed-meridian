@@ -49,7 +49,7 @@ namespace LevelTool
                 if (choices.Length == 0) pageTools.Add(new Label(page == "시험 기록" ? "저장된 시험을 조회·재생·보관합니다." : "현재 편집본의 사본으로 봇 시험을 실행합니다."));
             }
             foreach (var button in pageTools.Query<Button>().ToList()) button.EnableInClassList("selected", button.name == "page-" + inspectorPage);
-            levelTitle.text = Session == null ? "레벨 제작 도구" : "레벨 " + Session.Get(Session.SelectedLevelId).Data["levelNumber"] + "  ·  " + Session.Get(Session.SelectedLevelId).Data["displayName"];
+            levelTitle.text = Session == null ? "레벨 제작 도구" : "레벨 " + displayedLevel["levelNumber"] + "  ·  " + displayedLevel["displayName"];
             levelTitle.tooltip = levelTitle.text;
             UpdatePanelVisibility();
         }

@@ -60,7 +60,17 @@ namespace LevelAuthoring.Editor
         private const string NormalCommandName = "명령 이후 정상 입력";
         private static VisualElement Root => screen.GetComponent<UIDocument>().rootVisualElement;
 
-        public static void Run() => Begin(false);
+        private static Vector2Int[] requestedSizes;
+        private static Vector2Int[] ActiveSizes => requestedSizes ?? Sizes;
+        public static void Run() { requestedSizes = null; Begin(false); }
+        public static void RunRefreshViewports()
+        {
+            Output = "Logs/LevelToolRefreshPerformance/viewports-" + Guid.NewGuid().ToString("N");
+            requestedSizes = new[] { new Vector2Int(360, 780), new Vector2Int(412, 915), new Vector2Int(1280, 800), new Vector2Int(800, 1280) };
+            Begin(false);
+        }
+        // 작은 가로 화면의 기존 배치 문제를 같은 조건으로 빠르게 비교하는 진입점이다.
+        public static void RunLandscapeDiagnostic() { Begin(false); sizeIndex = 2; }
 
         public static void RunPendingInput() => Begin(true);
 
@@ -157,7 +167,7 @@ namespace LevelAuthoring.Editor
                         {
                             viewportScale = ViewportScales[sizeIndex]; panel.scale = viewportScale; SetViewport(ScaledSizes[sizeIndex]);
                         }
-                        else SetViewport(pendingInputOnly || advancedScreensOnly || pendingCommandsOnly ? new Vector2Int(412, 915) : Sizes[sizeIndex]);
+                        else SetViewport(pendingInputOnly || advancedScreensOnly || pendingCommandsOnly ? new Vector2Int(412, 915) : ActiveSizes[sizeIndex]);
                         Advance(pendingInputOnly ? 16 : advancedScreensOnly ? 20 : pendingCommandsOnly ? 40 : scaledViewportsOnly ? 60 : 1); break;
                     case 16:
                         Click("mobile-properties"); Click("inspector-level"); Advance(7); break;
@@ -376,7 +386,7 @@ namespace LevelAuthoring.Editor
                         Advance(14); break;
                     case 14:
                         cursor = input.cursorIndex; selection = input.selectIndex; pendingText = input.text; pendingValue = input.value;
-                        SetViewport(new Vector2Int(Sizes[sizeIndex].y, Sizes[sizeIndex].x)); Advance(4); break;
+                        SetViewport(new Vector2Int(ActiveSizes[sizeIndex].y, ActiveSizes[sizeIndex].x)); Advance(4); break;
                     case 4:
                         VerifyModalInput(); Capture("rotated-modal");
                         SetViewport(new Vector2Int(780, 360), new Rect(0, 0, 780, 140)); Advance(5); break;
@@ -397,7 +407,7 @@ namespace LevelAuthoring.Editor
                         Click("cancel"); Check(Root.Q("modal") == null && Root.Q("editor").enabledInHierarchy, "cancel restores editor");
                         VerifyPreserved("modal rotation and keyboard");
                         sizeIndex++;
-                        if (sizeIndex < Sizes.Length) { SetViewport(Sizes[sizeIndex]); Advance(1); }
+                        if (sizeIndex < ActiveSizes.Length) { SetViewport(ActiveSizes[sizeIndex]); Advance(1); }
                         else { SetViewport(new Vector2Int(412, 915)); Click("mobile-properties"); Click("inspector-level"); Advance(7); }
                         break;
                     case 7:

@@ -177,6 +177,9 @@ namespace LevelTool
         private void OnDisable()
         {
             suspendedInputs = editor != null && Session != null ? CaptureRecoveryInputs() : null;
+            displaySession = null; displayedLevel = null;
+            displayDocuments.Clear(); displayVersions.Clear(); definitions.Clear();
+            packComparisonKey = validationComparisonKey = null;
             root?.UnregisterCallback<InputEvent>(OnManualInput, TrickleDown.TrickleDown);
             recoveryReadRevision++;
             DisposeFileTransfer();
@@ -219,6 +222,7 @@ namespace LevelTool
         }
         private async UniTask Leave(string choice, Action continuation, string operation)
         {
+            bool completed = false;
             busy = true; editor.SetEnabled(false);
             try
             {
@@ -232,13 +236,24 @@ namespace LevelTool
                 await CloseToolBatch();
                 await CloseToolMulti();
                 continuation();
+                completed = true;
             }
             catch (Exception error)
             {
                 if (manualSaveInProgress) CompleteManualSave(error);
                 Show(operation + " 취소: " + error.Message);
             }
-            finally { busy = false; if (this != null && editor != null) { editor.SetEnabled(true); Refresh(); } }
+            finally
+            {
+                busy = false;
+                if (this != null && isActiveAndEnabled && editor != null)
+                {
+                    editor.SetEnabled(true);
+                    // 복원은 현재 화면을 바꾸므로 갱신한다. 실제 종료 성공 뒤에는 화면을 다시 구성하지 않는다.
+                    if (!completed || operation != "종료") Refresh();
+                    else { RefreshCommandStates(); UpdateManualSaveStatus(); }
+                }
+            }
         }
         private bool WantsToQuit()
         {

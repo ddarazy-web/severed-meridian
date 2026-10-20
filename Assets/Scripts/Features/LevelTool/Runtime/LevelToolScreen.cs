@@ -45,6 +45,8 @@ namespace LevelTool
             if (font != null) root.style.unityFont = font;
             root.AddToClassList("level-tool");
             navigationPage = null;
+            displaySession = null;
+            propertiesKey = null;
             levelListKey = paletteKey = boardKey = null;
             BuildEditorLayout();
             boardView = new Presentation.LevelToolBoardView(board, Show, SelectConnectionVertex, () => busy);
@@ -64,7 +66,7 @@ namespace LevelTool
                 });
             tutorialPanel = new Presentation.LevelToolTutorialPanel(new Presentation.LevelToolTutorialActions
             {
-                Session = () => Session, Draft = () => sharedTutorialDraft, Edit = Edit, Refresh = Refresh,
+                Session = () => Session, Draft = () => sharedTutorialDraft, Edit = Edit, Refresh = RefreshProperties,
                 Preview = () => tutorialPreview, SetPreview = value => tutorialPreview = value, Layer = () => layer,
                 Pick = BeginTutorialPick,
                 BeginSharedDraft = () => Edit(() => { sharedTutorialDraft = new LevelAuthoring.Runtime.SharedTutorialDraft(Session); tutorialStep = 0; CancelPendingInput(); brush = null; }),
@@ -102,6 +104,7 @@ namespace LevelTool
             try
             {
                 action();
+                forceProperties = true;
                 if (Session.SelectedLevelId != previousLevel) CancelPendingInput();
                 Refresh();
             }
@@ -155,19 +158,21 @@ namespace LevelTool
             folderLabel.tooltip = folderLabel.text;
             var focus = committingCommandInput ? null : CaptureFocusedInput();
             Vector2 levelOffset = levelList.scrollOffset, paletteOffset = palette.scrollOffset, propertyOffset = properties.scrollOffset, boardOffset = boardScroll.scrollOffset;
-            inspector = properties.contentContainer; inspector.Clear();
-            supplyPanel.Clear(); propertiesPanel.Clear(); tutorialPanel.Clear();
-            botBoard?.Root.RemoveFromHierarchy(); botBoard?.Dispose(); botBoard = null;
-            batchBoard?.Root.RemoveFromHierarchy(); batchBoard?.Dispose(); batchBoard = null;
-            multiBoard?.Root.RemoveFromHierarchy(); multiBoard?.Dispose(); multiBoard = null;
-            historyBoard?.Root.RemoveFromHierarchy(); historyBoard?.Dispose(); historyBoard = null;
+            inspector = properties.contentContainer;
+            try { PrepareDisplay(); }
+            catch (Exception error)
+            {
+                // 잘못된 참조를 고치기 전까지 이전 레벨의 입력을 현재 자료에 적용하지 않도록 비운다.
+                displaySession = null; inspector.Clear();
+                supplyPanel.Clear(); propertiesPanel.Clear(); tutorialPanel.Clear();
+                Show(error.Message); return;
+            }
             board.style.display = (inspectorPage == "자동 시험" || inspectorPage == "시험 기록") ? DisplayStyle.None : DisplayStyle.Flex;
             RefreshNavigation(); RefreshCommandStates();
-            if (Session == null) { levelList.Clear(); palette.Clear(); boardView.Clear(); return; }
+            if (Session == null) { levelList.Clear(); palette.Clear(); inspector.Clear(); boardView.Clear(); return; }
             try
             {
-                definitions = LevelToolDocuments.Definitions(Session);
-                var levels = Session.Documents.Where(doc => doc.Kind == "level").OrderBy(doc => (int)doc.Data["levelNumber"]).ToArray();
+                var levels = displayDocuments.Values.Where(doc => doc.Kind == "level").OrderBy(doc => (int)doc.Data["levelNumber"]).ToArray();
                 string nextLevels = string.Join("|", levels.Select(doc => doc.Id + ":" + doc.Data["levelNumber"] + ":" + doc.Data["displayName"]));
                 if (nextLevels != levelListKey)
                 {
@@ -197,15 +202,27 @@ namespace LevelTool
                     }
                 }
                 foreach (var item in palette.Query<Button>().ToList()) item.EnableInClassList("selected", item.name == brush);
-                string nextBoard = Workspace.Folder + "|" + Session.SelectedLevelId + "|" + Session.Get(Session.SelectedLevelId).Data.ToString(Newtonsoft.Json.Formatting.None) +
+                string nextBoard = Workspace.Folder + "|" + Session.SelectedLevelId + "|" + boardRevision +
                     "|" + string.Join(",", Session.SelectedCells) + "|" + layer + "|" + inspectorPage + "|" + cellSize + "|" +
                     flowTool + "|" + flowFirst + "|" + string.Join(",", flowRoute) + "|" + wireDrawing + "|" + string.Join(",", wireRoute) + "|" + connectionGenerator + "|" + connectionTarget + "|" + selectedConnection +
-                    "|" + string.Join("|", Session.Documents.Where(doc => doc.Kind != "level").Select(doc => doc.Data.ToString(Newtonsoft.Json.Formatting.None)));
+                    "|" + definitionRevision;
                 if (nextBoard != boardKey)
                 {
                     boardKey = nextBoard; DrawBoard();
                 }
-                DrawProperties(); DrawTutorialPreview();
+                string nextProperties = nextBoard + "|" + propertiesRevision + "|" + selectedShape + "|" + shared + "|" + (tutorialPick != null);
+                if (forceProperties || propertiesKey != nextProperties)
+                {
+                    inspector.Clear();
+                    supplyPanel.Clear(); propertiesPanel.Clear(); tutorialPanel.Clear();
+                    botBoard?.Root.RemoveFromHierarchy(); botBoard?.Dispose(); botBoard = null;
+                    batchBoard?.Root.RemoveFromHierarchy(); batchBoard?.Dispose(); batchBoard = null;
+                    multiBoard?.Root.RemoveFromHierarchy(); multiBoard?.Dispose(); multiBoard = null;
+                    historyBoard?.Root.RemoveFromHierarchy(); historyBoard?.Dispose(); historyBoard = null;
+                    DrawProperties();
+                    propertiesKey = nextProperties; forceProperties = false;
+                }
+                DrawTutorialPreview();
             }
             catch (Exception error) { Show(error.Message); }
             DrawValidationResults();

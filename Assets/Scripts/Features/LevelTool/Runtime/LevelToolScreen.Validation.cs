@@ -18,6 +18,8 @@ namespace LevelTool
         private readonly List<(string Document, LevelValidationIssue Issue)> validationIssues = new List<(string, LevelValidationIssue)>();
         private ContentDocument[] validatedDocuments;
         private string validatedLevel, validationMode;
+        private string validationComparisonKey;
+        private bool validationComparisonCurrent;
 
         private ContentDocument[] ValidationDocuments() => sharedTutorialDraft == null ? Session.Documents :
             Session.Documents.Select(doc => doc.Id == sharedTutorialDraft.FlowId ? sharedTutorialDraft.Session.Get(doc.Id) : doc).ToArray();
@@ -25,9 +27,13 @@ namespace LevelTool
         private bool ValidationIsCurrent()
         {
             if (validatedDocuments == null || Session == null || validatedLevel != Session.SelectedLevelId) return false;
+            string key = DisplayContentKey();
+            if (validationComparisonKey == key) return validationComparisonCurrent;
             var current = ValidationDocuments().ToDictionary(doc => doc.Id);
-            return current.Count == validatedDocuments.Length && validatedDocuments.All(doc =>
+            validationComparisonCurrent = current.Count == validatedDocuments.Length && validatedDocuments.All(doc =>
                 current.TryGetValue(doc.Id, out var other) && other.Kind == doc.Kind && JToken.DeepEquals(doc.Data, other.Data));
+            validationComparisonKey = key;
+            return validationComparisonCurrent;
         }
 
         private void ValidateLevel(bool replay)
@@ -35,6 +41,7 @@ namespace LevelTool
             if (busy || Session == null) return;
             validationIssues.Clear(); validatedLevel = Session.SelectedLevelId;
             validatedDocuments = ValidationDocuments();
+            validationComparisonKey = null;
             validationMode = replay ? "튜토리얼 논리 재생" : "구조·참조·레벨 검사";
             foreach (var document in validatedDocuments)
             {
