@@ -10,15 +10,15 @@
 
 **Spec:** [목표·완료 조건](../../../Goals/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-20-edit-refresh-performance-goal.md), [기존 측정·회귀 결과](../../../Verification/MoonRabbitJunkyard/2026-10-20-level-tool-manual-save-stage03.md).
 
-상태: 1·2단계 완료(2026-10-20). 이름 편집 정상 3회 중앙값 62~65ms로 100ms 목표를 충족했다. 3단계 대표 조작·반복 편집 검증은 미착수다. 기존 수동 저장 전환 1~3단계와 구분하는 후속 작업이다.
+상태: 1~3단계 완료(2026-10-20). 이름 편집 정상 3회 중앙값 62~65ms, 100회 반복 중앙값 64.94ms로 동기 100ms 목표를 충족했다. 다른 조작의 잔여 지연까지 모두 해결했다는 의미는 아니다. 기존 수동 저장 전환 1~3단계와 구분하는 후속 작업이다.
 
-## 현재 이어갈 작업
+## 최종 결과와 후속 후보
 
-다음 실행은 [3단계 계획](2026-10-20-edit-refresh-stage03-plan.md)과 [3단계 목표·실행문](../../../Goals/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-20-edit-refresh-stage03-goal.md)을 따른다. 완료된 단계를 처음부터 재구현하지 않는다.
+[3단계 계획](2026-10-20-edit-refresh-stage03-plan.md)과 [목표](../../../Goals/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-20-edit-refresh-stage03-goal.md)의 검증을 마쳤다. [최종 결과](../../../Verification/MoonRabbitJunkyard/2026-10-20-level-tool-edit-refresh-stage03.md)에 대표 조작·메모리·미검증과 후속 후보를 정리했다. 후속 구현은 자동 시작하지 않는다.
 
 - 화면 갱신: 기존 1단계 최종 기록에서 편집 중앙값은 221~227ms, 명령·화면 구간은 57~58ms다.
 - 문서 복사: 2단계에서 대상 지정 편집과 호출부 전환·회귀를 완료했다. 데이터 편집 중앙값은 약 14.5ms, 전체 편집은 62~65ms다. [2단계 결과](../../../Verification/MoonRabbitJunkyard/2026-10-20-level-tool-edit-refresh-stage02.md).
-- 최종 판정: 3단계에서 대표 조작·반복 편집·메모리를 확인한다. 단일 최대 지연 247ms와 명시적 저장 약 10초는 남아 있다.
+- 최종 판정: 3단계에서 대표 조작·100회 반복·새 세션 참조 해제·네 화면 크기를 확인했다. 반복 편집 최대 129ms, 튜토리얼 중앙값 약 1.05초·공유 적용 약 0.89초 및 명시적 저장 약 10초는 남는다.
 
 ## 공통 제약
 

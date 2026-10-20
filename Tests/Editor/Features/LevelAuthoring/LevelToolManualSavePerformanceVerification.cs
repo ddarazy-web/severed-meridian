@@ -17,7 +17,7 @@ using Debug = UnityEngine.Debug;
 
 namespace LevelAuthoring.Editor
 {
-    public static class LevelToolManualSavePerformanceVerification
+    public static partial class LevelToolManualSavePerformanceVerification
     {
         private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
         [StructLayout(LayoutKind.Sequential)]
