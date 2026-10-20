@@ -1,6 +1,7 @@
 #if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
 using System.IO;
+using System.Globalization;
 using System.Linq;
 using LevelAuthoring.Documents;
 using LevelAuthoring.Storage;
@@ -20,13 +21,17 @@ namespace LevelAuthoring.Editing
         public string ExportState()
         {
             if (Session == null) return null;
-            return new JObject
+            using (StringWriter text = new StringWriter(CultureInfo.InvariantCulture))
+            using (JsonTextWriter writer = new JsonTextWriter(text) { Formatting = Formatting.None })
             {
-                ["version"] = 1, ["folder"] = Folder, ["recovery"] = IsRecovery,
-                ["session"] = JObject.Parse(Session.ExportState())
-            }.ToString(Formatting.None);
+                writer.WriteStartObject();
+                writer.WritePropertyName("version"); writer.WriteValue(1);
+                writer.WritePropertyName("folder"); writer.WriteValue(Folder);
+                writer.WritePropertyName("recovery"); writer.WriteValue(IsRecovery);
+                writer.WritePropertyName("session"); Session.WriteState(writer);
+                writer.WriteEndObject(); return text.ToString();
+            }
         }
-
         public void RestoreState(string text)
         {
             try
@@ -36,7 +41,7 @@ namespace LevelAuthoring.Editing
                     !Path.IsPathRooted((string)data["folder"]) || data["recovery"]?.Type != JTokenType.Boolean ||
                     !(data["session"] is JObject state))
                     throw new ContentFormatException("레벨툴 복구본 형식이 잘못됐습니다.");
-                AuthoringEditSession restored = AuthoringEditSession.Restore(state.ToString(Formatting.None));
+                AuthoringEditSession restored = AuthoringEditSession.RestoreObject(state);
                 // 작성 중 문서 오류는 허용하되 도구에서 표시할 수 없는 버전은 거절한다.
                 foreach (ContentDocument level in restored.Documents.Where(doc => doc.Kind == "level"))
                     if ((int?)level.Data["schemaVersion"] != 4 && (int?)level.Data["schemaVersion"] != 5)

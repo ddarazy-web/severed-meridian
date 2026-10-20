@@ -71,6 +71,9 @@ namespace LevelAuthoring.Editor
                         Session.Apply("게임 시험 미션 준비", docs => MissionDocumentEditing.Set(docs[levelId].Data, 0, "Color", "Type1", 10));
                         screen.Workspace.Save();
                         Call("SelectWorkspacePage", "보드 편집"); Click("inspector-level");
+                        Session.SelectCells(new[] { 10, 11 });
+                        Click("board-zoom-in");
+                        Check(!Session.IsDirty, "selection and board zoom do not dirty saved documents");
                         Root.Q<TextField>("level-name").Focus(); stage++; break;
                     case 1:
                         TextField name = Root.Q<TextField>("level-name");
@@ -212,7 +215,10 @@ namespace LevelAuthoring.Editor
                     case 25:
                         SetRaw(Root.Q("level-moves"), "-"); PointerClick("save"); PointerClick("menu-file"); stage++; break;
                     case 26:
-                        Check(Root.Q("modal") == null && Root.Q<IntegerField>("level-moves").text == "-", "invalid numeric input blocks pointer save and menu without losing raw input");
+                        Check(Root.Q("command-menu") != null && Root.Q<IntegerField>("level-moves").text == "-", "invalid numeric input permits file menu without losing raw input");
+                        PointerClick("command-Save"); stage++; break;
+                    case 27:
+                        Check(Root.Q("modal") == null && Root.Q<IntegerField>("level-moves").text == "-", "invalid numeric input blocks menu Save without losing raw input");
                         Debug.Log("PASS real Play Mode delayed text/integer saves, invalid input retention, command parity, shared history and modal boundaries");
                         Debug.Log("MANUAL NOT VERIFIED: physical Korean IME composition, host Editor consumed keys and native OS window controls.");
                         done = true; EditorApplication.ExitPlaymode(); break;

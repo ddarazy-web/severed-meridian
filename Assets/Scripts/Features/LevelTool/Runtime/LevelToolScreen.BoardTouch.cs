@@ -139,7 +139,7 @@ namespace LevelTool
         {
             if (!paused) return;
             ResetBoardTouch();
-            CheckpointOnInterruption();
+
         }
 
         private void SelectBoardCells(IEnumerable<int> cells)

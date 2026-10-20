@@ -18,7 +18,7 @@ namespace LevelAuthoring.Editor
     public static class LevelToolMobileVerification
     {
         private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-        private const string Output = "Logs/AndroidLevelToolStage02";
+        private static string Output = "Logs/AndroidLevelToolStage02";
         private static readonly Vector2Int[] Sizes =
         {
             new Vector2Int(360, 780), new Vector2Int(412, 915), new Vector2Int(780, 360),
@@ -67,6 +67,12 @@ namespace LevelAuthoring.Editor
         public static void RunAdvancedScreens() => Begin(false, true);
 
         public static void RunPendingCommands() => Begin(false, false, true);
+
+        public static void RunIsolatedPendingCommands()
+        {
+            Output = "Logs/LevelToolRecoveryPerformance/pending-" + Guid.NewGuid().ToString("N");
+            Begin(false, false, true);
+        }
 
         public static void RunScaledViewports() => Begin(false, false, false, true);
 

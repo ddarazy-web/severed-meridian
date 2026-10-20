@@ -18,6 +18,7 @@ namespace LevelTool
         private void SuspendMobilePanelInput()
         {
             VisualElement input = FindCommandInput(root.focusController?.focusedElement as VisualElement);
+            input ??= editor?.Query<VisualElement>().ToList().FirstOrDefault(IsPendingAuthoringInput);
             if (input == null || mobilePendingInputs.ContainsKey(input)) return;
             Action<bool> restore = input is TextField text ? SuspendMobileInput(text) :
                 input is IntegerField integer ? SuspendMobileInput(integer) :
@@ -65,7 +66,7 @@ namespace LevelTool
             foreach (VisualElement input in new List<VisualElement>(mobilePendingInputs.Keys))
             {
                 if (!root.Contains(input)) { mobilePendingInputs.Remove(input); continue; }
-                bool visible = true;
+                bool visible = modal == null && editor.enabledInHierarchy;
                 for (VisualElement ancestor = input; ancestor != root; ancestor = ancestor.parent)
                     if (ancestor.style.display == DisplayStyle.None) { visible = false; break; }
                 mobilePendingInputs[input].Restore(visible);

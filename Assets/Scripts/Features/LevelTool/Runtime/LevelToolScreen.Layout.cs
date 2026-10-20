@@ -22,7 +22,11 @@ namespace LevelTool
             var header = new VisualElement { name = "header" }; header.AddToClassList("tool-header"); editor.Add(header);
             var identity = new VisualElement(); identity.AddToClassList("workspace-identity"); header.Add(identity);
             levelTitle = new Label("레벨 제작 도구") { name = "level-title" }; levelTitle.AddToClassList("level-title"); identity.Add(levelTitle);
-            folderLabel = new Label { name = "workspace-status" }; identity.Add(folderLabel);
+            var saveStatusRow = new VisualElement(); saveStatusRow.AddToClassList("save-status-row"); identity.Add(saveStatusRow);
+            folderLabel = new Label { name = "workspace-status" }; saveStatusRow.Add(folderLabel);
+            var saveDetails = Button(saveStatusRow, "save-status-details", "저장 안내", OpenSaveDetails);
+            saveDetails.RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
+            saveDetails.tooltip = "저장 상태와 오류 원인, 전체 저장 위치를 확인합니다.";
             toolbar = new VisualElement { name = "toolbar" }; toolbar.AddToClassList("toolbar"); header.Add(toolbar);
             CommandButton(toolbar, ToolCommandId.Save, "save");
             CommandButton(toolbar, ToolCommandId.Undo, "undo");

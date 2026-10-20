@@ -16,7 +16,7 @@ namespace LevelAuthoring.Editor
     public static class AndroidLevelToolScreenVerification
     {
         private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-        private static bool priorEnabled, done;
+        private static bool priorEnabled, done, requestedRecovery;
         private static EnterPlayModeOptions priorOptions;
         private static double deadline;
         private static int exit;
@@ -45,7 +45,7 @@ namespace LevelAuthoring.Editor
             expectedState = session.ExportState();
             new ToolDraftStore(recoveryFolder).Save(workspace.ExportState(), new JObject { ["layer"] = "Cover" }, 1);
             LevelToolRecoveryIsolation.Configure(recoveryFolder);
-            exit = 0; done = false; deadline = EditorApplication.timeSinceStartup + 180;
+            exit = 0; done = false; requestedRecovery = false; deadline = EditorApplication.timeSinceStartup + 180;
             EditorApplication.update += Tick;
             EditorApplication.playModeStateChanged += State;
             EditorApplication.EnterPlaymode();
@@ -71,6 +71,14 @@ namespace LevelAuthoring.Editor
                 screen = UnityEngine.Object.FindFirstObjectByType<LevelToolScreen>();
                 if (screen == null || (bool)Get("busy")) return;
                 LevelToolRecoveryIsolation.Verify(screen, recoveryFolder);
+                if (!requestedRecovery)
+                {
+                    Check(Root.Q<Button>("restore-draft") == null && screen.Workspace.Session == null, "startup does not read legacy recovery");
+                    Invoke("TryOpenInternalDefault");
+                    Check(screen.Workspace.Session == null && !Directory.Exists((string)typeof(LevelToolScreen).GetProperty("InternalProjectsRoot", Flags).GetValue(screen)),
+                        "startup does not create an internal project automatically");
+                    Invoke("ReadLegacyRecovery"); requestedRecovery = true; return;
+                }
                 Check(Root.Q<Button>("restore-draft") != null && screen.Workspace.Session == null,
                     "dirty recovery decision precedes opening any workspace");
                 VerifyBootstrapGuards();

@@ -83,8 +83,7 @@ namespace LevelAuthoring.Editor
             int firstCell = (int)previewStep["first"]["row"] * 9 + (int)previewStep["first"]["column"];
             Check(root.Q("tutorial-dim-" + firstCell) == null && root.Q("tutorial-preview-overlay").pickingMode == PickingMode.Ignore,
                 "highlighted action remains transparent and board input stays available");
-            var view = (Newtonsoft.Json.Linq.JObject)typeof(LevelToolScreen).GetMethod("CaptureView", flags).Invoke(screen, null);
-            Check((bool)view["tutorialPreview"], "preview setting included in recovery view");
+            Check((bool)typeof(LevelToolScreen).GetField("tutorialPreview", flags).GetValue(screen), "preview setting retained in memory");
             Check(session.ExportState() == beforePreview, "tutorial preview does not edit source");
             preview = root.Q<Toggle>("tutorial-preview"); preview.value = false;
             Check(root.Q("tutorial-preview-overlay") == null, "tutorial preview can be hidden");
@@ -100,8 +99,8 @@ namespace LevelAuthoring.Editor
             yield return null;
             Click("tutorial-pick-action");
             pick.Invoke(screen, new object[] { 30 }); pick.Invoke(screen, new object[] { 31 });
-            view = (Newtonsoft.Json.Linq.JObject)typeof(LevelToolScreen).GetMethod("CaptureView", flags).Invoke(screen, null);
-            Check(view["tutorialPick"]["cells"].Count() == 2, "pending selection serialized for reload");
+            var pendingPick = (Newtonsoft.Json.Linq.JObject)typeof(LevelToolScreen).GetField("tutorialPick", flags).GetValue(screen);
+            Check(pendingPick["cells"].Count() == 2, "pending selection retained in memory");
             pick.Invoke(screen, new object[] { 32 });
             Click("tutorial-pick-confirm");
             Check(root.Q("tutorial-pick-panel") != null && session.ExportState() == beforePicking, "invalid three-cell action remains pending without edits");

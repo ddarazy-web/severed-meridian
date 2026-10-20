@@ -6,6 +6,8 @@ Markdown 문서는 **문서 역할 → 프로젝트 → 개발 흐름** 순서�
 
 ## 분류별 목차
 
+- 레벨툴 성능 개선(수동 저장 전환): [3단계 계획·1단계 상세](Planning/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-19-manual-save-plan.md) · [목표·복사용 실행문](Goals/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-19-manual-save-goal.md) — 1·2단계 구현 및 3단계 측정·회귀 검증 완료. 편집 100ms 목표는 미달이며 후속 최적화가 필요하다. [후속 UX 계획](Planning/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-19-manual-save-stage02-plan.md) · [2단계 목표·실행문](Goals/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-19-manual-save-stage02-goal.md). 측정: [3단계 계획](Planning/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-20-manual-save-stage03-plan.md) · [목표·실행문](Goals/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-20-manual-save-stage03-goal.md).
+
 - 레벨 제작 데이터 ZIP 전달·Unity 리소스 반영: [3단계 통합 계획](Planning/project-wide/level-data-transfer-integration-plan.md) · [1단계 계획](Planning/project-wide/level-data-transfer-stage-01-plan.md) · [목표·완료 조건](Goals/project-wide/level-data-transfer-stage-01-goal.md) · [복사용 실행문](Commands/project-wide/level-data-transfer-stage-01-command.md) — 1·2·3단계 완료. ZIP 후보 검사·원본 채택·MemoryPack 변환·등록·복구 및 게임 로딩 검증 제공. 최종 근거와 후속 운영 실행문은 통합 계획에서 연결한다.
 
 - Windows 외부 빌드 앱: [통합 계획](Planning/project-wide/external-build-app-integration-plan.md) · [1단계 계획](Planning/project-wide/external-build-app-stage-01-plan.md) · [목표·완료 조건](Goals/project-wide/external-build-app-stage-01-goal.md) · [복사용 실행문](Commands/project-wide/external-build-app-stage-01-command.md) — 1단계 연결부 완료. [2단계 UI 계획](Planning/project-wide/external-build-app-stage-02-plan.md) · [2단계 실행문](Commands/project-wide/external-build-app-stage-02-command.md).

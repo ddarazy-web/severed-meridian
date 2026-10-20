@@ -12,42 +12,61 @@ namespace LevelTool
         private FocusedInputState modalInputFocus;
         private VisualElement modalPreviousFocus;
 
-        private async UniTask Storage(Action action)
+        private async UniTask Storage(Action action, bool saving = false)
         {
             if (busy) return;
             if (sharedTutorialDraft != null) { Show("공유 원본 사본을 적용하거나 버린 뒤 파일 작업을 해 주세요."); return; }
             var previousSession = Session;
             FocusedInputState previousInput = commandInputFocus ?? CaptureFocusedInput();
             commandInputFocus = null;
-            CheckpointOnInterruption();
+            var pendingInputs = CaptureRecoveryInputs();
+            if (HasPendingAuthoringInput()) SuspendMobilePanelInput();
+
             busy = true; editor.SetEnabled(false); Show("파일 처리 중…");
             RefreshCommandStates();
+            if (saving) BeginManualSave();
             try
             {
                 await UniTask.RunOnThreadPool(action);
+                manualFileFailure = null;
+                if (saving) CompleteManualSave();
                 if (!ReferenceEquals(previousSession, Session)) CancelPendingInput();
                 Show("파일 처리가 완료되었습니다.");
             }
-            catch (Exception error) { Show(error.Message); }
+            catch (Exception error)
+            {
+                if (saving) CompleteManualSave(error);
+                else { manualSaveOwner = Session; manualFileFailure = error.Message; }
+                Show(error.Message);
+            }
             finally
             {
                 busy = false;
                 if (this != null && editor != null)
                 {
                     editor.SetEnabled(modal == null); Refresh();
-                    if (!ReferenceEquals(previousSession, Session)) { RememberInternalProject(); CheckpointOnInterruption(); }
-                    if (ReferenceEquals(previousSession, Session) && modal == null) RestoreFocusedInput(previousInput);
+                    RestoreMobilePanelInputs();
+                    if (!ReferenceEquals(previousSession, Session)) RememberInternalProject();
+                    if (ReferenceEquals(previousSession, Session) && modal == null)
+                    {
+                        RestoreRecoveryInputs(pendingInputs);
+                        RestoreFocusedInput(previousInput);
+                        UpdateManualSaveStatus();
+                    }
                 }
             }
         }
 
-        private void WithDirty(Func<string, bool> action)
+        private void WithDirty(Func<string, bool> action) => WithDirtyFor("프로젝트 열기", action);
+
+        private void WithDirtyFor(string operation, Func<string, bool> action)
         {
-            if (Session?.IsDirty != true) { Storage(() => action("Cancel")).Forget(); return; }
-            VisualElement panel = OpenModal("현재 수정 내용이 저장되지 않았습니다.");
-            panel.Add(new Label("저장 후 계속하거나, 버리고 다른 자료를 열 수 있습니다. 취소하면 현재 편집을 유지합니다."));
-            Button(panel, "save-and-continue", "저장 후 계속", () => { CloseModal(); Storage(() => action("Save")).Forget(); });
-            Button(panel, "discard-and-continue", "버리고 계속", () => { CloseModal(); Storage(() => action("Discard")).Forget(); });
+            if (!HasUnsavedWork) { Storage(() => action("Cancel")).Forget(); return; }
+            VisualElement panel = OpenModal(operation + " 전 현재 작업 확인");
+            panel.Add(new Label("현재 작업에 저장하지 않은 변경이 있습니다. 저장하거나 버린 뒤 선택한 작업을 진행합니다. 취소하면 입력 중인 내용까지 유지합니다.")
+                { style = { whiteSpace = WhiteSpace.Normal } });
+            Button(panel, "save-and-continue", "저장 후 " + operation, () => { CloseModal(); ContinueAfterManualInput(() => Storage(() => action("Save")).Forget()).Forget(); });
+            Button(panel, "discard-and-continue", "버리고 " + operation, () => { CloseModal(); Storage(() => action("Discard")).Forget(); });
             Button(panel, "cancel", "취소", CloseModal);
         }
 
@@ -59,7 +78,7 @@ namespace LevelTool
                 try
                 {
                     var template = LevelToolDocuments.NewProject();
-                    WithDirty(choice => Workspace.Create(path, template, choice));
+                    WithDirtyFor("새 프로젝트 만들기", choice => Workspace.Create(path, template, choice));
                 }
                 catch (Exception error) { Show(error.Message); }
             }, true);
@@ -71,6 +90,8 @@ namespace LevelTool
             CloseModal();
             modalInputFocus = commandInputFocus ?? CaptureFocusedInput(); commandInputFocus = null;
             modalPreviousFocus = root.focusController?.focusedElement as VisualElement;
+            pendingInputDirty = HasPendingAuthoringInput();
+            SuspendMobilePanelInput();
             modal = new VisualElement { name = "modal" }; modal.AddToClassList("modal"); root.Add(modal);
             editor?.SetEnabled(false);
             VisualElement panel = new VisualElement { focusable = true }; panel.AddToClassList("dialog"); modal.Add(panel);
@@ -101,6 +122,7 @@ namespace LevelTool
             editor?.SetEnabled(!busy);
             if (!busy)
             {
+                RestoreMobilePanelInputs();
                 if (modalInputFocus != null) RestoreFocusedInput(modalInputFocus);
                 else if (modalPreviousFocus != null && root.Contains(modalPreviousFocus)) modalPreviousFocus.Focus();
             }

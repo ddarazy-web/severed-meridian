@@ -25,9 +25,9 @@ namespace LevelTool
         {
             inspector.Add(new Label("봇은 시작 순간의 레벨 사본을 사용하며 편집 보드를 바꾸지 않습니다. 튜토리얼 안내·아이템·부스터 없이 퍼즐 규칙만 시험합니다. 선택 점수는 사람의 체감 난이도가 아닙니다.")
                 { style = { whiteSpace = WhiteSpace.Normal } });
-            Number(inspector, "bot-seed", "시작 시드", toolBotSeed, value => { toolBotSeed = value; checkpointPending = true; });
+            Number(inspector, "bot-seed", "시작 시드", toolBotSeed, value => { toolBotSeed = value; });
             Choice(inspector, "bot-strategy", "전략", new[] { "Basic", "Planning" }, new[] { "기본", "두 수 계획" }, toolBotStrategy.ToString(),
-                value => { toolBotStrategy = (BotStrategyKind)Enum.Parse(typeof(BotStrategyKind), value); checkpointPending = true; });
+                value => { toolBotStrategy = (BotStrategyKind)Enum.Parse(typeof(BotStrategyKind), value); });
             Button(inspector, "bot-new", "현재 레벨로 새 봇 시험", () => PrepareToolBot(false));
             Button(inspector, "bot-repeat", "직전 시작 사본·시드로 다시", () => PrepareToolBot(true))
                 .tooltip = "편집 내용을 다시 읽지 않습니다. 직전 시험 사본과 시드는 유지하고, 선택한 전략으로 다시 시작합니다.";

@@ -16,51 +16,46 @@ namespace LevelTool
     {
         [SerializeField] private string recoveryDirectory;
         private ToolDraftStore draftStore;
-        private long checkpointSequence;
-        private bool checkpointPending, quitAllowed;
-        private float nextCheckpoint;
+        private bool quitAllowed;
         private int recoveryReadRevision;
         public event Action ExitRequested;
 
-        private async UniTask EnableRecovery()
+        private void EnableRecovery()
         {
             Application.wantsToQuit -= WantsToQuit;
             Application.wantsToQuit += WantsToQuit;
             draftStore ??= new ToolDraftStore(string.IsNullOrEmpty(recoveryDirectory)
                 ? Path.Combine(Application.persistentDataPath, "LevelTool") : recoveryDirectory);
-            // 같은 컴포넌트를 다시 켤 때 이미 메모리에 있는 편집본을 복구 파일로 덮지 않는다.
-            if (Session != null) return;
+            // 과거 복구본은 시작할 때 읽지 않는다. 명시적으로 요청한 경우에만 확인한다.
+            TryOpenDefaultWorkspace();
+            if (UsesInternalProjects) TryOpenInternalDefault();
+        }
+
+        private async UniTask ReadLegacyRecovery()
+        {
             int readRevision = ++recoveryReadRevision;
             busy = true; editor.SetEnabled(false);
             try
             {
                 ToolDraftStore.PreparedDraft record = await UniTask.RunOnThreadPool(draftStore.ReadPrepared);
-                if (this == null || !isActiveAndEnabled || readRevision != recoveryReadRevision || record == null) return;
-                JObject view = record.View;
+                if (this == null || !isActiveAndEnabled || readRevision != recoveryReadRevision) return;
+                if (record == null) { Show("과거 복구 기록이 없습니다."); return; }
                 string warning = draftStore.ReadWarning;
                 if (!File.Exists(Path.Combine(record.Folder, "project.json")))
                     warning = (warning == null ? "" : warning + "\n") + "프로젝트 저장본이 없습니다. 복구 초안을 복원하거나 다른 프로젝트를 열어 주세요.";
-                bool hasPendingInputs = view["pendingInputs"] is JArray pending && pending.Count > 0;
-                if (warning == null && !record.IsDirty && view["sharedTutorialDraft"]?.Type != JTokenType.String &&
-                    !hasPendingInputs)
-                    RestoreRecovery(record, false);
-                else
-                {
-                    recoveryBlocksDefault = true;
-                    VisualElement panel = OpenModal(warning == null ? "이전 작업을 어떻게 다시 열까요?" : "복구 기록을 확인해 주세요.");
-                    if (warning != null) panel.Add(new Label(warning));
-                    panel.Add(new Label("복원하면 선택한 칸과 실행 취소 이력도 돌아옵니다. 원본 JSON은 변경하지 않습니다."));
-                    Button(panel, "restore-draft", "이전 작업 복원", () => { CloseModal(); RestoreRecovery(record, false); });
-                    Button(panel, "discard-draft", "저장본으로 돌아가기", () => { CloseModal(); RestoreRecovery(record, true); });
-                    Button(panel, "open-other-project", "다른 프로젝트 열기", () => { CloseModal(); ChooseFolder(path => WithDirty(choice => Workspace.Open(path, choice))); });
-                    // 결정을 미룬 동안 기존 복구본 위로 새 자동 기록을 쓰지 않는다.
-                }
+                VisualElement panel = OpenModal(warning == null ? "과거 복구 기록 확인" : "복구 기록을 확인해 주세요.");
+                if (warning != null) panel.Add(new Label(warning));
+                panel.Add(new Label("복원하면 이전 선택과 실행 취소 이력이 돌아옵니다. 복구 파일과 원본 JSON은 변경하지 않습니다."));
+                Button(panel, "restore-draft", "이전 작업 복원", () =>
+                { CloseModal(); RequestLeaveFor(() => RestoreRecovery(record, false), "복원"); });
+                Button(panel, "discard-draft", "당시 저장본 열기", () =>
+                { CloseModal(); RequestLeaveFor(() => RestoreRecovery(record, true), "복원"); });
+                Button(panel, "cancel", "취소", CloseModal);
             }
             catch (Exception error)
             {
                 if (this != null && isActiveAndEnabled && readRevision == recoveryReadRevision)
                 {
-                    recoveryBlocksDefault = true;
                     VisualElement panel = OpenModal("복구 기록을 읽을 수 없습니다.");
                     panel.Add(new Label(error.Message + " · 원본 저장본과 복구 기록을 자동으로 바꾸지 않았습니다."));
                     Button(panel, "restore-previous-draft", "이전 복구 기록 확인", () => { CloseModal(); RestorePreviousRecovery().Forget(); });
@@ -73,8 +68,7 @@ namespace LevelTool
                 if (readRevision == recoveryReadRevision) busy = false;
                 if (this != null && readRevision == recoveryReadRevision && isActiveAndEnabled && editor != null)
                 {
-                    editor.SetEnabled(modal == null); TryOpenDefaultWorkspace();
-                    if (UsesInternalProjects) TryOpenInternalDefault();
+                    editor.SetEnabled(modal == null);
                 }
             }
         }
@@ -89,7 +83,8 @@ namespace LevelTool
                 ToolDraftStore.PreparedDraft previous = await UniTask.RunOnThreadPool(draftStore.ReadPreviousPrepared);
                 if (this == null || !isActiveAndEnabled || readRevision != recoveryReadRevision) return;
                 if (previous == null) { Show("이전 복구 기록이 없습니다. 다른 프로젝트를 열어 주세요."); return; }
-                RestoreRecovery(previous, false);
+                busy = false;
+                RequestLeaveFor(() => RestoreRecovery(previous, false), "복원");
             }
             catch (Exception error)
             {
@@ -168,31 +163,6 @@ namespace LevelTool
             catch (Exception error) { recoveryBlocksDefault = true; Show("복원 실패: " + error.Message + " · 기존 작업과 복구 기록을 유지했습니다."); }
         }
 
-        private JObject CaptureView() => new JObject
-        {
-            ["pendingInputs"] = CaptureRecoveryInputs(),
-            ["boardTouchTool"] = boardTouchTool, ["boardTouchAdd"] = boardTouchAdd, ["boardTouchReplace"] = boardTouchReplace,
-            ["mobilePanel"] = mobilePanel,
-            ["layer"] = layer, ["brush"] = brush, ["color"] = color, ["direction"] = direction,
-            ["anchor"] = anchor, ["seed"] = seed, ["cellSize"] = cellSize,
-            ["autoFitBoard"] = autoFitBoard, ["materialsVisible"] = materialsVisible,
-            ["levelSettingsVisible"] = levelSettingsVisible, ["boardFocus"] = boardFocus,
-            ["inspectorPage"] = inspectorPage,
-            ["batchCount"] = batchCount, ["toolBotSeed"] = toolBotSeed, ["toolBotStrategy"] = toolBotStrategy.ToString(),
-            ["multiSamples"] = multiSamples, ["multiMode"] = multiMode.ToString(), ["multiSelection"] = new JArray(multiSelection.OrderBy(id => id, StringComparer.Ordinal)),
-            ["tutorialStep"] = tutorialStep, ["newTutorialCondition"] = newTutorialCondition.ToString(),
-            ["tutorialPreview"] = tutorialPreview,
-            ["tutorialPick"] = tutorialPick?.DeepClone(),
-            ["sharedTutorialDraft"] = sharedTutorialDraft?.ExportState(),
-            ["flowTool"] = flowTool, ["flowFirst"] = flowFirst, ["flowRoute"] = new JArray(flowRoute),
-            ["connectionGenerator"] = connectionGenerator, ["connectionTarget"] = connectionTarget,
-            ["selectedConnection"] = selectedConnection, ["wireDrawing"] = wireDrawing, ["wireRoute"] = new JArray(wireRoute),
-            ["selectedShape"] = selectedShape,
-            ["boardX"] = boardScroll.scrollOffset.x, ["boardY"] = boardScroll.scrollOffset.y,
-            ["propertiesY"] = properties.scrollOffset.y, ["levelsY"] = levelList.scrollOffset.y,
-            ["paletteY"] = palette.scrollOffset.y
-        };
-
         private void Update()
         {
             UpdateMobileViewport();
@@ -203,29 +173,11 @@ namespace LevelTool
             AdvanceToolBatch();
             AdvanceToolMulti();
             AdvanceToolHistory();
-            if (busy || modal != null || !checkpointPending || Time.unscaledTime < nextCheckpoint || Session == null) return;
-            checkpointPending = false; nextCheckpoint = Time.unscaledTime + 1;
-            string state = Workspace.ExportState(); JObject view = CaptureView(); long sequence = ++checkpointSequence;
-            SaveCheckpoint(state, view, sequence).Forget();
-        }
-        private async UniTask SaveCheckpoint(string state, JObject view, long sequence)
-        {
-            try { await UniTask.RunOnThreadPool(() => draftStore.Save(state, view, sequence)); }
-            catch (Exception error) { if (this != null) Show("자동 복구 기록 실패: " + error.Message + " · 원본 저장을 해 주세요."); }
-        }
-
-        private void FlushRecovery()
-        {
-            if (Session == null || draftStore == null || modal?.Q<Button>("restore-draft") != null) return;
-            // 종료 콜백은 await할 수 없어 마지막 기록만 동기적으로 보장한다.
-            draftStore.Save(Workspace.ExportState(), CaptureView(), ++checkpointSequence);
         }
         private void OnDisable()
         {
-            bool storageWasBusy = busy;
-            // 패널 해제가 필드를 지우기 전에 미확정 입력과 화면 상태를 기록한다.
-            try { if (!storageWasBusy) FlushRecovery(); }
-            catch (Exception error) { Debug.LogError("레벨툴 복구 기록 실패: " + error.Message); }
+            suspendedInputs = editor != null && Session != null ? CaptureRecoveryInputs() : null;
+            root?.UnregisterCallback<InputEvent>(OnManualInput, TrickleDown.TrickleDown);
             recoveryReadRevision++;
             DisposeFileTransfer();
             DisposeBoardTouch();
@@ -250,46 +202,42 @@ namespace LevelTool
             Application.wantsToQuit -= WantsToQuit;
         }
 
-        public void RequestLeave(Action continuation)
+        public void RequestLeave(Action continuation) => RequestLeaveFor(continuation, "종료");
+
+        private void RequestLeaveFor(Action continuation, string operation)
         {
-            if (RecordsBusy) { Show("기록 정리를 끝내거나 취소한 뒤 종료해 주세요."); return; }
-            if (busy) { Show("파일 처리 완료 후 종료해 주세요."); return; }
-            if (!CommitCommandInput()) return;
-            if (committingCommandInput)
-            {
-                if (commandAwaitingInput) return;
-                commandAwaitingInput = true;
-                LeaveAfterInputCommit(continuation).Forget();
-                return;
-            }
-            if (sharedTutorialDraft != null) { AskSharedDraftBeforeLeave(continuation); return; }
-            if (Session?.IsDirty != true) { Leave("Cancel", continuation).Forget(); return; }
-            VisualElement panel = OpenModal("저장하지 않은 변경이 있습니다.");
-            panel.Add(new Label("저장 후 종료하거나 변경을 버릴 수 있습니다. 취소하면 계속 편집합니다."));
-            Button(panel, "save-and-leave", "저장 후 종료", () => { CloseModal(); Leave("Save", continuation).Forget(); });
-            Button(panel, "discard-and-leave", "버리고 종료", () => { CloseModal(); Leave("Discard", continuation).Forget(); });
+            if (RecordsBusy) { Show("기록 정리를 끝내거나 취소한 뒤 " + operation + "해 주세요."); return; }
+            if (busy) { Show("파일 처리 완료 후 " + operation + "해 주세요."); return; }
+            if (sharedTutorialDraft != null) { AskSharedDraftBeforeLeave(continuation, operation); return; }
+            if (!HasUnsavedWork) { Leave("Cancel", continuation, operation).Forget(); return; }
+            VisualElement panel = OpenModal(operation + " 전 현재 작업 확인");
+            panel.Add(new Label("저장하지 않은 변경이 있습니다. 저장한 뒤 " + operation + "하거나 변경을 버릴 수 있습니다. 취소하면 입력 중인 내용까지 유지합니다.")
+                { style = { whiteSpace = WhiteSpace.Normal } });
+            Button(panel, "save-and-leave", "저장 후 " + operation, () => { CloseModal(); ContinueAfterManualInput(() => Leave("Save", continuation, operation).Forget()).Forget(); });
+            Button(panel, "discard-and-leave", "버리고 " + operation, () => { CloseModal(); DiscardUncommittedInputs(); Leave("Discard", continuation, operation).Forget(); });
             Button(panel, "cancel", "취소", CloseModal);
         }
-        private async UniTask LeaveAfterInputCommit(Action continuation)
-        {
-            int revision = inputCommitRevision;
-            await UniTask.WaitUntil(() => !committingCommandInput || this == null || !isActiveAndEnabled);
-            if (this == null || !isActiveAndEnabled || revision != inputCommitRevision) return;
-            commandAwaitingInput = false;
-            RequestLeave(continuation);
-        }
-        private async UniTask Leave(string choice, Action continuation)
+        private async UniTask Leave(string choice, Action continuation, string operation)
         {
             busy = true; editor.SetEnabled(false);
             try
             {
-                if (choice == "Save") await UniTask.RunOnThreadPool(Workspace.Save);
-                else if (choice == "Discard") Session.Discard();
+                if (choice == "Save")
+                {
+                    BeginManualSave();
+                    await UniTask.RunOnThreadPool(Workspace.Save);
+                    CompleteManualSave();
+                }
+                else if (choice == "Discard") { Session.Discard(); manualSaveFailure = null; }
                 await CloseToolBatch();
                 await CloseToolMulti();
-                FlushRecovery(); continuation();
+                continuation();
             }
-            catch (Exception error) { Show("종료 취소: " + error.Message); }
+            catch (Exception error)
+            {
+                if (manualSaveInProgress) CompleteManualSave(error);
+                Show(operation + " 취소: " + error.Message);
+            }
             finally { busy = false; if (this != null && editor != null) { editor.SetEnabled(true); Refresh(); } }
         }
         private bool WantsToQuit()

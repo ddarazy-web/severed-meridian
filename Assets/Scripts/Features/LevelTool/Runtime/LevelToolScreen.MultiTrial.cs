@@ -38,14 +38,14 @@ namespace LevelTool
             panel.Add(new Label("체크한 레벨의 현재 초안을 순서대로 시험합니다. 오류가 있는 레벨은 표시하고 다음 레벨로 넘어갑니다. 추천 시험은 레벨마다 이동 1~100회 × 두 전략 × 100판(총 20,000판)이므로 오래 걸립니다. 편집 값은 자동 변경하지 않습니다.")
                 { style = { whiteSpace = WhiteSpace.Normal } });
             Choice(panel, "multi-mode", "시험 방식", new[] { "Repeat", "Balance" }, new[] { "현재 이동 횟수 반복", "이동 횟수 추천" }, multiMode.ToString(),
-                value => { multiMode = (MultiLevelTestMode)Enum.Parse(typeof(MultiLevelTestMode), value); checkpointPending = true; UpdateToolMulti(); });
-            Number(panel, "multi-samples", "반복 전략별 판 수", multiSamples, value => { multiSamples = value; checkpointPending = true; });
+                value => { multiMode = (MultiLevelTestMode)Enum.Parse(typeof(MultiLevelTestMode), value); UpdateToolMulti(); });
+            Number(panel, "multi-samples", "반복 전략별 판 수", multiSamples, value => { multiSamples = value; });
             multiLevels = new VisualElement(); panel.Add(multiLevels);
             foreach (var doc in Session.Documents.Where(d => d.Kind == "level").OrderBy(d => (int)d.Data["levelNumber"]))
             {
                 string id = doc.Id;
                 var toggle = new Toggle(doc.Data["levelNumber"] + " · " + doc.Data["displayName"]) { name = "multi-level-" + id, value = multiSelection.Contains(id) };
-                toggle.RegisterValueChangedCallback(e => { if (e.newValue) multiSelection.Add(id); else multiSelection.Remove(id); checkpointPending = true; }); multiLevels.Add(toggle);
+                toggle.RegisterValueChangedCallback(e => { if (e.newValue) multiSelection.Add(id); else multiSelection.Remove(id); }); multiLevels.Add(toggle);
             }
             Button(panel, "multi-start", "선택 레벨 시험 시작", StartToolMulti);
             Button(panel, "multi-pause", "여러 레벨 시험 일시정지", () => { toolMulti?.Pause(); UpdateToolMulti(); });

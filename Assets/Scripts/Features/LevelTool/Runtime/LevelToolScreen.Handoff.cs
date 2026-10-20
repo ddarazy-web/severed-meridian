@@ -19,7 +19,13 @@ namespace LevelTool
             if (busy || recoveryBlocksDefault || Session != null || modal != null || !string.IsNullOrEmpty(incomingWorkspace)) return;
             try
             {
-                LevelToolProjectAccess.OpenDefault(Workspace, InternalProjectsRoot, LevelToolDocuments.NewProject());
+                string path = LevelToolProjectAccess.Resolve(InternalProjectsRoot, "Default");
+                if (!System.IO.File.Exists(System.IO.Path.Combine(path, "project.json")))
+                {
+                    Show("파일 메뉴에서 새 프로젝트를 만들거나 기존 프로젝트를 열어 주세요. 자동 저장하지 않습니다.");
+                    return;
+                }
+                Workspace.Open(path, "Cancel");
                 RememberInternalProject();
                 Refresh(); Show("내부 기본 프로젝트를 열었습니다.");
             }
@@ -59,7 +65,7 @@ namespace LevelTool
             Button(toolbar, "open-incoming-workspace", label, () =>
             {
                 if (busy || RecordsBusy || BatchActive || MultiActive || toolBot?.NeedsAdvance == true || playRoot != null) return;
-                WithDirty(AcceptIncomingWorkspace);
+                WithDirtyFor("인계 작업 열기", AcceptIncomingWorkspace);
             }).tooltip = "기존 선택·미저장 내용·실행 취소 이력을 이어받습니다. 현재 작업이 있으면 저장/버리기/취소를 먼저 선택합니다.";
         }
 

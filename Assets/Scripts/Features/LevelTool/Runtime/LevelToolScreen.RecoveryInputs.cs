@@ -64,7 +64,18 @@ namespace LevelTool
             if (text == null) return;
             ((INotifyValueChanged<string>)text).SetValueWithoutNotify((string)input["text"] ?? "");
             field.SelectRange(Math.Min((int?)input["cursor"] ?? 0, field.text.Length), Math.Min((int?)input["selection"] ?? 0, field.text.Length));
-            if ((bool?)input["focused"] == true) field.Focus();
+            if ((bool?)input["focused"] == true)
+            {
+                field.Focus();
+                // 포커스 진입의 전체 선택보다 뒤에 저장된 선택 범위를 복원한다.
+                var restoredSession = Session;
+                string restoredText = field.text;
+                field.schedule.Execute(() =>
+                {
+                    if (isActiveAndEnabled && ReferenceEquals(Session, restoredSession) && root.Contains(field) && field.text == restoredText)
+                        field.SelectRange(Math.Min((int?)input["cursor"] ?? 0, field.text.Length), Math.Min((int?)input["selection"] ?? 0, field.text.Length));
+                });
+            }
             // 숨긴 패널의 Blur가 미확정 문자열을 잃지 않도록 기존 입력 보류를 사용한다.
             bool hidden = false;
             for (VisualElement ancestor = field; ancestor != editor && ancestor != null; ancestor = ancestor.parent)
@@ -76,12 +87,6 @@ namespace LevelTool
             }
         }
 
-        private void CheckpointOnInterruption()
-        {
-            if (busy || root == null || Session == null || draftStore == null) return;
-            try { FlushRecovery(); }
-            catch (Exception error) { Show("중단 복구 기록 실패: " + error.Message); }
-        }
     }
 }
 #endif

@@ -1,6 +1,7 @@
 #if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -33,7 +34,7 @@ namespace LevelTool
             if (focused) return;
             ResetBoardTouch();
             heldShortcutKeys.Clear();
-            CheckpointOnInterruption();
+
         }
         private void OnShortcutKeyUp(KeyUpEvent evt) => heldShortcutKeys.Remove(evt.keyCode);
         private void OnShortcutFocusOut(FocusOutEvent evt)
@@ -119,6 +120,9 @@ namespace LevelTool
             { Show("글자 조합을 마친 뒤 실행하세요. 입력은 그대로 유지됩니다."); return false; }
             VisualElement focused = root?.focusController?.focusedElement as VisualElement;
             VisualElement input = RestoreMobileCommandInput(out FocusedInputState suspendedFocus) ?? FindCommandInput(focused);
+            // 팝업을 닫은 직후에는 포커스 이동 이벤트보다 저장 콜백이 먼저 실행될 수 있다.
+            if (input == null || !IsPendingAuthoringInput(input))
+                input = editor?.Query<VisualElement>().ToList().FirstOrDefault(IsPendingAuthoringInput) ?? input;
             if (suspendedFocus != null) focused = input;
             if (input == null) return true;
             int integer = 0;
@@ -161,7 +165,13 @@ namespace LevelTool
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
             if (this == null || !isActiveAndEnabled || revision != inputCommitRevision) return;
             committingCommandInput = false;
-            if (commandInputRefreshPending) { commandInputRefreshPending = false; Refresh(); }
+            if (commandInputRefreshPending)
+            {
+                // 한 필드의 확정으로 화면이 재구성돼도 다른 미확정 입력은 메모리에 남긴다.
+                var pending = CaptureRecoveryInputs();
+                commandInputRefreshPending = false; Refresh();
+                RestoreRecoveryInputs(pending);
+            }
             RestoreFocusedInput(snapshot);
         }
     }

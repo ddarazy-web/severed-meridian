@@ -87,7 +87,6 @@ namespace LevelAuthoring.Editor
                 {
                     if (transferRun)
                     {
-                        ToolDraftStore.ValidateView((JObject)typeof(LevelToolScreen).GetMethod("CaptureView", Flags).Invoke(screen, null));
                         exported = new MemoryStream(); fakeTransfer = new FakeTransfer(exported); Set("fileTransfer", fakeTransfer);
                         var commandType = typeof(LevelToolScreen).GetNestedType("ToolCommandId", BindingFlags.NonPublic);
                         object command = Enum.Parse(commandType, "ExportProject");
@@ -121,13 +120,10 @@ namespace LevelAuthoring.Editor
                     expected = screen.Workspace.ExportState();
                     Call("OnApplicationPause", true);
                     JObject record = new ToolDraftStore(directory).Read();
-                    Check(record != null, "pause writes checkpoint immediately");
-                    Check((string)record["workspace"] == expected, "pause preserves current saved history");
-                    Check(record["view"]["pendingInputs"] is JArray drafts && drafts.Count > 0 &&
-                        (string)drafts[0]["text"] == "중단 전 미확정 한글", "pause records uncommitted input separately");
+                    Check(record == null, "pause does not write checkpoint");
                     Call("OnApplicationPause", false);
                     Check(screen.Workspace.ExportState() == expected && input.text == "중단 전 미확정 한글", "resume keeps live document and input");
-                    Debug.Log("PASS pause checkpoint, pending input, saved/current/history, live resume"); Finish(0);
+                    Debug.Log("PASS pause without checkpoint, pending input and in-memory history preserved"); Finish(0);
                 }
             }
             catch (Exception error) { Debug.LogException(error); Finish(1); }
@@ -236,6 +232,10 @@ namespace LevelAuthoring.Editor
                     ((INotifyValueChanged<string>)text).SetValueWithoutNotify("재실행 전 미확정 한글");
                     input.SelectRange(1, 5);
                     expected = screen.Workspace.ExportState();
+                    // 이전 버전에서 생성한 기록을 시험 폴더에 명시적으로 준비한다.
+                    var view = new JObject { ["levelSettingsVisible"] = true,
+                        ["pendingInputs"] = (JArray)typeof(LevelToolScreen).GetMethod("CaptureRecoveryInputs", Flags).Invoke(screen, null) };
+                    new ToolDraftStore(directory).Save(expected, view, 1);
                     Call("OnApplicationPause", true);
                     recoveryRecord = new ToolDraftStore(directory).Read();
                     Check((string)recoveryRecord["workspace"] == expected, "dirty checkpoint retains saved/current/undo/redo");
@@ -256,7 +256,13 @@ namespace LevelAuthoring.Editor
                 if (phase == 3)
                 {
                     if ((bool)Get("busy")) return;
-                    Check(Root.Q<Button>("restore-draft") != null, "fresh screen offers dirty recovery before project replacement");
+                    Check(Root.Q<Button>("restore-draft") == null && screen.Workspace.Session == null, "fresh screen does not automatically read recovery");
+                    Execute("LegacyRecovery"); phase = 31; next = EditorApplication.timeSinceStartup + 1; return;
+                }
+                if (phase == 31)
+                {
+                    if ((bool)Get("busy")) return;
+                    Check(Root.Q<Button>("restore-draft") != null, "explicit command offers recovery");
                     Click("restore-draft"); phase = 4; next = EditorApplication.timeSinceStartup + 1; return;
                 }
                 Check(screen.Workspace.ExportState() == expected, "fresh screen restores exact saved/current/history/selection");
@@ -269,6 +275,11 @@ namespace LevelAuthoring.Editor
                 screen.Workspace.Session.Undo();
                 Check((string)screen.Workspace.Session.Get(levelId).Data["displayName"] == "이전 편집 초안", "recovered undo returns to checkpoint draft");
                 Check(new ContentSnapshotStore(originalFolder).Read().Hash == originalHash, "recovery does not publish the pending draft");
+                Check(JToken.DeepEquals(new ToolDraftStore(directory).Read(), recoveryRecord), "explicit recovery preserves original legacy record");
+                screen.Workspace.SaveCopy(Path.Combine(directory, "manual-copy"));
+                Check(!screen.Workspace.Session.IsDirty && screen.Workspace.Session.CanUndo, "explicit recovered copy saves current JSON and retains Undo");
+                Check(new ContentSnapshotStore(originalFolder).Read().Hash == originalHash &&
+                    JToken.DeepEquals(new ToolDraftStore(directory).Read(), recoveryRecord), "copy save preserves source JSON and legacy recovery");
                 Finish(0); return;
             }
             bool importing = extendedMode.StartsWith("Import", StringComparison.Ordinal);
@@ -392,9 +403,6 @@ namespace LevelAuthoring.Editor
                     Root.focusController?.focusedElement?.Blur();
                     Set("recoveryDirectory", directory);
                     Set("draftStore", new ToolDraftStore(directory));
-                    Set("checkpointSequence", 0L);
-                    Set("checkpointPending", false);
-                    Set("nextCheckpoint", Time.unscaledTime + 1000);
                     Set("recentProjects", null);
                     Check(screen.Workspace.Create(Path.Combine(directory, "project"), LevelToolDocuments.NewProject(), "Discard"), "next isolated suite project");
                     Set("levelSettingsVisible", true); Call("Refresh");

@@ -82,3 +82,17 @@ Screen에는 전체 화면 조정, 흐름·연결·모양 등 일부 UI가 남�
 저장 시 입력 의미를 먼저 검증하고, Flush(true)한 임시 파일의 실제 바이트가 그 입력의 직렬화 바이트와 같은지 확인한다. 동일 자료의 Workspace를 다시 구성하지 않지만 파일 기록 검사와 현재/previous 보호는 유지한다. 큰 v1 이력 자체의 사본/직렬화 비용은 아직 남아 있다.
 
 관련 결과: [복구 성능 1단계 기록](../../Verification/MoonRabbitJunkyard/2026-10-19-level-tool-recovery-performance-stage01.md).
+
+## 2단계: Session 내부 이력 공유와 v1 코덱
+
+게시한 Session 내부 문서 사전과 ContentDocument는 이후 직접 수정하지 않는다. Capture/Fork/saved는 이 내부 자료를 공유하며 State의 선택 배열과 선택 레벨은 별도로 관리한다. Get/Documents/CreateSnapshot과 편집 callback은 외부에서 수정 가능한 사본을 사용한다. Apply는 callback 이후 변경 문서만 새로 복사하고 나머지 문서는 내부 참조를 재사용한다. 이 규칙을 깨는 내부 직접 수정 API를 추가하면 Undo/저장 기준이 함께 오염될 수 있으므로 새로운 편집도 기존 트랜잭션을 사용한다.
+
+Session.WriteState는 v1 필드·순서를 JsonWriter로 직접 출력하고 Workspace는 같은 writer를 사용한다. RestoreObject는 상위에서 파싱한 노드를 읽기만 하며 최초 문서는 복사한다. 복원 한 건 내부에서 ID·kind·내용 전체가 같은 문서만 공유하고, 복원 호출 간 전역 캐시는 두지 않는다. ContentDocument.Data 자체의 공개 계약은 여전히 가변이다.
+
+이 변경은 v1 파일 크기를 줄이지 않는다. 큰 기록의 JObject 파싱과 검증은 여전히 비용이 크다. [2단계 검증 기록](../../Verification/MoonRabbitJunkyard/2026-10-19-level-tool-recovery-performance-stage02.md)의 보호 종료와 미검증 범위를 함께 확인한다.
+
+## 3단계: 실제 복구 경계와 성능 한계
+
+같은 10회 이력의 3회 복구 경로 중앙값은 약 11.13초로 5초 목표에 미달했다. 실제 화면 자동 저장은 UI/Session 캡처를 메인 스레드에서 수행하므로 약 650ms의 정지가 남고, 기존 기록을 교체하는 종료 Flush는 약 11.25초였다. 백그라운드 저장 완료 시간과 메인 스레드 정지를 구분해야 한다. 측정만으로 가변 Session/UI를 작업 스레드에서 접근하도록 바꾸지 않았다.
+
+입력 복원은 Focus의 기본 전체 선택 이후 저장된 선택 범위를 한 번 더 적용한다. 예약된 적용 시 세션/필드/문자열이 바뀌었으면 생략해 다른 작업의 입력을 덮지 않는다. 실제 화면의 한글·잘못된 숫자·선택 범위·전체 UndoRedo 복원 및 관련 저장/변환 회귀 결과는 [3단계 기록](../../Verification/MoonRabbitJunkyard/2026-10-19-level-tool-recovery-performance-stage03.md)을 따른다. 30회 보호 종료, 60회·실기기 미검증과 메모리 목표 미달은 남아 있으며 추가 최적화는 별도 승인 범위다.

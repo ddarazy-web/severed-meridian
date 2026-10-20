@@ -73,8 +73,20 @@ namespace LevelTool
             }, tutorialState);
             editor.SetEnabled(!busy);
             RegisterShortcuts();
+            root.UnregisterCallback<InputEvent>(OnManualInput, TrickleDown.TrickleDown);
+            root.RegisterCallback<InputEvent>(OnManualInput, TrickleDown.TrickleDown);
             Refresh();
-            EnableRecovery().Forget();
+            EnableRecovery();
+            if (suspendedInputs != null)
+            {
+                JArray inputs = suspendedInputs; suspendedInputs = null;
+                var session = Session;
+                root.schedule.Execute(() =>
+                {
+                    if (isActiveAndEnabled && ReferenceEquals(Session, session))
+                    { RestoreRecoveryInputs(inputs); UpdateManualSaveStatus(); }
+                }).ExecuteLater(50);
+            }
             LoadToolSkin().Forget();
         }
 
@@ -125,7 +137,7 @@ namespace LevelTool
             if (committingCommandInput) { commandInputRefreshPending = true; return; }
             DrawIncomingWorkspace();
             UpdatePackStatus();
-            checkpointPending = true;
+
             folderLabel.text = (Session == null ? "작업 폴더 없음" : Session.IsDirty ? "● 미저장" : "저장됨") +
                 (Workspace.IsRecovery ? "  [복구본 · 사본 저장 필요]" : "");
             foreach (string name in new[] { "save", "save-copy", "reload", "undo", "redo", "play", "validate-level", "replay-tutorial" })
@@ -204,6 +216,7 @@ namespace LevelTool
             properties.scrollOffset = propertyOffset; boardScroll.scrollOffset = boardOffset;
             RestoreFocusedInput(focus);
             boardScroll.schedule.Execute(FitBoardToViewport);
+            UpdateManualSaveStatus();
         }
     }
 }

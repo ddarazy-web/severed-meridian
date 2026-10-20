@@ -22,11 +22,12 @@ namespace LevelTool
             try
             {
                 var snapshot = Session.CreateSnapshot();
-                VisualElement panel = OpenModal("프로젝트 ZIP 백업·전달");
+                VisualElement panel = OpenModal("저장 후 ZIP 내보내기");
                 Label summary = new Label($"프로젝트: {Path.GetFileName(Workspace.Folder)}\nID: {snapshot.Project.Id}\n레벨 {snapshot.Documents.Count(value => value.Kind == "level")}개 · 콘텐츠 버전 {snapshot.Project.Data["contentVersion"]}")
                     { name = "export-summary" };
                 summary.style.whiteSpace = WhiteSpace.Normal; panel.Add(summary);
                 Label guide = new Label("현재 편집 내용을 먼저 저장하고, 참조하는 JSON 전체를 ZIP으로 내보냅니다. 이미지·프리팹·로그·과거 백업은 포함하지 않습니다.\nZIP을 USB나 공유 폴더로 옮길 수 있습니다. 클라우드 업로드·동기화 완료는 해당 서비스에서 확인하세요.");
+                guide.text += "\nZIP 위치 선택을 취소해도 먼저 완료한 JSON 저장은 유지됩니다.";
                 guide.style.whiteSpace = WhiteSpace.Normal; panel.Add(guide);
                 Button(panel, "export-project-confirm", "저장 후 ZIP 위치 선택", () =>
                 { CloseModal(); RunProjectTransfer(false).Forget(); });
@@ -59,7 +60,7 @@ namespace LevelTool
             if (sharedTutorialDraft != null) { Show("공유 원본 사본을 적용하거나 버린 뒤 파일 작업을 해 주세요."); return; }
             var previous = Session;
             FocusedInputState focus = commandInputFocus ?? CaptureFocusedInput(); commandInputFocus = null;
-            CheckpointOnInterruption();
+
             var cancellation = new CancellationTokenSource(); fileTransferCancellation = cancellation;
             busy = true; editor.SetEnabled(false); RefreshCommandStates();
             string imported = null;
@@ -72,7 +73,9 @@ namespace LevelTool
                 fileTransfer ??= LevelToolFileTransfer.CreateDefault();
                 if (!import)
                 {
+                    BeginManualSave();
                     await UniTask.RunOnThreadPool(Workspace.Save); saved = true;
+                    CompleteManualSave();
                     savedHash = Session.Revision;
                     cancellation.Token.ThrowIfCancellationRequested();
                     Show("내부 저장 완료 · ZIP 저장 위치를 선택하세요.");
@@ -80,7 +83,7 @@ namespace LevelTool
                 else Show("가져올 프로젝트 ZIP을 선택하세요.");
                 Stream stream = import ? await fileTransfer.OpenProject(cancellation.Token) :
                     await fileTransfer.CreateProject(Path.GetFileName(Workspace.Folder) + "_" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff", CultureInfo.InvariantCulture) + ".zip", cancellation.Token);
-                if (stream == null) { Show(saved ? "전송 취소 · 내부 저장본 유지" : "전송 취소"); return; }
+                if (stream == null) { Show(saved ? "ZIP 전송 취소 · JSON 저장 완료 · 내부 저장본 유지" : "전송 취소"); return; }
                 // Windows 파일 스트림은 실제 경로를 제공한다. SAF 등은 경로를 추정하지 않는다.
                 destination = stream is FileStream file ? file.Name : "시스템 파일 선택기에서 지정한 문서";
                 string savedFolder = Workspace.Folder, projectsRoot = InternalProjectsRoot;
@@ -97,10 +100,11 @@ namespace LevelTool
                 transferred = true;
                 Show(import ? "ZIP 검사·내부 프로젝트 등록 완료" : "ZIP 내보내기 완료 · " + destination + " · 클라우드 동기화는 해당 서비스에서 확인하세요.");
             }
-            catch (OperationCanceledException) { Show((saved ? "전송 취소 · 내부 저장본 유지" : "전송 취소") +
+            catch (OperationCanceledException) { Show((saved ? "ZIP 전송 취소 · JSON 저장 완료 · 내부 저장본 유지" : "전송 취소") +
                 (!import && saved ? " · 생성된 외부 파일이 있다면 불완전할 수 있습니다." : "")); }
             catch (Exception failure)
             {
+                if (manualSaveInProgress) CompleteManualSave(failure);
                 Show((import ? "가져오기 실패: " : saved ? "내보내기 실패 · 내부 저장본 유지: " : "내부 저장 실패 · ZIP 내보내기 실패: ") + failure.Message +
                     (!import && saved ? " · 생성된 외부 파일이 있다면 불완전할 수 있습니다." : ""));
             }
@@ -114,7 +118,7 @@ namespace LevelTool
                 {
                     editor.SetEnabled(modal == null); Refresh();
                     if (ReferenceEquals(previous, Session)) RestoreFocusedInput(focus);
-                    CheckpointOnInterruption();
+
                     if (transferred && imported != null) WithDirty(choice => Workspace.Open(imported, choice));
                 }
             }

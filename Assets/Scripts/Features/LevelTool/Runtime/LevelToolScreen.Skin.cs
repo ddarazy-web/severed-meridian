@@ -57,6 +57,11 @@ namespace LevelTool
                 button.style.whiteSpace = WhiteSpace.NoWrap;
                 if (button.parent == toolbar && !mobileViewportActive) button.style.minWidth = button.text.Length * 14 + 40;
                 button.Add(icon);
+                if (button.name == "save" && mobileViewportActive)
+                {
+                    icon.style.display = DisplayStyle.None;
+                    button.style.paddingLeft = 4;
+                }
             }
         }
     }

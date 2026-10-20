@@ -31,7 +31,7 @@ namespace LevelTool
         {
             var panel = new Foldout { text = "같은 시드로 두 전략 반복 시험", value = true }; inspector.Add(panel);
             panel.Add(new Label("횟수마다 기본·계획 전략을 같은 시드로 실행합니다. 100회는 총 200판입니다. 저장 중에는 다음 판을 기다립니다.") { style = { whiteSpace = WhiteSpace.Normal } });
-            Number(panel, "batch-count", "전략별 시험 횟수", batchCount, value => { batchCount = value; checkpointPending = true; });
+            Number(panel, "batch-count", "전략별 시험 횟수", batchCount, value => { batchCount = value; });
             Button(panel, "batch-new", "현재 레벨로 반복 시험", () => StartToolBatch(false));
             Button(panel, "batch-repeat", "직전 사본·시드 묶음으로 다시", () => StartToolBatch(true));
             Button(panel, "batch-pause", "일시정지", () => { toolBatch?.Pause(); UpdateToolBatchControls(); });

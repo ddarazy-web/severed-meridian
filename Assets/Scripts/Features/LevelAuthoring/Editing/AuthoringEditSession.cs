@@ -36,7 +36,7 @@ namespace LevelAuthoring.Editing
         {
             if (stored == null) throw new ArgumentNullException(nameof(stored));
             current = new State { Documents = stored.Snapshot.Documents.ToDictionary(doc => doc.Id, StringComparer.Ordinal), Cells = Array.Empty<int>() };
-            SelectLevel(levelId); saved = Copy(current.Documents); savedLevelId = levelId; Revision = stored.Hash;
+            SelectLevel(levelId); saved = current.Documents; savedLevelId = levelId; Revision = stored.Hash;
         }
         public ContentDocument Get(string id)
         {
@@ -75,9 +75,12 @@ namespace LevelAuthoring.Editing
             if (draft.Any(pair => pair.Value == null || pair.Key != pair.Value.Id)) throw new ContentFormatException("문서 ID와 저장 키가 다릅니다.");
             if (!draft.TryGetValue(current.LevelId, out ContentDocument level) || level.Kind != "level") throw new ContentFormatException("선택한 레벨을 변경에서 제거할 수 없습니다.");
             if (Equal(draft, current.Documents)) return;
+            // 게시한 내부 문서는 다시 수정하지 않는다. 외부 콜백의 변경 문서만 새로 복사한다.
+            Dictionary<string, ContentDocument> next = draft.ToDictionary(pair => pair.Key, pair =>
+                current.Documents.TryGetValue(pair.Key, out ContentDocument previous) && previous.Kind == pair.Value.Kind &&
+                JToken.DeepEquals(previous.Data, pair.Value.Data) ? previous : Clone(pair.Value), StringComparer.Ordinal);
             undo.Push(Capture()); redo.Clear();
-            // 콜백이 보관한 사본으로 나중에 세션을 변경하지 못하게 한다.
-            current.Documents = Copy(draft);
+            current.Documents = next;
         }
         public void Undo() { if (undo.Count == 0) return; redo.Push(Capture()); current = undo.Pop(); }
         public void Redo() { if (redo.Count == 0) return; undo.Push(Capture()); current = redo.Pop(); }
@@ -85,7 +88,7 @@ namespace LevelAuthoring.Editing
         {
             string levelId = saved.ContainsKey(current.LevelId) ? current.LevelId :
                 savedLevelId;
-            current = new State { Documents = Copy(saved), LevelId = levelId, Cells = Array.Empty<int>() };
+            current = new State { Documents = saved, LevelId = levelId, Cells = Array.Empty<int>() };
             undo.Clear(); redo.Clear();
         }
         public ContentSnapshot CreateSnapshot() => new ContentSnapshot(current.Documents.Values);
@@ -96,9 +99,10 @@ namespace LevelAuthoring.Editing
             StoredContentSnapshot published = repository.Publish(CreateSnapshot(), expectedHash);
             Revision = published.Hash;
             current.Documents = published.Snapshot.Documents.ToDictionary(doc => doc.Id, StringComparer.Ordinal);
-            saved = Copy(current.Documents); savedLevelId = current.LevelId;
+            saved = current.Documents; savedLevelId = current.LevelId;
         }
-        private State Capture() => new State { Documents = Copy(current.Documents), LevelId = current.LevelId, Cells = (int[])current.Cells.Clone() };
+        // 사전과 문서는 게시 이후 불변이며, 변경 가능한 선택 상태만 별도 소유한다.
+        private State Capture() => new State { Documents = current.Documents, LevelId = current.LevelId, Cells = (int[])current.Cells.Clone() };
         private static ContentDocument Clone(ContentDocument doc) => new ContentDocument(doc.Kind, doc.Id, doc.Data);
         private static Dictionary<string, ContentDocument> Copy(Dictionary<string, ContentDocument> docs) => docs.ToDictionary(pair => pair.Key, pair => Clone(pair.Value), StringComparer.Ordinal);
         private static bool Equal(Dictionary<string, ContentDocument> left, Dictionary<string, ContentDocument> right)

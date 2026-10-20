@@ -120,7 +120,6 @@ namespace LevelAuthoring.Editor
                 if (tutorialCheck > 0)
                 {
                     if (tutorialCheck == 2 || tutorialCheck == 3)
-                        typeof(LevelToolScreen).GetField("nextCheckpoint", Flags).SetValue(screen, float.MaxValue);
                     if (tutorialCheck == 8) LevelToolHandoffExercise.Run(screen);
                     else if (tutorialCheck == 7) LevelToolRecordsExercise.Run(screen);
                     else if (tutorialCheck == 6) { LevelToolVisualExercise.Prepare(screen); waitingBotArtwork = true; return; }
@@ -132,7 +131,6 @@ namespace LevelAuthoring.Editor
                     {
                         // UI 조작 검사에서 매 프레임 전체 Undo 복구본을 저장하는 부하는 분리한다.
                         // 화면 해제의 최종 복구 저장은 그대로 수행한다.
-                        typeof(LevelToolScreen).GetField("nextCheckpoint", Flags).SetValue(screen, float.MaxValue);
                         tutorialRoutine = LevelToolTutorialExercise.Run(screen);
                         tutorialFrame = Time.frameCount; deadline = EditorApplication.timeSinceStartup + 240;
                         EditorApplication.QueuePlayerLoopUpdate(); return;

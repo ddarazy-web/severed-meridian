@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using LevelAuthoring.Documents;
 using LevelAuthoring.Editing;
 using LevelAuthoring.Storage;
 using LevelAuthoring.Runtime;
@@ -126,6 +127,31 @@ namespace LevelAuthoring.Editor
                 restoredShared.Apply(sharedTarget.Session);
                 Check((string)sharedTarget.Session.Get(shared.FlowId).Data["steps"][0]["instructions"] == "보존할 안내",
                     "restored shared draft still validates parent and applies");
+                string matrixFolder = Path.Combine(root, "damage-matrix");
+                var matrix = new ToolDraftStore(matrixFolder);
+                Check(matrix.Read() == null && matrix.ReadPrevious() == null, "missing records return no recovery");
+                Directory.CreateDirectory(matrixFolder);
+                string currentPath = Path.Combine(matrixFolder, "draft.json"), previousPath = currentPath + ".previous";
+                File.WriteAllText(previousPath, first);
+                Check((string)matrix.Read()["workspace"] == expected && matrix.ReadWarning != null,
+                    "missing current falls back to valid previous");
+                File.WriteAllText(currentPath, first); File.WriteAllText(previousPath, "broken previous");
+                Check((string)matrix.Read()["workspace"] == expected, "valid current ignores broken previous");
+                File.WriteAllText(currentPath, "broken current");
+                bool bothRejected = false;
+                try { matrix.Read(); } catch (ContentFormatException) { bothRejected = true; }
+                Check(bothRejected && File.ReadAllText(currentPath) == "broken current" && File.ReadAllText(previousPath) == "broken previous",
+                    "both corrupt records remain untouched on rejection");
+                var ordered = new ToolDraftStore(Path.Combine(root, "reordered"));
+                string older = source.ExportState(); source.Session.Redo(); string newer = source.ExportState(); source.Session.Undo();
+                using (var release = new System.Threading.ManualResetEventSlim(false))
+                {
+                    var delayed = System.Threading.Tasks.Task.Run(() => { release.Wait(); ordered.Save(older, new JObject(), 1); });
+                    try { ordered.Save(newer, new JObject(), 2); }
+                    finally { release.Set(); }
+                    delayed.GetAwaiter().GetResult();
+                }
+                Check((string)ordered.Read()["workspace"] == newer, "delayed older save cannot replace latest redo state");
                 Debug.Log("PASS prepared recovery ownership and fallback: " + root); EditorApplication.Exit(0);
             }
             catch (Exception error) { Debug.LogException(error); EditorApplication.Exit(1); }

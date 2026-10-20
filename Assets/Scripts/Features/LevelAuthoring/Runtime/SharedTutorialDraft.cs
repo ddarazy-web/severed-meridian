@@ -54,7 +54,7 @@ namespace LevelAuthoring.Runtime
             var draft = new SharedTutorialDraft
             {
                 FlowId = (string)data["flowId"], LevelId = (string)data["levelId"], baseline = (JObject)original.DeepClone(),
-                Session = AuthoringEditSession.Restore(data["session"].ToString(Formatting.None))
+                Session = AuthoringEditSession.RestoreObject((JObject)data["session"])
             };
             if (draft.Session.SelectedLevelId != draft.LevelId || draft.Session.Get(draft.FlowId).Kind != "tutorialFlow")
                 throw new ContentFormatException("공유 편집 사본의 대상이 잘못됐습니다.");

@@ -8,7 +8,7 @@ namespace LevelTool
 {
     public sealed partial class LevelToolScreen
     {
-        private enum ToolCommandId { Open, NewProject, ImportProject, ExportProject, RecentProjects, Save, SaveCopy, Reload, Backup, Exit, Undo, Redo, Copy, Cut, Paste, Delete, BoardFocus, Play, Validate, ReplayTutorial, Help, Cancel, Windowed, Fullscreen, Manual }
+        private enum ToolCommandId { Open, NewProject, ImportProject, ExportProject, RecentProjects, Save, SaveCopy, Reload, Backup, LegacyRecovery, Exit, Undo, Redo, Copy, Cut, Paste, Delete, BoardFocus, Play, Validate, ReplayTutorial, Help, Cancel, Windowed, Fullscreen, Manual }
         private sealed class ToolCommand
         {
             internal readonly ToolCommandId Id;
@@ -20,13 +20,14 @@ namespace LevelTool
         {
             new ToolCommand(ToolCommandId.Open, "작업 폴더 열기", "Ctrl+O", "미저장 내용을 확인한 뒤 JSON 작업 폴더를 엽니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.ImportProject, "프로젝트 ZIP 가져오기", "", "검사한 ZIP을 새 내부 프로젝트로 등록합니다. 기존 프로젝트는 보존합니다.", "제작 화면"),
-            new ToolCommand(ToolCommandId.ExportProject, "프로젝트 ZIP 내보내기", "", "내부 저장을 마친 후 정상 저장본만 ZIP으로 전송합니다.", "제작 화면"),
+            new ToolCommand(ToolCommandId.ExportProject, "저장 후 ZIP 내보내기", "", "JSON 저장을 마친 후 정상 저장본만 ZIP으로 전송합니다. ZIP 위치 선택을 취소해도 JSON 저장은 유지됩니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.RecentProjects, "최근 내부 프로젝트", "", "최근 성공적으로 연 내부 프로젝트를 선택합니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.NewProject, "새 프로젝트", "", "새 폴더에 프로젝트를 만듭니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.Save, "저장", "Ctrl+S", "현재 입력을 확정하고 작업 폴더에 저장합니다. 조합 중이거나 숫자가 잘못되면 보류합니다.", "제작 화면 · 입력 필드"),
             new ToolCommand(ToolCommandId.SaveCopy, "사본 저장", "Ctrl+Shift+S", "입력을 확정한 뒤 다른 JSON 폴더에 사본을 저장합니다.", "제작 화면 · 입력 필드"),
             new ToolCommand(ToolCommandId.Reload, "다시 읽기", "", "미저장 내용을 확인하고 작업 폴더를 다시 읽습니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.Backup, "이전 정상본", "", "선택한 폴더의 이전 정상본을 엽니다.", "제작 화면"),
+            new ToolCommand(ToolCommandId.LegacyRecovery, "과거 복구 기록 확인", "", "이전 버전의 복구 기록을 직접 확인합니다. 현재 작업과 원본 파일은 선택 전까지 유지됩니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.Exit, "도구 종료", "", "미저장 내용을 확인한 뒤 도구를 종료합니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.Undo, "실행 취소", "Ctrl+Z", "활성 제작 세션의 변경을 되돌립니다. 글 입력 중에는 필드의 기본 실행 취소가 우선합니다.", "제작 화면 · 공유 사본"),
             new ToolCommand(ToolCommandId.Redo, "다시 실행", "Ctrl+Y / Ctrl+Shift+Z", "활성 제작 세션의 변경을 다시 적용합니다. 글 입력 중에는 필드의 기본 동작이 우선합니다.", "제작 화면 · 공유 사본"),
@@ -71,9 +72,9 @@ namespace LevelTool
             else if (tutorialPick != null) reason = "칸 지정을 확정하거나 취소하세요.";
             else if (sharedTutorialDraft != null && (id == ToolCommandId.Open || id == ToolCommandId.NewProject ||
                 id == ToolCommandId.ImportProject || id == ToolCommandId.ExportProject || id == ToolCommandId.RecentProjects ||
-                id == ToolCommandId.Save || id == ToolCommandId.SaveCopy || id == ToolCommandId.Reload || id == ToolCommandId.Backup))
+                id == ToolCommandId.Save || id == ToolCommandId.SaveCopy || id == ToolCommandId.Reload || id == ToolCommandId.Backup || id == ToolCommandId.LegacyRecovery))
                 reason = "공유 원본 사본을 적용하거나 버린 뒤 파일 작업을 해 주세요.";
-            else if (id == ToolCommandId.Open || id == ToolCommandId.NewProject || id == ToolCommandId.Backup || id == ToolCommandId.Exit || id == ToolCommandId.ImportProject || id == ToolCommandId.RecentProjects) return true;
+            else if (id == ToolCommandId.Open || id == ToolCommandId.NewProject || id == ToolCommandId.Backup || id == ToolCommandId.LegacyRecovery || id == ToolCommandId.Exit || id == ToolCommandId.ImportProject || id == ToolCommandId.RecentProjects) return true;
             else if (Session == null) reason = "먼저 작업 폴더를 여세요.";
             else if (id == ToolCommandId.Copy || id == ToolCommandId.Cut || id == ToolCommandId.Paste || id == ToolCommandId.Delete)
             {
@@ -110,8 +111,8 @@ namespace LevelTool
                 else windowController.SetMode(LevelToolWindowMode.Windowed);
                 return true;
             }
-            if (!CommitCommandInput()) return false;
-            if (committingCommandInput)
+            if (!IsNavigationCommand(id) && !CommitCommandInput()) return false;
+            if (!IsNavigationCommand(id) && committingCommandInput)
             {
                 commandAwaitingInput = true;
                 RefreshCommandStates();
@@ -123,13 +124,14 @@ namespace LevelTool
             {
                 case ToolCommandId.Open: ChooseFolder(path => WithDirty(choice => Workspace.Open(path, choice))); break;
                 case ToolCommandId.NewProject: NewProject(); break;
-                case ToolCommandId.Save: Storage(() => Workspace.Save()).Forget(); break;
+                case ToolCommandId.Save: Storage(() => Workspace.Save(), true).Forget(); break;
                 case ToolCommandId.ImportProject: ImportProject(); break;
                 case ToolCommandId.ExportProject: ExportProject(); break;
                 case ToolCommandId.RecentProjects: OpenRecentProjects(); break;
-                case ToolCommandId.SaveCopy: ChooseFolder(path => Storage(() => Workspace.SaveCopy(path)).Forget(), true); break;
-                case ToolCommandId.Reload: WithDirty(choice => Workspace.Reload(choice)); break;
-                case ToolCommandId.Backup: ChooseFolder(path => WithDirty(choice => Workspace.OpenBackup(path, choice))); break;
+                case ToolCommandId.SaveCopy: ChooseFolder(path => Storage(() => Workspace.SaveCopy(path), true).Forget(), true); break;
+                case ToolCommandId.Reload: WithDirtyFor("다시 읽기", choice => Workspace.Reload(choice)); break;
+                case ToolCommandId.Backup: ChooseFolder(path => WithDirtyFor("이전 정상본 열기", choice => Workspace.OpenBackup(path, choice))); break;
+                case ToolCommandId.LegacyRecovery: ReadLegacyRecovery().Forget(); break;
                 case ToolCommandId.Exit: ExitTool(); break;
                 case ToolCommandId.Undo: Edit(() => (sharedTutorialDraft?.Session ?? Session).Undo()); break;
                 case ToolCommandId.Redo: Edit(() => (sharedTutorialDraft?.Session ?? Session).Redo()); break;
@@ -171,8 +173,18 @@ namespace LevelTool
         {
             if (evt.button != 0 || modal != null) return;
             commandInputFocus = CaptureFocusedInput();
+            if (!(evt.currentTarget is Button button) || !commandButtons.TryGetValue(button, out ToolCommandId id) || IsNavigationCommand(id))
+            {
+                // 메뉴와 이탈 동작은 잘못된 입력도 버리거나 취소할 수 있어야 한다.
+                SuspendMobilePanelInput();
+                return;
+            }
             if (!CommitCommandInput()) { commandInputFocus = null; evt.StopImmediatePropagation(); evt.PreventDefault(); }
         }
+
+        private static bool IsNavigationCommand(ToolCommandId id) => id == ToolCommandId.Open ||
+            id == ToolCommandId.NewProject || id == ToolCommandId.ImportProject || id == ToolCommandId.RecentProjects ||
+            id == ToolCommandId.Reload || id == ToolCommandId.Backup || id == ToolCommandId.LegacyRecovery || id == ToolCommandId.Exit;
 
         private void RefreshCommandStates()
         {
@@ -184,6 +196,7 @@ namespace LevelTool
                 bool allowed = CanExecuteCommand(pair.Value, out string reason);
                 pair.Key.SetEnabled(allowed);
                 pair.Key.tooltip = definition.Description + (definition.Gesture.Length == 0 ? "" : " (" + definition.Gesture + ")") +
+                    (pair.Value == ToolCommandId.Save && folderLabel != null ? "\n" + folderLabel.tooltip : "") +
                     (allowed ? "" : "\n사용 불가: " + reason);
             }
             foreach (Button button in removed) commandButtons.Remove(button);
@@ -196,7 +209,7 @@ namespace LevelTool
             string[] labels = { "파일", "편집", "보기", "시험", "도움말" };
             ToolCommandId[][] groups =
             {
-                new[] { ToolCommandId.Open, ToolCommandId.NewProject, ToolCommandId.ImportProject, ToolCommandId.ExportProject, ToolCommandId.RecentProjects, ToolCommandId.Save, ToolCommandId.SaveCopy, ToolCommandId.Reload, ToolCommandId.Backup, ToolCommandId.Exit },
+                new[] { ToolCommandId.Open, ToolCommandId.NewProject, ToolCommandId.ImportProject, ToolCommandId.ExportProject, ToolCommandId.RecentProjects, ToolCommandId.Save, ToolCommandId.SaveCopy, ToolCommandId.Reload, ToolCommandId.Backup, ToolCommandId.LegacyRecovery, ToolCommandId.Exit },
                 new[] { ToolCommandId.Undo, ToolCommandId.Redo, ToolCommandId.Copy, ToolCommandId.Cut, ToolCommandId.Paste, ToolCommandId.Delete, ToolCommandId.Cancel },
                 new[] { ToolCommandId.BoardFocus, ToolCommandId.Windowed, ToolCommandId.Fullscreen },
                 new[] { ToolCommandId.Play, ToolCommandId.Validate, ToolCommandId.ReplayTutorial },
@@ -207,7 +220,7 @@ namespace LevelTool
                 int group = index;
                 Button menuButton = Button(menuBar, "menu-" + names[index], labels[index], () =>
                 {
-                    if (busy || playRoot != null || !CommitCommandInput()) return;
+                    if (busy || playRoot != null) return;
                     VisualElement panel = OpenModal(labels[group]);
                     panel.name = "command-menu"; panel.AddToClassList("command-menu"); commandMenuOpen = true;
                     modal.style.backgroundColor = UnityEngine.Color.clear;
