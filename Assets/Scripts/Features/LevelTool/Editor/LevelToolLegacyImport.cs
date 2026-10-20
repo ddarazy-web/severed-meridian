@@ -43,7 +43,7 @@ namespace LevelTool.Editor
                 level.Data["levelNumber"] = workspace.Session.Documents.Where(doc => doc.Kind == "level").Max(doc => (int)doc.Data["levelNumber"]) + 1;
                 var shared = flow == null ? null : UnityAuthoringCodec.WriteDraft(flow, "tutorialFlow", flowId, Reference, Resource);
                 // 불완전한 사본은 편집 이력에만 추가한다. 수정·검사 전에는 디스크에 공개 저장하지 않는다.
-                workspace.Session.Apply("임시 튜토리얼 독립 사본 가져오기", docs =>
+                workspace.Session.ApplyToDocuments("임시 튜토리얼 독립 사본 가져오기", shared == null ? new[] { levelId } : new[] { levelId, flowId }, docs =>
                 {
                     if (shared != null) docs.Add(flowId, shared);
                     docs.Add(levelId, level);

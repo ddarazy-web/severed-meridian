@@ -21,7 +21,7 @@ namespace LevelAuthoring.Runtime
             edit(level);
             JToken after = graph.Encode(id).Data["tutorial"];
             // 다른 레벨 필드와 변환 시 정규화된 값은 원본 그대로 보존한다.
-            if (!JToken.DeepEquals(before, after)) session.Apply(label, docs => docs[id].Data["tutorial"] = after.DeepClone());
+            if (!JToken.DeepEquals(before, after)) session.ApplyToDocuments(label, new[] { id }, docs => docs[id].Data["tutorial"] = after.DeepClone());
         }
         public static void EditFlow(AuthoringEditSession session, string id, string label, Action<TutorialFlowDefinition> edit)
         {
@@ -30,7 +30,7 @@ namespace LevelAuthoring.Runtime
             JObject before = graph.Encode(id).Data;
             edit(flow);
             var changed = graph.Encode(id);
-            if (!JToken.DeepEquals(before, changed.Data)) session.Apply(label, docs => docs[id] = changed);
+            if (!JToken.DeepEquals(before, changed.Data)) session.ApplyToDocuments(label, new[] { id }, docs => docs[id] = changed);
         }
         public static void EditFlowSteps(AuthoringEditSession session, string flowId, string label, Action<LevelDefinition> edit)
         {
@@ -41,7 +41,7 @@ namespace LevelAuthoring.Runtime
             level.Tutorial.flow = null; level.Tutorial.steps = flow.steps;
             edit(level); flow.steps = level.Tutorial.steps;
             var changed = graph.Encode(flowId);
-            if (!JToken.DeepEquals(before, changed.Data)) session.Apply(label, docs => docs[flowId] = changed);
+            if (!JToken.DeepEquals(before, changed.Data)) session.ApplyToDocuments(label, new[] { flowId }, docs => docs[flowId] = changed);
         }
         public static void Connect(AuthoringEditSession session, string flowId)
         {
@@ -66,7 +66,7 @@ namespace LevelAuthoring.Runtime
             TutorialAuthoringRules.EnsureIds(flow.steps);
             TutorialAuthoringRules.Connect(level, flow);
             var flowDocument = graph.Encode(id); JToken tutorial = graph.Encode(session.SelectedLevelId).Data["tutorial"];
-            session.Apply("공통 구성 생성 및 연결", docs => { docs.Add(id, flowDocument); docs[session.SelectedLevelId].Data["tutorial"] = tutorial.DeepClone(); });
+            session.ApplyToDocuments("공통 구성 생성 및 연결", new[] { id, session.SelectedLevelId }, docs => { docs.Add(id, flowDocument); docs[session.SelectedLevelId].Data["tutorial"] = tutorial.DeepClone(); });
             return id;
         }
         public static string CreateSample(AuthoringEditSession session, string name, string description, int stepIndex)
@@ -82,7 +82,7 @@ namespace LevelAuthoring.Runtime
             sample.steps = TutorialAuthoringRules.CopySteps(stepIndex < 0 ? steps : new List<TutorialStepDefinition> { steps[stepIndex] });
             TutorialAuthoringRules.EnsureIds(sample.steps);
             var document = graph.Encode(id);
-            session.Apply("내 샘플 등록", docs => docs.Add(id, document)); return id;
+            session.ApplyToDocuments("내 샘플 등록", new[] { id }, docs => docs.Add(id, document)); return id;
         }
         public static void ApplySample(AuthoringEditSession session, string id)
         {
@@ -111,7 +111,7 @@ namespace LevelAuthoring.Runtime
         {
             string id = session.SelectedLevelId;
             JToken tutorial = graph.Encode(id).Data["tutorial"];
-            session.Apply(label, docs => docs[id].Data["tutorial"] = tutorial.DeepClone());
+            session.ApplyToDocuments(label, new[] { id }, docs => docs[id].Data["tutorial"] = tutorial.DeepClone());
         }
         private static void RequireName(string name)
         { if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("이름을 입력하세요."); }

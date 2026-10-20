@@ -10,7 +10,15 @@
 
 **Spec:** [목표·완료 조건](../../../Goals/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-20-edit-refresh-performance-goal.md), [기존 측정·회귀 결과](../../../Verification/MoonRabbitJunkyard/2026-10-20-level-tool-manual-save-stage03.md).
 
-상태: 1단계 구현·회귀·측정 완료(2026-10-20). 2·3단계는 미착수이며 최종 100ms 목표는 아직 미달이다. 기존 수동 저장 전환 1~3단계와 구분하는 후속 작업이다.
+상태: 1·2단계 완료(2026-10-20). 이름 편집 정상 3회 중앙값 62~65ms로 100ms 목표를 충족했다. 3단계 대표 조작·반복 편집 검증은 미착수다. 기존 수동 저장 전환 1~3단계와 구분하는 후속 작업이다.
+
+## 현재 이어갈 작업
+
+다음 실행은 [3단계 계획](2026-10-20-edit-refresh-stage03-plan.md)과 [3단계 목표·실행문](../../../Goals/MoonRabbitJunkyard/LevelToolRecoveryPerformance/2026-10-20-edit-refresh-stage03-goal.md)을 따른다. 완료된 단계를 처음부터 재구현하지 않는다.
+
+- 화면 갱신: 기존 1단계 최종 기록에서 편집 중앙값은 221~227ms, 명령·화면 구간은 57~58ms다.
+- 문서 복사: 2단계에서 대상 지정 편집과 호출부 전환·회귀를 완료했다. 데이터 편집 중앙값은 약 14.5ms, 전체 편집은 62~65ms다. [2단계 결과](../../../Verification/MoonRabbitJunkyard/2026-10-20-level-tool-edit-refresh-stage02.md).
+- 최종 판정: 3단계에서 대표 조작·반복 편집·메모리를 확인한다. 단일 최대 지연 247ms와 명시적 저장 약 10초는 남아 있다.
 
 ## 공통 제약
 

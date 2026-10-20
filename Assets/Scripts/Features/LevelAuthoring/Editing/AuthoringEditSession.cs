@@ -22,6 +22,7 @@ namespace LevelAuthoring.Editing
         private string savedLevelId;
         private readonly Stack<State> undo = new Stack<State>();
         private readonly Stack<State> redo = new Stack<State>();
+        private int lastEditCopyCount;
         public string Revision { get; private set; }
         public string SelectedLevelId => current.LevelId;
         public int[] SelectedCells => (int[])current.Cells.Clone();
@@ -68,7 +69,7 @@ namespace LevelAuthoring.Editing
         public void EditLevel(string label, Action<JObject> edit)
         {
             if (edit == null) throw new ArgumentNullException(nameof(edit));
-            Apply(label, docs =>
+            ApplyToDocuments(label, new[] { SelectedLevelId }, docs =>
             {
                 JObject level = docs[SelectedLevelId].Data;
                 if ((int)level["schemaVersion"] != 5) throw new InvalidOperationException("먼저 ‘편집 형식으로 전환’을 눌러 주세요. 이전 형식의 원본은 저장 전까지 바뀌지 않습니다.");
@@ -80,15 +81,44 @@ namespace LevelAuthoring.Editing
         {
             if (string.IsNullOrWhiteSpace(label)) throw new ArgumentException("변경 이름이 필요합니다.", nameof(label));
             if (edit == null) throw new ArgumentNullException(nameof(edit));
-            Dictionary<string, ContentDocument> draft = Copy(current.Documents);
+            lastEditCopyCount = 0;
+            Dictionary<string, ContentDocument> draft = current.Documents.ToDictionary(pair => pair.Key, pair => CopyForEdit(pair.Value), StringComparer.Ordinal);
             edit(draft);
+            CommitDraft(draft);
+        }
+
+        // 문서 ID 목록에는 추가할 ID도 포함한다. 콜백에는 대상의 사본만 주며 삭제는 사전에서 제거한다.
+        public void ApplyToDocuments(string label, IEnumerable<string> documentIds, Action<IDictionary<string, ContentDocument>> edit)
+        {
+            if (string.IsNullOrWhiteSpace(label)) throw new ArgumentException("변경 이름이 필요합니다.", nameof(label));
+            if (documentIds == null) throw new ArgumentNullException(nameof(documentIds));
+            if (edit == null) throw new ArgumentNullException(nameof(edit));
+            var targets = new HashSet<string>(documentIds, StringComparer.Ordinal);
+            if (targets.Any(string.IsNullOrWhiteSpace)) throw new ArgumentException("대상 문서 ID가 필요합니다.", nameof(documentIds));
+            lastEditCopyCount = 0;
+            var draft = targets.Where(current.Documents.ContainsKey).ToDictionary(id => id, id => CopyForEdit(current.Documents[id]), StringComparer.Ordinal);
+            edit(draft);
+            if (draft.Keys.Any(id => !targets.Contains(id))) throw new ContentFormatException("지정하지 않은 문서를 변경에 추가할 수 없습니다.");
+            // 무관한 불변 문서는 공유한다. 예외 시 현재 상태를 바꾸지 않도록 게시 전 별도 사전을 구성한다.
+            var candidate = new Dictionary<string, ContentDocument>(current.Documents, StringComparer.Ordinal);
+            foreach (string id in targets)
+            {
+                if (draft.TryGetValue(id, out ContentDocument document)) candidate[id] = document;
+                else candidate.Remove(id);
+            }
+            CommitDraft(candidate);
+        }
+
+        private void CommitDraft(Dictionary<string, ContentDocument> draft)
+        {
             if (draft.Any(pair => pair.Value == null || pair.Key != pair.Value.Id)) throw new ContentFormatException("문서 ID와 저장 키가 다릅니다.");
             if (!draft.TryGetValue(current.LevelId, out ContentDocument level) || level.Kind != "level") throw new ContentFormatException("선택한 레벨을 변경에서 제거할 수 없습니다.");
             if (Equal(draft, current.Documents)) return;
             // 게시한 내부 문서는 다시 수정하지 않는다. 외부 콜백의 변경 문서만 새로 복사한다.
             Dictionary<string, ContentDocument> next = draft.ToDictionary(pair => pair.Key, pair =>
-                current.Documents.TryGetValue(pair.Key, out ContentDocument previous) && previous.Kind == pair.Value.Kind &&
-                JToken.DeepEquals(previous.Data, pair.Value.Data) ? previous : Clone(pair.Value), StringComparer.Ordinal);
+                current.Documents.TryGetValue(pair.Key, out ContentDocument previous) &&
+                (ReferenceEquals(previous, pair.Value) || previous.Kind == pair.Value.Kind &&
+                JToken.DeepEquals(previous.Data, pair.Value.Data)) ? previous : CopyForEdit(pair.Value), StringComparer.Ordinal);
             undo.Push(Capture()); redo.Clear();
             current.Documents = next;
         }
@@ -114,19 +144,22 @@ namespace LevelAuthoring.Editing
         // 사전과 문서는 게시 이후 불변이며, 변경 가능한 선택 상태만 별도 소유한다.
         private State Capture() => new State { Documents = current.Documents, LevelId = current.LevelId, Cells = (int[])current.Cells.Clone() };
         private static ContentDocument Clone(ContentDocument doc) => new ContentDocument(doc.Kind, doc.Id, doc.Data);
-        private static Dictionary<string, ContentDocument> Copy(Dictionary<string, ContentDocument> docs) => docs.ToDictionary(pair => pair.Key, pair => Clone(pair.Value), StringComparer.Ordinal);
+        private ContentDocument CopyForEdit(ContentDocument doc) { lastEditCopyCount++; return Clone(doc); }
         private static bool Equal(Dictionary<string, ContentDocument> left, Dictionary<string, ContentDocument> right)
         {
+            if (ReferenceEquals(left, right)) return true;
             if (left.Count != right.Count) return false;
             foreach (var pair in left)
             {
                 if (!right.TryGetValue(pair.Key, out ContentDocument other) || pair.Value.Kind != other.Kind) return false;
+                if (ReferenceEquals(pair.Value, other)) continue;
                 JObject a = pair.Value.Data, b = other.Data;
                 // 세대별 파일 경로는 저장소가 정하므로 사용자 편집의 dirty 비교에서 제외한다.
                 if (pair.Value.Kind == "project")
                 {
-                    a = (JObject)a.DeepClone(); b = (JObject)b.DeepClone();
-                    a.Remove("documents"); b.Remove("documents");
+                    if (a.Properties().Count(p => p.Name != "documents") != b.Properties().Count(p => p.Name != "documents") ||
+                        a.Properties().Any(p => p.Name != "documents" && !JToken.DeepEquals(p.Value, b[p.Name]))) return false;
+                    continue;
                 }
                 if (!JToken.DeepEquals(a, b)) return false;
             }

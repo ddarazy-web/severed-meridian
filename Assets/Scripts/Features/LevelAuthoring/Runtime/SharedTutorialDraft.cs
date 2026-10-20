@@ -28,7 +28,7 @@ namespace LevelAuthoring.Runtime
         {
             ValidateParent(parent);
             ContentDocument changed = Session.Get(FlowId);
-            parent.Apply("공유 튜토리얼 원본 적용", docs => docs[FlowId] = changed);
+            parent.ApplyToDocuments("공유 튜토리얼 원본 적용", new[] { FlowId }, docs => docs[FlowId] = changed);
         }
         public ContentSnapshot Preview(AuthoringEditSession parent)
         {

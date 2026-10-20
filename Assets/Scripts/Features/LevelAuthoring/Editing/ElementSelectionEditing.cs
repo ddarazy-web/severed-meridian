@@ -67,7 +67,7 @@ namespace LevelAuthoring.Editing
             if (selected.Length == 0) return;
             IReadOnlyDictionary<string, JObject> definitions = Definitions();
             string levelId = session.SelectedLevelId;
-            session.Apply("선택 요소 삭제", documents =>
+            session.ApplyToDocuments("선택 요소 삭제", new[] { levelId }, documents =>
             {
                 foreach (JObject item in selected)
                     LevelDocumentEditing.Erase(documents[levelId].Data, definitions, layer, (int)item["coordinate"]["row"], (int)item["coordinate"]["column"]);

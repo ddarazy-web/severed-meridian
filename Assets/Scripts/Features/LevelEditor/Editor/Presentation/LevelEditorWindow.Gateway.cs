@@ -75,7 +75,7 @@ namespace Levels.Editor
                     .GroupBy(item => (string)item["path"]).ToDictionary(group => group.Key, group => (string)group.First()["id"]);
                 var changed = UnityAuthoringCodec.WriteDraft(flow, "tutorialFlow", shared.FlowId,
                     jsonFlowOwner.jsonWorkspace.DocumentId, path => resources[path]);
-                shared.Session.Apply("기존 창의 미적용 공유 사본", docs => docs[shared.FlowId] = changed);
+                shared.Session.ApplyToDocuments("기존 창의 미적용 공유 사본", new[] { shared.FlowId }, docs => docs[shared.FlowId] = changed);
                 var packet = JObject.Parse(workspace.ExportState()); packet["sharedTutorialDraft"] = shared.ExportState();
                 return packet.ToString();
             }

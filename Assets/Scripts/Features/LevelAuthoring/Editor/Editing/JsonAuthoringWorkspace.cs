@@ -95,7 +95,7 @@ namespace LevelAuthoring.Editor
                 RefreshResources();
                 var changes = objects.Select(pair => UnityAuthoringCodec.WriteDraft(pair.Value,
                     kinds[pair.Key], pair.Key, DocumentId, ResourceId)).ToArray();
-                Session.Apply(label, docs =>
+                Session.ApplyToDocuments(label, changes.Select(change => change.Id), docs =>
                 {
                     foreach (ContentDocument change in changes)
                     {

@@ -30,7 +30,7 @@ namespace LevelAuthoring.Editing
             var data = new JObject { ["displayName"] = name.Trim(), ["cells"] = cells,
                 ["sourceName"] = level.Data["displayName"]?.DeepClone(), ["sourceLevelNumber"] = level.Data["levelNumber"]?.DeepClone(),
                 ["obstacleHistory"] = new JArray(history ?? Array.Empty<string>()) };
-            session.Apply("맵 모양 등록", docs => docs.Add(id, new ContentDocument("shape", id, data)));
+            session.ApplyToDocuments("맵 모양 등록", new[] { id }, docs => docs.Add(id, new ContentDocument("shape", id, data)));
             return id;
         }
 
@@ -45,7 +45,7 @@ namespace LevelAuthoring.Editing
         public static void DeleteUnused(AuthoringEditSession session, string shapeId)
         {
             if (Usage(session, shapeId).Length != 0) throw new ContentFormatException("현재 작업 폴더의 레벨에서 사용 중인 모양입니다.");
-            session.Apply("미사용 맵 모양 삭제", docs => docs.Remove(shapeId));
+            session.ApplyToDocuments("미사용 맵 모양 삭제", new[] { shapeId }, docs => docs.Remove(shapeId));
         }
 
         public static void ApplyToNewLevel(JObject level, JObject shape)

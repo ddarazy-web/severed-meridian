@@ -30,7 +30,7 @@ namespace Levels.Editor
             var result = new PlacementEditResult();
             var definitions = JsonDefinitions();
             string id = brush.Erase ? null : Elements.Editor.ElementPlacementEditing.BrushDefinition(level.CreateElementCatalog(), brush).Id.Value;
-            jsonWorkspace.Session.Apply("보드 배치", documents =>
+            jsonWorkspace.Session.ApplyToDocuments("보드 배치", new[] { jsonWorkspace.Session.SelectedLevelId }, documents =>
             {
                 JObject document = documents[jsonWorkspace.Session.SelectedLevelId].Data;
                 foreach (BoardCoordinate cell in cells)
@@ -69,7 +69,7 @@ namespace Levels.Editor
         {
             var definitions = JsonDefinitions();
             string id = level.Elements[index].instanceId;
-            jsonWorkspace.Session.Apply("본체 이동", documents => LevelDocumentEditing.Move(
+            jsonWorkspace.Session.ApplyToDocuments("본체 이동", new[] { jsonWorkspace.Session.SelectedLevelId }, documents => LevelDocumentEditing.Move(
                 documents[jsonWorkspace.Session.SelectedLevelId].Data, definitions, id, destination.Row, destination.Column));
             jsonWorkspace.RestoreDisplay(); PersistJsonState();
             operation.text = "본체를 이동했습니다.";

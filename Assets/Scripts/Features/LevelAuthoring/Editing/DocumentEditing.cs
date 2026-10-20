@@ -25,14 +25,14 @@ namespace LevelAuthoring.Editing
             var data = (JObject)template.DeepClone();
             data["displayName"] = name.Trim(); data["levelNumber"] = number;
             // 배치/단계 ID는 레벨 내부 참조다. 기존 SO 복제처럼 내부 참조와 명시 학습 ID는 보존한다.
-            session.Apply("레벨 추가", docs => docs.Add(id, new ContentDocument("level", id, data)));
+            session.ApplyToDocuments("레벨 추가", new[] { id }, docs => docs.Add(id, new ContentDocument("level", id, data)));
             session.SelectLevel(id);
             return id;
         }
         public static void SetField(AuthoringEditSession session, string documentId, string path, JToken value)
         {
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("속성 경로를 지정하세요.", nameof(path));
-            session.Apply("속성 변경: " + path, docs =>
+            session.ApplyToDocuments("속성 변경: " + path, new[] { documentId }, docs =>
             {
                 if (!docs.TryGetValue(documentId, out ContentDocument document)) throw new ContentFormatException("없는 문서입니다.");
                 JToken target = document.Data.SelectToken(path, false);

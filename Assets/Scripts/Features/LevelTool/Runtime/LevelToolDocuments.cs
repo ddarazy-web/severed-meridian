@@ -47,7 +47,7 @@ namespace LevelTool
         public static void UpgradeSelectedLevel(AuthoringEditSession session)
         {
             JObject converted = UpgradePreview(session.Get(session.SelectedLevelId).Data);
-            session.Apply("레벨 편집 형식 전환", docs =>
+            session.ApplyToDocuments("레벨 편집 형식 전환", new[] { session.SelectedLevelId }, docs =>
             {
                 foreach (string field in new[] { "schemaVersion", "elements", "elementSupply" })
                     docs[session.SelectedLevelId].Data[field] = converted[field].DeepClone();
