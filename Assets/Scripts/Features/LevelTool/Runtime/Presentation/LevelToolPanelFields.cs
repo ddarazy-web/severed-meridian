@@ -20,7 +20,7 @@ namespace LevelTool.Presentation
             if (values.Length == 0) { parent.Add(new Label(label + ": 사용 가능한 종류 없음")); return; }
             List<string> choices = labels.Select((text, index) => labels.Count(value => value == text) > 1 ? text + " · " + values[index] : text).ToList();
             DropdownField field = new DropdownField(label, choices, Math.Max(0, Array.IndexOf(values, current))) { name = name };
-            field.RegisterValueChangedCallback(e => changed(values[choices.IndexOf(e.newValue)])); parent.Add(field);
+            field.RegisterValueChangedCallback(e => changed(values[field.choices.IndexOf(e.newValue)])); parent.Add(field);
         }
         public static void Number(VisualElement parent, string name, string label, int current, Action<int> changed)
         {

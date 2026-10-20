@@ -54,6 +54,14 @@ namespace LevelAuthoring.Editing
             new System.Runtime.CompilerServices.ConditionalWeakTable<ContentDocument, DocumentStamp>();
         // 게시 후 불변인 문서의 식별자만 제공한다. 화면 캐시에 내부 JObject 참조를 노출하지 않는다.
         public string[] DocumentIds => current.Documents.Keys.ToArray();
+        public string[] DocumentIdsOfKind(string kind) => current.Documents.Values.Where(doc => doc.Kind == kind).Select(doc => doc.Id).ToArray();
+        // 그래프가 생성된 시점의 불변 게시 문서를 유지하되, 실제 요청한 문서의 사본만 반환한다.
+        internal Func<string, ContentDocument> CaptureDocumentReader()
+        {
+            Dictionary<string, ContentDocument> published = current.Documents;
+            return id => published.TryGetValue(id, out ContentDocument document) ? Clone(document) :
+                throw new ContentFormatException("없는 제작 문서: " + id);
+        }
         public long GetDocumentVersion(string id) => documentStamps.GetValue(current.Documents[id], _ => new DocumentStamp()).Value;
         public void SelectLevel(string id)
         {

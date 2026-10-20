@@ -202,26 +202,34 @@ namespace LevelTool
                     }
                 }
                 foreach (var item in palette.Query<Button>().ToList()) item.EnableInClassList("selected", item.name == brush);
-                string nextBoard = Workspace.Folder + "|" + Session.SelectedLevelId + "|" + boardRevision +
-                    "|" + string.Join(",", Session.SelectedCells) + "|" + layer + "|" + inspectorPage + "|" + cellSize + "|" +
+                string nextBoardState = Workspace.Folder + "|" + Session.SelectedLevelId + "|" + boardRevision +
+                    "|" + string.Join(",", Session.SelectedCells) + "|" + layer + "|" + inspectorPage + "|" +
                     flowTool + "|" + flowFirst + "|" + string.Join(",", flowRoute) + "|" + wireDrawing + "|" + string.Join(",", wireRoute) + "|" + connectionGenerator + "|" + connectionTarget + "|" + selectedConnection +
                     "|" + definitionRevision;
-                if (nextBoard != boardKey)
+                string nextBoard = nextBoardState + "|" + cellSize;
+                // 자동 맞춤은 별도 예약 콜백에서 그린다. 이전 키와 같아도 실제 기하가 다르면 동기화한다.
+                if (nextBoard != boardKey || board.style.width.value.value != cellSize * 9)
                 {
                     boardKey = nextBoard; DrawBoard();
                 }
-                string nextProperties = nextBoard + "|" + propertiesRevision + "|" + selectedShape + "|" + shared + "|" + (tutorialPick != null);
+                string nextProperties = nextBoardState + "|" + propertiesRevision + "|" + selectedShape + "|" + shared + "|" + (tutorialPick != null);
                 if (forceProperties || propertiesKey != nextProperties)
                 {
-                    inspector.Clear();
-                    supplyPanel.Clear(); propertiesPanel.Clear(); tutorialPanel.Clear();
-                    botBoard?.Root.RemoveFromHierarchy(); botBoard?.Dispose(); botBoard = null;
-                    batchBoard?.Root.RemoveFromHierarchy(); batchBoard?.Dispose(); batchBoard = null;
-                    multiBoard?.Root.RemoveFromHierarchy(); multiBoard?.Dispose(); multiBoard = null;
-                    historyBoard?.Root.RemoveFromHierarchy(); historyBoard?.Dispose(); historyBoard = null;
-                    DrawProperties();
+                    bool retainedTutorial = inspectorPage == "튜토리얼" && tutorialPanel.Root.parent == inspector &&
+                        tutorialPick == null && tutorialPanel.TryRefreshInstructions();
+                    if (!retainedTutorial)
+                    {
+                        inspector.Clear();
+                        supplyPanel.Clear(); propertiesPanel.Clear(); tutorialPanel.Clear();
+                        botBoard?.Root.RemoveFromHierarchy(); botBoard?.Dispose(); botBoard = null;
+                        batchBoard?.Root.RemoveFromHierarchy(); batchBoard?.Dispose(); batchBoard = null;
+                        multiBoard?.Root.RemoveFromHierarchy(); multiBoard?.Dispose(); multiBoard = null;
+                        historyBoard?.Root.RemoveFromHierarchy(); historyBoard?.Dispose(); historyBoard = null;
+                        DrawProperties();
+                    }
                     propertiesKey = nextProperties; forceProperties = false;
                 }
+                inspector.Q<Slider>("board-zoom")?.SetValueWithoutNotify(cellSize);
                 DrawTutorialPreview();
             }
             catch (Exception error) { Show(error.Message); }

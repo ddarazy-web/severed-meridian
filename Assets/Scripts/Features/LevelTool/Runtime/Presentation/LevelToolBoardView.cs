@@ -27,6 +27,12 @@ namespace LevelTool.Presentation
         private readonly Func<bool> blocked;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private bool disposed;
+        private AuthoringEditSession displayedSession;
+        private string displayedLevelId, displayedFolder, displayedLayer;
+        private long displayedVersion;
+        private IReadOnlyDictionary<string, JObject> displayedDefinitions;
+        private JObject displayedLevel;
+        private float displayedCellSize;
         public VisualElement Root { get; }
 
         public LevelToolBoardView(VisualElement root, Action<string> show, Action<int> selectVertex, Func<bool> blocked)
@@ -36,16 +42,33 @@ namespace LevelTool.Presentation
             string layer, float cellSize, LevelToolBoardOverlayState overlay)
         {
             if (disposed) throw new ObjectDisposedException(nameof(LevelToolBoardView));
-            Clear();
-            JObject level = LevelToolDocuments.UpgradePreview(session.Get(session.SelectedLevelId).Data);
+            bool reset = !ReferenceEquals(displayedSession, session) || displayedLevelId != session.SelectedLevelId || displayedFolder != folder;
+            if (reset) Clear();
+            long version = session.GetDocumentVersion(session.SelectedLevelId);
+            JObject level = reset || displayedLevel == null || displayedVersion != version
+                ? LevelToolDocuments.UpgradePreview(session.Get(session.SelectedLevelId).Data) : displayedLevel;
+            bool contentChanged = reset || displayedLevel == null || displayedLayer != layer || !ReferenceEquals(displayedDefinitions, definitions) ||
+                new[] { "board", "elements", "flow", "connections", "elementSupply", "catalogId" }
+                    .Any(key => !JToken.DeepEquals(level[key], displayedLevel[key]));
+            bool tilesChanged = contentChanged || displayedLayer != layer;
+            float previousSize = displayedCellSize;
+            displayedSession = session; displayedLevelId = session.SelectedLevelId; displayedFolder = folder;
+            displayedVersion = version; displayedDefinitions = definitions; displayedLevel = level;
+            displayedLayer = layer; displayedCellSize = cellSize;
             Root.style.width = cellSize * 9; Root.style.height = cellSize * 9;
+            int[] selected = session.SelectedCells;
             for (int index = 0; index < 81; index++)
             {
                 bool active = (bool)level["board"]["cells"][index]["isActive"];
-                Label tile = new Label { name = "cell-" + index };
-                tile.AddToClassList("cell"); tile.style.width = cellSize; tile.style.height = cellSize;
+                Label tile = Root.Q<Label>("cell-" + index);
+                if (tile == null)
+                {
+                    tile = new Label { name = "cell-" + index }; tile.AddToClassList("cell"); Root.Insert(index, tile);
+                }
+                tile.style.width = cellSize; tile.style.height = cellSize;
+                tile.EnableInClassList("selected", selected.Contains(index));
+                if (!tilesChanged) continue;
                 tile.EnableInClassList("inactive", !active);
-                tile.EnableInClassList("selected", session.SelectedCells.Contains(index));
                 JObject item = level["elements"].OfType<JObject>().FirstOrDefault(value =>
                 {
                     if ((string)value["layer"] != layer) return false;
@@ -55,17 +78,37 @@ namespace LevelTool.Presentation
                 });
                 tile.text = active ? "·" : "×";
                 tile.tooltip = "행 " + (index / 9 + 1) + " · 열 " + (index % 9 + 1) + (item == null ? "" : "\n" + item["definitionId"]);
-                Root.Add(tile);
             }
+            Root.Q("flow-overlay")?.RemoveFromHierarchy();
+            Root.Q("connection-overlay")?.RemoveFromHierarchy();
             DrawFlowOverlay(level, cellSize, overlay);
             DrawConnectionOverlay(level, cellSize, overlay);
-            DrawArtwork(level, session, folder, definitions, cellSize).Forget();
+            if (contentChanged)
+            {
+                foreach (VisualElement element in Root.Children().Where(child => child.ClassListContains("board-artwork")).ToArray()) element.RemoveFromHierarchy();
+                DrawArtwork(level, session, folder, definitions, cellSize).Forget();
+            }
+            else if (previousSize > 0 && previousSize != cellSize)
+            {
+                float scale = cellSize / previousSize;
+                foreach (VisualElement element in Root.Children().Where(child => child.ClassListContains("board-artwork")))
+                {
+                    element.style.left = element.style.left.value.value * scale;
+                    element.style.top = element.style.top.value.value * scale;
+                    if (element is Image)
+                    {
+                        element.style.width = element.style.width.value.value * scale;
+                        element.style.height = element.style.height.value.value * scale;
+                    }
+                }
+            }
         }
 
         public void Clear()
         {
             artworkRevision++;
             Root.Clear();
+            displayedLevel = null; displayedSession = null; displayedDefinitions = null;
         }
 
         public void Dispose()
@@ -74,6 +117,7 @@ namespace LevelTool.Presentation
             disposed = true; artworkRevision++;
             lifetime.Cancel(); lifetime.Dispose(); artwork?.Dispose(); artwork = null;
             Root.Clear();
+            displayedLevel = null; displayedSession = null; displayedDefinitions = null;
         }
     }
 }

@@ -69,6 +69,7 @@ namespace LevelAuthoring.Editor
                     (string)screen.Workspace.Session.Get(screen.Workspace.Session.SelectedLevelId).Data["displayName"] == "갱신 검사", "version lookup preserves public copy isolation");
                 Call("Edit", (Action)(() => screen.Workspace.Session.SelectCells(new[] { 40 })));
                 Check(ReferenceEquals(definitions, Get("definitions")), "selection reuses definitions");
+                Check(ReferenceEquals(firstBoard, board[0]), "selection preserves existing board cells");
                 typeof(LevelToolScreen).GetField("brush", Flags).SetValue(screen, "supply.normal.fixed");
                 Call("Refresh");
                 Check(ReferenceEquals(definitions, Get("definitions")), "brush reuses definitions");
@@ -95,7 +96,11 @@ namespace LevelAuthoring.Editor
                 Check(!board.Q("cell-40").ClassListContains("inactive"), "Undo restores board appearance");
                 Check((bool)typeof(LevelToolScreen).GetMethod("ValidationIsCurrent", Flags).Invoke(screen, null), "Undo restores validation currency");
                 typeof(LevelToolScreen).GetField("cellSize", Flags).SetValue(screen, 64f);
+                VisualElement beforeZoom = board.Q("cell-40");
+                VisualElement propertiesBeforeZoom = properties[0];
                 Call("Refresh");
+                Check(ReferenceEquals(beforeZoom, board.Q("cell-40")), "zoom preserves existing board cells");
+                Check(ReferenceEquals(propertiesBeforeZoom, properties[0]), "zoom preserves property inputs");
                 Check(screen.Workspace.Session.GetDocumentVersion(screen.Workspace.Session.SelectedLevelId) == version, "zoom does not edit document");
                 screen.Workspace.Save();
                 screen.Workspace.Reload("Discard");

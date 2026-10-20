@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LevelAuthoring.Documents;
+using LevelAuthoring.Editing;
 using Levels;
 using Tutorial;
 using UnityEngine;
@@ -20,6 +21,7 @@ namespace LevelAuthoring.Runtime
             { "tutorialFlow", typeof(TutorialFlowDefinition) }, { "tutorialSample", typeof(TutorialUserSampleDefinition) }
         };
         private readonly Dictionary<string, ContentDocument> documents;
+        private Func<string, ContentDocument> readDocument;
         private readonly Dictionary<string, ScriptableObject> objects = new Dictionary<string, ScriptableObject>(StringComparer.Ordinal);
         private readonly HashSet<string> resolving = new HashSet<string>(StringComparer.Ordinal);
         private readonly List<ScriptableObject> owned = new List<ScriptableObject>();
@@ -34,10 +36,24 @@ namespace LevelAuthoring.Runtime
             resourceIds = resources.GroupBy(pair => pair.Value, StringComparer.Ordinal).ToDictionary(group => group.Key, group => group.First().Key, StringComparer.Ordinal);
         }
 
+        // 임시 편집 객체는 그래프별로 소유한다. 게시 문서의 사본은 참조를 따라갈 때만 읽는다.
+        public AuthoringObjectGraph(AuthoringEditSession session)
+        {
+            readDocument = session.CaptureDocumentReader();
+            ContentDocument project = readDocument(session.DocumentIdsOfKind("project").Single());
+            documents = new Dictionary<string, ContentDocument>(StringComparer.Ordinal) { { project.Id, project } };
+            resources = project.Data["resources"].ToDictionary(item => (string)item["id"], item => (string)item["path"], StringComparer.Ordinal);
+            resourceIds = resources.GroupBy(pair => pair.Value, StringComparer.Ordinal).ToDictionary(group => group.Key, group => group.First().Key, StringComparer.Ordinal);
+        }
+
         public ScriptableObject Resolve(string id)
         {
             if (objects.TryGetValue(id, out var value)) return value;
-            if (!documents.TryGetValue(id, out var document)) throw new ContentFormatException("없는 제작 문서: " + id);
+            if (!documents.TryGetValue(id, out var document))
+            {
+                if (readDocument == null) throw new ContentFormatException("없는 제작 문서: " + id);
+                document = readDocument(id); documents.Add(id, document);
+            }
             if (!Types.TryGetValue(document.Kind, out Type type)) throw new ContentFormatException("실행용 객체로 변환할 수 없는 문서 종류: " + document.Kind);
             if (!resolving.Add(id)) throw new ContentFormatException("제작 문서 참조가 순환합니다: " + id);
             try
@@ -68,7 +84,7 @@ namespace LevelAuthoring.Runtime
                     if (Application.isPlaying) Object.Destroy(owned[index]);
                     else Object.DestroyImmediate(owned[index]);
                 }
-            owned.Clear(); objects.Clear();
+            owned.Clear(); objects.Clear(); documents.Clear(); readDocument = null;
         }
     }
 }

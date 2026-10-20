@@ -27,15 +27,16 @@ namespace LevelTool.Presentation
             {
                 string catalogId = (string)level["catalogId"];
                 string visualId = catalogId == null ? null : (string)session.Get(catalogId).Data["visualId"];
+                JToken resources = session.Get(session.DocumentIdsOfKind("project").Single()).Data["resources"];
                 string key = folder + "|" + session.SelectedLevelId + "|" +
                     (visualId == null ? "builtin" : session.Get(visualId).Data.ToString()) + "|" +
-                    session.Documents.First(doc => doc.Kind == "project").Data["resources"];
+                    resources;
                 if (artwork == null || artworkKey != key)
                 {
                     ElementVisualCatalog catalog = LegacyElementVisuals.Catalog;
                     if (visualId != null)
                     {
-                        Dictionary<string, string> paths = session.Documents.First(doc => doc.Kind == "project").Data["resources"]
+                        Dictionary<string, string> paths = resources
                             .ToDictionary(item => (string)item["id"], item => (string)item["path"]);
                         List<ScriptableObject> owned = new List<ScriptableObject>();
                         try
@@ -67,6 +68,8 @@ namespace LevelTool.Presentation
                 try { await owner.PrepareEffectsAsync(frames.Select(value => value.frame.Path), lifetime.Token); }
                 catch (Exception error) { if (revision == artworkRevision) show("이미지 로드 실패: " + error.Message); }
                 if (disposed || revision != artworkRevision) return;
+                // 로드 대기 중 사용자가 확대/축소했으면 현재 배율에 맞춰 표시한다.
+                cellSize = displayedCellSize;
                 foreach (var value in frames.OrderBy(value => value.frame.Order))
                 {
                     try
@@ -78,6 +81,7 @@ namespace LevelTool.Presentation
                         float width = side * sprite.rect.width / Mathf.Max(sprite.rect.width, sprite.rect.height);
                         float height = side * sprite.rect.height / Mathf.Max(sprite.rect.width, sprite.rect.height);
                         Image image = new Image { sprite = sprite, scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
+                        image.AddToClassList("board-artwork");
                         image.style.position = Position.Absolute;
                         image.style.left = ((int)value.item["coordinate"]["column"] + logicalSize / 2) * cellSize + frame.Offset.x * side - width * frame.Pivot.x;
                         image.style.top = ((int)value.item["coordinate"]["row"] + logicalSize / 2) * cellSize - frame.Offset.y * side - height * (1 - frame.Pivot.y);
@@ -91,6 +95,7 @@ namespace LevelTool.Presentation
                 {
                     int row = (int)source["coordinate"]["row"], column = (int)source["coordinate"]["column"];
                     Label marker = new Label("↓") { name = "source-" + (row * 9 + column), pickingMode = PickingMode.Ignore };
+                    marker.AddToClassList("board-artwork");
                     marker.style.position = Position.Absolute; marker.style.left = (column + .75f) * cellSize; marker.style.top = row * cellSize;
                     marker.style.color = new Color(.5f, 1f, .85f); marker.style.backgroundColor = new Color(.05f, .12f, .18f, .85f);
                     Root.Add(marker);

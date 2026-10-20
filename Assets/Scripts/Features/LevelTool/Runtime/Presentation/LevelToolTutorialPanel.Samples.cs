@@ -30,7 +30,7 @@ namespace LevelTool.Presentation
                 state.SelectedSample = TutorialDraftEditing.CreateSample(Session, state.SampleName, state.SampleDescription, Math.Max(0, Math.Min(tutorialStep, stepCount - 1))))).SetEnabled(stepCount > 0);
             Button(samples, "tutorial-save-all-sample", "전체 진행을 내 샘플로 등록", () => Edit(() =>
                 state.SelectedSample = TutorialDraftEditing.CreateSample(Session, state.SampleName, state.SampleDescription, -1))).SetEnabled(stepCount > 0);
-            var library = Session.Documents.Where(doc => doc.Kind == "tutorialSample").ToArray();
+            var library = Session.DocumentIdsOfKind("tutorialSample").Select(Session.Get).ToArray();
             if (!library.Any(doc => doc.Id == state.SelectedSample)) state.SelectedSample = library.FirstOrDefault()?.Id;
             Choice(samples, "tutorial-user-sample", "내 샘플", library.Select(doc => doc.Id).ToArray(), library.Select(doc => (string)doc.Data["displayName"]).ToArray(),
                 state.SelectedSample, value => { state.SelectedSample = value; Refresh(); });

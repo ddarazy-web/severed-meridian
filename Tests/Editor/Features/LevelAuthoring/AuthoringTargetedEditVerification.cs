@@ -29,6 +29,22 @@ namespace LevelAuthoring.Editor
                 var session = workspace.Session;
                 string level = session.SelectedLevelId;
                 string project = session.Documents.Single(doc => doc.Kind == "project").Id;
+                var graphConstructor = typeof(LevelAuthoring.Runtime.AuthoringObjectGraph).GetConstructor(new[] { typeof(AuthoringEditSession) });
+                Check(graphConstructor != null, "graph supports lazy isolated session reads");
+                var graphSession = session.Fork();
+                using (var graph = (LevelAuthoring.Runtime.AuthoringObjectGraph)graphConstructor.Invoke(new object[] { graphSession }))
+                {
+                    var loaded = (System.Collections.IDictionary)typeof(LevelAuthoring.Runtime.AuthoringObjectGraph)
+                        .GetField("documents", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(graph);
+                    Check(loaded.Count == 1, "graph construction copies only project resources");
+                    string capturedName = (string)graphSession.Get(level).Data["displayName"];
+                    graphSession.EditLevel("그래프 이후 편집", data => data["displayName"] = "새 게시 문서");
+                    var resolved = (Levels.LevelDefinition)graph.Resolve(level);
+                    Check(resolved.name == capturedName, "lazy graph retains creation-time document version");
+                    string nameBefore = (string)session.Get(level).Data["displayName"];
+                    resolved.name = "격리된 임시 이름";
+                    Check((string)session.Get(level).Data["displayName"] == nameBefore, "graph draft does not mutate session");
+                }
                 string originalName = (string)session.Get(level).Data["displayName"];
                 long projectVersion = session.GetDocumentVersion(project), levelVersion = session.GetDocumentVersion(level);
                 JObject retained = null;

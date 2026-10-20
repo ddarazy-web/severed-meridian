@@ -6,6 +6,7 @@ using Board;
 using LevelAuthoring.Editing;
 using LevelAuthoring.Runtime;
 using Levels;
+using Newtonsoft.Json.Linq;
 using Tutorial;
 using UnityEngine.UIElements;
 
@@ -38,6 +39,10 @@ namespace LevelTool.Presentation
         private readonly LevelToolTutorialConditionsPanel conditionsPanel;
         private int revision;
         private bool disposed;
+        private AuthoringEditSession instructionSession;
+        private string instructionDocument;
+        private int instructionStep;
+        private JObject instructionSnapshot;
         public VisualElement Root { get; } = new VisualElement();
         private VisualElement inspector => Root;
         private AuthoringEditSession Session => actions.Session();
@@ -57,12 +62,45 @@ namespace LevelTool.Presentation
             conditionsPanel = new LevelToolTutorialConditionsPanel(() => sharedTutorialDraft?.Session ?? Session, EditTutorial,
                 SelectedCoordinates, (mode, condition) => BeginTutorialPick(mode, condition), () => state.NewCondition, value => state.NewCondition = value);
         }
-        public void Clear() { revision++; conditionsPanel.Clear(); Root.Clear(); }
+        public void Clear() { revision++; conditionsPanel.Clear(); Root.Clear(); instructionSnapshot = null; instructionSession = null; }
         public void Dispose() { if (disposed) return; disposed = true; Clear(); conditionsPanel.Dispose(); }
         public void RefreshView()
         {
             if (disposed) throw new ObjectDisposedException(nameof(LevelToolTutorialPanel));
             Clear(); DrawTutorial();
+            instructionSession = sharedTutorialDraft?.Session ?? Session;
+            instructionDocument = sharedTutorialDraft?.FlowId ?? Session.SelectedLevelId;
+            instructionStep = tutorialStep;
+            instructionSnapshot = instructionSession.Get(instructionDocument).Data;
+        }
+        // 안내문만 바뀐 경우 구조와 콜백 대상은 그대로다. 입력과 단계 이름만 동기화한다.
+        public bool TryRefreshInstructions()
+        {
+            TextField input = Root.Q<TextField>("tutorial-instructions");
+            AuthoringEditSession session = sharedTutorialDraft?.Session ?? Session;
+            string id = sharedTutorialDraft?.FlowId ?? Session.SelectedLevelId;
+            if (input == null || instructionSnapshot == null || !ReferenceEquals(session, instructionSession) ||
+                instructionDocument != id || instructionStep != tutorialStep) return false;
+            JObject current = session.Get(id).Data;
+            JArray steps = (JArray)(sharedTutorialDraft == null ? current["tutorial"]?["steps"] : current["steps"]);
+            JObject comparable = (JObject)instructionSnapshot.DeepClone();
+            JArray previous = (JArray)(sharedTutorialDraft == null ? comparable["tutorial"]?["steps"] : comparable["steps"]);
+            if (steps == null || previous == null || steps.Count != previous.Count || tutorialStep < 0 || tutorialStep >= steps.Count) return false;
+            bool changed = false;
+            for (int index = 0; index < steps.Count; index++)
+            {
+                changed |= !JToken.DeepEquals(previous[index]["instructions"], steps[index]["instructions"]);
+                previous[index]["instructions"] = steps[index]["instructions"]?.DeepClone();
+            }
+            if (!changed || !JToken.DeepEquals(comparable, current)) return false;
+            input.SetValueWithoutNotify((string)steps[tutorialStep]["instructions"] ?? "");
+            DropdownField picker = Root.Q<DropdownField>("tutorial-step");
+            picker.choices = steps.Select((step, index) => (index + 1) + ". " + (string)step["instructions"]).ToList();
+            picker.SetValueWithoutNotify(picker.choices[tutorialStep]);
+            Label draftStatus = Root.Q<Label>("tutorial-draft-status");
+            if (draftStatus != null) draftStatus.text = "공유 원본의 편집 사본" + (sharedTutorialDraft.IsChanged ? " · 미적용" : "");
+            instructionSnapshot = current;
+            return true;
         }
         private void DrawTutorialConditions(LevelDefinition level, TutorialStepDefinition step)
         {
@@ -81,7 +119,7 @@ namespace LevelTool.Presentation
         {
             TutorialToggle(inspector, "tutorial-preview", "보드 강조 미리보기", tutorialPreview, value => { tutorialPreview = value; Refresh(); });
             inspector.Add(new Label("밝은 칸은 강조 대상입니다. 후속 단계의 이동·생성 후 위치는 재생 검사와 게임 시험에서 확인하세요.") { style = { whiteSpace = WhiteSpace.Normal } });
-            using var graph = new AuthoringObjectGraph((sharedTutorialDraft?.Session ?? Session).Documents);
+            using var graph = new AuthoringObjectGraph(sharedTutorialDraft?.Session ?? Session);
             var level = (LevelDefinition)graph.Resolve(Session.SelectedLevelId);
             if (sharedTutorialDraft != null)
             {

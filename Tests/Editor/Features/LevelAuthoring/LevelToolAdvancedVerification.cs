@@ -119,7 +119,6 @@ namespace LevelAuthoring.Editor
                 typeof(LevelToolScreen).GetMethod("Refresh", Flags).Invoke(screen, null);
                 if (tutorialCheck > 0)
                 {
-                    if (tutorialCheck == 2 || tutorialCheck == 3)
                     if (tutorialCheck == 8) LevelToolHandoffExercise.Run(screen);
                     else if (tutorialCheck == 7) LevelToolRecordsExercise.Run(screen);
                     else if (tutorialCheck == 6) { LevelToolVisualExercise.Prepare(screen); waitingBotArtwork = true; return; }

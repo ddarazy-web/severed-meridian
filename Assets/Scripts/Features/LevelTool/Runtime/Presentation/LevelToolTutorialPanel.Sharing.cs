@@ -12,7 +12,7 @@ namespace LevelTool.Presentation
     {
         private bool DrawTutorialSharing(LevelDefinition level)
         {
-            var flows = Session.Documents.Where(doc => doc.Kind == "tutorialFlow").ToArray();
+            var flows = Session.DocumentIdsOfKind("tutorialFlow").Select(Session.Get).ToArray();
             string current = (string)Session.Get(Session.SelectedLevelId).Data["tutorial"]["flowId"];
             if (!flows.Any(doc => doc.Id == state.SelectedFlow)) state.SelectedFlow = current ?? flows.FirstOrDefault()?.Id;
             var sharing = new Foldout { text = "공통 구성 · 같은 진행을 여러 레벨에서 사용", value = true }; inspector.Add(sharing);
@@ -27,7 +27,7 @@ namespace LevelTool.Presentation
             }
             sharing.Add(new Label("현재: " + level.Tutorial.flow.name + "\n흐름과 안내는 공유하며, 아래 레벨별 설정은 이 레벨에만 적용합니다.") { style = { whiteSpace = WhiteSpace.Normal } });
             var usage = new Foldout { text = "이 구성을 사용하는 레벨", name = "tutorial-flow-usage", value = false }; sharing.Add(usage);
-            foreach (var doc in Session.Documents.Where(doc => doc.Kind == "level" && (string)doc.Data["tutorial"]?["flowId"] == current))
+            foreach (var doc in Session.DocumentIdsOfKind("level").Select(Session.Get).Where(doc => (string)doc.Data["tutorial"]?["flowId"] == current))
                 usage.Add(new Label(doc.Data["levelNumber"] + ". " + doc.Data["displayName"]));
             Button(sharing, "tutorial-edit-flow", "공유 원본 사본 편집", actions.BeginSharedDraft);
             Button(sharing, "tutorial-detach", "현재 값으로 독립 복사", () => Edit(() => TutorialDraftEditing.Detach(Session)));
@@ -37,7 +37,7 @@ namespace LevelTool.Presentation
         }
         private void DrawSharedDraft(TutorialFlowDefinition flow)
         {
-            inspector.Add(new Label("공유 원본의 편집 사본" + (sharedTutorialDraft.IsChanged ? " · 미적용" : "")));
+            inspector.Add(new Label("공유 원본의 편집 사본" + (sharedTutorialDraft.IsChanged ? " · 미적용" : "")) { name = "tutorial-draft-status" });
             inspector.Add(new Label("아래 변경은 ‘원본 적용’ 전까지 다른 레벨에 반영되지 않습니다. 위 실행 취소/다시 실행도 이 사본에 적용됩니다. 새 설정을 선언했다면 원본 적용 후 레벨 설정 목록을 동기화하세요.") { style = { whiteSpace = WhiteSpace.Normal } });
             Button(inspector, "tutorial-apply-flow", "원본 적용", ApplySharedTutorialDraft);
             Button(inspector, "tutorial-cancel-flow", "사본 버리고 돌아가기", actions.DiscardSharedDraft);

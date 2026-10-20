@@ -40,9 +40,14 @@ namespace LevelAuthoring.Editor
         private static ElementSelectionEditing measuredClipboard;
         private static SharedTutorialDraft measuredShared;
         private static VisualElement preservedBoard, preservedMaterial, preservedInput;
+        private static VisualElement preservedTutorialInput;
+        private static Image preservedArtwork;
+        private static float previousArtworkWidth;
+        private static float previousArtworkStyle, previousCellSize, previousCellWidth;
         private static Vector2 preservedScroll;
         private static long unchangedVersion;
         private static bool focusedRefreshOnly;
+        private static string singleScenario;
         private static AuthoringEditSession EditSession => screen.Workspace.Session;
         private static VisualElement ExtendedRoot => screen.GetComponent<UIDocument>().rootVisualElement;
         private static object Field(string name) => typeof(LevelToolScreen).GetField(name, Flags).GetValue(screen);
@@ -50,11 +55,23 @@ namespace LevelAuthoring.Editor
 
         public static void RunRepresentative()
         {
-            focusedRefreshOnly = false; BeginRepresentative();
+            singleScenario = null; focusedRefreshOnly = false; BeginRepresentative();
         }
         public static void RunFocusedRefresh()
         {
-            focusedRefreshOnly = true; BeginRepresentative();
+            singleScenario = null; focusedRefreshOnly = true; BeginRepresentative();
+        }
+        public static void RunPreviewRefresh()
+        {
+            singleScenario = "tutorial-preview-zoom"; focusedRefreshOnly = true; BeginRepresentative();
+        }
+        public static void RunZoomRefresh()
+        {
+            singleScenario = "zoom"; focusedRefreshOnly = true; BeginRepresentative();
+        }
+        public static void RunTutorialCosts()
+        {
+            singleScenario = "tutorial-costs"; focusedRefreshOnly = true; BeginRepresentative();
         }
         private static void BeginRepresentative()
         {
@@ -118,7 +135,7 @@ namespace LevelAuthoring.Editor
                         ["fingerprint"] = ContentSnapshotFingerprint.Compute(source), ["mainThreadAllocatedBytes"] = JValue.CreateNull(),
                         ["readyDefinition"] = "two subsequent Editor updates with attached panel, valid board geometry and current display document; not GPU completion" });
                     BuildScenarios();
-                    if (focusedRefreshOnly) scenarios.RemoveAll(value => value.Name != "focus-scroll-preservation");
+                    if (focusedRefreshOnly) scenarios.RemoveAll(value => value.Name != (singleScenario ?? "focus-scroll-preservation"));
                     extendedPhase = 1; sampleWatch.Restart(); return;
                 }
                 if (extendedPhase == 1)
@@ -211,6 +228,43 @@ namespace LevelAuthoring.Editor
 
         private static void BuildScenarios()
         {
+            if (singleScenario == "tutorial-costs")
+            {
+                for (int index = 0; index < 3; index++)
+                    scenarios.Add(new Scenario { Name = "tutorial-costs",
+                        Prepare = () => { SetField("inspectorPage", "튜토리얼"); Call("Refresh"); unchangedVersion = EditSession.GetDocumentVersion(measuredLevel); },
+                        Action = () =>
+                        {
+                            var costs = new JObject();
+                            Stopwatch timer = Stopwatch.StartNew();
+                            using (var graph = new AuthoringObjectGraph(EditSession.Documents))
+                            {
+                                graph.Resolve(measuredLevel); costs["fullGraphMs"] = timer.Elapsed.TotalMilliseconds;
+                            }
+                            timer.Restart();
+                            using (var graph = new AuthoringObjectGraph(EditSession))
+                            {
+                                graph.Resolve(measuredLevel); costs["scopedGraphMs"] = timer.Elapsed.TotalMilliseconds;
+                                timer.Restart(); graph.Encode(measuredLevel); costs["encodeMs"] = timer.Elapsed.TotalMilliseconds;
+                            }
+                            timer.Restart();
+                            ((LevelTool.Presentation.LevelToolTutorialPanel)Field("tutorialPanel")).RefreshView();
+                            costs["panelMs"] = timer.Elapsed.TotalMilliseconds;
+                            SetField("tutorialPreview", true); SetField("tutorialPreviewKey", null);
+                            timer.Restart(); Call("DrawTutorialPreview"); costs["previewMs"] = timer.Elapsed.TotalMilliseconds;
+                            pendingMeasurement["phaseMs"] = costs;
+                        },
+                        Verify = () => ExtendedCheck(!EditSession.IsDirty && EditSession.GetDocumentVersion(measuredLevel) == unchangedVersion,
+                            "phase measurement does not edit source") });
+                return;
+            }
+            scenarios.Add(ArtworkRaceScenario());
+            scenarios.Add(new Scenario { Name = "tutorial-preview-zoom", Prepare = () =>
+                { SetField("inspectorPage", "튜토리얼"); SetField("tutorialPreview", true); Call("Refresh");
+                    preservedBoard = ExtendedRoot.Q("tutorial-preview-overlay"); },
+                Action = () => { SetField("cellSize", 64f); Call("Refresh"); },
+                Verify = () => { ExtendedCheck(preservedBoard != null && ReferenceEquals(preservedBoard, ExtendedRoot.Q("tutorial-preview-overlay")), "preview zoom preserves overlay");
+                    ExtendedCheck(Math.Abs(preservedBoard.worldBound.width - 576) < 1, "preview zoom updates overlay geometry"); } });
             for (int run = 0; run < 3; run++)
             {
                 scenarios.Add(new Scenario { Name = "cell-place", Prepare = () => ChangeLevel(level => LevelDocumentEditing.Erase(level, measuredDefinitions, "Block", 4, 4)),
@@ -227,9 +281,10 @@ namespace LevelAuthoring.Editor
                     Verify = () => { ExtendedCheck(ExtendedRoot.Q<IntegerField>("scrapTarget").value == 7, "supply visible");
                         Call("Edit", (Action)(() => EditSession.Undo())); Call("Edit", (Action)(() => EditSession.Redo()));
                         ExtendedCheck(ExtendedRoot.Q<IntegerField>("scrapTarget").value == 7, "supply Redo visible"); } });
-                scenarios.Add(new Scenario { Name = "tutorial", Prepare = () => { SetField("inspectorPage", "튜토리얼"); Call("Refresh"); },
+                scenarios.Add(new Scenario { Name = "tutorial", Prepare = () => { SetField("inspectorPage", "튜토리얼"); Call("Refresh"); preservedTutorialInput = ExtendedRoot.Q<TextField>("tutorial-instructions"); },
                     Action = () => Call("Edit", (Action)(() => TutorialDraftEditing.EditLevel(EditSession, "튜토리얼 안내", level => level.Tutorial.steps[0].instructions = "측정 안내"))),
                     Verify = () => { ExtendedCheck(ExtendedRoot.Q<TextField>("tutorial-instructions")?.value == "측정 안내", "tutorial field current");
+                        ExtendedCheck(ReferenceEquals(preservedTutorialInput, ExtendedRoot.Q<TextField>("tutorial-instructions")), "instruction edit preserves tutorial input");
                         SetField("inspectorPage", "기본"); Call("Refresh"); SetField("inspectorPage", "튜토리얼"); Call("Refresh");
                         ExtendedCheck(ExtendedRoot.Q<TextField>("tutorial-instructions")?.value == "측정 안내", "hidden tutorial reentry current"); } });
                 scenarios.Add(new Scenario { Name = "shared-apply", Prepare = PrepareShared,
@@ -246,8 +301,20 @@ namespace LevelAuthoring.Editor
                         ((VisualElement)Field("board")).Q("cell-40").ClassListContains("selected"), "selection visible without document edit") });
                 scenarios.Add(new Scenario { Name = "zoom", Prepare = () => unchangedVersion = EditSession.GetDocumentVersion(measuredLevel),
                     Action = () => { SetField("cellSize", 64f); Call("Refresh"); },
-                    Verify = () => ExtendedCheck(EditSession.GetDocumentVersion(measuredLevel) == unchangedVersion &&
-                        Math.Abs(((VisualElement)Field("board")).Q("cell-40").worldBound.width - 64) < 1, "zoom geometry changes without document edit") });
+                    Verify = () => { ExtendedCheck(EditSession.GetDocumentVersion(measuredLevel) == unchangedVersion &&
+                        Math.Abs(((VisualElement)Field("board")).Q("cell-40").worldBound.width - 64) < 1, "zoom geometry changes without document edit");
+                        WriteExtended(new JObject { ["kind"] = "artwork-zoom", ["exists"] = preservedArtwork != null,
+                            ["same"] = ReferenceEquals(preservedArtwork, ((VisualElement)Field("board")).Q<Image>()),
+                            ["before"] = previousArtworkWidth, ["after"] = preservedArtwork?.worldBound.width ?? 0,
+                            ["styleBefore"] = previousArtworkStyle, ["styleAfter"] = preservedArtwork?.style.width.value.value ?? 0,
+                            ["cellSizeBefore"] = previousCellSize, ["cellWorldBefore"] = previousCellWidth,
+                            ["cellSizeAfter"] = (float)Field("cellSize"),
+                            ["count"] = ((VisualElement)Field("board")).Query<Image>().ToList().Count });
+                        // 배율은 inline 기하로 검증하고, worldBound 양 끝의 패널 픽셀 반올림 오차는 따로 허용한다.
+                        ExtendedCheck(preservedArtwork != null && ReferenceEquals(preservedArtwork, ((VisualElement)Field("board")).Q<Image>()) &&
+                            Math.Abs(preservedArtwork.style.width.value.value - previousArtworkStyle * 64f / previousCellSize) < .01f &&
+                            Math.Abs(preservedArtwork.worldBound.width - preservedArtwork.style.width.value.value) < 2,
+                            "zoom reuses and resizes artwork"); } });
                 scenarios.Add(new Scenario { Name = "clipboard-compatibility", Prepare = () =>
                     { ChangeLevel(level => { LevelDocumentEditing.Place(level, measuredDefinitions, normalDefinition, 4, 4, true);
                         LevelDocumentEditing.Erase(level, measuredDefinitions, "Block", 4, 5); });
@@ -287,7 +354,8 @@ namespace LevelAuthoring.Editor
         private static void ResetExtended()
         {
             sampleWatch.Restart(); measuredClipboard = null; measuredShared = null;
-            preservedInput = preservedBoard = preservedMaterial = null;
+            preservedInput = preservedBoard = preservedMaterial = preservedTutorialInput = null; preservedArtwork = null;
+            SetField("tutorialPreview", false);
             ExtendedRoot.focusController?.focusedElement?.Blur(); Call("CancelPendingInput");
             ((ScrollView)Field("properties")).style.maxHeight = StyleKeyword.Null;
             SetField("sharedTutorialDraft", null); EditSession.Discard(); EditSession.SelectLevel(measuredLevel);
@@ -299,6 +367,15 @@ namespace LevelAuthoring.Editor
         {
             pendingMeasurement = new JObject { ["kind"] = "operation", ["operation"] = name, ["documents"] = EditSession.DocumentIds.Length,
                 ["readsBefore"] = (int)Field("displayDocumentReadCount"), ["buildsBefore"] = (int)Field("definitionBuildCount") };
+            if (name == "zoom")
+            {
+                preservedArtwork = ((VisualElement)Field("board")).Q<Image>();
+                previousArtworkWidth = preservedArtwork?.worldBound.width ?? 0;
+                previousArtworkStyle = preservedArtwork?.style.width.value.value ?? 0;
+                previousCellSize = (float)Field("cellSize");
+                previousCellWidth = ((VisualElement)Field("board")).Q("cell-40").worldBound.width;
+                ExtendedCheck(Math.Abs(previousCellWidth - previousCellSize) < 1, "zoom starts from synchronized board geometry");
+            }
             if (name == "focus-scroll-preservation")
             {
                 preservedScroll = ((ScrollView)Field("properties")).scrollOffset;
@@ -327,7 +404,7 @@ namespace LevelAuthoring.Editor
         private static void CaptureAndReplaceSession()
         {
             sampleWatch.Restart(); activeScenario = null; scenarios.Clear();
-            preservedInput = preservedBoard = preservedMaterial = null; measuredClipboard = null; measuredShared = null;
+            preservedInput = preservedBoard = preservedMaterial = preservedTutorialInput = null; preservedArtwork = null; measuredClipboard = null; measuredShared = null;
             releasedReferences.Add(new WeakReference(EditSession));
             releasedReferences.Add(new WeakReference(Field("displayedLevel")));
             releasedReferences.Add(new WeakReference(((VisualElement)Field("board"))[0]));
@@ -342,6 +419,7 @@ namespace LevelAuthoring.Editor
         }
         private static void ExtendedFinish(int code)
         {
+            releaseArtworkTest?.Invoke(); releaseArtworkTest = null;
             EditorApplication.update -= ExtendedTick; Finish(code);
         }
     }

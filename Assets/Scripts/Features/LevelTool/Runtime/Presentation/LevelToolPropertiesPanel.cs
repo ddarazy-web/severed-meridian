@@ -99,7 +99,7 @@ namespace LevelTool.Presentation
             Bind(brushColor, e => color = e.newValue); inspector.Add(brushColor);
             DropdownField orientation = new DropdownField("로켓 방향", new System.Collections.Generic.List<string> { "Horizontal", "Vertical" }, direction == "Horizontal" ? 0 : 1);
             Bind(orientation, e => direction = e.newValue); inspector.Add(orientation);
-            Slider zoom = new Slider("보드 확대", 32, 144) { value = cellSize };
+            Slider zoom = new Slider("보드 확대", 32, 144) { name = "board-zoom", value = cellSize };
             Bind(zoom, e => actions.Zoom(e.newValue)); inspector.Add(zoom);
             Button(inspector, "fit-board", "보드를 화면에 맞추기", actions.Fit);
             inspector.Add(new Label("선택 칸 " + Session.SelectedCells.Length + "개 · Shift+클릭으로 영역 선택"));

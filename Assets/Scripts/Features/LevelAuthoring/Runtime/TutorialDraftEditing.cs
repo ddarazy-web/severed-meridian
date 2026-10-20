@@ -14,7 +14,7 @@ namespace LevelAuthoring.Runtime
     {
         public static void EditLevel(AuthoringEditSession session, string label, Action<LevelDefinition> edit)
         {
-            using var graph = new AuthoringObjectGraph(session.Documents);
+            using var graph = new AuthoringObjectGraph(session);
             string id = session.SelectedLevelId;
             var level = (LevelDefinition)graph.Resolve(id);
             JToken before = graph.Encode(id).Data["tutorial"];
@@ -25,7 +25,7 @@ namespace LevelAuthoring.Runtime
         }
         public static void EditFlow(AuthoringEditSession session, string id, string label, Action<TutorialFlowDefinition> edit)
         {
-            using var graph = new AuthoringObjectGraph(session.Documents);
+            using var graph = new AuthoringObjectGraph(session);
             var flow = (TutorialFlowDefinition)graph.Resolve(id);
             JObject before = graph.Encode(id).Data;
             edit(flow);
@@ -34,7 +34,7 @@ namespace LevelAuthoring.Runtime
         }
         public static void EditFlowSteps(AuthoringEditSession session, string flowId, string label, Action<LevelDefinition> edit)
         {
-            using var graph = new AuthoringObjectGraph(session.Documents);
+            using var graph = new AuthoringObjectGraph(session);
             var level = (LevelDefinition)graph.Resolve(session.SelectedLevelId);
             var flow = (TutorialFlowDefinition)graph.Resolve(flowId);
             JObject before = graph.Encode(flowId).Data;
@@ -45,7 +45,7 @@ namespace LevelAuthoring.Runtime
         }
         public static void Connect(AuthoringEditSession session, string flowId)
         {
-            using var graph = new AuthoringObjectGraph(session.Documents);
+            using var graph = new AuthoringObjectGraph(session);
             var level = (LevelDefinition)graph.Resolve(session.SelectedLevelId);
             TutorialAuthoringRules.Connect(level, (TutorialFlowDefinition)graph.Resolve(flowId));
             ApplyLevel(session, graph, "공통 구성 연결");
@@ -56,7 +56,7 @@ namespace LevelAuthoring.Runtime
         public static string CreateFlow(AuthoringEditSession session, string name)
         {
             RequireName(name);
-            using var graph = new AuthoringObjectGraph(session.Documents);
+            using var graph = new AuthoringObjectGraph(session);
             var level = (LevelDefinition)graph.Resolve(session.SelectedLevelId);
             if (level.Tutorial.flow != null) throw new InvalidOperationException("이미 공유 중입니다. 독립 복사 후 새 구성을 만드세요.");
             var flow = ScriptableObject.CreateInstance<TutorialFlowDefinition>();
@@ -72,7 +72,7 @@ namespace LevelAuthoring.Runtime
         public static string CreateSample(AuthoringEditSession session, string name, string description, int stepIndex)
         {
             RequireName(name);
-            using var graph = new AuthoringObjectGraph(session.Documents);
+            using var graph = new AuthoringObjectGraph(session);
             var level = (LevelDefinition)graph.Resolve(session.SelectedLevelId);
             var steps = TutorialFlowResolver.Resolve(level).steps;
             var sample = ScriptableObject.CreateInstance<TutorialUserSampleDefinition>();
@@ -86,7 +86,7 @@ namespace LevelAuthoring.Runtime
         }
         public static void ApplySample(AuthoringEditSession session, string id)
         {
-            using var graph = new AuthoringObjectGraph(session.Documents);
+            using var graph = new AuthoringObjectGraph(session);
             var level = (LevelDefinition)graph.Resolve(session.SelectedLevelId);
             if (level.Tutorial.flow != null) throw new InvalidOperationException("공유 중에는 단계를 추가할 수 없습니다. 독립 복사를 먼저 선택하세요.");
             var sample = (TutorialUserSampleDefinition)graph.Resolve(id);
@@ -96,7 +96,7 @@ namespace LevelAuthoring.Runtime
         public static string AddSampleBoard(AuthoringEditSession session, string sampleId)
         {
             var sample = TutorialSampleBoards.All.Single(value => value.Id == sampleId);
-            using var graph = new AuthoringObjectGraph(session.Documents);
+            using var graph = new AuthoringObjectGraph(session);
             var board = sample.CreateBoard();
             foreach (var item in board.Elements)
                 if (string.IsNullOrEmpty(item.instanceId)) item.instanceId = Guid.NewGuid().ToString("N");
