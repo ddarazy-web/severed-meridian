@@ -3,6 +3,8 @@ using System.IO;
 using System.Reflection;
 using LevelAuthoring.Editing;
 using LevelAuthoring.Documents;
+using LevelAuthoring.Storage;
+using Newtonsoft.Json.Linq;
 using LevelTool;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -19,6 +21,7 @@ namespace LevelAuthoring.Editor
         private static bool previousEnabled;
         private static EnterPlayModeOptions previousOptions;
         private static double deadline;
+        private static bool awaitingListing;
 
         public static void Run()
         {
@@ -43,6 +46,16 @@ namespace LevelAuthoring.Editor
                 if (!EditorApplication.isPlaying) return;
                 screen ??= UnityEngine.Object.FindFirstObjectByType<LevelToolScreen>();
                 if (screen == null || (bool)Get("busy")) return;
+                if (awaitingListing)
+                {
+                    Check(screen.Workspace.Directory.MetadataWarning == null, "explicit listing refresh completed");
+                    Check(screen.Workspace.Session.IsDirty && screen.Workspace.Session.GetDocumentInfo(screen.Workspace.Session.SelectedLevelId).DisplayName == "목록 갱신 초안",
+                        "listing UI preserved unsaved draft");
+                    Check(((LevelBrowserIndex)Get("levelIndex")).Search("2").Count == 1, "listing UI refreshed unknown number");
+                    screen.Workspace.Session.Undo(); Check(!screen.Workspace.Session.IsDirty, "listing UI preserved Undo");
+                    Check(Get("modal") == null && ((VisualElement)Get("editor")).enabledInHierarchy, "listing progress closed and editor restored");
+                    Finish(0); return;
+                }
                 LevelToolRecoveryIsolation.Verify(screen, Path.Combine(folder, "recovery"));
                 screen.Workspace.Create(Path.Combine(folder, "project"), LevelToolDocuments.NewProject());
                 Call("Refresh");
@@ -127,7 +140,40 @@ namespace LevelAuthoring.Editor
                 Check(properties.childCount == 0, "failed display preparation does not leave stale editable controls");
                 Call("Edit", (Action)(() => screen.Workspace.Session.Undo()));
                 Check(properties.Q<IntegerField>("scrapTarget")?.value == previousTarget, "Undo recovers display after invalid reference");
-                Finish(0);
+                string listing = Path.Combine(folder, "listing");
+                ContentDocument displayLevel = screen.Workspace.Session.Get(screen.Workspace.Session.SelectedLevelId);
+                ContentDocument project = LevelToolDocuments.NewProject().Project;
+                var entries = new JArray();
+                for (int index = 0; index < 10000; index++)
+                    entries.Add(new JObject { ["id"] = "ui-level-" + index, ["path"] = "levels/" + index + ".json" });
+                project.Data["documents"] = entries;
+                var files = new JsonContentStore(listing); files.Save(project, "project.json", null);
+                screen.Workspace.OpenListing(listing, "Discard"); Call("Refresh");
+                var browser = (ListView)Get("levelBrowser");
+                Check(screen.Workspace.Session == null && browser.itemsSource.Count == 10000 && browser.enabledInHierarchy,
+                    "actual scene displays 10000 entries without selecting a body");
+                Check(((TextField)Get("levelSearch")).enabledInHierarchy, "listing-only search enabled");
+                files.Save(new ContentDocument("level", "ui-level-0", displayLevel.Data), "levels/0.json", null);
+                int priorComparisons = (int)Get("packComparisonCount");
+                Call("OpenSelectedLevel", "ui-level-0", null);
+                Check(screen.Workspace.Session?.SelectedLevelId == "ui-level-0" && board.Q("cell-40") != null,
+                    "explicit edit shows selected board without other bodies");
+                Check((int)Get("packComparisonCount") == priorComparisons, "opening selected level avoids automatic whole-project pack comparison");
+                Check(Get("validatedDocuments") == null, "old project validation not reused in new directory session");
+                string refreshFolder = Path.Combine(folder, "refresh");
+                screen.Workspace.Create(refreshFolder, LevelToolDocuments.NewProject());
+                string selectedId = screen.Workspace.Session.SelectedLevelId;
+                DocumentEditing.DuplicateLevel(screen.Workspace.Session, selectedId, 2, "목록 테스트"); screen.Workspace.Save();
+                foreach (string file in Directory.GetFiles(Path.Combine(refreshFolder, ".authoring", "listings"), "*.json")) File.Delete(file);
+                screen.Workspace.OpenListing(refreshFolder, "Discard"); screen.Workspace.OpenLevel(selectedId);
+                screen.Workspace.Session.EditLevel("초안", value => value["displayName"] = "목록 갱신 초안"); Call("Refresh");
+                var root = (VisualElement)Get("root");
+                Check(root.Q<Button>("rebuild-level-list")?.enabledInHierarchy == true, "explicit listing refresh button available");
+                Call("RequestListingRebuild");
+                Check(root.Q<Button>("confirm-listing-rebuild") != null, "listing rebuild explains full scan before execution");
+                Call("CloseModal"); Check(screen.Workspace.Session.IsDirty, "dismissing listing rebuild preserves draft");
+                awaitingListing = true; Call("RunListingRebuild");
+                Check(root.Q<Label>("listing-progress") != null && root.Q<Button>("cancel-listing-rebuild") != null, "listing progress and cancel controls visible");
             }
             catch (Exception error)
             {
@@ -148,6 +194,14 @@ namespace LevelAuthoring.Editor
             EditorApplication.update -= Tick;
             EditorSettings.enterPlayModeOptionsEnabled = previousEnabled;
             EditorSettings.enterPlayModeOptions = previousOptions;
+            foreach (string child in new[] { "project", "listing", "refresh", "recovery" })
+            {
+                string target = Path.GetFullPath(Path.Combine(folder, child));
+                if (!target.StartsWith(Path.GetFullPath(folder) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                    throw new IOException("검사 사본 경로가 소유 범위를 벗어났습니다.");
+                if (Directory.Exists(target) && (File.GetAttributes(target) & FileAttributes.ReparsePoint) == 0)
+                    Directory.Delete(target, true);
+            }
             EditorApplication.Exit(code);
         }
     }

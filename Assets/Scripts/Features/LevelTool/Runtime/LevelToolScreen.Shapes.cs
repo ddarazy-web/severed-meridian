@@ -25,7 +25,7 @@ namespace LevelTool
                         (definitions.TryGetValue(group.Key, out JObject definition) ? (string)definition["displayName"] : group.Key) + " " + group.Count() + "개").ToArray();
                 selectedShape = ShapeDocumentEditing.Register(Session, Session.SelectedLevelId, name.value, history);
             }));
-            ContentDocument[] shapes = Session.Documents.Where(doc => doc.Kind == "shape").OrderBy(doc => (string)doc.Data["displayName"]).ToArray();
+            ContentDocument[] shapes = Session.DocumentIdsOfKind("shape").Select(Session.Get).OrderBy(doc => (string)doc.Data["displayName"]).ToArray();
             if (shapes.Length == 0) { inspector.Add(new Label("아직 등록한 모양이 없습니다.")); return; }
             if (!shapes.Any(doc => doc.Id == selectedShape)) selectedShape = shapes[0].Id;
             Choice(inspector, "shape-choice", "등록한 모양", shapes.Select(doc => doc.Id).ToArray(),
@@ -57,7 +57,7 @@ namespace LevelTool
                 Button(used, "shape-usage-" + id, (string)Session.Get(id).Data["displayName"], () => RequestOpenLevel(id))
                     .RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
             inspector.Add(new Label("등록 당시: " + shape.Data["sourceName"] + " · " + string.Join(" / ", ((JArray)shape.Data["obstacleHistory"]).Values<string>())));
-            IntegerField number = new IntegerField("새 레벨 번호") { value = Session.Documents.Where(doc => doc.Kind == "level").Max(doc => (int)doc.Data["levelNumber"]) + 1 };
+            IntegerField number = new IntegerField("새 레벨 번호") { value = Session.DocumentIdsOfKind("level").Max(id => Session.GetDocumentInfo(id).LevelNumber) + 1 };
             TextField newName = new TextField("새 레벨 이름") { value = "새 레벨" }; inspector.Add(number); inspector.Add(newName);
             Button(inspector, "shape-create-level", "이 모양으로 새 레벨 만들기", () => Edit(() =>
             {

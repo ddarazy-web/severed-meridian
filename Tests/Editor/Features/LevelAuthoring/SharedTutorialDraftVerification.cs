@@ -1,10 +1,10 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using LevelAuthoring.Editing;
 using LevelAuthoring.Runtime;
 using Tutorial;
+using LevelTool;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,13 +14,17 @@ namespace LevelAuthoring.Editor
     {
         public static void Run()
         {
+            string owned = Path.GetFullPath("Logs/SharedTutorialDraft/" + Guid.NewGuid().ToString("N"));
+            string data = Path.Combine(owned, "data"); Directory.CreateDirectory(owned);
+            int exit = 1;
             try
             {
                 Type type = typeof(TutorialDraftEditing).Assembly.GetType("LevelAuthoring.Runtime.SharedTutorialDraft");
                 Check(type != null, "isolated shared tutorial draft exists");
-                var workspace = new AuthoringToolWorkspace(); workspace.Open(File.ReadAllText("Logs/GameAuthoringStage02/latest-fixtures.txt"), "Cancel");
+                var workspace = new AuthoringToolWorkspace(); workspace.Create(data, LevelToolDocuments.NewProject());
+                string levelId = workspace.Session.SelectedLevelId;
+                workspace.OpenListing(data, "Cancel"); workspace.OpenLevel(levelId);
                 var parent = workspace.Session;
-                parent.SelectLevel(parent.Documents.First(doc => doc.Kind == "level" && (int)doc.Data["levelNumber"] == 2).Id);
                 TutorialDraftEditing.EditLevel(parent, "prepare", level =>
                 {
                     level.Tutorial.flow = null; level.Tutorial.bindings.Clear(); level.Tutorial.steps.Clear();
@@ -44,9 +48,11 @@ namespace LevelAuthoring.Editor
                 bool rejected = false;
                 try { type.GetMethod("Apply").Invoke(draft, new object[] { parent }); } catch (TargetInvocationException error) { rejected = error.InnerException is InvalidOperationException; }
                 Check(rejected && (string)parent.Get(flowId).Data["steps"][0]["instructions"] == "external", "conflicting source is preserved and apply rejected");
-                EditorApplication.Exit(0);
+                File.WriteAllText(Path.Combine(owned, "result.txt"), "PASS shared draft v2 isolation, recovery, apply, Undo and conflict"); exit = 0;
             }
-            catch (Exception error) { Debug.LogException(error); EditorApplication.Exit(1); }
+            catch (Exception error) { File.WriteAllText(Path.Combine(owned, "result.txt"), "FAIL " + error); Debug.LogException(error); }
+            finally { if (Directory.Exists(data)) Directory.Delete(data, true); }
+            EditorApplication.Exit(exit);
         }
         private static void Check(bool value, string message) { if (!value) throw new Exception("FAIL " + message); Debug.Log("PASS " + message); }
     }

@@ -75,7 +75,8 @@ namespace LevelTool
                 id == ToolCommandId.Save || id == ToolCommandId.SaveCopy || id == ToolCommandId.Reload || id == ToolCommandId.Backup || id == ToolCommandId.LegacyRecovery))
                 reason = "공유 원본 사본을 적용하거나 버린 뒤 파일 작업을 해 주세요.";
             else if (id == ToolCommandId.Open || id == ToolCommandId.NewProject || id == ToolCommandId.Backup || id == ToolCommandId.LegacyRecovery || id == ToolCommandId.Exit || id == ToolCommandId.ImportProject || id == ToolCommandId.RecentProjects) return true;
-            else if (Session == null) reason = "먼저 작업 폴더를 여세요.";
+            else if (id == ToolCommandId.Reload && Workspace.Folder != null) return true;
+            else if (Session == null) reason = Workspace.Directory != null ? "목록의 편집 버튼으로 레벨을 여세요." : "먼저 작업 폴더를 여세요.";
             else if (id == ToolCommandId.Copy || id == ToolCommandId.Cut || id == ToolCommandId.Paste || id == ToolCommandId.Delete)
             {
                 if (sharedTutorialDraft != null || inspectorPage != "기본") reason = "보드 편집의 기본 배치 화면에서 사용하세요.";
@@ -122,15 +123,15 @@ namespace LevelTool
             if (!CanExecuteCommand(id, out reason)) { Show(reason); return false; }
             switch (id)
             {
-                case ToolCommandId.Open: ChooseFolder(path => WithDirty(choice => Workspace.Open(path, choice))); break;
+                case ToolCommandId.Open: ChooseFolder(path => WithDirty(choice => Workspace.OpenListing(path, choice))); break;
                 case ToolCommandId.NewProject: NewProject(); break;
                 case ToolCommandId.Save: Storage(() => Workspace.Save(), true).Forget(); break;
                 case ToolCommandId.ImportProject: ImportProject(); break;
                 case ToolCommandId.ExportProject: ExportProject(); break;
                 case ToolCommandId.RecentProjects: OpenRecentProjects(); break;
                 case ToolCommandId.SaveCopy: ChooseFolder(path => Storage(() => Workspace.SaveCopy(path), true).Forget(), true); break;
-                case ToolCommandId.Reload: WithDirtyFor("다시 읽기", choice => Workspace.Reload(choice)); break;
-                case ToolCommandId.Backup: ChooseFolder(path => WithDirtyFor("이전 정상본 열기", choice => Workspace.OpenBackup(path, choice))); break;
+                case ToolCommandId.Reload: WithDirtyFor("다시 읽기", choice => Workspace.ReloadListing(choice)); break;
+                case ToolCommandId.Backup: ChooseFolder(path => WithDirtyFor("이전 정상본 열기", choice => Workspace.OpenListing(path, choice, true))); break;
                 case ToolCommandId.LegacyRecovery: ReadLegacyRecovery().Forget(); break;
                 case ToolCommandId.Exit: ExitTool(); break;
                 case ToolCommandId.Undo: Edit(() => (sharedTutorialDraft?.Session ?? Session).Undo()); break;

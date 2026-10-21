@@ -50,7 +50,7 @@ namespace LevelTool
             AuthoringObjectGraph graph = null;
             try
             {
-                ContentSnapshot snapshot = repeat ? toolBotSnapshot : sharedTutorialDraft?.Preview(Session) ?? Session.CreateSnapshot();
+                ContentSnapshot snapshot = repeat ? toolBotSnapshot : CreateTrialSnapshot();
                 if (snapshot == null) throw new InvalidOperationException("먼저 새 봇 시험을 시작하세요.");
                 string id = repeat ? toolBotLevel : Session.SelectedLevelId;
                 int runSeed = repeat ? toolBot.Seed : toolBotSeed;

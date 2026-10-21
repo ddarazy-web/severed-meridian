@@ -29,7 +29,7 @@ namespace LevelAuthoring.Documents
                         throw new ContentFormatException("지원하지 않는 schemaVersion입니다. 지원 버전: 1.");
                     if (root["kind"].Type != JTokenType.String || root["id"].Type != JTokenType.String || !(root["data"] is JObject data))
                         throw new ContentFormatException("문서 kind/id/data 형식이 잘못됐습니다.");
-                    var result = new ContentDocument((string)root["kind"], (string)root["id"], data);
+                    var result = ContentDocument.FromParsedBody((string)root["kind"], (string)root["id"], data);
                     ContentDocumentValidator.Validate(result);
                     return result;
                 }

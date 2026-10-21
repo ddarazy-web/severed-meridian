@@ -59,7 +59,7 @@ namespace LevelTool
                     VisualElement panel = OpenModal("복구 기록을 읽을 수 없습니다.");
                     panel.Add(new Label(error.Message + " · 원본 저장본과 복구 기록을 자동으로 바꾸지 않았습니다."));
                     Button(panel, "restore-previous-draft", "이전 복구 기록 확인", () => { CloseModal(); RestorePreviousRecovery().Forget(); });
-                    Button(panel, "open-other-project", "다른 프로젝트 열기", () => { CloseModal(); ChooseFolder(path => WithDirty(choice => Workspace.Open(path, choice))); });
+                    Button(panel, "open-other-project", "다른 프로젝트 열기", () => { CloseModal(); ChooseFolder(path => WithDirty(choice => Workspace.OpenListing(path, choice))); });
                     Button(panel, "cancel", "닫기", CloseModal);
                 }
             }
@@ -177,7 +177,7 @@ namespace LevelTool
         private void OnDisable()
         {
             suspendedInputs = editor != null && Session != null ? CaptureRecoveryInputs() : null;
-            displaySession = null; displayedLevel = null;
+            displaySession = null; displayDirectory = null; displayedLevel = null;
             displayDocuments.Clear(); displayVersions.Clear(); definitions.Clear();
             packComparisonKey = validationComparisonKey = null;
             root?.UnregisterCallback<InputEvent>(OnManualInput, TrickleDown.TrickleDown);

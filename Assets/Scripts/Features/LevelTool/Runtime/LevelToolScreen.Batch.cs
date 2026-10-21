@@ -49,7 +49,7 @@ namespace LevelTool
             AuthoringObjectGraph graph = null;
             try
             {
-                var snapshot = repeat ? batchSnapshot : sharedTutorialDraft?.Preview(Session) ?? Session.CreateSnapshot();
+                var snapshot = repeat ? batchSnapshot : CreateTrialSnapshot();
                 if (snapshot == null) throw new InvalidOperationException("먼저 새 반복 시험을 시작하세요.");
                 string id = repeat ? batchLevel : Session.SelectedLevelId;
                 int[] seeds = repeat ? (int[])batchSeeds.Clone() : BotBatchSession.NewSeeds(batchCount, batchSeeds);

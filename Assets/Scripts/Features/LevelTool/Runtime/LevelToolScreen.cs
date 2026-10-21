@@ -124,7 +124,7 @@ namespace LevelTool
         {
             Edit(() =>
             {
-                int number = Session.Documents.Where(doc => doc.Kind == "level").Max(doc => (int)doc.Data["levelNumber"]) + 1;
+                int number = Session.DocumentIdsOfKind("level").Max(id => Session.GetDocumentInfo(id).LevelNumber) + 1;
                 if (duplicate) DocumentEditing.DuplicateLevel(Session, Session.SelectedLevelId, number, "레벨 " + number + " 사본");
                 else
                 {
@@ -141,8 +141,9 @@ namespace LevelTool
             DrawIncomingWorkspace();
             UpdatePackStatus();
 
-            folderLabel.text = (Session == null ? "작업 폴더 없음" : Session.IsDirty ? "● 미저장" : "저장됨") +
+            folderLabel.text = (Session == null ? Workspace.Directory != null ? "목록 열림 · 편집할 레벨을 선택하세요" : "작업 폴더 없음" : Session.IsDirty ? "● 미저장" : "저장됨") +
                 (Workspace.IsRecovery ? "  [복구본 · 사본 저장 필요]" : "");
+            if (Session?.RequiresProjectValidation == true) folderLabel.text += " · 전체 프로젝트 검사 필요";
             foreach (string name in new[] { "save", "save-copy", "reload", "undo", "redo", "play", "validate-level", "replay-tutorial" })
                 root.Q<Button>(name)?.SetEnabled(Session != null && !busy);
             root.Q<Button>("new-project")?.SetEnabled(!busy);
@@ -169,7 +170,7 @@ namespace LevelTool
             }
             board.style.display = (inspectorPage == "자동 시험" || inspectorPage == "시험 기록") ? DisplayStyle.None : DisplayStyle.Flex;
             RefreshNavigation(); RefreshCommandStates();
-            if (Session == null) { levelRows.Clear(); levelBrowser.itemsSource = levelRows; palette.Clear(); inspector.Clear(); boardView.Clear(); return; }
+            if (Session == null) { RefreshLevelBrowser(); palette.Clear(); inspector.Clear(); boardView.Clear(); ApplyToolSkin(); return; }
             try
             {
                 RefreshLevelBrowser();

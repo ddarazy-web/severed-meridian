@@ -38,10 +38,9 @@ namespace LevelTool
             existing?.RemoveFromHierarchy(); tutorialPreviewKey = null;
             try
             {
-                // 표시 캐시의 격리된 문서를 사용한다. 공유 사본은 해당 흐름 문서만 대체한다.
-                using var graph = new AuthoringObjectGraph(displayDocuments.Values.Select(document =>
-                    sharedTutorialDraft != null && document.Id == sharedTutorialDraft.FlowId
-                        ? sharedTutorialDraft.Session.Get(document.Id) : document));
+                // 선택 레벨의 참조만 따라간다. 공유 사본은 해당 흐름 문서만 대체한다.
+                using var graph = new AuthoringObjectGraph(Session, sharedTutorialDraft == null ? null :
+                    sharedTutorialDraft.Session.Get(sharedTutorialDraft.FlowId));
                 var level = (LevelDefinition)graph.Resolve(Session.SelectedLevelId);
                 var tutorial = TutorialFlowResolver.Resolve(level);
                 var step = tutorial.steps?.ElementAtOrDefault(tutorialStep);

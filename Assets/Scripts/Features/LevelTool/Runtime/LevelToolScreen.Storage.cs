@@ -17,6 +17,7 @@ namespace LevelTool
             if (busy) return;
             if (sharedTutorialDraft != null) { Show("공유 원본 사본을 적용하거나 버린 뒤 파일 작업을 해 주세요."); return; }
             var previousSession = Session;
+            string previousFolder = Workspace.Folder;
             FocusedInputState previousInput = commandInputFocus ?? CaptureFocusedInput();
             commandInputFocus = null;
             var pendingInputs = CaptureRecoveryInputs();
@@ -46,7 +47,7 @@ namespace LevelTool
                 {
                     editor.SetEnabled(modal == null); Refresh();
                     RestoreMobilePanelInputs();
-                    if (!ReferenceEquals(previousSession, Session)) RememberInternalProject();
+                    if (!ReferenceEquals(previousSession, Session) || previousFolder != Workspace.Folder) RememberInternalProject();
                     if (ReferenceEquals(previousSession, Session) && modal == null)
                     {
                         RestoreRecoveryInputs(pendingInputs);

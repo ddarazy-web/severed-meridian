@@ -24,6 +24,11 @@ namespace LevelAuthoring.Validation
         // 부분 복원 대상의 참조만 확인한다. 다른 작성 중 문서의 오류 때문에 복원을 막지 않는다.
         internal static void ValidateDocumentReferences(ContentDocument document, Dictionary<string, ContentDocument> documents)
         {
+            if (document.Kind == "project")
+            {
+                CheckReference(document.Data["defaultCatalogId"], "catalog", documents, "project.defaultCatalogId");
+                return;
+            }
             string type = (string)Schema["roots"][document.Kind];
             References(document.Data, new JObject { ["type"] = type }, documents, Context(document));
         }
@@ -96,54 +101,78 @@ namespace LevelAuthoring.Validation
             }
         }
 
-        public static void ValidateSnapshot(IEnumerable<ContentDocument> documents)
+        public static void ValidateSnapshot(IEnumerable<ContentDocument> documents) => ValidateSnapshot(documents, false);
+        internal static void ValidateSnapshot(IEnumerable<ContentDocument> documents, bool documentsValidated)
         {
             var byId = new Dictionary<string, ContentDocument>(StringComparer.Ordinal);
             var numbers = new HashSet<int>();
             var elements = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var document in documents)
+            foreach (var storedDocument in documents)
             {
-                Validate(document);
+                ContentDocument document = documentsValidated ? storedDocument : storedDocument?.Materialize();
+                if (!documentsValidated || document == null) Validate(document);
                 if (byId.ContainsKey(document.Id)) throw new ContentFormatException("중복 문서 ID: " + document.Id);
-                byId.Add(document.Id, document);
-                if (document.Kind == "level" && !numbers.Add((int)document.Data["levelNumber"])) throw new ContentFormatException(Context(document) + " · levelNumber: 중복 레벨 번호입니다.");
+                byId.Add(document.Id, storedDocument);
+                if (document.Kind == "level" && !numbers.Add(document.Info.LevelNumber)) throw new ContentFormatException(Context(document) + " · levelNumber: 중복 레벨 번호입니다.");
                 if (document.Kind == "element" && !elements.Add((string)document.Data["definition"]["id"])) throw new ContentFormatException("중복 게임 요소 ID입니다.");
             }
             var projects = byId.Values.Where(document => document.Kind == "project").ToArray();
             if (projects.Length != 1) throw new ContentFormatException("스냅샷에는 project 문서가 하나 필요합니다.");
             CheckReference(projects[0].Data["defaultCatalogId"], "catalog", byId, "project.defaultCatalogId");
             var resources = new HashSet<string>(((JArray)projects[0].Data["resources"]).Select(item => (string)item["id"]), StringComparer.Ordinal);
-            foreach (var document in byId.Values.Where(document => document.Kind != "project"))
+            // 레벨이 참조하는 공유 문서의 참조를 먼저 검사해야 의미 검사에서 누락된 키를 조회하지 않는다.
+            foreach (var storedDocument in byId.Values.Where(document => document.Kind != "project").OrderBy(document => document.Kind == "level"))
             {
+                ContentDocument document = storedDocument.Materialize();
                 References(document.Data, new JObject { ["type"] = (string)Schema["roots"][document.Kind] }, byId, Context(document) + ".data");
                 if (document.Kind == "visual")
                     foreach (var property in document.Data.Descendants().OfType<JProperty>().Where(property => property.Name == "resourceId" || property.Name == "effectResourceIds"))
                         foreach (var reference in property.Value is JArray list ? list.ToArray() : new[] { property.Value })
                             if (reference.Type != JTokenType.Null && !string.IsNullOrEmpty((string)reference) && !resources.Contains((string)reference))
                                 throw new ContentFormatException(Context(document) + " · " + property.Path + ": 없는 리소스 ID " + reference);
+                ContentReferenceValidator.Validate(document, byId);
             }
-            ContentReferenceValidator.Validate(byId);
         }
 
-        private static void References(JToken value, JObject spec, Dictionary<string, ContentDocument> documents, string path)
+        internal static IEnumerable<string> ReferencedDocumentIds(ContentDocument document)
+        {
+            Validate(document);
+            var ids = new HashSet<string>(StringComparer.Ordinal);
+            if (document.Kind == "project")
+            {
+                string catalog = (string)document.Data["defaultCatalogId"];
+                if (catalog != null) ids.Add(catalog);
+            }
+            else VisitReferences(document.Data, new JObject { ["type"] = (string)Schema["roots"][document.Kind] }, Context(document),
+                (value, kind, path) => ids.Add((string)value));
+            return ids;
+        }
+
+        private static void References(JToken value, JObject spec, Dictionary<string, ContentDocument> documents, string path) =>
+            VisitReferences(value, spec, path, (reference, kind, location) => CheckReference(reference, kind, documents, location));
+
+        private static void VisitReferences(JToken value, JObject spec, string path, Action<JToken, string, string> visit)
         {
             if (value.Type == JTokenType.Null) return;
             string type = (string)spec["type"];
-            if (type == "reference") { CheckReference(value, (string)spec["kind"], documents, path); return; }
+            if (type == "reference") { visit(value, (string)spec["kind"], path); return; }
             if (type == "array")
             {
                 int index = 0;
-                foreach (var item in (JArray)value) References(item, (JObject)spec["items"], documents, path + "[" + index++ + "]");
+                foreach (var item in (JArray)value) VisitReferences(item, (JObject)spec["items"], path + "[" + index++ + "]", visit);
                 return;
             }
             if (Schema["types"][type]?["fields"] is JObject fields)
-                foreach (var field in fields.Properties()) References(value[field.Name], (JObject)field.Value, documents, path + "." + field.Name);
+                foreach (var field in fields.Properties()) VisitReferences(value[field.Name], (JObject)field.Value, path + "." + field.Name, visit);
         }
 
         private static void CheckReference(JToken value, string kind, Dictionary<string, ContentDocument> documents, string path)
         {
             if (value.Type == JTokenType.Null) return;
-            if (!documents.TryGetValue((string)value, out var target) || target.Kind != kind)
+            if (!documents.TryGetValue((string)value, out var target))
+                throw new ContentFormatException(path + ": 참조가 없습니다. 기대 종류: " + kind);
+            if (target.Kind == "unknown") target.EnsureLoaded();
+            if (target.Kind != kind)
                 throw new ContentFormatException(path + ": 참조가 없거나 종류가 다릅니다. 기대 종류: " + kind);
         }
 

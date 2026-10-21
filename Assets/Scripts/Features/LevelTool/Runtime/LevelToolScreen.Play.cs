@@ -1,8 +1,10 @@
 #if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using GameScreen;
+using LevelAuthoring.Documents;
 using LevelAuthoring.Runtime;
 using Tutorial;
 using UnityEngine;
@@ -29,6 +31,12 @@ namespace LevelTool
         public void Configure(Font uiFont, StyleSheet sheet, GameObject world, GameObject session, GameObject screen)
         { font = uiFont; styles = sheet; boardPrefab = world; sessionPrefab = session; screenPrefab = screen; }
 
+        private ContentSnapshot CreateTrialSnapshot(IEnumerable<string> ids = null)
+        {
+            ids ??= new[] { Session.SelectedLevelId };
+            return sharedTutorialDraft?.PreviewLevels(Session, ids) ?? Session.CreateTrialSnapshot(ids);
+        }
+
         public async UniTask BeginPlay()
         {
             if (busy || RecordsBusy || Session == null || playRoot != null) return;
@@ -39,7 +47,7 @@ namespace LevelTool
             busy = true; editor.SetEnabled(false);
             try
             {
-                var snapshot = sharedTutorialDraft?.Preview(Session) ?? Session.CreateSnapshot();
+                var snapshot = CreateTrialSnapshot();
                 if (boardPrefab == null || sessionPrefab == null || screenPrefab == null)
                     throw new InvalidOperationException("게임 시험 프리팹 연결이 없습니다.");
                 playLifetime = CancellationTokenSource.CreateLinkedTokenSource(this.GetCancellationTokenOnDestroy());

@@ -41,10 +41,10 @@ namespace LevelTool
                 value => { multiMode = (MultiLevelTestMode)Enum.Parse(typeof(MultiLevelTestMode), value); UpdateToolMulti(); });
             Number(panel, "multi-samples", "반복 전략별 판 수", multiSamples, value => { multiSamples = value; });
             multiLevels = new VisualElement(); panel.Add(multiLevels);
-            foreach (var doc in Session.Documents.Where(d => d.Kind == "level").OrderBy(d => (int)d.Data["levelNumber"]))
+            foreach (var doc in Session.DocumentIdsOfKind("level").Select(Session.GetDocumentInfo).OrderBy(info => info.LevelNumber))
             {
                 string id = doc.Id;
-                var toggle = new Toggle(doc.Data["levelNumber"] + " · " + doc.Data["displayName"]) { name = "multi-level-" + id, value = multiSelection.Contains(id) };
+                var toggle = new Toggle(doc.LevelNumber + " · " + doc.DisplayName) { name = "multi-level-" + id, value = multiSelection.Contains(id) };
                 toggle.RegisterValueChangedCallback(e => { if (e.newValue) multiSelection.Add(id); else multiSelection.Remove(id); }); multiLevels.Add(toggle);
             }
             Button(panel, "multi-start", "선택 레벨 시험 시작", StartToolMulti);
@@ -69,7 +69,7 @@ namespace LevelTool
             AuthoringObjectGraph graph = null;
             try
             {
-                var snapshot = sharedTutorialDraft?.Preview(Session) ?? Session.CreateSnapshot();
+                var snapshot = CreateTrialSnapshot(multiSelection);
                 string[] ids = snapshot.Documents.Where(d => d.Kind == "level" && multiSelection.Contains(d.Id))
                     .OrderBy(d => (int)d.Data["levelNumber"]).Select(d => d.Id).ToArray();
                 if (ids.Length == 0) throw new InvalidOperationException("시험할 레벨을 하나 이상 체크하세요.");

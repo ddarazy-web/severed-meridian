@@ -84,7 +84,7 @@ namespace LevelTool
             string relation;
             try
             {
-                var snapshot = sharedTutorialDraft?.Preview(Session) ?? Session.CreateSnapshot();
+                var snapshot = CreateTrialSnapshot();
                 using var graph = new AuthoringObjectGraph(snapshot.Documents);
                 relation = LevelStateBuilder.Fingerprint((LevelDefinition)graph.Resolve(Session.SelectedLevelId)) == historyReader.Record.fingerprint ?
                     "현재 편집 내용과 같은 정의" : "현재 편집 내용과 다른 과거 사본";

@@ -17,7 +17,7 @@ namespace LevelAuthoring.Editing
 
         public static string AddLevel(AuthoringEditSession session, JObject template, int number, string name)
         {
-            if (number < 1 || session.Documents.Any(doc => doc.Kind == "level" && (int)doc.Data["levelNumber"] == number))
+            if (number < 1 || session.DocumentIdsOfKind("level").Any(id => session.GetDocumentInfo(id).LevelNumber == number))
                 throw new ContentFormatException("레벨 번호가 잘못됐거나 이미 사용 중입니다.");
             if (string.IsNullOrWhiteSpace(name)) throw new ContentFormatException("레벨 이름을 입력하세요.");
             if (template == null) throw new ArgumentNullException(nameof(template));

@@ -119,7 +119,7 @@ namespace LevelTool
                     editor.SetEnabled(modal == null); Refresh();
                     if (ReferenceEquals(previous, Session)) RestoreFocusedInput(focus);
 
-                    if (transferred && imported != null) WithDirty(choice => Workspace.Open(imported, choice));
+                    if (transferred && imported != null) WithDirty(choice => Workspace.OpenListing(imported, choice));
                 }
             }
         }
@@ -155,7 +155,7 @@ namespace LevelTool
                 foreach (string name in names)
                 {
                     string path = LevelToolProjectAccess.Resolve(InternalProjectsRoot, name);
-                    Button item = Button(list, "recent-project", name, () => { CloseModal(); WithDirty(choice => Workspace.Open(path, choice)); });
+                    Button item = Button(list, "recent-project", name, () => { CloseModal(); WithDirty(choice => Workspace.OpenListing(path, choice)); });
                     if (!File.Exists(Path.Combine(path, "project.json"))) { item.SetEnabled(false); item.text += " · 저장본 없음"; }
                 }
                 if (names.Length == 0) list.Add(new Label("최근에 연 내부 프로젝트가 없습니다."));

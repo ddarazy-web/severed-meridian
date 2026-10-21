@@ -36,7 +36,7 @@ namespace LevelTool
                 byte[] bytes = await ContentPackAssetLoader.LoadAsync(ContentPackGenerationCodec.Address, this.GetCancellationTokenOnDestroy());
                 if (revision != packCheckRevision) return;
                 checkedPackHash = ContentPackGenerationCodec.Decode(bytes).SourceHash;
-                UpdatePackStatus();
+                UpdatePackStatusCore(true);
             }
             catch (OperationCanceledException) { }
             catch (Exception error)
@@ -46,7 +46,9 @@ namespace LevelTool
             }
         }
 
-        private void UpdatePackStatus()
+        private void UpdatePackStatus() => UpdatePackStatusCore(false);
+
+        private void UpdatePackStatusCore(bool explicitComparison)
         {
             if (packStatus == null) return;
             string input = packedTrial ? "시험 입력: 생성된 팩. " : "시험 입력: 현재 편집본(미저장 포함). ";
@@ -55,6 +57,11 @@ namespace LevelTool
             try
             {
                 string key = DisplayContentKey();
+                if (Session.RequiresProjectValidation && !explicitComparison && packComparisonKey != key)
+                {
+                    packStatus.text = input + "전체 파일 자동 비교는 하지 않습니다. ‘팩 상태 확인’을 누르면 전체 비교합니다.";
+                    return;
+                }
                 if (packComparisonKey != key)
                 {
                     packComparisonCount++;

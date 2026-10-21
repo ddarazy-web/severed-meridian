@@ -16,7 +16,7 @@ namespace LevelTool
         private void TryOpenInternalDefault()
         {
             // 복구 선택·명시적 인계·현재 편집은 최초 기본 프로젝트보다 우선한다.
-            if (busy || recoveryBlocksDefault || Session != null || modal != null || !string.IsNullOrEmpty(incomingWorkspace)) return;
+            if (busy || recoveryBlocksDefault || Session != null || Workspace.Directory != null || modal != null || !string.IsNullOrEmpty(incomingWorkspace)) return;
             try
             {
                 string path = LevelToolProjectAccess.Resolve(InternalProjectsRoot, "Default");
@@ -25,7 +25,7 @@ namespace LevelTool
                     Show("파일 메뉴에서 새 프로젝트를 만들거나 기존 프로젝트를 열어 주세요. 자동 저장하지 않습니다.");
                     return;
                 }
-                Workspace.Open(path, "Cancel");
+                Workspace.OpenListing(path, "Cancel");
                 RememberInternalProject();
                 Refresh(); Show("내부 기본 프로젝트를 열었습니다.");
             }
@@ -51,7 +51,7 @@ namespace LevelTool
         private void TryOpenDefaultWorkspace()
         {
             // 복구 확인이 끝난 빈 화면에서만 자동으로 연다. 기존/복구 작업은 명시적 선택을 기다린다.
-            if (!incomingDefault || string.IsNullOrEmpty(incomingWorkspace) || busy || recoveryBlocksDefault || Session != null || modal != null) return;
+            if (!incomingDefault || string.IsNullOrEmpty(incomingWorkspace) || busy || recoveryBlocksDefault || Session != null || Workspace.Directory != null || modal != null) return;
             AcceptIncomingWorkspace("Cancel"); Refresh();
         }
 

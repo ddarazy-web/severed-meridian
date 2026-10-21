@@ -12,7 +12,7 @@ namespace LevelAuthoring.Editing
 {
     // 화면이나 Unity 수명주기와 무관하게 폴더 전환과 저장의 소유권을 관리한다.
     // UI는 파일 작업 중 편집 입력을 잠그고 이 작업을 작업 스레드에서 호출한다.
-    public sealed class AuthoringToolWorkspace
+    public sealed partial class AuthoringToolWorkspace
     {
         public AuthoringEditSession Session { get; private set; }
         public string Folder { get; private set; }
@@ -22,32 +22,61 @@ namespace LevelAuthoring.Editing
         {
             if (Session == null) return null;
             using (StringWriter text = new StringWriter(CultureInfo.InvariantCulture))
-            using (JsonTextWriter writer = new JsonTextWriter(text) { Formatting = Formatting.None })
-            {
-                writer.WriteStartObject();
-                writer.WritePropertyName("version"); writer.WriteValue(1);
-                writer.WritePropertyName("folder"); writer.WriteValue(Folder);
-                writer.WritePropertyName("recovery"); writer.WriteValue(IsRecovery);
-                writer.WritePropertyName("session"); Session.WriteState(writer);
-                writer.WriteEndObject(); return text.ToString();
-            }
+            { WriteState(text); return text.ToString(); }
+        }
+        public void WriteState(TextWriter output)
+        {
+            if (Session == null) throw new ContentFormatException("기록할 편집 세션이 없습니다.");
+            using var writer = new JsonTextWriter(output) { Formatting = Formatting.None, CloseOutput = false };
+            writer.WriteStartObject();
+            writer.WritePropertyName("version"); writer.WriteValue(1);
+            writer.WritePropertyName("folder"); writer.WriteValue(Folder);
+            writer.WritePropertyName("recovery"); writer.WriteValue(IsRecovery);
+            writer.WritePropertyName("session"); Session.WriteState(writer);
+            writer.WriteEndObject();
         }
         public void RestoreState(string text)
         {
+            using var input = new StringReader(text);
+            RestoreState(input);
+        }
+        public void RestoreState(TextReader input)
+        {
+            using var reader = new JsonTextReader(input) { CloseInput = false, DateParseHandling = DateParseHandling.None, MaxDepth = 96 };
             try
             {
-                JObject data = JObject.Parse(text);
-                if ((int?)data["version"] != 1 || data["folder"]?.Type != JTokenType.String ||
-                    !Path.IsPathRooted((string)data["folder"]) || data["recovery"]?.Type != JTokenType.Boolean ||
-                    !(data["session"] is JObject state))
+                if (!reader.Read() || reader.TokenType != JsonToken.StartObject)
                     throw new ContentFormatException("레벨툴 복구본 형식이 잘못됐습니다.");
-                AuthoringEditSession restored = AuthoringEditSession.RestoreObject(state);
+                JToken version = null, folderValue = null, recovery = null;
+                AuthoringEditSession restored = null;
+                while (reader.Read() && reader.TokenType != JsonToken.EndObject)
+                {
+                    if (reader.TokenType != JsonToken.PropertyName) throw new ContentFormatException("레벨툴 복구 필드가 잘못됐습니다.");
+                    string key = (string)reader.Value;
+                    if (!reader.Read()) throw new ContentFormatException("레벨툴 복구본이 중간에 끝났습니다.");
+                    switch (key)
+                    {
+                        case "version": version = JToken.ReadFrom(reader); break;
+                        case "folder": folderValue = JToken.ReadFrom(reader); break;
+                        case "recovery": recovery = JToken.ReadFrom(reader); break;
+                        case "session": restored = AuthoringEditSession.ReadState(reader); break;
+                        default: reader.Skip(); break;
+                    }
+                }
+                if (reader.TokenType != JsonToken.EndObject || reader.Read() || (int?)version != 1 || folderValue?.Type != JTokenType.String ||
+                    !Path.IsPathRooted((string)folderValue) || recovery?.Type != JTokenType.Boolean || restored == null)
+                    throw new ContentFormatException("레벨툴 복구본 형식이 잘못됐습니다.");
                 // 작성 중 문서 오류는 허용하되 도구에서 표시할 수 없는 버전은 거절한다.
-                foreach (ContentDocument level in restored.Documents.Where(doc => doc.Kind == "level"))
-                    if ((int?)level.Data["schemaVersion"] != 4 && (int?)level.Data["schemaVersion"] != 5)
+                foreach (ContentDocumentInfo level in restored.DocumentIdsOfKind("level").Select(restored.GetDocumentInfo))
+                    if (level.LevelSchemaVersion != 4 && level.LevelSchemaVersion != 5)
                         throw new ContentFormatException("레벨툴에서 지원하지 않는 복구 레벨 형식입니다.");
-                string folder = Path.GetFullPath((string)data["folder"]);
-                Session = restored; Folder = folder; IsRecovery = (bool)data["recovery"];
+                string folder = Path.GetFullPath((string)folderValue);
+                if (restored.DirectoryBaseline != null && !string.Equals(restored.DirectoryBaseline.Root.TrimEnd(Path.DirectorySeparatorChar),
+                    folder.TrimEnd(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase))
+                    throw new ContentFormatException("복구 원본 폴더와 작업 폴더가 다릅니다.");
+                if (restored.DirectoryBaseline != null && restored.DirectoryBaseline.IsBackup != (bool)recovery)
+                    throw new ContentFormatException("복구 원본 보호 상태가 일치하지 않습니다.");
+                Session = restored; Folder = folder; IsRecovery = (bool)recovery; directory = null;
             }
             catch (JsonException error) { throw new ContentFormatException("레벨툴 복구본이 손상됐습니다.", error); }
         }
@@ -57,8 +86,8 @@ namespace LevelAuthoring.Editing
         {
             if (restored == null || restored.Session == null || ReferenceEquals(restored, this))
                 throw new InvalidOperationException("이동할 복구 작업공간이 없습니다.");
-            Session = restored.Session; Folder = restored.Folder; IsRecovery = restored.IsRecovery;
-            restored.Session = null; restored.Folder = null; restored.IsRecovery = false;
+            Session = restored.Session; Folder = restored.Folder; IsRecovery = restored.IsRecovery; directory = restored.directory;
+            restored.Session = null; restored.Folder = null; restored.IsRecovery = false; restored.directory = null;
         }
         public bool Open(string folder, string dirtyChoice) => OpenCore(folder, dirtyChoice, false);
         public bool OpenBackup(string folder, string dirtyChoice) => OpenCore(folder, dirtyChoice, true);
@@ -87,6 +116,7 @@ namespace LevelAuthoring.Editing
                     next = CreateSession(backup ? repository.ReadBackup() : repository.Read(), Session.SelectedLevelId);
             }
             Session = next;
+            directory = null;
             Folder = path;
             IsRecovery = backup;
             return true;
@@ -104,6 +134,7 @@ namespace LevelAuthoring.Editing
             if (Session == null) throw new ContentFormatException("먼저 작업 폴더를 여세요.");
             string path = Path.GetFullPath(folder);
             Session.SaveAs(new ContentSnapshotStore(path));
+            directory = null;
             // 공개까지 성공한 이후에만 저장 대상과 복구 상태를 바꾼다.
             Folder = path;
             IsRecovery = false;
@@ -123,6 +154,7 @@ namespace LevelAuthoring.Editing
             if (Session?.IsDirty == true && dirtyChoice == "Save") Save();
             StoredContentSnapshot published = new ContentSnapshotStore(path).Publish(template, null);
             Session = new AuthoringEditSession(published, id);
+            directory = null;
             Folder = path;
             IsRecovery = false;
             return true;
@@ -131,8 +163,8 @@ namespace LevelAuthoring.Editing
         private static AuthoringEditSession CreateSession(StoredContentSnapshot stored, string preferredId)
         {
             ValidateToolVersions(stored.Snapshot);
-            ContentDocument[] levels = stored.Snapshot.Documents.Where(doc => doc.Kind == "level")
-                .OrderBy(doc => (int)doc.Data["levelNumber"]).ToArray();
+            ContentDocumentInfo[] levels = stored.Snapshot.DocumentIds.Select(stored.Snapshot.GetDocumentInfo).Where(doc => doc.Kind == "level")
+                .OrderBy(doc => doc.LevelNumber).ToArray();
             if (levels.Length == 0) throw new ContentFormatException("프로젝트에 편집할 레벨이 없습니다.");
             string id = levels.Any(doc => doc.Id == preferredId) ? preferredId : levels[0].Id;
             return new AuthoringEditSession(stored, id);
@@ -140,8 +172,8 @@ namespace LevelAuthoring.Editing
 
         private static void ValidateToolVersions(ContentSnapshot snapshot)
         {
-            foreach (ContentDocument level in snapshot.Documents.Where(doc => doc.Kind == "level"))
-                if ((int)level.Data["schemaVersion"] != 4 && (int)level.Data["schemaVersion"] != 5)
+            foreach (ContentDocumentInfo level in snapshot.DocumentIds.Select(snapshot.GetDocumentInfo).Where(doc => doc.Kind == "level"))
+                if (level.LevelSchemaVersion != 4 && level.LevelSchemaVersion != 5)
                     throw new ContentFormatException("현재 레벨툴은 레벨 형식 4·5를 지원합니다. 기존 편집기에서 변환 후 여세요: " + level.Id);
         }
     }

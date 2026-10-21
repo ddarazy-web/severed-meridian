@@ -154,7 +154,7 @@ namespace LevelAuthoring.Editing
             JObject level = session.Get(session.SelectedLevelId).Data;
             if ((string)level["catalogId"] == null && level["embeddedDefinitions"] is JArray embedded && embedded.Count > 0)
                 return embedded.Cast<JObject>().ToDictionary(definition => (string)definition["id"], definition => definition, StringComparer.Ordinal);
-            return session.Documents.Where(document => document.Kind == "element")
+            return session.DocumentIdsOfKind("element").Select(session.Get)
                 .ToDictionary(document => (string)document.Data["definition"]["id"], document => (JObject)document.Data["definition"], StringComparer.Ordinal);
         }
 

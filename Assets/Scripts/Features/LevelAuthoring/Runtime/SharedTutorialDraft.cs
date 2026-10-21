@@ -1,5 +1,6 @@
 #if UNITY_EDITOR || PRODUCT_LEVEL_EDITOR
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using LevelAuthoring.Documents;
 using LevelAuthoring.Editing;
@@ -34,6 +35,11 @@ namespace LevelAuthoring.Runtime
         {
             ValidateParent(parent);
             return new ContentSnapshot(parent.Documents.Select(doc => doc.Id == FlowId ? Session.Get(FlowId) : doc));
+        }
+        public ContentSnapshot PreviewLevels(AuthoringEditSession parent, IEnumerable<string> levelIds)
+        {
+            ValidateParent(parent);
+            return parent.CreateTrialSnapshot(levelIds, Session.Get(FlowId));
         }
         public void ValidateParent(AuthoringEditSession parent)
         {

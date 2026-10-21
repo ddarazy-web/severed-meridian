@@ -20,6 +20,7 @@ namespace LevelAuthoring.Storage
     {
         private static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, true);
         private readonly string root;
+        internal string Root => root;
         private readonly Action<SavePhase> checkpoint;
         public JsonContentStore(string root) : this(root, null) { }
         internal JsonContentStore(string root, Action<SavePhase> checkpoint)
@@ -32,6 +33,7 @@ namespace LevelAuthoring.Storage
 
         public ContentFile Read(string relativePath) => ReadFile(Resolve(relativePath));
         public ContentFile ReadBackup(string relativePath) => ReadFile(Resolve(relativePath + ".previous"));
+        internal string ReadHash(string relativePath) => HashFile(Resolve(relativePath));
 
         public ContentFile Save(ContentDocument document, string relativePath, string expectedHash)
         {
@@ -74,7 +76,7 @@ namespace LevelAuthoring.Storage
             if (File.Exists(path))
             {
                 if (expectedHash == null) throw new ContentFormatException("파일이 이미 있습니다. 다시 읽은 뒤 저장하세요.");
-                if (ReadFile(path).Hash != expectedHash) throw new ContentFormatException("외부에서 문서가 변경됐습니다. 덮어쓰지 않았습니다.");
+                if (HashFile(path) != expectedHash) throw new ContentFormatException("외부에서 문서가 변경됐습니다. 덮어쓰지 않았습니다.");
             }
             else if (expectedHash != null) throw new ContentFormatException("문서가 삭제됐습니다. 다시 열어 주세요.");
         }
@@ -95,7 +97,7 @@ namespace LevelAuthoring.Storage
                     throw new ContentFormatException("문서 경로에 잘못된 구간이 있습니다: " + relativePath);
         }
 
-        private string Resolve(string relativePath)
+        internal string Resolve(string relativePath)
         {
             ValidateRelativePath(relativePath);
             string path = Path.GetFullPath(Path.Combine(root, relativePath));
@@ -112,9 +114,16 @@ namespace LevelAuthoring.Storage
                     throw new ContentFormatException("링크를 통과하는 문서 경로는 허용하지 않습니다: " + current);
         }
 
+        internal static string DocumentHash(ContentDocument document) => Hash(Utf8.GetBytes(ContentJson.Write(document)));
         private static string Hash(byte[] bytes)
         {
             using (var algorithm = SHA256.Create()) return BitConverter.ToString(algorithm.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant();
+        }
+        private static string HashFile(string path)
+        {
+            using (var input = File.OpenRead(path))
+            using (var algorithm = SHA256.Create())
+                return BitConverter.ToString(algorithm.ComputeHash(input)).Replace("-", "").ToLowerInvariant();
         }
     }
 }

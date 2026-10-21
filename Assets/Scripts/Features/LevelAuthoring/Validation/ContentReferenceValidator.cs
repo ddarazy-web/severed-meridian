@@ -19,23 +19,20 @@ namespace LevelAuthoring.Validation
             "legacy.scrap", "legacy.capsule", "legacy.color-lock", "legacy.rod-box", "legacy.generator", "legacy.web", "legacy.mold", "legacy.dust" };
         private static readonly HashSet<string> ConditionFields = new HashSet<string> { "RequiredCount", "MatchSize", "Target", "PowerDefinitionId", "Color", "MissionIndex" };
 
-        public static void Validate(Dictionary<string, ContentDocument> documents)
+        public static void Validate(ContentDocument document, Dictionary<string, ContentDocument> documents)
         {
-            foreach (var document in documents.Values)
+            try
             {
-                try
+                switch (document.Kind)
                 {
-                    switch (document.Kind)
-                    {
-                        case "tutorialFlow": Flow(document.Data); break;
-                        case "tutorialSample": GeneratedNames(Objects(document.Data["steps"], "sample.steps")); break;
-                        case "visual": Visual(document.Data); break;
-                        case "catalog": Catalog(document.Data, documents); break;
-                        case "level": Level(document.Data, documents); break;
-                    }
+                    case "tutorialFlow": Flow(document.Data); break;
+                    case "tutorialSample": GeneratedNames(Objects(document.Data["steps"], "sample.steps")); break;
+                    case "visual": Visual(document.Data); break;
+                    case "catalog": Catalog(document.Data, documents); break;
+                    case "level": Level(document.Data, documents); break;
                 }
-                catch (ContentFormatException error) { throw new ContentFormatException(ContentDocumentValidator.Context(document) + " · " + error.Message, error); }
             }
+            catch (ContentFormatException error) { throw new ContentFormatException(ContentDocumentValidator.Context(document) + " · " + error.Message, error); }
         }
 
         private static JObject[] Objects(JToken value, string path)

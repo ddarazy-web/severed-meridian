@@ -37,9 +37,16 @@ namespace LevelAuthoring.Runtime
         }
 
         // 임시 편집 객체는 그래프별로 소유한다. 게시 문서의 사본은 참조를 따라갈 때만 읽는다.
-        public AuthoringObjectGraph(AuthoringEditSession session)
+        public AuthoringObjectGraph(AuthoringEditSession session) : this(session, null) { }
+        public AuthoringObjectGraph(AuthoringEditSession session, ContentDocument replacement)
         {
             readDocument = session.CaptureDocumentReader();
+            if (replacement != null)
+            {
+                var copy = new ContentDocument(replacement.Kind, replacement.Id, replacement.Data);
+                Func<string, ContentDocument> original = readDocument;
+                readDocument = id => id == copy.Id ? new ContentDocument(copy.Kind, copy.Id, copy.Data) : original(id);
+            }
             ContentDocument project = readDocument(session.DocumentIdsOfKind("project").Single());
             documents = new Dictionary<string, ContentDocument>(StringComparer.Ordinal) { { project.Id, project } };
             resources = project.Data["resources"].ToDictionary(item => (string)item["id"], item => (string)item["path"], StringComparer.Ordinal);

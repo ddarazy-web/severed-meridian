@@ -19,6 +19,7 @@ namespace LevelTool
         private ContentDocument[] validatedDocuments;
         private string validatedLevel, validationMode;
         private string validationComparisonKey;
+        private string validatedDisplayKey;
         private bool validationComparisonCurrent;
 
         private ContentDocument[] ValidationDocuments() => sharedTutorialDraft == null ? Session.Documents :
@@ -28,6 +29,7 @@ namespace LevelTool
         {
             if (validatedDocuments == null || Session == null || validatedLevel != Session.SelectedLevelId) return false;
             string key = DisplayContentKey();
+            if (Session.RequiresProjectValidation) return validatedDisplayKey == key;
             if (validationComparisonKey == key) return validationComparisonCurrent;
             var current = ValidationDocuments().ToDictionary(doc => doc.Id);
             validationComparisonCurrent = current.Count == validatedDocuments.Length && validatedDocuments.All(doc =>
@@ -40,7 +42,18 @@ namespace LevelTool
         {
             if (busy || Session == null) return;
             validationIssues.Clear(); validatedLevel = Session.SelectedLevelId;
-            validatedDocuments = ValidationDocuments();
+            validatedDocuments = null;
+            validatedDisplayKey = null;
+            try { validatedDocuments = ValidationDocuments(); }
+            catch (Exception error)
+            {
+                string message = "검사 실패 · 문서를 읽지 못했습니다. " + error.Message;
+                validationPanel?.Clear();
+                validationPanel?.Add(new Label(message) { style = { whiteSpace = WhiteSpace.Normal } });
+                Show(message);
+                return;
+            }
+            validatedDisplayKey = DisplayContentKey();
             validationComparisonKey = null;
             validationMode = replay ? "튜토리얼 논리 재생" : "구조·참조·레벨 검사";
             foreach (var document in validatedDocuments)

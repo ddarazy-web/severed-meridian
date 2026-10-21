@@ -11,13 +11,21 @@ namespace LevelAuthoring.Documents
         public static string Compute(ContentSnapshot snapshot)
         {
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
-            var documents = snapshot.Documents;
-            // 저장 세대의 경로는 제작 내용이 아니다. 조회 사본만 정규화한다.
-            foreach (var document in documents)
-                if (document.Kind == "project") document.Data["documents"] = new Newtonsoft.Json.Linq.JArray();
-            byte[] bytes = Encoding.UTF8.GetBytes(string.Join("\n", documents.OrderBy(document => document.Id, StringComparer.Ordinal).Select(ContentJson.Write)));
             using var hash = SHA256.Create();
-            return BitConverter.ToString(hash.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant();
+            byte[] separator = { 10 };
+            bool first = true;
+            foreach (string id in snapshot.DocumentIds.OrderBy(value => value, StringComparer.Ordinal))
+            {
+                if (!first) hash.TransformBlock(separator, 0, separator.Length, separator, 0);
+                first = false;
+                ContentDocument document = snapshot.Get(id);
+                // 기존 정규화와 문서 사이 개행을 그대로 유지하며 한 문서씩 해시한다.
+                if (document.Kind == "project") document.Data["documents"] = new Newtonsoft.Json.Linq.JArray();
+                byte[] bytes = Encoding.UTF8.GetBytes(ContentJson.Write(document));
+                hash.TransformBlock(bytes, 0, bytes.Length, bytes, 0);
+            }
+            hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+            return BitConverter.ToString(hash.Hash).Replace("-", "").ToLowerInvariant();
         }
     }
 }

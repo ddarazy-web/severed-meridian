@@ -136,11 +136,21 @@ namespace LevelAuthoring.Storage
                     if (expected.Length != names.Count || !expected.All(path => archive.GetEntry(path) != null))
                         throw new ContentFormatException("ZIP은 공개 목록의 JSON만 포함해야 합니다. 누락 또는 추가 파일이 있습니다.");
                 }
-                new ContentSnapshotStore(project).Read();
+                new ContentSnapshotStore(project).ReadAndIndex(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
                 CheckLinks(root);
                 // 검증된 프로젝트만 같은 파일시스템 안에서 한 번에 공개한다. 기존 대상은 덮어쓰지 않는다.
-                Directory.Move(project, target);
+                for (int attempt = 0; ; attempt++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested(); CheckLinks(root); CheckLinks(project);
+                    try { Directory.Move(project, target); break; }
+                    catch (IOException) when (attempt < 3 && Directory.Exists(project) && !Directory.Exists(target) && !File.Exists(target))
+                    {
+                        // Windows에서 새 JSON 검사 직후 폴더 이동이 잠시 거부되는 경우만 제한적으로 재시도한다.
+                        // 목적지가 생겼으면 덮어쓰지 않으며, 계속 실패하는 권한 문제는 원래 오류로 반환한다.
+                        cancellationToken.WaitHandle.WaitOne(50 << attempt);
+                    }
+                }
                 return target;
             }
             catch (InvalidDataException error)
