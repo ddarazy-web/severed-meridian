@@ -167,3 +167,25 @@ Button:focus { border-color: rgb(169, 245, 228); }
 }
 .level-tool .unity-scroller--vertical { flex-shrink: 0; }
 .level-tool .unity-scroller--horizontal { flex-shrink: 0; }
+.level-tool .level-browser-row {
+    flex-direction: row; align-items: center; height: 48px;
+    padding-left: 5px; padding-right: 3px;
+    border-left-width: 3px; border-left-color: rgba(0, 0, 0, 0);
+}
+.level-tool .level-browser-label {
+    flex-grow: 1; flex-shrink: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.level-tool .level-edit-button {
+    width: 48px; min-width: 48px; height: 40px; min-height: 40px;
+    flex-shrink: 0; margin-left: 4px; padding-left: 3px; padding-right: 3px;
+}
+.level-tool .editing-level { border-left-color: rgb(83, 222, 196); background-color: rgba(42, 108, 99, 0.35); }
+.level-tool #level-result-count { font-size: 12px; margin-top: 3px; margin-bottom: 3px; }
+.level-tool #level-search { margin-top: 3px; margin-bottom: 3px; }
+.level-tool #level-search > .unity-base-field__label { min-width: 30px; width: 30px; }
+.mobile-portrait #left-panel > .panel-tabs, .mobile-landscape #left-panel > .panel-tabs { display: none; }
+.mobile-portrait #level-shortcuts, .mobile-landscape #level-shortcuts { flex-direction: row; }
+.mobile-portrait #recent-levels, .mobile-landscape #recent-levels { flex-grow: 1; flex-shrink: 1; min-width: 0; }
+.mobile-portrait #find-current-level, .mobile-landscape #find-current-level { width: 120px; min-width: 0; flex-shrink: 0; }
+.level-tool #recent-levels { margin-bottom: 3px; }

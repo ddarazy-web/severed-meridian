@@ -54,7 +54,8 @@ namespace LevelTool
             VisualElement used = new VisualElement { name = "shape-usage" }; inspector.Add(used);
             used.Add(new Label("같은 활성 칸 모양의 레벨 " + usage.Length + "개"));
             foreach (string id in usage)
-                Button(used, "shape-usage-" + id, (string)Session.Get(id).Data["displayName"], () => Edit(() => { Session.SelectLevel(id); CancelFlowTool(); wireDrawing = false; }));
+                Button(used, "shape-usage-" + id, (string)Session.Get(id).Data["displayName"], () => RequestOpenLevel(id))
+                    .RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
             inspector.Add(new Label("등록 당시: " + shape.Data["sourceName"] + " · " + string.Join(" / ", ((JArray)shape.Data["obstacleHistory"]).Values<string>())));
             IntegerField number = new IntegerField("새 레벨 번호") { value = Session.Documents.Where(doc => doc.Kind == "level").Max(doc => (int)doc.Data["levelNumber"]) + 1 };
             TextField newName = new TextField("새 레벨 이름") { value = "새 레벨" }; inspector.Add(number); inspector.Add(newName);

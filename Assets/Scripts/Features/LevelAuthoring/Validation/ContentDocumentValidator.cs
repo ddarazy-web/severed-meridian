@@ -21,6 +21,13 @@ namespace LevelAuthoring.Validation
             catch (ContentFormatException error) { throw new ContentFormatException(Context(document) + " · " + error.Message, error); }
         }
 
+        // 부분 복원 대상의 참조만 확인한다. 다른 작성 중 문서의 오류 때문에 복원을 막지 않는다.
+        internal static void ValidateDocumentReferences(ContentDocument document, Dictionary<string, ContentDocument> documents)
+        {
+            string type = (string)Schema["roots"][document.Kind];
+            References(document.Data, new JObject { ["type"] = type }, documents, Context(document));
+        }
+
         internal static string Context(ContentDocument document) => document == null ? "빈 문서" :
             document.Id + (document.Kind == "level" ? " · 레벨 " + document.Data["levelNumber"] : " · " + document.Kind);
 

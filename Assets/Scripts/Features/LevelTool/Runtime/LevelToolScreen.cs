@@ -29,7 +29,7 @@ namespace LevelTool
         private LevelToolWindowController windowController;
         private Presentation.LevelToolBoardView boardView;
         private Presentation.LevelToolPropertiesPanel propertiesPanel;
-        private string levelListKey, paletteKey, boardKey;
+        private string paletteKey, boardKey;
         private Dictionary<string, JObject> definitions = new Dictionary<string, JObject>();
         private AuthoringEditSession Session => Workspace.Session;
 
@@ -47,7 +47,7 @@ namespace LevelTool
             navigationPage = null;
             displaySession = null;
             propertiesKey = null;
-            levelListKey = paletteKey = boardKey = null;
+            paletteKey = boardKey = null;
             BuildEditorLayout();
             boardView = new Presentation.LevelToolBoardView(board, Show, SelectConnectionVertex, () => busy);
             supplyPanel = new Presentation.LevelToolSupplyPanel(() => Session, Change, supplyState);
@@ -169,22 +169,10 @@ namespace LevelTool
             }
             board.style.display = (inspectorPage == "자동 시험" || inspectorPage == "시험 기록") ? DisplayStyle.None : DisplayStyle.Flex;
             RefreshNavigation(); RefreshCommandStates();
-            if (Session == null) { levelList.Clear(); palette.Clear(); inspector.Clear(); boardView.Clear(); return; }
+            if (Session == null) { levelRows.Clear(); levelBrowser.itemsSource = levelRows; palette.Clear(); inspector.Clear(); boardView.Clear(); return; }
             try
             {
-                var levels = displayDocuments.Values.Where(doc => doc.Kind == "level").OrderBy(doc => (int)doc.Data["levelNumber"]).ToArray();
-                string nextLevels = string.Join("|", levels.Select(doc => doc.Id + ":" + doc.Data["levelNumber"] + ":" + doc.Data["displayName"]));
-                if (nextLevels != levelListKey)
-                {
-                    levelListKey = nextLevels; levelList.Clear();
-                    foreach (var document in levels)
-                    {
-                        string id = document.Id;
-                        Button(levelList, id, document.Data["levelNumber"] + " · " + document.Data["displayName"],
-                            () => Edit(() => { Session.SelectLevel(id); anchor = -1; moveBody = null; }));
-                    }
-                }
-                foreach (var item in levelList.Query<Button>().ToList()) item.EnableInClassList("selected", item.name == Session.SelectedLevelId);
+                RefreshLevelBrowser();
                 var materials = definitions.Where(pair => LevelToolDocuments.Layer(pair.Value) == layer).ToArray();
                 string nextPalette = layer + string.Join("|", materials.Select(pair => pair.Key + ":" + pair.Value["displayName"]));
                 if (nextPalette != paletteKey)

@@ -40,8 +40,9 @@ namespace LevelTool
             {
                 displaySession = Session;
                 displayVersions.Clear(); displayDocuments.Clear();
+                levelIndex = new LevelBrowserIndex(); browserRevision = -1;
                 displayedLevelId = null; displayedLevel = null;
-                levelListKey = paletteKey = boardKey = propertiesKey = null;
+                paletteKey = boardKey = propertiesKey = null;
             }
             if (Session == null) return;
             bool definitionsChanged = reset, documentsChanged = reset;
@@ -49,6 +50,7 @@ namespace LevelTool
             foreach (string removed in displayDocuments.Keys.Except(ids).ToArray())
             {
                 definitionsChanged |= displayDocuments[removed].Kind != "level";
+                levelIndex.Remove(removed);
                 displayDocuments.Remove(removed); displayVersions.Remove(removed); documentsChanged = true;
             }
             foreach (string id in ids)
@@ -56,6 +58,7 @@ namespace LevelTool
                 long version = Session.GetDocumentVersion(id);
                 if (displayVersions.TryGetValue(id, out long previous) && previous == version) continue;
                 ContentDocument document = Session.Get(id);
+                if (document.Kind == "level") levelIndex.Upsert(id, (int)document.Data["levelNumber"], (string)document.Data["displayName"]);
                 displayDocumentReadCount++;
                 definitionsChanged |= document.Kind != "level";
                 displayDocuments[id] = document; displayVersions[id] = version; documentsChanged = true;

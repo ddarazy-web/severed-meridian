@@ -95,8 +95,12 @@ namespace LevelTool
             if (!ValidationIsCurrent()) { Show("내용이 변경되었습니다. 먼저 다시 검사하세요."); return; }
             var document = Session.Get(documentId);
             if (document.Kind != "level") { Show("문서 " + documentId + " · " + issue.Message); return; }
+            if (Session.SelectedLevelId != documentId)
+            {
+                RequestOpenLevel(documentId, () => FocusValidationIssue(documentId, issue));
+                return;
+            }
             CancelPendingInput(); brush = null;
-            if (Session.SelectedLevelId != documentId) Session.SelectLevel(documentId);
             string path = issue.PropertyPath ?? "";
             boardFocus = false;
             levelSettingsVisible = path == "moveCount" || path.StartsWith("colors") || path.StartsWith("missions") ||

@@ -53,7 +53,7 @@ namespace LevelTool
             var levelActions = new VisualElement(); levelActions.AddToClassList("panel-tabs"); levelPanel.Add(levelActions);
             Button(levelActions, "new-level", "새 레벨", () => AddLevel(false));
             Button(levelActions, "duplicate", "복제", () => AddLevel(true));
-            levelList = new ScrollView(ScrollViewMode.Vertical) { name = "levels", horizontalScrollerVisibility = ScrollerVisibility.Hidden }; levelList.style.flexGrow = 1; levelPanel.Add(levelList);
+            BuildLevelBrowser();
             materialPanel = new VisualElement(); materialPanel.AddToClassList("panel-content"); leftPanel.Add(materialPanel);
             var layers = new DropdownField("편집 층", new List<string> { "Block", "Obstacle", "Cover", "Dust" }, 0) { name = "edit-layer" };
             layers.SetValueWithoutNotify(layer);
@@ -75,7 +75,7 @@ namespace LevelTool
             Button(rightTabs, "inspector-level", "레벨 설정", () => { levelSettingsVisible = true; UpdatePanelVisibility(); });
             properties = new ScrollView(ScrollViewMode.Vertical) { name = "properties", horizontalScrollerVisibility = ScrollerVisibility.Hidden }; properties.style.flexGrow = 1; rightPanel.Add(properties); inspector = properties.contentContainer;
             validationPanel = new ScrollView { name = "validation-panel" }; validationPanel.AddToClassList("validation-panel"); editor.Add(validationPanel);
-            status = new Label("왼쪽에서 레벨을 선택하고, 소재 탭에서 배치할 블록을 고르세요.") { name = "status" }; status.AddToClassList("status"); editor.Add(status);
+            status = new Label("왼쪽 목록의 ‘편집’ 버튼으로 레벨을 열고, 소재 탭에서 배치할 블록을 고르세요.") { name = "status" }; status.AddToClassList("status"); editor.Add(status);
             UpdatePanelVisibility();
             InitializeMobileLayout();
             InitializeBoardTouch();

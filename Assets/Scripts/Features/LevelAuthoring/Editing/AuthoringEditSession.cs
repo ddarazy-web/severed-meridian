@@ -16,6 +16,7 @@ namespace LevelAuthoring.Editing
             internal Dictionary<string, ContentDocument> Documents;
             internal string LevelId;
             internal int[] Cells;
+            internal bool BeforeSave;
         }
         private State current;
         private Dictionary<string, ContentDocument> saved;
@@ -129,6 +130,7 @@ namespace LevelAuthoring.Editing
                 JToken.DeepEquals(previous.Data, pair.Value.Data)) ? previous : CopyForEdit(pair.Value), StringComparer.Ordinal);
             undo.Push(Capture()); redo.Clear();
             current.Documents = next;
+            current.BeforeSave = false;
         }
         public void Undo() { if (undo.Count == 0) return; redo.Push(Capture()); current = undo.Pop(); }
         public void Redo() { if (redo.Count == 0) return; undo.Push(Capture()); current = redo.Pop(); }
@@ -148,9 +150,13 @@ namespace LevelAuthoring.Editing
             Revision = published.Hash;
             current.Documents = published.Snapshot.Documents.ToDictionary(doc => doc.Id, StringComparer.Ordinal);
             saved = current.Documents; savedLevelId = current.LevelId;
+            // 저장 이전의 원자적 작업은 부분 취소 이후에도 원래 모습으로 Undo할 수 있어야 한다.
+            foreach (State state in undo) state.BeforeSave = true;
+            foreach (State state in redo) state.BeforeSave = true;
+            current.BeforeSave = false;
         }
         // 사전과 문서는 게시 이후 불변이며, 변경 가능한 선택 상태만 별도 소유한다.
-        private State Capture() => new State { Documents = current.Documents, LevelId = current.LevelId, Cells = (int[])current.Cells.Clone() };
+        private State Capture() => new State { Documents = current.Documents, LevelId = current.LevelId, Cells = (int[])current.Cells.Clone(), BeforeSave = current.BeforeSave };
         private static ContentDocument Clone(ContentDocument doc) => new ContentDocument(doc.Kind, doc.Id, doc.Data);
         private ContentDocument CopyForEdit(ContentDocument doc) { lastEditCopyCount++; return Clone(doc); }
         private static bool Equal(Dictionary<string, ContentDocument> left, Dictionary<string, ContentDocument> right)

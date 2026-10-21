@@ -160,6 +160,10 @@ namespace LevelTool
 
         private void UpdateMobilePanelVisibility()
         {
+            // 가상 목록은 높이가 정해진 뷰포트가 필요하다. 소재 화면의 바깥 스크롤은 유지한다.
+            ScrollView leftContent = leftPanel.Q<ScrollView>("mobile-left-content");
+            if (leftContent != null) leftContent.contentContainer.style.height = materialsVisible ?
+                new StyleLength(StyleKeyword.Auto) : new StyleLength(Length.Percent(100));
             bool left = mobilePanel == "levels" || mobilePanel == "materials";
             leftPanel.style.display = !boardFocus && (mobileWide || left) ? DisplayStyle.Flex : DisplayStyle.None;
             rightPanel.style.display = !boardFocus && (mobileWide || mobilePanel == "properties") ? DisplayStyle.Flex : DisplayStyle.None;

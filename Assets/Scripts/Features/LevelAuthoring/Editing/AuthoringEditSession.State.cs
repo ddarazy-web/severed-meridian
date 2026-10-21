@@ -80,6 +80,7 @@ namespace LevelAuthoring.Editing
             writer.WriteStartObject();
             writer.WritePropertyName("documents"); WriteDocuments(writer, state.Documents);
             writer.WritePropertyName("levelId"); writer.WriteValue(state.LevelId);
+            writer.WritePropertyName("beforeSave"); writer.WriteValue(state.BeforeSave);
             writer.WritePropertyName("cells"); writer.WriteStartArray();
             foreach (int cell in state.Cells) writer.WriteValue(cell);
             writer.WriteEndArray(); writer.WriteEndObject();
@@ -119,7 +120,7 @@ namespace LevelAuthoring.Editing
 
         private static State Decode(JToken token, Dictionary<string, List<ContentDocument>> pool)
         {
-            var state = new State { Documents = DecodeDocuments(token["documents"], pool), LevelId = (string)token["levelId"], Cells = ((JArray)token["cells"]).Values<int>().ToArray() };
+            var state = new State { Documents = DecodeDocuments(token["documents"], pool), LevelId = (string)token["levelId"], Cells = ((JArray)token["cells"]).Values<int>().ToArray(), BeforeSave = (bool?)token["beforeSave"] ?? false };
             if (state.LevelId == null || !state.Documents.TryGetValue(state.LevelId, out ContentDocument level) || level.Kind != "level" ||
                 state.Cells.Any(cell => cell < 0 || cell >= 81) || state.Cells.Distinct().Count() != state.Cells.Length)
                 throw new ContentFormatException("복구본의 레벨 또는 선택 칸이 잘못됐습니다.");
