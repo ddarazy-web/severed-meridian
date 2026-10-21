@@ -62,7 +62,8 @@ namespace LevelAuthoring.Editor
                             EditorUtility.SetDirty(schema);
                         }
                         foreach (var entry in levels.entries.ToArray())
-                            if ((entry.address.StartsWith("Levels/levels-", StringComparison.Ordinal) || entry.address == ContentPackGenerationCodec.Address) && !paths.Contains(entry.AssetPath))
+                            if ((entry.address.StartsWith("Levels/levels-", StringComparison.Ordinal) || entry.address == ContentPackGenerationCodec.Address ||
+                                entry.address == LevelLobbyIndexCodec.Address) && !paths.Contains(entry.AssetPath))
                                 settings.RemoveAssetEntry(entry.guid);
                         foreach (string path in paths)
                         {

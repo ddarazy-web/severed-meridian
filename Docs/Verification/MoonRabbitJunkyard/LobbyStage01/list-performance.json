@@ -1,0 +1,90 @@
+[
+  {
+    "total": 1000,
+    "run": 0,
+    "bytes": 117899,
+    "loadAndBindMs": 2.4332000000000003,
+    "monoUsedDeltaBytes": 319488,
+    "cells": 12,
+    "scroll201StepsMs": 30.003300000000003,
+    "reused": true,
+    "selected": "test-999"
+  },
+  {
+    "total": 1000,
+    "run": 1,
+    "bytes": 117899,
+    "loadAndBindMs": 2.1332,
+    "monoUsedDeltaBytes": 307200,
+    "cells": 12,
+    "scroll201StepsMs": 29.1826,
+    "reused": true,
+    "selected": "test-999"
+  },
+  {
+    "total": 1000,
+    "run": 2,
+    "bytes": 117899,
+    "loadAndBindMs": 2.394,
+    "monoUsedDeltaBytes": 319488,
+    "cells": 12,
+    "scroll201StepsMs": 29.896,
+    "reused": true,
+    "selected": "test-999"
+  },
+  {
+    "total": 1000,
+    "run": 3,
+    "bytes": 117899,
+    "loadAndBindMs": 2.1562,
+    "monoUsedDeltaBytes": 311296,
+    "cells": 12,
+    "scroll201StepsMs": 28.1448,
+    "reused": true,
+    "selected": "test-999"
+  },
+  {
+    "total": 10000,
+    "run": 0,
+    "bytes": 1188899,
+    "loadAndBindMs": 17.6412,
+    "monoUsedDeltaBytes": 2887680,
+    "cells": 12,
+    "scroll201StepsMs": 69.411200000000008,
+    "reused": true,
+    "selected": "test-9999"
+  },
+  {
+    "total": 10000,
+    "run": 1,
+    "bytes": 1188899,
+    "loadAndBindMs": 18.2541,
+    "monoUsedDeltaBytes": 2887680,
+    "cells": 12,
+    "scroll201StepsMs": 70.535,
+    "reused": true,
+    "selected": "test-9999"
+  },
+  {
+    "total": 10000,
+    "run": 2,
+    "bytes": 1188899,
+    "loadAndBindMs": 17.8534,
+    "monoUsedDeltaBytes": 2871296,
+    "cells": 12,
+    "scroll201StepsMs": 69.5823,
+    "reused": true,
+    "selected": "test-9999"
+  },
+  {
+    "total": 10000,
+    "run": 3,
+    "bytes": 1188899,
+    "loadAndBindMs": 17.7959,
+    "monoUsedDeltaBytes": 2879488,
+    "cells": 12,
+    "scroll201StepsMs": 69.2123,
+    "reused": true,
+    "selected": "test-9999"
+  }
+]

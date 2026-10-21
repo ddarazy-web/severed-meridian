@@ -96,6 +96,7 @@ namespace LevelAuthoring.Editor
             if (relative == null) throw new ContentFormatException("팩 출력 경로가 없습니다.");
             string asset = relative.EndsWith(".meta", StringComparison.Ordinal) ? relative.Substring(0, relative.Length - 5) : relative;
             if (asset != Elements.Editor.ElementContentPackBuild.OutputPath && asset != JsonContentPackBuild.GenerationPath &&
+                asset != Levels.LevelLobbyIndexCodec.OutputPath &&
                 !Regex.IsMatch(asset, @"\AAssets/Data/LevelPacks/levels-[0-9]{6,}\.bytes\z") &&
                 !Regex.IsMatch(asset, @"\AAssets/AddressableAssetsData/(?:[A-Za-z0-9_ -]+/)*[A-Za-z0-9_ -]+\.asset\z"))
                 throw new ContentFormatException("소유하지 않는 팩 출력 경로입니다: " + relative);

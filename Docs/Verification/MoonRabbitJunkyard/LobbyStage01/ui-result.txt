@@ -1,0 +1,12 @@
+PASS total=0, cells=0, stable instances, selected ID and drag suppression
+PASS total=1, cells=1, stable instances, selected ID and drag suppression
+PASS total=15, cells=12, stable instances, selected ID and drag suppression
+PASS total=1000, cells=12, stable instances, selected ID and drag suppression
+PASS total=10000, cells=12, stable instances, selected ID and drag suppression
+PASS viewport grow/shrink before list LateUpdate adjusts pool and unique bindings
+KEY frame=23 current=1 expected=1 pressed=True edge=True list=True focus= first=9988
+KEY frame=24 current=1 expected=1 pressed=True edge=False list=True focus=Play first=9988
+KEY frame=25 current=1 expected=1 pressed=True edge=False list=True focus=Play first=9988
+PASS keyboard End/Home focuses correct rows and scrolls to visibility
+PASS authored scene dependencies and registered name/UI glyph coverage
+PASS repeated reload/cancel/reenable, ID/number/generation selection, destruction and operation cache baseline

@@ -1,0 +1,1 @@
+PASS index source mapping, generation hash, atomic publication rollback
