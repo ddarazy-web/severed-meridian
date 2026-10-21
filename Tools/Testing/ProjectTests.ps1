@@ -5,6 +5,7 @@ param(
     [string]$Method
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'TestArtifactCleanup.ps1')
 $projectRoot = [IO.Path]::GetFullPath($ProjectPath).TrimEnd('\', '/')
 $source = Join-Path $projectRoot 'Tests/Editor'
 $target = Join-Path $projectRoot 'Assets/__ProjectTests'
@@ -104,7 +105,9 @@ try {
     }
     if (-not (Test-Path -LiteralPath $UnityPath -PathType Leaf)) { throw 'Unity 실행 파일을 찾을 수 없습니다. -UnityPath를 지정하세요.' }
     Connect-Tests
+    $processExited = $false
     try {
+        $cleanupSnapshot = Start-TestArtifactCleanup $projectRoot
         $logPath = Join-Path $stateDirectory ((Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Action + '.log')
         $unityArguments = @('-batchmode', '-projectPath', $projectRoot, '-logFile', $logPath)
         if ($Action -eq 'Compile') { $unityArguments += '-quit' }
@@ -114,9 +117,20 @@ try {
         $quotedArguments = @($unityArguments | ForEach-Object { '"' + $_.Replace('"', '\"') + '"' })
         $unityProcess = Start-Process -FilePath $UnityPath -ArgumentList $quotedArguments -WorkingDirectory $projectRoot -WindowStyle Hidden -PassThru
         $unityProcess.WaitForExit()
+        $processExited = $true
         $unityExit = $unityProcess.ExitCode
         $unityProcess.Dispose()
         if ($unityExit -ne 0) { throw "Unity 검사 실패(exit $unityExit): $logPath" }
         Write-Output "Unity $Action 성공(exit 0)"
-    } finally { Assert-EditorClosed; Disconnect-Tests }
+    } finally {
+        Assert-EditorClosed
+        Disconnect-Tests
+        if ($processExited) {
+            try {
+                $cleanup = Complete-TestArtifactCleanup $cleanupSnapshot
+                $cleanup | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath ($logPath + '.cleanup.json') -Encoding utf8
+                Write-Output "테스트 사본 정리: $($cleanup.DeletedFiles)개 · 보존/확인 필요 $($cleanup.Skipped.Count)곳"
+            } catch { Write-Warning "테스트 사본 정리를 완료하지 못했습니다. 파일은 보존합니다: $_" }
+        }
+    }
 } finally { $gate.Dispose() }

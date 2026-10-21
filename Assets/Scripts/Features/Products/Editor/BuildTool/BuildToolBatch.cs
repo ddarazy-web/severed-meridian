@@ -57,7 +57,7 @@ namespace Products.Editor
                 {
                     var profiles = ProductProfiles.Definitions.Select(product => new
                     {
-                        name = product.Name, path = product.ProfilePath, target = product.Target.ToString(), output = product.Output,
+                        name = product.Name, path = product.ProfilePath, target = product.Target.ToString(), output = BuildToolPlatforms.Default.Output(product, null),
                         options = BuildToolOptions.Default.Available(product).Select(option => new
                         { id = option.Id, label = option.Label, description = option.Tooltip, defaultEnabled = option.DefaultEnabled,
                             off = option.DisabledLabel ?? "OFF", on = option.EnabledLabel ?? "ON" }).ToArray()

@@ -32,7 +32,11 @@ namespace Products.Editor
                     var store = new BuildToolRunStore(BuildToolExecutionVerification.NewRoot());
                     var runner = new BuildToolRunner(backend, store, "format-fixture");
                     runner.Start(backend.Profile.Guid, false, new Dictionary<string, bool> { [BuildToolAndroidBundle.Id] = true });
-                    BuildToolPreflightVerification.Check(runner.Current.output == Path.GetFullPath(Path.ChangeExtension(product.Output, ".aab")), "AAB output frozen before platform selection: " + product.Name);
+                    var savedVersion = BuildToolVersionSettings.Read(backend.Profile);
+                    string expectedOutput = product.Symbol == "PRODUCT_ANDROID_GAME"
+                        ? Path.Combine(Path.GetDirectoryName(product.Output), $"moon_rabbit_junk_{savedVersion.Name}_{savedVersion.Code}.aab")
+                        : Path.ChangeExtension(product.Output, ".aab");
+                    BuildToolPreflightVerification.Check(runner.Current.output == Path.GetFullPath(expectedOutput), "AAB output frozen before platform selection: " + product.Name);
                     runner = new BuildToolRunner(backend, store, "format-fixture");
                     backend.BeforeBuild = request => BuildToolPreflightVerification.Check(request.androidAppBundle == true && request.output.EndsWith(".aab"), "reloaded request passes AAB to backend");
                     for (int i = 0; i < 12 && !runner.Current.IsTerminal; i++) runner.Step();
@@ -65,7 +69,11 @@ namespace Products.Editor
                 window.SelectProfile(android);
                 var dropdown = window.rootVisualElement.Q<DropdownField>("option-" + BuildToolAndroidBundle.Id);
                 BuildToolPreflightVerification.Check(dropdown.value == "APK", "Android format UI defaults to APK"); dropdown.value = "AAB";
-                BuildToolPreflightVerification.Check(window.rootVisualElement.Q<Label>("profile-information").text.Contains("Game.aab"), "AAB selection updates displayed output immediately");
+                var version = BuildToolVersionSettings.Read(native.Read(android));
+                string expectedName = $"moon_rabbit_junk_{version.Name}_{version.Code}";
+                BuildToolPreflightVerification.Check(Path.GetFileName(BuildToolAndroidBundle.Output(ProductProfiles.Definitions[0], null)) == expectedName + ".apk",
+                    "APK filename uses product profile version and code");
+                BuildToolPreflightVerification.Check(window.rootVisualElement.Q<Label>("profile-information").text.Contains(expectedName + ".aab"), "AAB selection updates versioned output immediately");
                 window.Close(); window = ScriptableObject.CreateInstance<MatchBuildToolWindow>(); window.SelectionPath = preferences; window.Show(); window.CreateGUI();
                 BuildToolPreflightVerification.Check(window.rootVisualElement.Q<DropdownField>("option-" + BuildToolAndroidBundle.Id).value == "AAB", "format selection survives reopening");
                 window.SelectProfile(AssetDatabase.AssetPathToGUID(ProductProfiles.Definitions.Last().ProfilePath));

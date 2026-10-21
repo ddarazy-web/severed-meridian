@@ -83,7 +83,7 @@ Build.bat -Profile "Windows Level Editor" -DebugMode off
 - `-Format aab`: Google Play 업로드용 AAB.
 - `-DebugMode on`: 디버그 옵션 활성화. `off`: Release 옵션.
 - Android 형식을 Windows 프로필에 지정하면 오류로 종료합니다.
-- 출력 위치는 기존 제품 정의를 따릅니다. 예: `Builds/Android/Game.apk`, `Builds/Steam/MoonRabbit.exe`, `Builds/LevelTool/MoonRabbitLevelTool.exe`.
+- Android 게임은 `Builds/Android/moon_rabbit_junk_<Version Name>_<Version Code>.apk`로 출력합니다. 예: `moon_rabbit_junk_0.1.0_1.apk`. AAB 선택 시 확장자는 `.aab`입니다. 버전은 해당 Android Game 프로필에서 읽으며 파일명에 쓸 수 없는 문자는 `_`로 바꿉니다. 다른 제품의 출력 경로는 유지합니다.
 - 실제 빌드는 기존 Addressables·MemoryPack 등 콘텐츠 생성도 실행합니다. 결과를 스토어에 업로드하거나 커밋·푸시하지는 않습니다.
 - 실제 빌드에서는 Unity 시작 인자로 선택한 Build Profile을 지정하여 대상 플랫폼으로 시작합니다. 이후 옵션 적용·실행·후처리는 기존 빌드 도구가 담당합니다. 프로필 에셋은 기존 제품 정의 규칙대로 `Assets/Settings/BuildProfiles/<프로필 이름>.asset`을 사용합니다.
 - 동일 출력 경로에 재빌드하면 기존 산출물이 갱신됩니다. 보관할 빌드는 먼저 별도 폴더로 복사하세요.

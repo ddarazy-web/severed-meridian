@@ -19,8 +19,21 @@ namespace Products.Editor
         public bool Handles(BuildToolOptionStage stage) => stage == BuildToolOptionStage.BeforeBuild;
         public void Execute(BuildToolOptionStage stage, BuildToolOptionContext context) => context.Request.androidAppBundle = context.Enabled;
 
-        public static string Output(ProductDefinition product, IReadOnlyList<BuildToolOptionState> options) =>
-            Path.ChangeExtension(product.Output, options != null && options.Any(option => option.id == Id && option.enabled) ? ".aab" : ".apk");
+        public static string Output(ProductDefinition product, IReadOnlyList<BuildToolOptionState> options)
+        {
+            string output = product.Output;
+            if (product.Symbol == "PRODUCT_ANDROID_GAME")
+            {
+                var profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(product.ProfilePath);
+                using var settings = new SerializedObject(ProductProfiles.ProfileSettings(profile, false));
+                // 전역 PlayerSettings 대신 해당 제품 프로필의 버전을 사용한다.
+                string version = settings.FindProperty("bundleVersion").stringValue;
+                foreach (char invalid in Path.GetInvalidFileNameChars()) version = version.Replace(invalid, '_');
+                int code = settings.FindProperty("AndroidBundleVersionCode").intValue;
+                output = Path.Combine(Path.GetDirectoryName(output), $"moon_rabbit_junk_{version}_{code}.apk");
+            }
+            return Path.ChangeExtension(output, options != null && options.Any(option => option.id == Id && option.enabled) ? ".aab" : ".apk");
+        }
 
         internal static void Apply(BuildToolRequest request, BuildToolRunStore store)
         {

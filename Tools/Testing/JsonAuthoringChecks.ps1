@@ -1,6 +1,7 @@
 param([ValidateSet('Portable','Unity','All')][string]$Action = 'Portable')
 $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
+. (Join-Path $PSScriptRoot 'TestArtifactCleanup.ps1')
 Push-Location $repo
 try {
     if ($Action -ne 'Portable') {
@@ -26,14 +27,35 @@ try {
         }
     }
     if ($Action -ne 'Unity') {
-        $jsonLibrary = Get-ChildItem (Join-Path $repo 'Library/PackageCache/com.unity.nuget.newtonsoft-json*/Runtime/Newtonsoft.Json.dll') | Select-Object -First 1
-        if (!$jsonLibrary) { throw 'Unity에서 공식 Newtonsoft JSON 패키지를 먼저 복원하세요.' }
-        if (!(Test-Path 'Logs/GameAuthoringStage02/latest-fixtures.txt')) { throw '먼저 -Action Unity로 대표 시험 문서를 생성하세요.' }
-        $linkRoot = Join-Path $repo ('ContentData/Trials/game-authoring-stage-02/link-check-' + [Guid]::NewGuid().ToString('N'))
-        New-Item -ItemType Directory -Path (Join-Path $linkRoot 'outside'),(Join-Path $linkRoot 'inside') -Force | Out-Null
-        New-Item -ItemType Junction -Path (Join-Path $linkRoot 'inside/link') -Target (Join-Path $linkRoot 'outside') | Out-Null
-        [IO.File]::WriteAllText((Join-Path $repo 'Logs/GameAuthoringStage02/link-root.txt'), (Join-Path $linkRoot 'inside'))
-        & dotnet run --project (Join-Path $repo 'Tests/Portable/LevelAuthoring/LevelAuthoringChecks.csproj') "-p:JsonLibrary=$($jsonLibrary.FullName)"
-        if ($LASTEXITCODE -ne 0) { throw "독립 JSON 검사 실패: $LASTEXITCODE" }
+        $stateDirectory = Join-Path $repo 'Logs/TestHarness'
+        New-Item -ItemType Directory -Path $stateDirectory -Force | Out-Null
+        $cleanupGate = [IO.File]::Open((Join-Path $stateDirectory 'operation.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
+        $portableExited = $false
+        try {
+            $editorLock = Join-Path $repo 'Temp/UnityLockfile'
+            if (Test-Path -LiteralPath $editorLock) {
+                $probe = [IO.File]::Open($editorLock, 'Open', 'ReadWrite', 'None'); $probe.Dispose()
+            }
+            $cleanupSnapshot = Start-TestArtifactCleanup $repo
+            $report = Join-Path $stateDirectory ('portable-' + [guid]::NewGuid().ToString('N'))
+            $jsonLibrary = Get-ChildItem (Join-Path $repo 'Library/PackageCache/com.unity.nuget.newtonsoft-json*/Runtime/Newtonsoft.Json.dll') | Select-Object -First 1
+            if (!$jsonLibrary) { throw 'Unity에서 공식 Newtonsoft JSON 패키지를 먼저 복원하세요.' }
+            if (!(Test-Path 'Logs/GameAuthoringStage02/latest-fixtures.txt')) { throw '먼저 -Action Unity로 대표 시험 문서를 생성하세요.' }
+            $linkRoot = Join-Path $repo ('ContentData/Trials/game-authoring-stage-02/link-check-' + [Guid]::NewGuid().ToString('N'))
+            New-Item -ItemType Directory -Path (Join-Path $linkRoot 'outside'),(Join-Path $linkRoot 'inside') -Force | Out-Null
+            New-Item -ItemType Junction -Path (Join-Path $linkRoot 'inside/link') -Target (Join-Path $linkRoot 'outside') | Out-Null
+            [IO.File]::WriteAllText((Join-Path $repo 'Logs/GameAuthoringStage02/link-root.txt'), (Join-Path $linkRoot 'inside'))
+            & dotnet run --project (Join-Path $repo 'Tests/Portable/LevelAuthoring/LevelAuthoringChecks.csproj') "-p:JsonLibrary=$($jsonLibrary.FullName)" 2>&1 | Tee-Object -FilePath ($report + '.log')
+            $portableExited = $true
+            if ($LASTEXITCODE -ne 0) { throw "독립 JSON 검사 실패: $LASTEXITCODE" }
+            } finally {
+            if ($portableExited) {
+                try {
+                    $cleanup = Complete-TestArtifactCleanup $cleanupSnapshot
+                    $cleanup | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath ($report + '.cleanup.json') -Encoding utf8
+                } catch { Write-Warning "독립 검사 사본 정리를 완료하지 못했습니다: $_" }
+            }
+            $cleanupGate.Dispose()
+        }
     }
 } finally { Pop-Location }

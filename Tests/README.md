@@ -37,6 +37,18 @@
 
 검사별 기존 결과 경로는 바뀌지 않는다. 과거 결과를 보존하려면 실행 전 해당 검사 출력 폴더를 별도 백업한다. 실행 도구 로그와 연결 소유 기록은 `Logs/TestHarness`에 남는다.
 
+## 검사 종료 후 임시 사본 정리
+
+`ProjectTests.ps1 -Action Run/Compile` 및 `JsonAuthoringChecks.ps1`의 독립 검사는 프로세스 종료 후 자동 정리한다. 실패 종료도 정리하지만, 프로세스 중단·에디터 사용 중·연결 해제 실패 시에는 보존한다.
+
+- 실행 전 존재했던 폴더는 삭제하지 않는다. `TestArtifactCleanup.ps1`에 등록된 GUID 형식의 테스트 전용 폴더 중 이번 실행에서 생성된 폴더만 검사한다.
+- 해당 폴더의 `project.json`, `draft.json`, `part-draft.json`과 그 임시·이전 사본, `snapshots/<GUID>/<번호>.json`만 삭제한다.
+- 실제 편집의 `draft-*`, Candidates/Backups, 현재 선택된 정식 원본, 고정 입력, 로그·JSONL·스크린샷·보고서·ZIP은 보존한다. 이름이나 소유권이 불명확한 파일도 보존한다.
+- 잠긴 파일 또는 링크가 있으면 해당 사본을 보존한다. `.cleanup.json`에 삭제 수·용량·보존 경로를 기록한다. 일반 에디터에서 직접 실행한 검사는 자동 정리 대상이 아니다.
+- 새 테스트가 다른 경로를 사용한다면 전용 출력 경로와 사본 파일 형식을 확인한 뒤 정리 규칙 및 보호 검사를 함께 추가한다. 전체 Logs/Trials 삭제나 오래된 폴더 일괄 삭제는 하지 않는다.
+
+정리 보호 검사: `./Tools/Testing/Test-TestArtifactCleanup.ps1`
+
 ## 수동으로 검사 연결
 
 ```powershell

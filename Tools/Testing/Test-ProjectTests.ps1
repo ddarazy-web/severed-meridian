@@ -44,6 +44,7 @@ try {
     $shellPath = (Get-Process -Id $PID).Path
     Reject { & $Harness -Action Run -ProjectPath $root -Method 'Sample.Run' -UnityPath $shellPath } '실제 비정상 종료 코드 전달' 'Unity 검사 실패\(exit [1-9][0-9]*\)'
     Check (-not (Test-Path "$root/Assets/__ProjectTests") -and -not (Test-Path "$root/Logs/TestHarness/connection.json")) '실행 실패 후 자동 해제'
+    Check (@(Get-ChildItem "$root/Logs/TestHarness" -Filter '*.cleanup.json').Count -eq 1) '실패한 검사도 정리 결과 기록'
     New-Item -ItemType Directory -Path "$root/Assets/__ProjectTests" | Out-Null
     [IO.File]::WriteAllText("$root/Assets/__ProjectTests/owned-by-user.txt", 'keep')
     Reject { & $Harness -Action Detach -ProjectPath $root } '미소유 폴더 해제 거절'
@@ -51,6 +52,11 @@ try {
     Check (Test-Path "$root/Assets/__ProjectTests/owned-by-user.txt") '사용자 폴더 보존'
     Write-Output "TOTAL PASS $passed"
 } finally {
-    # 검사 증거는 Logs에 남겨 실패 시 원본과 복사본을 확인할 수 있다.
-    Write-Output "SELFTEST WORKSPACE $root"
+    # 성공 시 모의 프로젝트를 제거하고 검증 결과만 남긴다. 실패 증거는 보존한다.
+    if ($passed -eq 18) {
+        $allowed = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../Logs/TestHarness/SelfTests')) + [IO.Path]::DirectorySeparatorChar
+        if (!$root.StartsWith($allowed, [StringComparison]::OrdinalIgnoreCase)) { throw '검사 경로가 범위를 벗어났습니다.' }
+        "TOTAL PASS $passed" | Set-Content -LiteralPath ($root + '.result.txt') -Encoding utf8
+        Remove-Item -LiteralPath $root -Recurse -Force
+    } else { Write-Output "SELFTEST WORKSPACE $root" }
 }
