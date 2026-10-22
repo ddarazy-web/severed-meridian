@@ -9,18 +9,25 @@ namespace GameScreen
         [SerializeField] private UnityEngine.UI.Text title, detail;
         [SerializeField] private UnityEngine.UI.Button retry;
         [SerializeField] private UnityEngine.UI.Button nextLevel;
-        private UnityAction onRetry, onNext;
+        [SerializeField] private UnityEngine.UI.Button lobby;
+        private UnityAction onRetry, onNext, onLobby;
         private PuzzleResultState value = new PuzzleResultState();
         public void Configure(UnityEngine.UI.Text heading, UnityEngine.UI.Text body, UnityEngine.UI.Button button)
         { title = heading; detail = body; retry = button; }
         public void Bind(System.Action action)
             => Bind(action, null);
         public void ConfigureNextButton(UnityEngine.UI.Button button) => nextLevel = button;
-        public void Bind(System.Action retryAction, System.Action nextAction)
+        public void Bind(System.Action retryAction, System.Action nextAction, System.Action lobbyAction = null)
         {
             ReleaseRestore();
             onRetry = () => { if (isActiveAndEnabled && retry.interactable) retryAction?.Invoke(); };
             retry.onClick.AddListener(onRetry);
+            if (lobby != null)
+            {
+                lobby.gameObject.SetActive(lobbyAction != null);
+                onLobby = () => { if (isActiveAndEnabled && lobby.interactable) lobbyAction?.Invoke(); };
+                lobby.onClick.AddListener(onLobby);
+            }
             if (nextLevel == null) return;
             onNext = () => { if (isActiveAndEnabled && nextLevel.interactable) nextAction?.Invoke(); };
             if (nextAction != null) nextLevel.onClick.AddListener(onNext);
@@ -36,6 +43,7 @@ namespace GameScreen
         {
             value = state == null ? new PuzzleResultState() : (PuzzleResultState)state.Copy();
             title.text = value.Title; detail.text = value.Body; retry.interactable = !value.Busy;
+            if (lobby != null) lobby.interactable = !value.Busy;
             if (nextLevel == null) return;
             nextLevel.gameObject.SetActive(value.NextVisible); nextLevel.interactable = value.NextEnabled && !value.Busy;
         }
@@ -51,7 +59,8 @@ namespace GameScreen
         {
             if (retry != null && onRetry != null) retry.onClick.RemoveListener(onRetry);
             if (nextLevel != null && onNext != null) nextLevel.onClick.RemoveListener(onNext);
-            onRetry = onNext = null;
+            if (lobby != null && onLobby != null) lobby.onClick.RemoveListener(onLobby);
+            onRetry = onNext = onLobby = null;
         }
         private void OnDisable() { ReleaseRestore(); }
     }

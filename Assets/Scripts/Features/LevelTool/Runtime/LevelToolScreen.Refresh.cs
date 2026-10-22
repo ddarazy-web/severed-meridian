@@ -95,6 +95,12 @@ namespace LevelTool
             // 이전 선택의 본문은 화면 캐시에 남기지 않는다. Undo는 세션의 불변 버전이 보존한다.
             foreach (string stale in displayDocuments.Where(pair => pair.Value.Kind == "level" && pair.Key != Session.SelectedLevelId).Select(pair => pair.Key).ToArray())
                 displayDocuments.Remove(stale);
+            if (Session.SelectedLevelId == null)
+            {
+                displayedLevelId = null; displayedLevel = null;
+                displayContentVersion = Session.ContentVersion; displayMetadataVersion = metadataVersion;
+                return;
+            }
             if (!displayDocuments.ContainsKey(Session.SelectedLevelId))
             {
                 displayDocuments[Session.SelectedLevelId] = Session.Get(Session.SelectedLevelId); displayDocumentReadCount++;

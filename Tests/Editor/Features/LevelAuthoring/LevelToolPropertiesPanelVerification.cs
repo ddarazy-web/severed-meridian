@@ -30,7 +30,7 @@ namespace LevelAuthoring.Editor
                 actionsType.GetField("SetColor").SetValue(actions, (Action<string>)(value => optionsType.GetField("Color").SetValue(options, value)));
                 actionsType.GetField("SetDirection").SetValue(actions, (Action<string>)(value => optionsType.GetField("Direction").SetValue(options, value)));
                 AuthoringToolWorkspace workspace = new AuthoringToolWorkspace();
-                workspace.Create(Path.GetFullPath("Logs/LevelToolRefactorStage03/properties-" + Guid.NewGuid().ToString("N")), LevelToolDocuments.NewProject());
+                workspace.Create(Path.GetFullPath("Logs/LevelToolRefactorStage03/properties-" + Guid.NewGuid().ToString("N")), LevelToolTestProject.Create());
                 AuthoringEditSession session = workspace.Session;
                 int commands = 0;
                 Action<string, Action<JObject>> change = (label, edit) => { commands++; session.EditLevel(label, edit); };

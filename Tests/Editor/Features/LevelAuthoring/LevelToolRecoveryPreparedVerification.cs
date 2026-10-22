@@ -20,7 +20,7 @@ namespace LevelAuthoring.Editor
             string root = Path.GetFullPath("Logs/LevelToolRecoveryPerformance/prepared-" + Guid.NewGuid().ToString("N"));
             try
             {
-                var source = new AuthoringToolWorkspace(); source.Create(Path.Combine(root, "project"), LevelToolDocuments.NewProject());
+                var source = new AuthoringToolWorkspace(); source.Create(Path.Combine(root, "project"), LevelToolTestProject.Create());
                 source.Session.EditLevel("이름", level => LevelDocumentEditing.SetName(level, "첫 변경"));
                 source.Session.EditLevel("이름", level => LevelDocumentEditing.SetName(level, "둘째 변경"));
                 source.Session.Undo(); source.Session.SelectCells(new[] { 1, 2 });

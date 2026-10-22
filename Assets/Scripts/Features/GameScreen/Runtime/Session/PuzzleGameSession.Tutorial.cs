@@ -34,9 +34,12 @@ namespace GameScreen
         private bool TutorialAllowsBoardInput => !TutorialActive || tutorial.Progress.State == TutorialProgressState.AwaitAction && !HasProgressFeedback;
         private bool TutorialPresentationReady => ready && !failed && !IsRestarting && !IsChangingLevel && !IsPresenting && !HasProgressFeedback && !IsStartingFeedback;
 
-        private static bool CheckTutorialReplay(LevelDefinition definition)
+        private bool CheckTutorialReplay(LevelDefinition definition)
         {
             if (!definition.HasTutorial) return false;
+            // 정식 팩은 제작 검증을 통과한 세대이며 로더에서 선택 레벨 구조를 검사한다.
+            // 초안/툴 시험은 기존 전체 재생 검증을 유지한다.
+            if (publishedSource != null) return true;
             System.Collections.Generic.List<LevelValidationIssue> issues = LevelTutorialReplayValidator.Validate(definition);
             if (issues.Count == 0) return true;
             string diagnostic = string.Join(" · ", issues.Select(issue => issue.ToString()));

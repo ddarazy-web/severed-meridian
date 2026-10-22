@@ -24,7 +24,7 @@ namespace LevelAuthoring.Editor
             int exit = 1;
             try
             {
-                ContentSnapshot template = LevelToolDocuments.NewProject();
+                ContentSnapshot template = LevelToolTestProject.Create();
                 var documents = template.Documents.ToList();
                 ContentDocument original = documents.Single(doc => doc.Kind == "level");
                 for (int number = 2; number <= 4; number++)

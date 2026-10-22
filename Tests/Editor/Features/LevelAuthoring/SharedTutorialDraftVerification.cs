@@ -21,7 +21,7 @@ namespace LevelAuthoring.Editor
             {
                 Type type = typeof(TutorialDraftEditing).Assembly.GetType("LevelAuthoring.Runtime.SharedTutorialDraft");
                 Check(type != null, "isolated shared tutorial draft exists");
-                var workspace = new AuthoringToolWorkspace(); workspace.Create(data, LevelToolDocuments.NewProject());
+                var workspace = new AuthoringToolWorkspace(); workspace.Create(data, LevelToolTestProject.Create());
                 string levelId = workspace.Session.SelectedLevelId;
                 workspace.OpenListing(data, "Cancel"); workspace.OpenLevel(levelId);
                 var parent = workspace.Session;

@@ -29,7 +29,7 @@ public static class BuildToolVersionVerification
                 string path = folder + "/" + product.Name + ".asset";
                 if (!AssetDatabase.CopyAsset(product.ProfilePath, path)) throw new Exception("복제 실패");
                 BuildToolProfileInfo profile = BuildToolProfiles.Discover().Single(p => p.Path == path);
-                string code = product.Target == BuildTarget.StandaloneWindows64 ? null : "17";
+                string code = product.Target != BuildTarget.Android && product.Target != BuildTarget.iOS ? null : "17";
                 save.Invoke(null, new object[] { profile, "2.3.4", code });
                 AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
                 profile = BuildToolProfiles.Discover().Single(p => p.Path == path);

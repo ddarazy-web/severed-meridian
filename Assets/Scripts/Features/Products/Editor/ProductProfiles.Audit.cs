@@ -47,7 +47,9 @@ namespace Products.Editor
                 if (player.FindProperty("productName").stringValue != definition.ProductName)
                     throw new BuildFailedException(definition.Name + " 제품 이름/저장 경로 설정이 다릅니다.");
                 SerializedProperty identifiers = player.FindProperty("applicationIdentifier");
-                string platform = definition.Target == BuildTarget.Android ? "Android" : definition.Target == BuildTarget.iOS ? "iPhone" : "Standalone";
+                if (!BuildToolPlatforms.Default.TryGet(definition.Target, out IBuildToolPlatform handler, out string reason))
+                    throw new BuildFailedException(reason);
+                string platform = handler.PlayerSettingsKey;
                 bool identifierMatches = false;
                 for (int index = 0; identifiers != null && index < identifiers.arraySize; index++)
                 {
@@ -72,7 +74,7 @@ namespace Products.Editor
                     if (asset != null) preloadedList.Add(AssetDatabase.GetAssetPath(asset));
                 }
                 string[] preloaded = preloadedList.ToArray();
-                string[] roots = commonRoots.Concat(preloaded).Concat(addressableRoots).Concat(new[] { definition.Scene }).Where(value => !string.IsNullOrEmpty(value)).Distinct().ToArray();
+                string[] roots = commonRoots.Concat(preloaded).Concat(addressableRoots).Concat(definition.Scenes).Where(value => !string.IsNullOrEmpty(value)).Distinct().ToArray();
                 string[] dependencies = AssetDatabase.GetDependencies(roots, true);
                 foreach (string path in dependencies) ValidateDependency(path, definition.IsTool);
                 // StreamingAssets는 직렬화 참조 분석 밖에서도 그대로 복사되므로 원본 JSON을 별도로 거절한다.
@@ -86,7 +88,7 @@ namespace Products.Editor
                     PropertyInfo explicitProperty = typeof(PluginImporter).GetProperty("IsExplicitlyReferenced", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                     report.AppendLine("  platform-compatible plugin=" + plugin.assetPath + "; native=" + plugin.isNativePlugin + "; explicitReference=" + explicitProperty?.GetValue(plugin) + "; defineConstraints=" + string.Join(",", plugin.DefineConstraints));
                 }
-                report.AppendLine(definition.Name + " | " + definition.Symbol + " | " + definition.Target + " | " + definition.Scene + " | " + definition.Output);
+                report.AppendLine(definition.Name + " | " + definition.Symbol + " | " + definition.Target + " | " + string.Join(", ", definition.Scenes) + " | " + definition.Output);
                 report.AppendLine("  productName=" + definition.ProductName + "; dependencies=" + dependencies.Length + "; resources/streaming=" + commonRoots.Length + "; preloaded=" + preloaded.Length + "; addressableRoots=" + addressableRoots.Count);
                 report.AppendLine("  moduleInstalled=" + BuildPipeline.IsBuildTargetSupported(BuildPipeline.GetBuildTargetGroup(definition.Target), definition.Target) + "; platformCompatiblePluginCount=" + plugins.Length);
                 report.AppendLine("  contentBuild=" + buildPath + "; contentLoad=" + loadPath);

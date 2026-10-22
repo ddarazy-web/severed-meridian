@@ -1,0 +1,11 @@
+Unity=6000.3.10f1; OS=Windows 11  (10.0.26200); graphics=NVIDIA GeForce RTX 3060 Ti; screen=640x480; generation=be2a8e04f9ce742fe26d485e3299a5c89d77dacf39e4c817708752996fb599df
+Editor BeforeSceneLoad→first Canvas render callback=349.039ms; LobbyScreen ready=715.492ms; levels=15
+Canvas callback is an Editor rendering boundary, not Android process start or display presentation latency. List samples run within one initialized Editor lobby; run0 is first fixture bind, run1-3 are warm repeats.
+READ Assets/Data/LevelPacks/content-generation.bytes
+READ Assets/Data/LevelPacks/lobby-index.bytes
+WARM lobby metadata reload=1; readyMs=200.886
+WARM lobby metadata reload=2; readyMs=201.003
+WARM lobby metadata reload=3; readyMs=201.375
+Thread allocation counter supported=False; unsupported values use -1, not zero allocations.
+Unity frame allocation recorder valid=True; frame values include test instrumentation and UI frame work, not only the measured loop.
+PASS 15/1000/10000 × first+3 warm samples; bounded stable cells; correct final selection; startup reads only metadata.

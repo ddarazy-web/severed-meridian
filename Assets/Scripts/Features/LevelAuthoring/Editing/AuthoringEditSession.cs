@@ -42,13 +42,15 @@ namespace LevelAuthoring.Editing
         {
             if (stored == null) throw new ArgumentNullException(nameof(stored));
             current = new State { Documents = stored.Snapshot.ShareOwnedDocuments(), Cells = Array.Empty<int>() };
-            SelectLevel(levelId); saved = current.Documents; savedLevelId = levelId; Revision = stored.Hash;
+            if (levelId != null) SelectLevel(levelId);
+            saved = current.Documents; savedLevelId = levelId; Revision = stored.Hash;
         }
         public AuthoringEditSession(ContentProjectDirectory directory, string levelId)
         {
             DirectoryBaseline = directory ?? throw new ArgumentNullException(nameof(directory));
             current = new State { Documents = directory.CreateDocumentReferences(), Cells = Array.Empty<int>() };
-            SelectLevel(levelId); saved = current.Documents; savedLevelId = levelId; Revision = directory.ManifestHash;
+            if (levelId != null) SelectLevel(levelId);
+            saved = current.Documents; savedLevelId = levelId; Revision = directory.ManifestHash;
         }
         public ContentDocument Get(string id)
         {
@@ -114,6 +116,18 @@ namespace LevelAuthoring.Editing
             if (selection.Any(cell => cell < 0 || cell >= 81)) throw new ArgumentOutOfRangeException(nameof(cells));
             current.Cells = selection;
         }
+        public void DeleteSelectedLevel()
+        {
+            ContentDocument nextLevel = current.Documents.Values.Where(doc => doc.Kind == "level" && doc.Id != current.LevelId)
+                .OrderBy(doc => doc.Info.LevelNumber).ThenBy(doc => doc.Id, StringComparer.Ordinal).FirstOrDefault();
+            if (nextLevel == null) throw new ContentFormatException("마지막 레벨은 삭제할 수 없습니다. 레벨을 하나 이상 남겨 주세요.");
+            // 다음 레벨을 읽지 못하면 삭제도 하지 않는다. 문서와 선택을 한 이력으로 함께 보관한다.
+            nextLevel.EnsureLoaded();
+            var next = new Dictionary<string, ContentDocument>(current.Documents, StringComparer.Ordinal);
+            next.Remove(current.LevelId);
+            undo.Push(Capture()); redo.Clear();
+            current = new State { Documents = next, LevelId = nextLevel.Id, Cells = Array.Empty<int>() };
+        }
         public void EditLevel(string label, Action<JObject> edit)
         {
             if (edit == null) throw new ArgumentNullException(nameof(edit));
@@ -160,7 +174,7 @@ namespace LevelAuthoring.Editing
         private void CommitDraft(Dictionary<string, ContentDocument> draft)
         {
             if (draft.Any(pair => pair.Value == null || pair.Key != pair.Value.Id)) throw new ContentFormatException("문서 ID와 저장 키가 다릅니다.");
-            if (!draft.TryGetValue(current.LevelId, out ContentDocument level) || level.Kind != "level") throw new ContentFormatException("선택한 레벨을 변경에서 제거할 수 없습니다.");
+            if (current.LevelId != null && (!draft.TryGetValue(current.LevelId, out ContentDocument level) || level.Kind != "level")) throw new ContentFormatException("선택한 레벨을 변경에서 제거할 수 없습니다.");
             if (Equal(draft, current.Documents)) return;
             // 게시한 내부 문서는 다시 수정하지 않는다. 외부 콜백의 변경 문서만 새로 복사한다.
             Dictionary<string, ContentDocument> next = draft.ToDictionary(pair => pair.Key, pair =>
@@ -175,7 +189,7 @@ namespace LevelAuthoring.Editing
         public void Redo() { if (redo.Count == 0) return; undo.Push(Capture()); current = redo.Pop(); }
         public void Discard()
         {
-            string levelId = saved.ContainsKey(current.LevelId) ? current.LevelId :
+            string levelId = current.LevelId != null && saved.ContainsKey(current.LevelId) ? current.LevelId :
                 savedLevelId;
             current = new State { Documents = saved, LevelId = levelId, Cells = Array.Empty<int>() };
             undo.Clear(); redo.Clear();

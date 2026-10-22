@@ -27,7 +27,7 @@ namespace LevelAuthoring.Editor
             {
                 host = new GameObject("isolated-display-test"); host.SetActive(false);
                 var screen = host.AddComponent<LevelToolScreen>();
-                screen.Workspace.Create(data, LevelToolDocuments.NewProject());
+                screen.Workspace.Create(data, LevelToolTestProject.Create());
                 AuthoringEditSession session = screen.Workspace.Session;
                 ContentDocument original = session.Get(session.SelectedLevelId);
                 for (int number = 2; number <= 50; number++)

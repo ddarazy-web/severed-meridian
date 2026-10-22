@@ -25,7 +25,7 @@ namespace LevelAuthoring.Editor
                 targeted = typeof(AuthoringEditSession).GetMethod("ApplyToDocuments");
                 Check(targeted != null, "targeted document transaction exists");
                 var workspace = new AuthoringToolWorkspace();
-                workspace.Create(Path.Combine(folder, "project"), LevelToolDocuments.NewProject());
+                workspace.Create(Path.Combine(folder, "project"), LevelToolTestProject.Create());
                 var session = workspace.Session;
                 string level = session.SelectedLevelId;
                 string project = session.Documents.Single(doc => doc.Kind == "project").Id;

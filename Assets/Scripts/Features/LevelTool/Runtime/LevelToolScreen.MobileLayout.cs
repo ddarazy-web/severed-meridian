@@ -160,6 +160,9 @@ namespace LevelTool
 
         private void UpdateMobilePanelVisibility()
         {
+            bool editing = Workspace.Folder != null && levelIndex.Count > 0;
+            mobileNavigation.style.display = editing ? DisplayStyle.Flex : DisplayStyle.None;
+            mobileToolStatus.style.display = editing ? DisplayStyle.Flex : DisplayStyle.None;
             // 가상 목록은 높이가 정해진 뷰포트가 필요하다. 소재 화면의 바깥 스크롤은 유지한다.
             ScrollView leftContent = leftPanel.Q<ScrollView>("mobile-left-content");
             if (leftContent != null) leftContent.contentContainer.style.height = materialsVisible ?

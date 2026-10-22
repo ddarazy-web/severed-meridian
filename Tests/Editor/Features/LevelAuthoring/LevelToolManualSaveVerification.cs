@@ -64,7 +64,7 @@ namespace LevelAuthoring.Editor
                     if (screen == null || (bool)Get("busy")) return;
                     LevelToolRecoveryIsolation.Verify(screen, folder);
                     Check(Get("modal") == null && screen.Workspace.Session == null, "startup does not automatically read recovery files");
-                    screen.Workspace.Create(Path.Combine(folder, "project"), LevelToolDocuments.NewProject());
+                    screen.Workspace.Create(Path.Combine(folder, "project"), LevelToolTestProject.Create());
                     if (sharedPending)
                     {
                         TutorialDraftEditing.EditLevel(screen.Workspace.Session, "준비", level =>

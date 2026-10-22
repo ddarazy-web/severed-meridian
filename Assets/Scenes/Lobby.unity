@@ -119,6 +119,55 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &210931065
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 210931066}
+  - component: {fileID: 210931067}
+  m_Layer: 0
+  m_Name: LobbyGameFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &210931066
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 210931065}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &210931067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 210931065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae99d403eb9ac58439933daedca4431a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameScreen.Navigation.LobbyGameFlow
+  screen: {fileID: 2639227160341945116}
+  lobbyCanvas: {fileID: 2639227160341945115}
+  lobbyCamera: {fileID: 822453851}
+  lobbyInput: {fileID: 449882105}
+  gameScenePath: Assets/Scenes/PuzzleGame.unity
 --- !u!1 &449882105
 GameObject:
   m_ObjectHideFlags: 0
@@ -289,6 +338,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4468815908895053017, guid: 6c17326e3ef2e954da56b9f923a8cf41, type: 3}
+      propertyPath: m_SortingOrder
+      value: 30000
+      objectReference: {fileID: 0}
     - target: {fileID: 6413527003256950981, guid: 6c17326e3ef2e954da56b9f923a8cf41, type: 3}
       propertyPath: m_Name
       value: LobbyCanvas
@@ -378,6 +431,22 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6c17326e3ef2e954da56b9f923a8cf41, type: 3}
+--- !u!223 &2639227160341945115 stripped
+Canvas:
+  m_CorrespondingSourceObject: {fileID: 4468815908895053017, guid: 6c17326e3ef2e954da56b9f923a8cf41, type: 3}
+  m_PrefabInstance: {fileID: 2639227160341945114}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2639227160341945116 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7443949486415860341, guid: 6c17326e3ef2e954da56b9f923a8cf41, type: 3}
+  m_PrefabInstance: {fileID: 2639227160341945114}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ab2d3b1ad9e42a793cb1ca30d533cd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Lobby.LobbyScreen
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -385,3 +454,4 @@ SceneRoots:
   - {fileID: 2639227160341945114}
   - {fileID: 449882106}
   - {fileID: 822453850}
+  - {fileID: 210931066}

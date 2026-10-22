@@ -37,7 +37,7 @@ namespace Products.Editor
                     Check(item.Guid == AssetDatabase.AssetPathToGUID(product.ProfilePath) && item.Product == product, "GUID and product " + product.Name);
                     Check(item.ReadIssues.Count == 0 && item.ApplicationId == product.ApplicationId && item.ProductName == product.ProductName,
                         "actual settings read without repair " + product.Name);
-                    Check(!item.IsCopy && item.Scenes.SequenceEqual(new[] { product.Scene }), "scene and original profile " + product.Name);
+                    Check(!item.IsCopy && item.Scenes.SequenceEqual(product.Scenes), "scenes and original profile " + product.Name);
                     var result = BuildToolPreflight.Inspect(item);
                     Check(result.Issues.Any(issue => issue.Level == BuildToolIssueLevel.Unknown) && result.Summary.Contains("미검증"), "never claims a build passed " + product.Name);
                     bool supported = BuildPipeline.IsBuildTargetSupported(BuildPipeline.GetBuildTargetGroup(item.Target), item.Target);

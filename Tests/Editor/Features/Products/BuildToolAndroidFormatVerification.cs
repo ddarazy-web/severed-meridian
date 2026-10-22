@@ -35,7 +35,7 @@ namespace Products.Editor
                     var savedVersion = BuildToolVersionSettings.Read(backend.Profile);
                     string expectedOutput = product.Symbol == "PRODUCT_ANDROID_GAME"
                         ? Path.Combine(Path.GetDirectoryName(product.Output), $"moon_rabbit_junk_{savedVersion.Name}_{savedVersion.Code}.aab")
-                        : Path.ChangeExtension(product.Output, ".aab");
+                        : Path.Combine(Path.GetDirectoryName(product.Output), $"aos_moonrabbit_level_tool_{savedVersion.Name}_{savedVersion.Code}.aab");
                     BuildToolPreflightVerification.Check(runner.Current.output == Path.GetFullPath(expectedOutput), "AAB output frozen before platform selection: " + product.Name);
                     runner = new BuildToolRunner(backend, store, "format-fixture");
                     backend.BeforeBuild = request => BuildToolPreflightVerification.Check(request.androidAppBundle == true && request.output.EndsWith(".aab"), "reloaded request passes AAB to backend");
@@ -43,6 +43,7 @@ namespace Products.Editor
                     BuildToolPreflightVerification.Check(runner.Current.phase == BuildToolRunPhase.Succeeded && backend.BuildCalls == 1, "AAB mock lifecycle completes once");
                     backend.BeforeBuild = request => BuildToolPreflightVerification.Check(request.androidAppBundle == false && request.output.EndsWith(".apk"), "next APK request has no AAB residue");
                     runner.Start(backend.Profile.Guid, false, null);
+                    BuildToolPreflightVerification.Check(runner.Current.output == Path.GetFullPath(Path.ChangeExtension(expectedOutput, ".apk")), "APK uses same versioned filename: " + product.Name);
                     for (int i = 0; i < 12 && !runner.Current.IsTerminal; i++) runner.Step();
                     BuildToolPreflightVerification.Check(runner.Current.phase == BuildToolRunPhase.Succeeded, "APK mock lifecycle completes");
                 }

@@ -15,6 +15,7 @@ namespace GameScreen
         [SerializeField] private int seed = 12345;
         [SerializeField] private PuzzleWorldBoard board;
         [SerializeField] private Camera boardCamera;
+        [SerializeField] private bool waitForExplicitRequest;
         private ElementVisualCatalog visualCatalog;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private PuzzleArtwork artwork;
@@ -30,6 +31,13 @@ namespace GameScreen
             !IsPresenting && !IsStartingFeedback && Phase == BoardActionPhase.Ready && Outcome == null && TutorialAllowsBoardInput;
         public string Message { get; private set; } = "레벨 로딩 중";
         public event Action Changed;
+        public double InitialDataMilliseconds { get; private set; }
+        public double InitialBoardMilliseconds { get; private set; }
+        public double InitialArtworkMilliseconds { get; private set; }
+        public double InitialReadyMilliseconds { get; private set; }
+        public double InitialInteractionMilliseconds { get; private set; } = -1;
+        public PublishedLevelLoadTiming LastPublishedLoadTiming => publishedSource?.LastLoadTiming ?? default;
+        private System.Diagnostics.Stopwatch initialPreparationTimer;
 
         public void Configure(PuzzleWorldBoard worldBoard, Camera camera)
         { board = worldBoard; boardCamera = camera; }
@@ -50,7 +58,7 @@ namespace GameScreen
 #endif
         private void Start()
         {
-            if (!started) InitializeAsync(levelNumber, seed, CancellationToken.None).Forget(Debug.LogException);
+            if (!started && !waitForExplicitRequest) InitializeAsync(levelNumber, seed, CancellationToken.None).Forget(Debug.LogException);
         }
 
         public UniTask InitializeAsync(int number, int randomSeed, CancellationToken token)
@@ -72,6 +80,7 @@ namespace GameScreen
                 throw new InvalidOperationException("이미 시작된 게임 세션입니다.");
             }
             started = true;
+            initialPreparationTimer = System.Diagnostics.Stopwatch.StartNew();
             using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(token, lifetime.Token);
             try
             {
@@ -79,31 +88,37 @@ namespace GameScreen
                 if (explicitRequest)
                 {
                     // 실패해도 Start가 정식 레벨 로딩으로 우회하지 않도록 먼저 실행권을 확보한다.
-                    if (request == null) throw new ArgumentNullException(nameof(request));
+                    if (request == null && publishedSource == null) throw new ArgumentNullException(nameof(request));
                     if (context == null) throw new ArgumentNullException(nameof(context));
                     PlayContext = context;
                     tutorialContext = context.Tutorial;
                     levelAdvanceEnabled = context.AllowLevelAdvance;
-                    ElementVisualCatalogDto visuals = request.CreateVisuals();
-                    visualCatalog = visuals == null ? null : LegacyElementVisuals.WithOverrides(visuals);
-                    definition = request.CreateDefinition();
+                    if (request != null)
+                    {
+                        ElementVisualCatalogDto visuals = request.CreateVisuals();
+                        visualCatalog = visuals == null ? null : LegacyElementVisuals.WithOverrides(visuals);
+                        definition = request.CreateDefinition();
+                    }
+                    else definition = await publishedSource.LoadAsync(number, linked.Token);
                 }
                 else if (definition == null) definition = await LevelPackLoader.LoadAsync(number, linked.Token);
                 linked.Token.ThrowIfCancellationRequested();
                 visualCatalog ??= ElementVisualLookup.ForLevel(definition);
-                initialBytes = LevelPackCodec.Snapshot(definition);
+                initialBytes = publishedSource == null ? LevelPackCodec.Snapshot(definition) : null;
                 levelNumber = number; seed = randomSeed;
+                InitialDataMilliseconds = initialPreparationTimer.Elapsed.TotalMilliseconds;
                 await PrepareAsync(definition, randomSeed, linked.Token);
                 GameDiagnostics.GameLog.Debug("퍼즐 세션 시작 · 레벨 " + levelNumber + " · 시드 " + seed, this);
             }
             catch (OperationCanceledException)
             {
-                ready = false; DisposeTutorial(); artwork?.Dispose();
+                ready = false; DisposeTutorial(); artwork?.Dispose(); publishedSource?.Dispose();
                 if (explicitRequest) throw;
             }
             catch (Exception error)
             {
                 Fail("레벨 " + number + " 시작 실패: " + error.Message);
+                publishedSource?.Dispose();
                 if (explicitRequest) throw;
             }
             finally
@@ -114,6 +129,7 @@ namespace GameScreen
 
         private async UniTask PrepareAsync(LevelDefinition definition, int randomSeed, CancellationToken token)
         {
+            var phaseTimer = System.Diagnostics.Stopwatch.StartNew();
             Message = "시작 보드 구성 중"; Changed?.Invoke();
             bool runTutorial = ShouldRunTutorial(definition) && CheckTutorialReplay(definition);
             StartingBoardSearch search = new StartingBoardSearch(definition, runTutorial ? definition.Tutorial.seed : randomSeed);
@@ -129,12 +145,16 @@ namespace GameScreen
             tutorial = runTutorial ? Tutorial.TutorialBoardAdapter.Prepare(definition, search.State) : null;
             executor = tutorial?.Executor ?? new BoardActionExecutor(search.State);
             InitializeProgress();
+            InitialBoardMilliseconds = phaseTimer.Elapsed.TotalMilliseconds;
+            phaseTimer.Restart();
             artwork = new PuzzleArtwork(visualCatalog);
             await artwork.PrepareAsync(State, token);
             token.ThrowIfCancellationRequested();
+            InitialArtworkMilliseconds = phaseTimer.Elapsed.TotalMilliseconds;
             board.Draw(State, artwork);
             CenterCamera();
             ready = true;
+            InitialReadyMilliseconds = initialPreparationTimer.Elapsed.TotalMilliseconds;
             LogicalSessionId = Guid.NewGuid().ToString("N");
             BeginStartFeedback();
             Message = "블록을 선택하거나 드래그하세요"; Changed?.Invoke();
@@ -155,6 +175,12 @@ namespace GameScreen
 
         private void Update()
         {
+            // 최초 입장 연출이 끝나는 시점만 한 번 기록한다. 튜토리얼은 안내 조작부터 허용된다.
+            if (InitialInteractionMilliseconds < 0 && ready && !IsStartingFeedback && initialPreparationTimer != null)
+            {
+                InitialInteractionMilliseconds = initialPreparationTimer.Elapsed.TotalMilliseconds;
+                initialPreparationTimer.Stop();
+            }
             if (boardCamera != null && !HasScreenLayout) boardCamera.orthographicSize = (PuzzleWorldBoard.HalfHeight + 0.7f) / Mathf.Min(1, boardCamera.aspect);
             // 이 프레임에 새로 예약한 수집은 다음 보드 표시 시간부터 진행한다.
             TickProgress(Time.deltaTime);
@@ -226,6 +252,7 @@ namespace GameScreen
             ClearProgress();
             ResetPresentation();
             lifetime.Cancel(); artwork?.Dispose(); lifetime.Dispose();
+            publishedSource?.Dispose(); publishedSource = null;
             Changed = null;
         }
     }

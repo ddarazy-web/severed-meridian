@@ -32,7 +32,7 @@ namespace LevelAuthoring.Editor
                 edit = typeof(AuthoringEditSession).GetMethod("EditLevel");
                 Check(edit != null, "common selected-level edit transaction exists");
                 AuthoringToolWorkspace workspace = new AuthoringToolWorkspace();
-                workspace.Create(Path.Combine(folder, "Project"), LevelToolDocuments.NewProject());
+                workspace.Create(Path.Combine(folder, "Project"), LevelToolTestProject.Create());
                 session = workspace.Session; levelId = session.SelectedLevelId;
                 Dictionary<string, JObject> definitions = LevelToolDocuments.Definitions(session);
                 JObject baseline = Read();
@@ -131,7 +131,7 @@ namespace LevelAuthoring.Editor
                 }
                 finally { UnityEngine.Object.DestroyImmediate(legacy); }
                 AuthoringToolWorkspace legacyWorkspace = new AuthoringToolWorkspace();
-                ContentSnapshot legacyProject = LevelToolDocuments.NewProject();
+                ContentSnapshot legacyProject = LevelToolTestProject.Create();
                 string legacyId = legacyProject.Documents.First(doc => doc.Kind == "level").Id;
                 old = new ContentDocument("level", legacyId, old.Data);
                 legacyWorkspace.Create(Path.Combine(folder, "Legacy"), new ContentSnapshot(legacyProject.Documents.Select(doc => doc.Id == legacyId ? old : doc)));

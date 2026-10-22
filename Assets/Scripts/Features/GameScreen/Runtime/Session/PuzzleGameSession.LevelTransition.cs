@@ -13,7 +13,7 @@ namespace GameScreen
         private bool levelTransitionRefreshPending;
         public bool LevelAdvanceEnabled => levelAdvanceEnabled;
         public bool IsChangingLevel { get; private set; }
-        public bool CanAdvanceLevel => isActiveAndEnabled && levelAdvanceEnabled && ResultReady &&
+        public bool CanAdvanceLevel => isActiveAndEnabled && levelAdvanceEnabled && HasNextRegisteredLevel && ResultReady &&
             Outcome.Kind == BoardOutcomeKind.Won && !IsChangingLevel && !IsPaused && !audioBackground;
 
         public void SetLevelAdvanceEnabled(bool enabled)
@@ -52,11 +52,20 @@ namespace GameScreen
                 {
                     Message = "다음 레벨 준비 중"; Changed?.Invoke();
                     linked.Token.ThrowIfCancellationRequested();
-                    nextNumber = checked(levelNumber + 1);
-                    definition = await LevelPackLoader.LoadAsync(nextNumber);
+                    if (publishedRoute != null)
+                    {
+                        if (!publishedRoute.TryGetNext(levelNumber, out var next)) return false;
+                        nextNumber = next.Number;
+                        definition = await publishedSource.LoadAsync(nextNumber, linked.Token);
+                    }
+                    else
+                    {
+                        nextNumber = checked(levelNumber + 1);
+                        definition = await LevelPackLoader.LoadAsync(nextNumber, linked.Token);
+                    }
                     linked.Token.ThrowIfCancellationRequested();
                     if (!isActiveAndEnabled) throw new OperationCanceledException();
-                    candidateBytes = LevelPackCodec.Snapshot(definition);
+                    candidateBytes = publishedSource == null ? LevelPackCodec.Snapshot(definition) : null;
                     bool runTutorial = ShouldRunTutorial(definition) && CheckTutorialReplay(definition);
                     StartingBoardSearch search = new StartingBoardSearch(definition, runTutorial ? definition.Tutorial.seed : seed);
                     while (!search.IsDone)

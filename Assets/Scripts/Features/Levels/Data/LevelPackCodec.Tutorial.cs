@@ -46,10 +46,14 @@ namespace Levels
         {
             if (!IsTutorialPack(bytes) || bytes.Length < 8 || (bytes[4] != TutorialFormatVersion && bytes[4] != 4 && bytes[4] != 5 && bytes[4] != 6) || bytes[5] != 0 || bytes[6] != 0 || bytes[7] != 0)
                 throw new InvalidOperationException("지원하지 않는 튜토리얼 팩 헤더입니다.");
-            if (bytes[4] == 6) return DecodeIdentity(bytes);
-            if (bytes[4] == 5) return DecodeConditionDetails(bytes);
-            if (bytes[4] == 4) return DecodeComposer(bytes);
+            if (bytes[4] == 6) return DecodeIdentity(bytes, validate);
+            if (bytes[4] == 5) return DecodeConditionDetails(bytes, validate);
+            if (bytes[4] == 4) return DecodeComposer(bytes, validate);
             PackedTutorialLevelPack pack = MemoryPackSerializer.Deserialize<PackedTutorialLevelPack>(bytes.AsSpan(8));
+            if (pack == null || pack.FormatVersion != TutorialFormatVersion || pack.ElementPack == null || pack.Tutorials == null ||
+                pack.Tutorials.Length == 0 || pack.Tutorials.Length > LevelsPerPack || pack.Tutorials.Any(entry => entry == null ||
+                    entry.Tutorial != null && (entry.Tutorial.steps == null || entry.Tutorial.steps.Any(step => step == null))))
+                throw new InvalidOperationException("튜토리얼 팩 구조 오류입니다.");
             if (validate) ValidateTutorialPack(pack);
             return pack;
         }

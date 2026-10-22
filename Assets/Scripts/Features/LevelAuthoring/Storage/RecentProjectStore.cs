@@ -9,13 +9,18 @@ using Newtonsoft.Json.Linq;
 
 namespace LevelAuthoring.Storage
 {
-    // 외부 경로나 URI 대신 앱 내부 프로젝트의 이름만 기록한다.
+    // Android 내부 이름과 Windows 폴더 기록을 서로 다른 파일에 보관한다.
     public sealed class RecentProjectStore
     {
         private readonly string path;
+        private readonly bool folders;
         private readonly object gate = new object();
         public string ReadWarning { get; private set; }
-        public RecentProjectStore(string stateDirectory) { path = Path.Combine(Path.GetFullPath(stateDirectory), "recent-projects.json"); }
+        public RecentProjectStore(string stateDirectory, bool folders = false)
+        {
+            this.folders = folders;
+            path = Path.Combine(Path.GetFullPath(stateDirectory), folders ? "recent-project-folders.json" : "recent-projects.json");
+        }
 
         public string[] Read()
         {
@@ -67,7 +72,7 @@ namespace LevelAuthoring.Storage
             }
         }
 
-        private static string[] Validate(JObject record)
+        private string[] Validate(JObject record)
         {
             if (record["version"]?.Type != JTokenType.Integer || record["version"].ToString() != "1" ||
                 !(record["projects"] is JArray projects) || projects.Count > 10 || projects.Any(item => item.Type != JTokenType.String))
@@ -77,6 +82,12 @@ namespace LevelAuthoring.Storage
                 throw new ContentFormatException("최근 프로젝트 기록에 중복 이름이 있습니다.");
             foreach (string name in names)
             {
+                if (folders)
+                {
+                    if (string.IsNullOrWhiteSpace(name) || !Path.IsPathFullyQualified(name) || name.Any(char.IsControl))
+                        throw new ContentFormatException("최근 프로젝트의 폴더 경로가 잘못됐습니다.");
+                    continue;
+                }
                 if (string.IsNullOrWhiteSpace(name) || name != name.Trim() || name == "." || name == ".." ||
                     name.EndsWith(".", StringComparison.Ordinal) || name.IndexOfAny("/\\:*?\"<>|".ToCharArray()) >= 0 ||
                     name.Any(char.IsControl) || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)

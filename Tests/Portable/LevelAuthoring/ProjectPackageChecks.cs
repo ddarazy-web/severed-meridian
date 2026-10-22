@@ -12,7 +12,7 @@ internal static partial class Program
 {
     private static void ProjectPackageChecks()
     {
-        Action<string, Stream, CancellationToken> export = ProjectPackageStore.Export;
+        Action<string, Stream, CancellationToken> export = (folder, stream, token) => ProjectPackageStore.Export(folder, stream, token);
         Func<Stream, string, string, CancellationToken, string> import = ProjectPackageStore.Import;
         string fixture = File.ReadAllText("Logs/GameAuthoringStage02/latest-fixtures.txt");
         string root = Path.GetFullPath("ContentData/Trials/game-authoring-stage-04/packages-" + Guid.NewGuid().ToString("N"));

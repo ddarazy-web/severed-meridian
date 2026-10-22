@@ -90,7 +90,7 @@ namespace LevelAuthoring.Editor
         private static void PrepareViewport()
         {
             Call("CancelPendingInput");
-            Check(screen.Workspace.Create(Path.Combine(runFolder, "Project-" + sizeIndex), LevelToolDocuments.NewProject(), "Discard"), "isolated viewport project created");
+            Check(screen.Workspace.Create(Path.Combine(runFolder, "Project-" + sizeIndex), LevelToolTestProject.Create(), "Discard"), "isolated viewport project created");
             session = screen.Workspace.Session; levelId = session.SelectedLevelId;
             Set("brush", null); Set("moveBody", null); Set("boardTouchTool", "tap"); Set("cellSize", 32f); Set("autoFitBoard", false);
             if (texture != null) { panel.targetTexture = null; texture.Release(); UnityEngine.Object.DestroyImmediate(texture); }

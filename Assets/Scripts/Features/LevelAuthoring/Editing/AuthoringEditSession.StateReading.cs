@@ -74,8 +74,8 @@ namespace LevelAuthoring.Editing
                 if (session.current == null || session.saved == null || previous == null || following == null || string.IsNullOrEmpty(session.Revision))
                     throw new ContentFormatException("편집 복구본의 필수 상태 또는 revision이 없습니다.");
                 ContentSnapshot.FromOwnedDocuments(session.saved.Values);
-                session.savedLevelId ??= session.saved.Values.First(doc => doc.Kind == "level").Id;
-                if (!session.saved.TryGetValue(session.savedLevelId, out ContentDocument selected) || selected.Kind != "level")
+                session.savedLevelId ??= session.saved.Values.FirstOrDefault(doc => doc.Kind == "level")?.Id;
+                if (session.savedLevelId != null && (!session.saved.TryGetValue(session.savedLevelId, out ContentDocument selected) || selected.Kind != "level"))
                     throw new ContentFormatException("복구본의 저장 레벨이 없습니다.");
                 foreach (State state in previous.AsEnumerable().Reverse()) session.undo.Push(state);
                 foreach (State state in following.AsEnumerable().Reverse()) session.redo.Push(state);
@@ -140,8 +140,9 @@ namespace LevelAuthoring.Editing
                 }
             }
             Expect(reader, JsonToken.EndObject);
-            if (state.Documents == null || state.Cells == null || state.LevelId == null ||
-                !state.Documents.TryGetValue(state.LevelId, out ContentDocument level) || level.Kind != "level" ||
+            if (state.Documents == null || state.Cells == null ||
+                (state.LevelId != null && (!state.Documents.TryGetValue(state.LevelId, out ContentDocument level) || level.Kind != "level")) ||
+                (state.LevelId == null && state.Cells.Length != 0) ||
                 state.Cells.Any(cell => cell < 0 || cell >= 81) || state.Cells.Distinct().Count() != state.Cells.Length)
                 throw new ContentFormatException("복구본의 레벨 또는 선택 칸이 잘못됐습니다.");
             return state;

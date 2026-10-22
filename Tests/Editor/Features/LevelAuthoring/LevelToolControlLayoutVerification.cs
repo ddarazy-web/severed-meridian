@@ -55,7 +55,7 @@ namespace LevelAuthoring.Editor
                 const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
                 if (screen == null || (bool)typeof(LevelToolScreen).GetField("busy", flags).GetValue(screen)) return;
                 LevelToolRecoveryIsolation.Verify(screen, recoveryFolder);
-                screen.Workspace.Create(Path.Combine(recoveryFolder, "Project"), LevelToolDocuments.NewProject());
+                screen.Workspace.Create(Path.Combine(recoveryFolder, "Project"), LevelToolTestProject.Create());
                 typeof(LevelToolScreen).GetField("levelSettingsVisible", flags).SetValue(screen, true);
                 typeof(LevelToolScreen).GetMethod("Refresh", flags).Invoke(screen, null);
                 EditorApplication.update -= StartBatch;

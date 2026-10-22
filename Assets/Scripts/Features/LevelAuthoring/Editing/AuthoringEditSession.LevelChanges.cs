@@ -23,7 +23,7 @@ namespace LevelAuthoring.Editing
         {
             if (!HasLevelChanges(id)) return;
             saved.TryGetValue(id, out ContentDocument baseline);
-            string fallback = current.Documents.ContainsKey(savedLevelId) && savedLevelId != id ? savedLevelId :
+            string fallback = savedLevelId != null && current.Documents.ContainsKey(savedLevelId) && savedLevelId != id ? savedLevelId :
                 current.Documents.Values.FirstOrDefault(doc => doc.Kind == "level" && doc.Id != id)?.Id;
             if (baseline == null && fallback == null)
                 throw new ContentFormatException("마지막 레벨을 제거할 수 없습니다.");
@@ -46,7 +46,7 @@ namespace LevelAuthoring.Editing
             if (baseline == null) documents.Remove(id);
             else documents[id] = baseline;
             string selected = source.LevelId;
-            if (!documents.ContainsKey(selected))
+            if (selected != null && !documents.ContainsKey(selected))
                 selected = fallback != null && documents.ContainsKey(fallback) ? fallback :
                     documents.Values.First(doc => doc.Kind == "level").Id;
             return new State

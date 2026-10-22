@@ -81,7 +81,7 @@ namespace LevelAuthoring.Editor
                 Check(panel.targetTexture == null, "tool and UGUI use actual Game View rather than UITK texture");
                 previousScaleMode = panel.scaleMode; previousScale = panel.scale;
                 panel.scaleMode = PanelScaleMode.ConstantPixelSize; panel.scale = 1;
-                Check(screen.Workspace.Create(Path.Combine(folder, "Project"), LevelToolDocuments.NewProject()), "isolated tutorial project");
+                Check(screen.Workspace.Create(Path.Combine(folder, "Project"), LevelToolTestProject.Create()), "isolated tutorial project");
                 var parent = screen.Workspace.Session;
                 // 기존 SharedDraftGame과 같은 공통 샘플/공유 초안 준비를 재사용한다.
                 TutorialDraftEditing.AddSampleBoard(parent, "two");

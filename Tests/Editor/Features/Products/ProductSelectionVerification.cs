@@ -40,7 +40,7 @@ namespace Products.Editor
                     Check(settings.ContentStateBuildPath.StartsWith(Addressables.LibraryPath, StringComparison.Ordinal), "content state isolated " + value.Symbol);
                     return Addressables.BuildPath;
                 }).ToArray();
-                Check(catalogRoots.Distinct().Count() == 5, "five distinct initialization/catalog roots without building");
+                Check(catalogRoots.Distinct().Count() == ProductProfiles.Definitions.Length, "product-specific initialization/catalog roots without building");
                 ProductProfiles.ApplyContentPaths(null);
                 Check(Addressables.LibraryPath == "Library/com.unity.addressables/" && Addressables.BuildReportPath == "Library/com.unity.addressables/BuildReports/" && string.IsNullOrEmpty(settings.ContentStateBuildPath), "default content paths restored");
                 foreach (ProductDefinition definition in compatible)

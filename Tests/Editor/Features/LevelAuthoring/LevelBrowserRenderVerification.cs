@@ -27,7 +27,7 @@ namespace LevelAuthoring.Editor
         {
             folder = Path.GetFullPath("Logs/LevelBrowserRender/" + Guid.NewGuid().ToString("N"));
             project = Path.Combine(folder, "data"); Directory.CreateDirectory(folder);
-            var fixture = new AuthoringToolWorkspace(); fixture.Create(project, LevelToolDocuments.NewProject());
+            var fixture = new AuthoringToolWorkspace(); fixture.Create(project, LevelToolTestProject.Create());
             first = fixture.Session.SelectedLevelId;
             ContentDocument original = fixture.Session.Get(first);
             string[] ids = Enumerable.Range(2, 999).Select(n => "render-level-" + n).ToArray();

@@ -22,7 +22,7 @@ namespace LevelAuthoring.Editor
             screen = target;
             string original = Session.SelectedLevelId;
             string originalData = Data.ToString();
-            Refresh(); Click("new-level");
+            Refresh(); Click("new-level"); Click("create-level");
             string created = Session.SelectedLevelId;
             Check(created != original && (int)Data["schemaVersion"] == 5 && Data["elementSupply"]["sources"].Count() == 9, "UI new level with basic sources");
             Click("undo"); Check(Session.SelectedLevelId == original, "UI new level one undo");
@@ -62,7 +62,7 @@ namespace LevelAuthoring.Editor
             Check(Root.Query<IntegerField>().ToList().First(field => field.label == "목표 수량").value == oldAmount,
                 "rejected mission amount restores displayed value");
             Click("remove-mission-0"); Check(Data["missions"].Count() == 0, "UI basic mission removal");
-            Click("duplicate"); Check(Session.SelectedLevelId != created, "UI duplicate level");
+            Click("duplicate"); Click("create-level"); Check(Session.SelectedLevelId != created, "UI duplicate level");
             while (Session.CanUndo) Session.Undo();
             Check(Session.SelectedLevelId == original && Data.ToString() == originalData && !Session.IsDirty,
                 "UI edits undo to original including advanced data");

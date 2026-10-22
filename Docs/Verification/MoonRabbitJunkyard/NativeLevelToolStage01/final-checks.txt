@@ -1,0 +1,147 @@
+Native LevelTool UX Stage01 - final evidence
+Unity 6000.3.10f1, Windows Editor, PanelScaleMode.ConstantPixelSize scale=1, RenderTexture depth=24
+Mobile viewports and keyboard/back handling are simulated; not Android device verification.
+
+PASS create project without implicit level
+PASS empty clean session
+PASS reopen empty project
+PASS restore empty session
+PASS empty listing opens
+PASS empty listing has no levels
+PASS first level stays dirty in memory
+PASS first level not implicitly saved
+PASS undo first level returns to empty project
+PASS redo first level restores selection
+PASS lazy first level history restores
+PASS restored history contains empty state
+PASS first level saved without data loss
+PASS duplicate preserves elements
+PASS duplicate preserves missions
+PASS duplicate preserves moveCount
+PASS duplicate preserves tutorial
+PASS duplicate preserves elementSupply
+PASS duplicate leaves source unchanged
+PASS failed open preserves pending work
+PASS cancel project switch preserves pending work
+PASS duplicate survives project reopen
+PASS Windows recent folder survives reopen
+PASS Android recent names preserved separately
+PASS 24 native start checks
+PASS 54 focused portable checks
+
+20261022-171334-917-Run.log
+PASS native-start start screen visible
+PASS native-start enabled start-recent-projects
+PASS native-start empty recent guidance
+PASS native-start enabled cancel
+PASS native-start enabled start-new-project
+PASS native-start Tab advances project dialog focus
+PASS native-start Escape cancels new project
+PASS native-start enabled start-new-project
+PASS native-start enabled create-project
+PASS native-start empty name rejected
+PASS native-start enabled create-project
+PASS native-start enabled choose-folder
+PASS native-start project has no implicit level
+PASS native-start empty guidance
+PASS native-start empty project cannot play
+PASS native-start enabled first-level
+PASS native-start first number suggested
+PASS native-start no duplicate without source
+PASS native-start enabled create-level
+PASS native-start bad number rejected
+PASS native-start first level opened dirty
+PASS native-start 9x9 board visible
+PASS native-start no automatic level save
+PASS native-start enabled undo
+PASS native-start undo first level shows empty state
+PASS native-start enabled redo
+PASS native-start redo restores first level
+native-start review regressions: boardVisible=True, paletteRestored=True
+PASS native-start first level opens board and redo restores palette
+PASS native-start enabled save
+PASS native-start explicit save
+PASS native-start enabled duplicate
+PASS native-start duplicate source selected
+PASS native-start enabled create-level
+PASS native-start duplicate opened
+PASS native-start duplicate preserves board
+PASS native-start enabled save
+PASS native-start recent project remembers opened folder
+PASS native-start enabled cancel
+PASS native-start missing recent folder offers reopen path
+PASS native-start enabled cancel
+PASS native-start enabled project-start-menu
+PASS native-start project start accessible during editing
+PASS native-start enabled cancel
+PASS native-start enabled new-level
+PASS native-start dialog visible (1280, 800)
+PASS native-start enabled cancel
+PASS native-start enabled new-level
+PASS native-start dialog visible (1440, 900)
+PASS native-start enabled cancel
+PASS native-start enabled new-level
+PASS native-start dialog visible (390, 844)
+PASS native-start keyboard leaves cancel accessible (390, 844)
+PASS native-start enabled cancel
+PASS native-start enabled new-level
+PASS native-start dialog visible (844, 390)
+PASS native-start keyboard leaves cancel accessible (844, 390)
+PASS native-start enabled cancel
+PASS native-start enabled new-level
+PASS native-start dialog visible (820, 1180)
+PASS native-start keyboard leaves cancel accessible (820, 1180)
+PASS native-start enabled cancel
+PASS native-start two levels persisted
+PASS native-start empty project hides editing navigation
+PASS native-start enabled first-level
+PASS native-start Android back cancels first level (390, 844)
+PASS native-start enabled first-level
+PASS native-start Android back cancels first level (844, 390)
+PASS native-start enabled first-level
+PASS native-start Android back cancels first level (820, 1180)
+
+20261022-170032-081-Run.log
+
+20261022-170137-470-Run.log
+
+20261022-170610-146-Run.log
+PASS isolated project
+PASS ImportProject command connected
+PASS actual import command opens project naming modal
+PASS actual import calls the stream picker once
+PASS import does not replace old session before successful dirty transition
+PASS import preserves original published JSON
+PASS import closes input before asking to switch
+PASS validated import follows existing dirty transition contract
+PASS dirty transition cancel preserves draft selection undo and redo
+PASS validated import remains reopenable after transition cancel
+
+20261022-171123-974-Run.log
+
+20261022-171149-384-Run.log
+PASS common command identifiers exist
+PASS five menus share command definitions
+PASS Save has a disabled reason
+PASS Undo has a disabled reason
+PASS empty workspace disables save and undo
+PASS Open has a disabled reason
+PASS Help has a disabled reason
+PASS empty workspace can open and ask for help
+PASS Manual has a disabled reason
+PASS manual is available before opening a project
+PASS help menu includes manual and existing shortcut help
+PASS Windowed has a disabled reason
+PASS Fullscreen has a disabled reason
+PASS standalone window commands cannot resize Unity Editor
+PASS Open has a disabled reason
+PASS Play has a disabled reason
+PASS busy blocks file and play commands
+PASS help is searchable
+PASS Open has a disabled reason
+PASS Save has a disabled reason
+PASS modal prevents background commands
+PASS escape closes the top modal
+PASS held key does not reopen help
+PASS register and unregister have no command side effects
+PASS level tool shortcut command boundaries

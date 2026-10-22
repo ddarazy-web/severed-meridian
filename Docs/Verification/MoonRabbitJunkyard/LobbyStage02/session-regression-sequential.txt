@@ -1,0 +1,5 @@
+initial dataMs=430.0319 boardMs=156.1185 artworkMs=942.807 readyMs=1536.9107 interactionMs=2173.8357
+metadataMs=226.0021 packReadMs=63.4762 packDecodeMs=85.7259 selectedMs=53.1687
+PASS restart initial cells/moves/random restored; logical session renewed; decoded pack reused
+PASS cancelled next preserved level 2; next loaded registered level 15; same pack reused
+PASS last registered level hides next; result lobby button returns and destroys session

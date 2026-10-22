@@ -48,7 +48,7 @@ namespace LevelAuthoring.Editor
                 if (phase == 0)
                 {
                     workspace = new AuthoringToolWorkspace();
-                    workspace.Create(Path.GetFullPath("Logs/LevelToolRefactorStage03/board-lifetime-" + Guid.NewGuid().ToString("N")), LevelToolDocuments.NewProject());
+                    workspace.Create(Path.GetFullPath("Logs/LevelToolRefactorStage03/board-lifetime-" + Guid.NewGuid().ToString("N")), LevelToolTestProject.Create());
                     AuthoringEditSession session = workspace.Session;
                     populatedId = session.SelectedLevelId;
                     var definitions = LevelToolDocuments.Definitions(session);

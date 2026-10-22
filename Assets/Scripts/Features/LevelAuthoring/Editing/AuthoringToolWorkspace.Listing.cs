@@ -65,6 +65,13 @@ namespace LevelAuthoring.Editing
             if (Session == null) Session = new AuthoringEditSession(Directory, id);
             else Session.SelectLevel(id);
         }
+
+        public void BeginEditingProject()
+        {
+            if (Session != null) return;
+            if (Directory == null) throw new ContentFormatException("먼저 프로젝트를 여세요.");
+            Session = new AuthoringEditSession(Directory, null);
+        }
     }
 }
 #endif

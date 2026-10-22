@@ -153,7 +153,7 @@ namespace LevelAuthoring.Editor
                         panel = screen.GetComponent<UIDocument>().panelSettings;
                         priorTarget = panel.targetTexture; priorScaleMode = panel.scaleMode; priorScale = panel.scale;
                         panel.scaleMode = PanelScaleMode.ConstantPixelSize; panel.scale = 1;
-                        Check(screen.Workspace.Create(projectFolder, LevelToolDocuments.NewProject()), "isolated project created");
+                        Check(screen.Workspace.Create(projectFolder, LevelToolTestProject.Create()), "isolated project created");
                         session = screen.Workspace.Session; levelId = session.SelectedLevelId;
                         Dictionary<string, JObject> definitions = LevelToolDocuments.Definitions(session);
                         definitionId = definitions.First(pair => LevelToolDocuments.Layer(pair.Value) == "Block" && LevelToolDocuments.Size(pair.Value) == 1).Key;

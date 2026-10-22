@@ -77,10 +77,15 @@ namespace Levels
 
         public static ElementLevelPack DecodeElements(byte[] bytes)
         {
+            ElementLevelPack pack = DecodeElementPayload(bytes);
+            ValidateElements(pack); return pack;
+        }
+
+        private static ElementLevelPack DecodeElementPayload(byte[] bytes)
+        {
             if (!IsElementPack(bytes) || bytes.Length < 8 || bytes[4] != FormatVersion || bytes[5] != 0 || bytes[6] != 0 || bytes[7] != 0)
                 throw new InvalidOperationException("지원하지 않는 요소 팩 헤더입니다.");
-            ElementLevelPack pack = MemoryPackSerializer.Deserialize<ElementLevelPack>(bytes.AsSpan(8));
-            ValidateElements(pack); return pack;
+            return MemoryPackSerializer.Deserialize<ElementLevelPack>(bytes.AsSpan(8));
         }
 
         public static LevelWithCatalog ReadLevelWithCatalog(byte[] bytes, int number)
@@ -143,6 +148,22 @@ namespace Levels
 
         private static void ValidateElements(ElementLevelPack pack)
         {
+            ElementCatalog catalog = ValidateElementStructure(pack);
+            foreach (PackedElementLevel data in pack.Levels)
+            {
+                LevelDefinition level = LevelDefinition.FromElementPacked(data, catalog);
+                try
+                {
+                    List<LevelValidationIssue> issues = LevelDefinitionValidator.Validate(level);
+                    if (issues.Count > 0) throw new ArgumentException($"레벨 {data.LevelNumber}: " + string.Join("; ", issues));
+                }
+                finally { if (Application.isPlaying) UnityEngine.Object.Destroy(level); else UnityEngine.Object.DestroyImmediate(level); }
+            }
+            DefinitionClosure(pack.Levels, catalog);
+        }
+
+        private static ElementCatalog ValidateElementStructure(ElementLevelPack pack)
+        {
             if (pack == null || pack.FormatVersion != FormatVersion) throw new InvalidOperationException("지원하지 않는 요소 팩 버전입니다.");
             if (pack.Levels == null || pack.Levels.Length == 0 || pack.Levels.Length > LevelsPerPack || pack.Definitions == null)
                 throw new InvalidOperationException("요소 팩 수량·정의 표 오류입니다.");
@@ -154,16 +175,8 @@ namespace Levels
                 if (data == null || data.SchemaVersion != LevelDefinition.CurrentSchemaVersion ||
                     FirstLevel(data.LevelNumber) != pack.FirstLevel || !numbers.Add(data.LevelNumber))
                     throw new InvalidOperationException("요소 팩의 스키마·번호·중복 오류입니다.");
-                LevelDefinition level = LevelDefinition.FromElementPacked(data, catalog);
-                try
-                {
-                    List<LevelValidationIssue> issues = LevelDefinitionValidator.Validate(level);
-                    if (issues.Count > 0) throw new ArgumentException($"레벨 {data.LevelNumber}: " + string.Join("; ", issues));
-                }
-                finally { if (Application.isPlaying) UnityEngine.Object.Destroy(level); else UnityEngine.Object.DestroyImmediate(level); }
             }
-            // 실행 중 생성될 정의와 프로필 참조 누락도 배치되지 않았다는 이유로 허용하지 않는다.
-            DefinitionClosure(pack.Levels, catalog);
+            return catalog;
         }
     }
 }

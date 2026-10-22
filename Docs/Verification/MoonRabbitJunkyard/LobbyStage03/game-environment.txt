@@ -1,0 +1,2 @@
+Unity 6000.3.10f1; Windows 11  (10.0.26200); NVIDIA GeForce RTX 3060 Ti
+New Editor Play session. Round0 first game; rounds1-3 same level warm repeats; rounds4-9 levels1/2/15. Native/managed memory includes Editor and instrumentation. Peak sampled once per Editor update; not device/process RSS or a sub-frame allocation peak. Camera callback is render completion, not display presentation. firstGameCameraMs=-1 means batch Editor did not render an observable game camera; it is unmeasured, not instant.

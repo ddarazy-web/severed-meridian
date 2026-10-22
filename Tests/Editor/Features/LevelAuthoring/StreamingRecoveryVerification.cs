@@ -27,7 +27,7 @@ namespace LevelAuthoring.Editor
             int exit = 1;
             try
             {
-                var workspace = new AuthoringToolWorkspace(); workspace.Create(data, LevelToolDocuments.NewProject());
+                var workspace = new AuthoringToolWorkspace(); workspace.Create(data, LevelToolTestProject.Create());
                 AuthoringEditSession source = workspace.Session;
                 source.EditLevel("first", level => level["displayName"] = "첫 변경");
                 source.EditLevel("unfinished", level => level["moveCount"] = -1);
@@ -110,7 +110,7 @@ namespace LevelAuthoring.Editor
                     }
                 }
                 string lazyFolder = Path.Combine(data, "lazy");
-                var lazyFixture = new AuthoringToolWorkspace(); lazyFixture.Create(lazyFolder, LevelToolDocuments.NewProject());
+                var lazyFixture = new AuthoringToolWorkspace(); lazyFixture.Create(lazyFolder, LevelToolTestProject.Create());
                 string firstId = lazyFixture.Session.SelectedLevelId;
                 string secondId = DocumentEditing.DuplicateLevel(lazyFixture.Session, firstId, 2, "미확인 복구"); lazyFixture.Save();
                 foreach (string index in Directory.GetFiles(Path.Combine(lazyFolder, ".authoring", "listings"), "*.json")) File.Delete(index);

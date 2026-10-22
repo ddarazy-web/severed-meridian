@@ -68,16 +68,15 @@ namespace LevelTool
             finally { Release(source); }
         }
 
-        public static ContentSnapshot NewProject()
+        public static ContentSnapshot NewProject(string name = "레벨 작업")
         {
+            if (string.IsNullOrWhiteSpace(name)) throw new ContentFormatException("프로젝트 이름을 입력하세요.");
             ContentDocument project = new ContentDocument("project", "project-" + Guid.NewGuid().ToString("N"), new JObject
             {
-                ["name"] = "레벨 작업", ["contentVersion"] = 1, ["defaultCatalogId"] = null,
+                ["name"] = name.Trim(), ["contentVersion"] = 1, ["defaultCatalogId"] = null,
                 ["resources"] = new JArray(), ["documents"] = new JArray(), ["sourceIds"] = new JArray()
             });
-            JObject level = NewLevel();
-            level["displayName"] = "새 레벨";
-            return new ContentSnapshot(new[] { project, new ContentDocument("level", "level-" + Guid.NewGuid().ToString("N"), level) });
+            return new ContentSnapshot(new[] { project });
         }
 
         public static Dictionary<string, JObject> Definitions(AuthoringEditSession session)

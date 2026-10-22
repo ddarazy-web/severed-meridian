@@ -21,7 +21,7 @@ namespace LevelAuthoring.Editor
         internal static AuthoringToolWorkspace CreateFixture(string folder)
         {
             var workspace = new AuthoringToolWorkspace();
-            workspace.Create(folder, LevelToolDocuments.NewProject());
+            workspace.Create(folder, LevelToolTestProject.Create());
             var session = workspace.Session;
             var definitions = LevelToolDocuments.Definitions(session);
             string normal = definitions.First(pair => (string)pair.Value["supply"]?["behavior"] == "FixedNormal").Key;

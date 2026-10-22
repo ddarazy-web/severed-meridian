@@ -69,7 +69,7 @@ namespace LevelAuthoring.Editor
                 if (phase == 0)
                 {
                     LevelToolRecoveryIsolation.Verify(screen, Path.Combine(folder, "recovery"));
-                    ContentSnapshot original = LevelToolDocuments.NewProject();
+                    ContentSnapshot original = LevelToolTestProject.Create();
                     ContentDocument a = original.Documents.Single(doc => doc.Kind == "level");
                     aId = a.Id;
                     var b = a.Data; b["levelNumber"] = 2; b["displayName"] = "두 번째";

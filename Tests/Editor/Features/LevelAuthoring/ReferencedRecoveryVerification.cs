@@ -19,7 +19,7 @@ namespace LevelAuthoring.Editor
             int exit = 1;
             try
             {
-                var setup = new AuthoringToolWorkspace(); setup.Create(data, LevelToolDocuments.NewProject());
+                var setup = new AuthoringToolWorkspace(); setup.Create(data, LevelToolTestProject.Create());
                 string first = setup.Session.SelectedLevelId;
                 string second = DocumentEditing.DuplicateLevel(setup.Session, first, 2, "Unread"); setup.Save();
                 foreach (string index in Directory.GetFiles(Path.Combine(data, ".authoring", "listings"), "*.json")) File.Delete(index);
@@ -58,7 +58,7 @@ namespace LevelAuthoring.Editor
                 try { target.RestoreState(state); } catch (ContentFormatException) { rejected = true; }
                 Check(rejected && ReferenceEquals(target.Session, preserved), "Failed recovery replaced active workspace");
                 string reindexed = Path.Combine(data, "reindexed");
-                var external = new AuthoringToolWorkspace(); external.Create(reindexed, LevelToolDocuments.NewProject());
+                var external = new AuthoringToolWorkspace(); external.Create(reindexed, LevelToolTestProject.Create());
                 string edited = external.Session.SelectedLevelId;
                 external.OpenListing(reindexed, "Discard"); external.OpenLevel(edited);
                 external.Session.EditLevel("draft", body => body["displayName"] = "protected draft");
@@ -72,7 +72,7 @@ namespace LevelAuthoring.Editor
                 try { new AuthoringToolWorkspace().RestoreState(beforeExternal); } catch (ContentFormatException) { rejected = true; }
                 Check(rejected, "Refreshed index silently replaced the recorded baseline hash");
                 string deletionFolder = Path.Combine(data, "deletion");
-                var deletion = new AuthoringToolWorkspace(); deletion.Create(deletionFolder, LevelToolDocuments.NewProject());
+                var deletion = new AuthoringToolWorkspace(); deletion.Create(deletionFolder, LevelToolTestProject.Create());
                 string kept = deletion.Session.SelectedLevelId;
                 string removed = DocumentEditing.DuplicateLevel(deletion.Session, kept, 2, "Remove"); deletion.Save();
                 deletion.OpenListing(deletionFolder, "Discard"); deletion.OpenLevel(kept);
@@ -87,7 +87,7 @@ namespace LevelAuthoring.Editor
                 try { restoredDeletion.Save(); } catch (ContentFormatException) { rejected = true; }
                 Check(rejected && restoredDeletion.Session.IsDirty, "Restored deletion ignored external changes to removed document");
                 string backupFolder = Path.Combine(data, "backup");
-                var backup = new AuthoringToolWorkspace(); backup.Create(backupFolder, LevelToolDocuments.NewProject());
+                var backup = new AuthoringToolWorkspace(); backup.Create(backupFolder, LevelToolTestProject.Create());
                 string backupLevel = backup.Session.SelectedLevelId;
                 backup.Session.EditLevel("save", body => body["displayName"] = "next generation"); backup.Save();
                 backup.OpenListing(backupFolder, "Discard", true); backup.OpenLevel(backupLevel);
@@ -97,7 +97,7 @@ namespace LevelAuthoring.Editor
                 try { backupRestored.Save(); } catch (ContentFormatException) { rejected = true; }
                 Check(rejected, "Backup recovery allowed original overwrite");
                 string discardFolder = Path.Combine(data, "discard");
-                var discard = new AuthoringToolWorkspace(); discard.Create(discardFolder, LevelToolDocuments.NewProject());
+                var discard = new AuthoringToolWorkspace(); discard.Create(discardFolder, LevelToolTestProject.Create());
                 string a = discard.Session.SelectedLevelId;
                 string b = DocumentEditing.DuplicateLevel(discard.Session, a, 2, "Other"); discard.Save();
                 discard.OpenListing(discardFolder, "Discard"); discard.OpenLevel(a);

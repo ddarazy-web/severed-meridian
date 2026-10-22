@@ -133,34 +133,36 @@ namespace LevelTool
 
         private void RememberInternalProject()
         {
-            if (Workspace.Folder == null || !string.Equals(Path.GetDirectoryName(Workspace.Folder), InternalProjectsRoot, StringComparison.OrdinalIgnoreCase)) return;
+            if (Workspace.Folder == null || UsesInternalProjects && !string.Equals(Path.GetDirectoryName(Workspace.Folder), InternalProjectsRoot, StringComparison.OrdinalIgnoreCase)) return;
             try
             {
-                recentProjects ??= new RecentProjectStore(Path.GetDirectoryName(InternalProjectsRoot));
-                recentProjects.RecordOpened(Path.GetFileName(Workspace.Folder));
+                recentProjects ??= new RecentProjectStore(Path.GetDirectoryName(InternalProjectsRoot), !UsesInternalProjects);
+                recentProjects.RecordOpened(UsesInternalProjects ? Path.GetFileName(Workspace.Folder) : Workspace.Folder);
             }
             catch (Exception failure) { Show("프로젝트는 열렸지만 최근 기록 갱신 실패: " + failure.Message); }
         }
 
         private void OpenRecentProjects()
         {
-            VisualElement panel = OpenModal("최근 내부 프로젝트");
-            Label notice = new Label("일반 Windows 작업 폴더는 기존 ‘작업 폴더 열기’를 사용하세요."); panel.Add(notice);
+            VisualElement panel = OpenModal("최근 프로젝트");
+            Label notice = new Label("프로젝트를 선택해서 여세요. 위치가 바뀌었다면 ‘프로젝트 열기’를 사용하세요.")
+                { style = { whiteSpace = WhiteSpace.Normal } }; panel.Add(notice);
             ScrollView list = new ScrollView(); list.style.maxHeight = 280; panel.Add(list);
             try
             {
-                recentProjects ??= new RecentProjectStore(Path.GetDirectoryName(InternalProjectsRoot));
+                recentProjects ??= new RecentProjectStore(Path.GetDirectoryName(InternalProjectsRoot), !UsesInternalProjects);
                 string[] names = recentProjects.Read();
                 if (recentProjects.ReadWarning != null) notice.text = recentProjects.ReadWarning;
                 foreach (string name in names)
                 {
-                    string path = LevelToolProjectAccess.Resolve(InternalProjectsRoot, name);
+                    string path = UsesInternalProjects ? LevelToolProjectAccess.Resolve(InternalProjectsRoot, name) : name;
                     Button item = Button(list, "recent-project", name, () => { CloseModal(); WithDirty(choice => Workspace.OpenListing(path, choice)); });
                     if (!File.Exists(Path.Combine(path, "project.json"))) { item.SetEnabled(false); item.text += " · 저장본 없음"; }
                 }
-                if (names.Length == 0) list.Add(new Label("최근에 연 내부 프로젝트가 없습니다."));
+                if (names.Length == 0) list.Add(new Label("최근에 연 프로젝트가 없습니다. 새로 만들거나 프로젝트를 열어 주세요."));
             }
             catch (Exception failure) { notice.text = failure.Message; }
+            Button(panel, "recent-open-other", "프로젝트 열기", () => { CloseModal(); TryExecuteCommand(ToolCommandId.Open); });
             Button(panel, "cancel", "닫기", CloseModal);
         }
     }

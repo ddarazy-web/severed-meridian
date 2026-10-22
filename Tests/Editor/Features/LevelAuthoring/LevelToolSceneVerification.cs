@@ -19,7 +19,7 @@ namespace LevelAuthoring.Editor
                 if (screen == null) throw new Exception("실행용 레벨툴 화면이 없습니다.");
                 if (AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/Scenes/LevelTool.unity") == null)
                     throw new Exception("실행용 레벨툴 씬이 없습니다.");
-                var template = LevelTool.LevelToolDocuments.NewProject();
+                var template = LevelToolTestProject.Create();
                 if (template == null) throw new Exception("새 프로젝트 기본 문서 생성 실패");
                 var fixtures = new ContentSnapshotStore(File.ReadAllText("Logs/GameAuthoringStage02/latest-fixtures.txt")).Read().Snapshot;
                 ContentDocument old = fixtures.Documents.First(doc => doc.Kind == "level" && (int)doc.Data["schemaVersion"] == 4);

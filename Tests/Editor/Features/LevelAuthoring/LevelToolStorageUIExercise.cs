@@ -46,8 +46,9 @@ namespace LevelAuthoring.Editor
             string sourceHash = store.Read().Hash;
             Folder("save-copy", root + "-recovered"); await Idle();
             Check(!screen.Workspace.IsRecovery && store.Read().Hash == sourceHash, "UI backup copy leaves source unchanged");
-            Folder("new-project", root + "-new"); await Idle();
-            Check(screen.Workspace.Folder == root + "-new" && screen.Workspace.Session.Documents.Count(doc => doc.Kind == "level") == 1,
+            Click("new-project"); Click("create-project");
+            Root.Q<TextField>("folder-path").value = root + "-new"; Click("choose-folder"); await Idle();
+            Check(screen.Workspace.Folder == root + "-new" && screen.Workspace.Session.Documents.Count(doc => doc.Kind == "level") == 0,
                 "UI new project from existing project");
             screen = null;
         }

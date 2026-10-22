@@ -22,7 +22,7 @@ namespace Products.Editor
         public static string Output(ProductDefinition product, IReadOnlyList<BuildToolOptionState> options)
         {
             string output = product.Output;
-            if (product.Symbol == "PRODUCT_ANDROID_GAME")
+            if (product.Symbol == "PRODUCT_ANDROID_GAME" || product.IsTool)
             {
                 var profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(product.ProfilePath);
                 using var settings = new SerializedObject(ProductProfiles.ProfileSettings(profile, false));
@@ -30,7 +30,8 @@ namespace Products.Editor
                 string version = settings.FindProperty("bundleVersion").stringValue;
                 foreach (char invalid in Path.GetInvalidFileNameChars()) version = version.Replace(invalid, '_');
                 int code = settings.FindProperty("AndroidBundleVersionCode").intValue;
-                output = Path.Combine(Path.GetDirectoryName(output), $"moon_rabbit_junk_{version}_{code}.apk");
+                string prefix = product.IsTool ? "aos_moonrabbit_level_tool" : "moon_rabbit_junk";
+                output = Path.Combine(Path.GetDirectoryName(output), $"{prefix}_{version}_{code}.apk");
             }
             return Path.ChangeExtension(output, options != null && options.Any(option => option.id == Id && option.enabled) ? ".aab" : ".apk");
         }

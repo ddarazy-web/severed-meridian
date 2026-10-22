@@ -60,7 +60,7 @@ namespace LevelAuthoring.Editor
                 if (phase == 0)
                 {
                     LevelToolRecoveryIsolation.Verify(screen, folder);
-                    screen.Workspace.Create(Path.Combine(folder, "긴 한글 저장 위치 확인용 제작 데이터 프로젝트"), LevelToolDocuments.NewProject());
+                    screen.Workspace.Create(Path.Combine(folder, "긴 한글 저장 위치 확인용 제작 데이터 프로젝트"), LevelToolTestProject.Create());
                     projectFile = Path.Combine(screen.Workspace.Folder, "project.json");
                     original = File.ReadAllBytes(projectFile);
                     screen.Workspace.Session.EditLevel("UX 검사", level => LevelDocumentEditing.SetName(level, "저장 상태 검사"));

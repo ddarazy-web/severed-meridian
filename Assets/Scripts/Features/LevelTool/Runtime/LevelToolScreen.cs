@@ -120,17 +120,29 @@ namespace LevelTool
         }
         private void Change(string label, Action<JObject> action) => Edit(() => Session.EditLevel(label, action));
 
-        private void AddLevel(bool duplicate)
+        private void ConfirmDeleteLevel()
         {
-            Edit(() =>
+            if (Session == null || busy || modal != null || sharedTutorialDraft != null || tutorialPick != null) return;
+            if (Session.DocumentIdsOfKind("level").Length <= 1)
+            { Show("마지막 레벨은 삭제할 수 없습니다. 레벨을 하나 이상 남겨 주세요."); return; }
+            var session = Session;
+            string id = session.SelectedLevelId;
+            var info = session.GetDocumentInfo(id);
+            VisualElement panel = OpenModal("레벨 삭제");
+            panel.Add(new Label("현재 편집 중인 레벨 " + info.LevelNumber + " · " + info.DisplayName + "을 삭제할까요?")
+                { style = { whiteSpace = WhiteSpace.Normal } });
+            panel.Add(new Label("저장할 때 작업 폴더에 반영됩니다. 실행 취소(Ctrl+Z)로 복구할 수 있습니다.")
+                { style = { whiteSpace = WhiteSpace.Normal } });
+            Button(panel, "cancel-delete-level", "취소", CloseModal);
+            Button(panel, "confirm-delete-level", "삭제", () =>
             {
-                int number = Session.DocumentIdsOfKind("level").Max(id => Session.GetDocumentInfo(id).LevelNumber) + 1;
-                if (duplicate) DocumentEditing.DuplicateLevel(Session, Session.SelectedLevelId, number, "레벨 " + number + " 사본");
-                else
+                CloseModal();
+                ContinueAfterManualInput(() => Edit(() =>
                 {
-                    JObject value = LevelToolDocuments.NewLevel(Session.Get(Session.SelectedLevelId).Data["catalogId"]);
-                    DocumentEditing.AddLevel(Session, value, number, "레벨 " + number);
-                }
+                    if (!ReferenceEquals(Session, session) || session.SelectedLevelId != id) return;
+                    session.DeleteSelectedLevel();
+                    Show("레벨을 삭제했습니다. 저장하면 반영되며 실행 취소로 복구할 수 있습니다.");
+                })).Forget();
             });
         }
 
@@ -148,6 +160,8 @@ namespace LevelTool
                 root.Q<Button>(name)?.SetEnabled(Session != null && !busy);
             root.Q<Button>("new-project")?.SetEnabled(!busy);
             bool shared = sharedTutorialDraft != null;
+            root.Q("delete-level")?.SetEnabled(Session != null && !busy && !shared && tutorialPick == null &&
+                Session.DocumentIdsOfKind("level").Length > 1);
             root.Q("select")?.SetEnabled(Session != null && !busy);
             foreach (string name in new[] { "open", "new-project", "backup" })
                 root.Q(name)?.SetEnabled(!busy && !shared);
@@ -170,7 +184,8 @@ namespace LevelTool
             }
             board.style.display = (inspectorPage == "자동 시험" || inspectorPage == "시험 기록") ? DisplayStyle.None : DisplayStyle.Flex;
             RefreshNavigation(); RefreshCommandStates();
-            if (Session == null) { RefreshLevelBrowser(); palette.Clear(); inspector.Clear(); boardView.Clear(); ApplyToolSkin(); return; }
+            RefreshStartScreen();
+            if (Session?.SelectedLevelId == null) { RefreshLevelBrowser(); palette.Clear(); paletteKey = null; inspector.Clear(); boardView.Clear(); ApplyToolSkin(); return; }
             try
             {
                 RefreshLevelBrowser();

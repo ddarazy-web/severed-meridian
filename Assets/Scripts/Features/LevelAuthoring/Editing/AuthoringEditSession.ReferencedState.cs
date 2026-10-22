@@ -137,8 +137,8 @@ namespace LevelAuthoring.Editing
                     if (!(token is JObject item)) throw new ContentFormatException("복구 이력이 없습니다.");
                     var state = new State { Documents = Documents(item["documents"]), LevelId = (string)item["levelId"],
                         Cells = ((JArray)item["cells"]).Values<int>().ToArray(), BeforeSave = (bool?)item["beforeSave"] ?? false };
-                    if (state.LevelId == null || !state.Documents.TryGetValue(state.LevelId, out ContentDocument selected) ||
-                        selected.Kind != "level" || state.Cells.Any(cell => cell < 0 || cell >= 81) || state.Cells.Distinct().Count() != state.Cells.Length)
+                    if ((state.LevelId != null && (!state.Documents.TryGetValue(state.LevelId, out ContentDocument selected) ||
+                        selected.Kind != "level")) || (state.LevelId == null && state.Cells.Length != 0) || state.Cells.Any(cell => cell < 0 || cell >= 81) || state.Cells.Distinct().Count() != state.Cells.Length)
                         throw new ContentFormatException("복구 레벨 또는 선택 칸이 잘못됐습니다.");
                     return state;
                 }
@@ -146,9 +146,9 @@ namespace LevelAuthoring.Editing
                     current = History(fields["current"]), saved = Documents(fields["saved"]), savedLevelId = (string)fields["savedLevelId"] };
                 foreach (ContentDocument document in session.saved.Values.Where(document => document.RecoveryReference == null))
                     ContentDocumentValidator.Validate(document);
-                if (session.savedLevelId == null || !session.saved.TryGetValue(session.savedLevelId, out ContentDocument savedLevel) || savedLevel.Kind != "level")
+                if (session.savedLevelId != null && (!session.saved.TryGetValue(session.savedLevelId, out ContentDocument savedLevel) || savedLevel.Kind != "level"))
                     throw new ContentFormatException("복구 저장 레벨이 없습니다.");
-                session.current.Documents[session.current.LevelId].EnsureLoaded();
+                if (session.current.LevelId != null) session.current.Documents[session.current.LevelId].EnsureLoaded();
                 foreach (JToken item in ((JArray)fields["undo"]).Reverse()) session.undo.Push(History(item));
                 foreach (JToken item in ((JArray)fields["redo"]).Reverse()) session.redo.Push(History(item));
                 return session;

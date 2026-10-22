@@ -25,7 +25,7 @@ namespace LevelAuthoring.Editor
                 Type stateType = type.Assembly.GetType("LevelTool.Presentation.LevelToolSupplyState");
                 object state = Activator.CreateInstance(stateType);
                 AuthoringToolWorkspace workspace = new AuthoringToolWorkspace();
-                workspace.Create(Path.GetFullPath("Logs/LevelToolRefactorStage03/supply-" + Guid.NewGuid().ToString("N")), LevelToolDocuments.NewProject());
+                workspace.Create(Path.GetFullPath("Logs/LevelToolRefactorStage03/supply-" + Guid.NewGuid().ToString("N")), LevelToolTestProject.Create());
                 AuthoringEditSession session = workspace.Session;
                 session.SelectCells(new[] { 0 });
                 int commands = 0;

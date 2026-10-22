@@ -34,6 +34,15 @@ namespace Lobby
             Refresh(true);
         }
 
+        public float ScrollOffset => scroll.content.anchoredPosition.y;
+        public void RestoreScroll(float offset)
+        {
+            scroll.StopMovement();
+            scroll.content.anchoredPosition = new Vector2(0, Mathf.Clamp(offset, 0,
+                Mathf.Max(0, scroll.content.rect.height - scroll.viewport.rect.height)));
+            Refresh(true);
+        }
+
         private void LateUpdate()
         {
             if (levels != null && !Mathf.Approximately(viewportHeight, scroll.viewport.rect.height)) Refresh(true);

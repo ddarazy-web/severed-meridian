@@ -31,7 +31,7 @@ public static class BuildToolExternalSettingsVerification
                 Check(File.ReadAllText(path) == original && !File.Exists(preferences), "read is read-only");
                 Check(current["options"].Count() > 0 && current["revision"] != null, "metadata");
                 Check(current.Descendants().OfType<JProperty>().All(p => !p.Name.ToLowerInvariant().Contains("password")), "no password fields");
-                string code = product.Target == BuildTarget.StandaloneWindows64 ? null : "19";
+                string code = product.Target != BuildTarget.Android && product.Target != BuildTarget.iOS ? null : "19";
                 var patch = new JObject { ["expectedRevision"] = current["revision"], ["appVersion"] = new JObject { ["name"] = "3.2.1" },
                     ["options"] = new JObject { ["debug-mode"] = true } };
                 if (code != null) patch["appVersion"]["code"] = code;
@@ -76,7 +76,7 @@ public static class BuildToolExternalSettingsVerification
             Check(BuildProfile.GetActiveBuildProfile() == active && PlayerSettings.bundleVersion == activeVersion, "active profile isolation");
             var batch = typeof(BuildToolProfiles).Assembly.GetType("Products.Editor.BuildToolBatch").GetMethod("ExecuteSettings");
             JObject catalog = (JObject)batch.Invoke(null, new object[] { new JObject { ["version"] = 2, ["requestId"] = "catalog-test", ["operation"] = "settings" } });
-            Check(catalog["profiles"].Count() == 5, "canonical catalog");
+            Check(catalog["profiles"].Count() == ProductProfiles.Definitions.Length, "canonical catalog");
             try { batch.Invoke(null, new object[] { new JObject { ["version"] = 2, ["requestId"] = "invalid-profile", ["operation"] = "settings", ["profileGuid"] = "missing" } }); throw new Exception("unknown profile accepted"); }
             catch (TargetInvocationException) { }
             return "PASS " + count + " profiles: read-only, metadata, save/reload, stale revision, invalid input, omitted fields, IO rollback, catalog, isolation";

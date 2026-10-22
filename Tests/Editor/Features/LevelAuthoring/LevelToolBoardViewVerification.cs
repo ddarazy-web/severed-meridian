@@ -26,7 +26,7 @@ namespace LevelAuthoring.Editor
                 Check(overlayType != null, "board overlay inputs are explicit");
                 string folder = Path.GetFullPath("Logs/LevelToolRefactorStage03/board-" + Guid.NewGuid().ToString("N"));
                 AuthoringToolWorkspace workspace = new AuthoringToolWorkspace();
-                workspace.Create(folder, LevelToolDocuments.NewProject());
+                workspace.Create(folder, LevelToolTestProject.Create());
                 workspace.Session.SelectCells(new[] { 10, 11 });
                 string before = workspace.Session.ExportState();
                 VisualElement root = new VisualElement();

@@ -67,7 +67,8 @@ namespace GameScreen
 
         public async UniTask RestartAsync(CancellationToken token)
         {
-            if (initialBytes == null || IsRestarting || IsChangingLevel || lifetime.IsCancellationRequested || !isActiveAndEnabled) return;
+            if ((initialBytes == null && publishedSource == null) || (publishedSource != null && !ready) ||
+                IsRestarting || IsChangingLevel || lifetime.IsCancellationRequested || !isActiveAndEnabled) return;
             IsRestarting = true;
             string previousMessage = Message;
             LevelDefinition definition = null;
@@ -78,7 +79,8 @@ namespace GameScreen
             {
                 Message = "다시 시작하는 중"; Changed?.Invoke();
                 linked.Token.ThrowIfCancellationRequested();
-                definition = LevelPackCodec.ReadLevel(initialBytes, levelNumber);
+                definition = publishedSource == null ? LevelPackCodec.ReadLevel(initialBytes, levelNumber) :
+                    await publishedSource.LoadAsync(levelNumber, linked.Token);
                 bool runTutorial = ShouldRunTutorial(definition) && CheckTutorialReplay(definition);
                 StartingBoardSearch search = new StartingBoardSearch(definition, runTutorial ? definition.Tutorial.seed : seed);
                 while (!search.IsDone)

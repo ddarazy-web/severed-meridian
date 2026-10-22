@@ -146,9 +146,8 @@ namespace LevelAuthoring.Editing
                 throw new ArgumentException("저장, 버리기, 취소 중 하나를 선택하세요.", nameof(dirtyChoice));
             if (Session?.IsDirty == true && dirtyChoice == "Cancel") return false;
             string path = Path.GetFullPath(folder);
-            // 레벨이 없는 템플릿을 먼저 거절해 사용 불가능한 폴더가 남지 않게 한다.
+            // 프로젝트 생성과 첫 레벨 추가는 별도 동작이다.
             string id = template.Documents.FirstOrDefault(doc => doc.Kind == "level")?.Id;
-            if (id == null) throw new ContentFormatException("프로젝트에 레벨이 필요합니다.");
             ValidateToolVersions(template);
             if (File.Exists(Path.Combine(path, "project.json"))) throw new ContentFormatException("이미 프로젝트가 있는 폴더입니다. 새 폴더를 선택하세요.");
             if (Session?.IsDirty == true && dirtyChoice == "Save") Save();
@@ -165,8 +164,7 @@ namespace LevelAuthoring.Editing
             ValidateToolVersions(stored.Snapshot);
             ContentDocumentInfo[] levels = stored.Snapshot.DocumentIds.Select(stored.Snapshot.GetDocumentInfo).Where(doc => doc.Kind == "level")
                 .OrderBy(doc => doc.LevelNumber).ToArray();
-            if (levels.Length == 0) throw new ContentFormatException("프로젝트에 편집할 레벨이 없습니다.");
-            string id = levels.Any(doc => doc.Id == preferredId) ? preferredId : levels[0].Id;
+            string id = levels.Any(doc => doc.Id == preferredId) ? preferredId : levels.FirstOrDefault()?.Id;
             return new AuthoringEditSession(stored, id);
         }
 

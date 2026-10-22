@@ -17,9 +17,235 @@ using UnityEngine.AddressableAssets;
 
 namespace LevelAuthoring.Editor
 {
-    public static class LobbyUiVerification
+    public static partial class LobbyUiVerification
     {
         private const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
+        private static Action startupProbe;
+        private static bool verifyRelease;
+        private static bool rejectLevelPack;
+        private static bool verifyDataFailure;
+        private static bool verifyProgress;
+        public static void RunRelease() { verifyRelease = true; RunStartup(); }
+        public static void RunDataFailure() { verifyDataFailure = verifyRelease = true; RunStartup(); }
+        public static void RunPlayerProgress() { verifyProgress = verifyRelease = true; RunStartup(); }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void InstallStartupProbe() => startupProbe?.Invoke();
+        public static void RunStartup()
+        {
+            bool enabled = EditorSettings.enterPlayModeOptionsEnabled;
+            EnterPlayModeOptions options = EditorSettings.enterPlayModeOptions;
+            var startScene = EditorSceneManager.playModeStartScene;
+            var reads = new List<string>();
+            var originalTransform = Addressables.InternalIdTransformFunc;
+            startupProbe = () => Addressables.InternalIdTransformFunc = location =>
+            {
+                reads.Add(location.InternalId);
+                if (rejectLevelPack && location.PrimaryKey == LevelPackCodec.Address(1)) return "Assets/__MissingLobbyStage02Pack.bytes";
+                return originalTransform == null ? location.InternalId : originalTransform(location);
+            };
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload;
+            EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/Scenes/Lobby.unity");
+            EditorApplication.playModeStateChanged += Started;
+            EditorApplication.EnterPlaymode();
+
+            async void Started(PlayModeStateChange state)
+            {
+                if (state != PlayModeStateChange.EnteredPlayMode) return;
+                EditorApplication.playModeStateChanged -= Started;
+                int exit = 1;
+                var result = new List<string>();
+                var savedPreferences = new Dictionary<string, int?>();
+                LevelDefinition tutorialSource = null;
+                try
+                {
+                    double deadline = EditorApplication.timeSinceStartup + 30;
+                    LobbyScreen screen = null;
+                    while (EditorApplication.timeSinceStartup < deadline)
+                    {
+                        screen = UnityEngine.Object.FindFirstObjectByType<LobbyScreen>();
+                        if (screen != null && screen.Snapshot != null) break;
+                        await UniTask.Yield();
+                    }
+                    Check(screen != null && screen.Snapshot != null && screen.LastReadyMilliseconds > 0, "Lobby ready timeout");
+                    await UniTask.DelayFrame(3);
+                    Check(UnityEngine.Object.FindObjectsByType<GameScreen.PuzzleGameSession>(FindObjectsSortMode.None).Length == 0, "Game started before selection");
+                    string[] dependencies = AssetDatabase.GetDependencies("Assets/Scenes/Lobby.unity", true);
+                    Check(!dependencies.Any(path => path.Contains("Atlas") || path.EndsWith(".mp3") || path.EndsWith(".wav") || path.Contains("Assets/Prefabs/Game") || path.Contains("LevelTool")), "Forbidden lobby dependency");
+                    Check(reads.Count > 0, "No actual resource reads observed");
+                    Check(!reads.Any(path => path.Contains("levels-") || path.Contains("element-content") || path.Contains("Atlas") || path.EndsWith(".wav") || path.EndsWith(".mp3")), "Game data or artwork read by lobby");
+                    result.Add("PASS lobby ready ms=" + screen.LastReadyMilliseconds + "; levels=" + screen.Snapshot.Levels.Count);
+                    result.Add("PASS no game session or game dependencies before selection");
+                    result.AddRange(reads.Select(path => "READ " + path));
+                    if (verifyProgress)
+                    {
+                        tutorialSource = LevelPackCodec.ReadLevel(File.ReadAllBytes("Assets/Data/LevelPacks/levels-000001.bytes"), 1);
+                        var keys = new List<string> { "MoonRabbit.Tutorial.Completed.1" };
+                        if (!string.IsNullOrEmpty(tutorialSource.Tutorial.completionId)) keys.Add("MoonRabbit.Tutorial.Identity." + tutorialSource.Tutorial.completionId);
+                        foreach (int previous in tutorialSource.Tutorial.previousLevelNumbers ?? new List<int>()) keys.Add("MoonRabbit.Tutorial.Completed." + previous);
+                        foreach (string key in keys.Distinct()) savedPreferences[key] = PlayerPrefs.HasKey(key) ? PlayerPrefs.GetInt(key) : (int?)null;
+                        Directory.CreateDirectory("Logs/LobbyStage02");
+                        File.WriteAllText("Logs/LobbyStage02/player-progress-backup.json", Newtonsoft.Json.JsonConvert.SerializeObject(savedPreferences));
+                        foreach (string key in savedPreferences.Keys) PlayerPrefs.DeleteKey(key);
+                        PlayerPrefs.Save();
+                    }
+                    if (verifyDataFailure)
+                    {
+                        MemoryBoundary("failure-before");
+                        rejectLevelPack = true;
+                        screen.GetComponentInChildren<LobbyLevelCell>().GetComponentInChildren<Button>().onClick.Invoke();
+                        deadline = EditorApplication.timeSinceStartup + 30;
+                        while (EditorApplication.timeSinceStartup < deadline)
+                        {
+                            var flow = UnityEngine.Object.FindFirstObjectByType<GameScreen.Navigation.LobbyGameFlow>();
+                            if (flow != null && !flow.IsBusy) break;
+                            await UniTask.Yield();
+                        }
+                        Check(UnityEngine.Object.FindObjectsByType<GameScreen.PuzzleGameSession>(FindObjectsSortMode.None).Length == 0, "Failed data load retained a game session");
+                        Check(Field<Text>(screen, "status").text.Contains("준비하지 못"), "Failed data load lacks retry guidance");
+                        Check(UnityEngine.SceneManagement.SceneManager.sceneCount == 1, "Failed data load retained a scene");
+                        result.Add("PASS real game pack read failure returns to selectable lobby with no game scene/session");
+                        MemoryBoundary("failure-after");
+                        rejectLevelPack = false;
+                        if (gameMeasurements)
+                        {
+                            MemoryBoundary("entry-cancel-before");
+                            screen.GetComponentInChildren<LobbyLevelCell>().GetComponentInChildren<Button>().onClick.Invoke();
+                            Field<Button>(screen, "retry").onClick.Invoke();
+                            using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(30));
+                            await UniTask.WaitUntil(() => !UnityEngine.Object.FindFirstObjectByType<GameScreen.Navigation.LobbyGameFlow>().IsBusy, cancellationToken: timeout.Token);
+                            Check(UnityEngine.Object.FindObjectsByType<GameScreen.PuzzleGameSession>(FindObjectsSortMode.None).Length == 0, "Cancelled entry retained session");
+                            MemoryBoundary("entry-cancel-after");
+                        }
+                    }
+                    if (verifyRelease)
+                    {
+                      for (int round = 0; round < (verifyProgress ? 2 : verifyDataFailure ? 1 : 10); round++)
+                      {
+                        int selectedIndex = verifyProgress || verifyDataFailure || gameMeasurements && round < 4 ? 0 : round % 3 == 0 ? 0 : round % 3 == 1 ? 1 : 14;
+                        var activeList = screen.GetComponentInChildren<LobbyLevelList>();
+                        activeList.RestoreScroll(selectedIndex * Field<float>(activeList, "rowHeight"));
+                        float savedOffset = screen.ScrollOffset;
+                        var cell = activeList.GetComponentsInChildren<LobbyLevelCell>().Single(item => item.BoundIndex == selectedIndex).GetComponentInChildren<Button>();
+                        using var measurement = gameMeasurements ? new GameMeasurement(round, selectedIndex + 1, reads) : null;
+                        cell.onClick.Invoke();
+                        deadline = EditorApplication.timeSinceStartup + 30;
+                        GameScreen.PuzzleGameSession game = null;
+                        while (EditorApplication.timeSinceStartup < deadline)
+                        {
+                            game = UnityEngine.Object.FindFirstObjectByType<GameScreen.PuzzleGameSession>();
+                            var flow = UnityEngine.Object.FindFirstObjectByType<GameScreen.Navigation.LobbyGameFlow>();
+                            if (game != null && game.IsReady && flow != null && !flow.IsBusy) break;
+                            await UniTask.Yield();
+                        }
+                        Check(game != null && game.IsReady, "Game entry failed");
+                        Check(game.State.LevelNumber == selectedIndex + 1, "Selected level changed after lobby reconstruction");
+                        await UniTask.DelayFrame(5);
+                        Check(UnityEngine.Object.FindObjectsByType<LobbyScreen>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 0,
+                            "Lobby UI retained after successful game entry");
+                        Check(UnityEngine.Object.FindObjectsByType<LobbyLevelCell>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 0,
+                            "Lobby cells retained after successful game entry");
+                        result.Add("PASS lobby screen and pooled cells released during game");
+                        if (measurement != null)
+                        {
+                            using var interactionTimeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(20));
+                            await UniTask.WaitUntil(() => game.InitialInteractionMilliseconds >= 0, cancellationToken: interactionTimeout.Token);
+                            measurement.Ready(game);
+                            if (verifyDataFailure) await MeasureSessionBoundaries(game);
+                        }
+                        if (verifyProgress)
+                        {
+                            await WaitForStableGame(game);
+                            if (round == 0)
+                            {
+                                Check(game.TutorialState != null && game.TutorialState.State != Tutorial.TutorialProgressState.Completed, "Fresh player tutorial did not start");
+                                foreach (var step in Tutorial.TutorialFlowResolver.Resolve(tutorialSource).steps)
+                                {
+                                    bool accepted = step.kind == Tutorial.TutorialStepKind.Description ? game.TryAdvanceTutorial() :
+                                        step.kind == Tutorial.TutorialStepKind.Item ? game.TryUseItem(step.item, step.first) : game.TrySwap(step.first, step.second);
+                                    Check(accepted, "Published tutorial action rejected: " + step.kind);
+                                    await WaitForStableGame(game);
+                                }
+                                Check(game.TutorialState != null && game.TutorialState.State == Tutorial.TutorialProgressState.Completed, "Published tutorial did not complete");
+                                string completionKey = string.IsNullOrEmpty(tutorialSource.Tutorial.completionId) ? "MoonRabbit.Tutorial.Completed.1" : "MoonRabbit.Tutorial.Identity." + tutorialSource.Tutorial.completionId;
+                                Check(PlayerPrefs.GetInt(completionKey, 0) == 1, "Published tutorial completion not persisted");
+                                result.Add("PASS actual published tutorial actions completed and persisted");
+                            }
+                            else
+                            {
+                                Check(game.TutorialState == null, "Completed player tutorial ran again on reentry");
+                                result.Add("PASS recorded tutorial skipped on fresh lobby reentry");
+                            }
+                        }
+                        measurement?.Returning();
+                        game.RequestLobby();
+                        deadline = EditorApplication.timeSinceStartup + 30;
+                        while (EditorApplication.timeSinceStartup < deadline)
+                        {
+                            screen = UnityEngine.Object.FindFirstObjectByType<LobbyScreen>();
+                            var flow = UnityEngine.Object.FindFirstObjectByType<GameScreen.Navigation.LobbyGameFlow>();
+                            if (screen != null && screen.Snapshot != null && flow != null && !flow.IsBusy && UnityEngine.Object.FindObjectsByType<GameScreen.PuzzleGameSession>(FindObjectsSortMode.None).Length == 0) break;
+                            await UniTask.Yield();
+                        }
+                        Check(screen != null && screen.Snapshot != null && UnityEngine.Object.FindObjectsByType<GameScreen.PuzzleGameSession>(FindObjectsSortMode.None).Length == 0, "Lobby return failed");
+                        Check(Mathf.Abs(screen.ScrollOffset - savedOffset) < 1, "Lobby scroll position not restored");
+                        measurement?.LobbyReady(screen);
+                        var operationCount = Addressables.ResourceManager.GetType().GetProperty("OperationCacheCount", Private);
+                        deadline = EditorApplication.timeSinceStartup + 5;
+                        int operations;
+                        do
+                        {
+                            await UniTask.Yield();
+                            operations = (int)operationCount.GetValue(Addressables.ResourceManager);
+                        } while (operations != 0 && EditorApplication.timeSinceStartup < deadline);
+                        Check(operations == 0, "Addressables operations retained after return: " + operations);
+                        result.Add("PASS reconstructed lobby and released game round=" + round);
+                        result.Add("PASS selected=" + (selectedIndex + 1) + "; scroll=" + savedOffset + "; operation cache=" + operations);
+                        measurement?.Finished();
+                        if (verifyDataFailure) MemoryBoundary("boundaries-returned-drained");
+                      }
+                    }
+                    exit = 0;
+                }
+                catch (Exception error) { result.Add("FAIL " + error); }
+                finally
+                {
+                    Directory.CreateDirectory("Logs/LobbyStage02");
+                    File.WriteAllLines(gameMeasurements ? Path.Combine(measurementOutput, "result.txt") : "Logs/LobbyStage02/startup.txt", result);
+                    foreach (var preference in savedPreferences)
+                    {
+                        if (preference.Value.HasValue) PlayerPrefs.SetInt(preference.Key, preference.Value.Value);
+                        else PlayerPrefs.DeleteKey(preference.Key);
+                    }
+                    if (savedPreferences.Count > 0)
+                    {
+                        PlayerPrefs.Save();
+                        File.AppendAllText("Logs/LobbyStage02/startup.txt", "PASS original player preference keys restored\n");
+                    }
+                    if (tutorialSource != null) UnityEngine.Object.Destroy(tutorialSource);
+                    Addressables.InternalIdTransformFunc = originalTransform;
+                    startupProbe = null;
+                    verifyRelease = false;
+                    verifyDataFailure = rejectLevelPack = false;
+                    verifyProgress = false;
+                    gameMeasurements = false;
+                    EditorSettings.enterPlayModeOptionsEnabled = enabled;
+                    EditorSettings.enterPlayModeOptions = options;
+                    EditorSceneManager.playModeStartScene = startScene;
+                    EditorApplication.Exit(exit);
+                }
+            }
+        }
+
+        private static async UniTask WaitForStableGame(GameScreen.PuzzleGameSession game)
+        {
+            using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(35));
+            await UniTask.Yield();
+            await UniTask.WaitUntil(() => game.HasFailed || game.IsReady && !game.IsStartingFeedback && !game.IsPresenting && !game.HasProgressFeedback &&
+                (game.Phase == Simulation.BoardActionPhase.Ready || game.Phase == Simulation.BoardActionPhase.Stopped), cancellationToken: timeout.Token);
+            Check(!game.HasFailed, game.Message);
+        }
+
         public static void Run()
         {
             EditorApplication.playModeStateChanged += BeginInPlayMode;

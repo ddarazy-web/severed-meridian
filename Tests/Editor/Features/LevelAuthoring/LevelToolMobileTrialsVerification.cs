@@ -77,7 +77,7 @@ namespace LevelAuthoring.Editor
                 panel = screen.GetComponent<UIDocument>().panelSettings;
                 previousTexture = panel.targetTexture; previousScaleMode = panel.scaleMode; previousScale = panel.scale;
                 panel.scaleMode = PanelScaleMode.ConstantPixelSize; panel.scale = 1;
-                Check(screen.Workspace.Create(Path.Combine(recoveryFolder, "Project"), LevelToolDocuments.NewProject()), "isolated project created");
+                Check(screen.Workspace.Create(Path.Combine(recoveryFolder, "Project"), LevelToolTestProject.Create()), "isolated project created");
                 var session = screen.Workspace.Session;
                 string id = session.SelectedLevelId;
                 session.Apply("모바일 시험 설정", docs => {

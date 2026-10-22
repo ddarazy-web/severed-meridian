@@ -31,7 +31,7 @@ namespace LevelAuthoring.Editor
                 Type type = typeof(LevelToolScreen).Assembly.GetType("LevelTool.Presentation.LevelToolTutorialConditionsPanel");
                 Check(type != null, "tutorial conditions have an independent presentation owner");
                 AuthoringToolWorkspace workspace = new AuthoringToolWorkspace();
-                workspace.Create(Path.GetFullPath("Logs/LevelToolRefactorStage03/conditions-" + Guid.NewGuid().ToString("N")), LevelToolDocuments.NewProject());
+                workspace.Create(Path.GetFullPath("Logs/LevelToolRefactorStage03/conditions-" + Guid.NewGuid().ToString("N")), LevelToolTestProject.Create());
                 AuthoringEditSession session = workspace.Session;
                 TutorialDraftEditing.EditLevel(session, "준비", data => data.Tutorial.steps.Add(new TutorialStepDefinition()));
                 TutorialConditionKind kind = TutorialConditionKind.Match;

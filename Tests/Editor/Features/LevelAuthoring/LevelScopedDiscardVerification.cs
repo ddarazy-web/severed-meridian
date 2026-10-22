@@ -18,7 +18,7 @@ namespace LevelAuthoring.Editor
             Directory.CreateDirectory(Path.GetDirectoryName(report));
             try
             {
-                ContentSnapshot original = LevelToolDocuments.NewProject();
+                ContentSnapshot original = LevelToolTestProject.Create();
                 ContentDocument a = original.Documents.Single(doc => doc.Kind == "level");
                 ContentDocument project = original.Project;
                 var bData = a.Data;

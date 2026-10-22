@@ -72,7 +72,7 @@ namespace Levels
             Array.Copy(payload, 0, bytes, 8, payload.Length); return bytes;
         }
 
-        private static PackedTutorialLevelPack DecodeConditionDetails(byte[] bytes)
+        private static PackedTutorialLevelPack DecodeConditionDetails(byte[] bytes, bool validate)
         {
             var details = MemoryPackSerializer.Deserialize<PackedTutorialConditionDetails>(bytes.AsSpan(8));
             if (details?.ComposerPack == null || details.ComposerPack.Length < 8 || !IsTutorialPack(details.ComposerPack) ||
@@ -110,7 +110,8 @@ namespace Levels
                 condition.missionIndex = detail.MissionIndex;
                 condition.missionKind = detail.MissionKind; condition.missionColor = detail.MissionColor;
             }
-            ValidateTutorialPack(pack); return pack;
+            if (validate) ValidateTutorialPack(pack);
+            return pack;
         }
     }
 }

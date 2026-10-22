@@ -21,7 +21,7 @@ namespace LevelTool
             new ToolCommand(ToolCommandId.Open, "작업 폴더 열기", "Ctrl+O", "미저장 내용을 확인한 뒤 JSON 작업 폴더를 엽니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.ImportProject, "프로젝트 ZIP 가져오기", "", "검사한 ZIP을 새 내부 프로젝트로 등록합니다. 기존 프로젝트는 보존합니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.ExportProject, "저장 후 ZIP 내보내기", "", "JSON 저장을 마친 후 정상 저장본만 ZIP으로 전송합니다. ZIP 위치 선택을 취소해도 JSON 저장은 유지됩니다.", "제작 화면"),
-            new ToolCommand(ToolCommandId.RecentProjects, "최근 내부 프로젝트", "", "최근 성공적으로 연 내부 프로젝트를 선택합니다.", "제작 화면"),
+            new ToolCommand(ToolCommandId.RecentProjects, "최근 프로젝트", "", "최근 성공적으로 연 프로젝트를 선택합니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.NewProject, "새 프로젝트", "", "새 폴더에 프로젝트를 만듭니다.", "제작 화면"),
             new ToolCommand(ToolCommandId.Save, "저장", "Ctrl+S", "현재 입력을 확정하고 작업 폴더에 저장합니다. 조합 중이거나 숫자가 잘못되면 보류합니다.", "제작 화면 · 입력 필드"),
             new ToolCommand(ToolCommandId.SaveCopy, "사본 저장", "Ctrl+Shift+S", "입력을 확정한 뒤 다른 JSON 폴더에 사본을 저장합니다.", "제작 화면 · 입력 필드"),
@@ -77,6 +77,10 @@ namespace LevelTool
             else if (id == ToolCommandId.Open || id == ToolCommandId.NewProject || id == ToolCommandId.Backup || id == ToolCommandId.LegacyRecovery || id == ToolCommandId.Exit || id == ToolCommandId.ImportProject || id == ToolCommandId.RecentProjects) return true;
             else if (id == ToolCommandId.Reload && Workspace.Folder != null) return true;
             else if (Session == null) reason = Workspace.Directory != null ? "목록의 편집 버튼으로 레벨을 여세요." : "먼저 작업 폴더를 여세요.";
+            else if (Session.SelectedLevelId == null && (id == ToolCommandId.Play || id == ToolCommandId.Validate ||
+                id == ToolCommandId.ReplayTutorial || id == ToolCommandId.Copy || id == ToolCommandId.Cut ||
+                id == ToolCommandId.Paste || id == ToolCommandId.Delete || id == ToolCommandId.BoardFocus))
+                reason = "먼저 레벨을 만들거나 목록의 편집 버튼으로 열어 주세요.";
             else if (id == ToolCommandId.Copy || id == ToolCommandId.Cut || id == ToolCommandId.Paste || id == ToolCommandId.Delete)
             {
                 if (sharedTutorialDraft != null || inspectorPage != "기본") reason = "보드 편집의 기본 배치 화면에서 사용하세요.";

@@ -23,7 +23,7 @@ namespace LevelAuthoring.Editor
             int exit = 1;
             try
             {
-                ContentSnapshot template = LevelToolDocuments.NewProject();
+                ContentSnapshot template = LevelToolTestProject.Create();
                 ContentDocument project = template.Project;
                 var entries = new JArray();
                 for (int index = 0; index < 10000; index++)

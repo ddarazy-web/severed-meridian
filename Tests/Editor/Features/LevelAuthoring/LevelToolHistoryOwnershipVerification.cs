@@ -23,7 +23,7 @@ namespace LevelAuthoring.Editor
             string folder = Path.GetFullPath("Logs/LevelToolRecoveryPerformance/history-" + Guid.NewGuid().ToString("N"));
             try
             {
-                var workspace = new AuthoringToolWorkspace(); workspace.Create(folder, LevelToolDocuments.NewProject());
+                var workspace = new AuthoringToolWorkspace(); workspace.Create(folder, LevelToolTestProject.Create());
                 var repository = new ContentSnapshotStore(folder);
                 StoredContentSnapshot input = repository.Read();
                 var session = new AuthoringEditSession(input, workspace.Session.SelectedLevelId);

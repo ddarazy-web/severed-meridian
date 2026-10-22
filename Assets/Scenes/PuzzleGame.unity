@@ -218,6 +218,10 @@ PrefabInstance:
       propertyPath: boardCamera
       value: 
       objectReference: {fileID: 407133826}
+    - target: {fileID: 2369426923161170096, guid: 6f2d090c57e23154f96582f718e4a515, type: 3}
+      propertyPath: waitForExplicitRequest
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2936886132248689141, guid: 6f2d090c57e23154f96582f718e4a515, type: 3}
       propertyPath: board
       value: 
@@ -285,7 +289,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51540fbe61e3110479845aafd39e7ed2, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameScreen.PuzzleBoardInput
 --- !u!114 &1150240484 stripped
 MonoBehaviour:
@@ -296,7 +300,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e1cea0588b8c0e428593970b922b8ec, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameScreen.PuzzleGameSession
 --- !u!1001 &1484481349
 PrefabInstance:
@@ -700,11 +704,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7434539800332995520, guid: 4646908b8c9c7a044ba4a2a0f9c1ae58, type: 3}
       propertyPath: input
-      value:
+      value: 
       objectReference: {fileID: 1150240483}
     - target: {fileID: 7434539800332995520, guid: 4646908b8c9c7a044ba4a2a0f9c1ae58, type: 3}
       propertyPath: session
-      value:
+      value: 
       objectReference: {fileID: 1150240484}
     - target: {fileID: 7539350126008350212, guid: 4646908b8c9c7a044ba4a2a0f9c1ae58, type: 3}
       propertyPath: m_Pivot.x
@@ -971,7 +975,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
   m_SendPointerHoverToParent: 1
   m_MoveRepeatDelay: 0.5
@@ -1002,7 +1006,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
   m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1

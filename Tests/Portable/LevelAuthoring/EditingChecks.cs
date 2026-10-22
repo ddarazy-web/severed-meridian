@@ -7,6 +7,43 @@ using LevelAuthoring.Storage;
 using Newtonsoft.Json.Linq;
 internal static partial class Program
 {
+    private static void LevelDeletionChecks()
+    {
+        var deletion = typeof(AuthoringEditSession).GetMethod("DeleteSelectedLevel");
+        Check(deletion != null, "selected level deletion operation exists");
+        var stored = new ContentSnapshotStore(File.ReadAllText("Logs/GameAuthoringStage02/latest-fixtures.txt")).Read();
+        string first = stored.Snapshot.Documents.First(doc => doc.Kind == "level").Id;
+        var setup = new AuthoringEditSession(stored, first);
+        setup.Apply("검사 준비", docs =>
+        {
+            foreach (string id in docs.Values.Where(doc => doc.Kind == "level" && doc.Id != first).Select(doc => doc.Id).ToArray()) docs.Remove(id);
+        });
+        string second = DocumentEditing.DuplicateLevel(setup, first, 881995, "삭제 검사 레벨");
+        var repository = new ContentSnapshotStore(Path.GetFullPath("ContentData/Trials/game-authoring-stage-03/session-" + Guid.NewGuid().ToString("N")));
+        setup.SaveAs(repository);
+        foreach (bool lazy in new[] { false, true })
+        {
+            var session = lazy ? new AuthoringEditSession(repository.ReadDirectory(), second) : new AuthoringEditSession(repository.Read(), second);
+            var remove = (Action)Delegate.CreateDelegate(typeof(Action), session, deletion);
+            session.SelectCells(new[] { 10, 11 });
+            remove();
+            Check(session.SelectedLevelId == first && !session.DocumentIds.Contains(second) && session.SelectedCells.Length == 0, "delete selects remaining level and clears cells " + lazy);
+            Check(session.IsDirty && repository.Read().Snapshot.DocumentIds.Contains(second), "delete stays in memory until save " + lazy);
+            session.Undo();
+            Check(session.SelectedLevelId == second && session.SelectedCells.SequenceEqual(new[] { 10, 11 }) && !session.IsDirty && !session.CanUndo, "one undo restores deleted level selection and clean state " + lazy);
+            session.Redo();
+            Check(session.SelectedLevelId == first && !session.DocumentIds.Contains(second), "redo removes level again " + lazy);
+            Reject(remove, "last level deletion rejected " + lazy);
+            Check(session.SelectedLevelId == first && session.DocumentIdsOfKind("level").Length == 1, "rejected deletion preserves remaining level " + lazy);
+            session.Save(repository);
+            Check(!repository.Read().Snapshot.DocumentIds.Contains(second) && !session.IsDirty, "save and reopen excludes deleted level " + lazy);
+            session.Undo();
+            Check(session.SelectedLevelId == second && session.IsDirty, "undo after save restores deleted level " + lazy);
+            session.Save(repository);
+            Check(repository.Read().Snapshot.DocumentIds.Contains(second), "restored level can be saved and reopened " + lazy);
+        }
+    }
+
     private static void EditingChecks()
     {
         var stored = new ContentSnapshotStore(File.ReadAllText("Logs/GameAuthoringStage02/latest-fixtures.txt")).Read();

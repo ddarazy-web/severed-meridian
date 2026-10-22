@@ -34,7 +34,7 @@ namespace LevelAuthoring.Editor
             string folder = Path.GetFullPath("Logs/AndroidLevelToolStage01/screen-" + Guid.NewGuid().ToString("N"));
             recoveryFolder = Path.Combine(folder, "Recovery");
             var workspace = new AuthoringToolWorkspace();
-            workspace.Create(Path.Combine(folder, "Projects", "Current"), LevelToolDocuments.NewProject());
+            workspace.Create(Path.Combine(folder, "Projects", "Current"), LevelToolTestProject.Create());
             incomingState = workspace.ExportState();
             AuthoringEditSession session = workspace.Session;
             string id = session.SelectedLevelId;

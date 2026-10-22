@@ -19,6 +19,9 @@ namespace LevelTool
             editor = new VisualElement { name = "editor" }; editor.AddToClassList("editor-shell"); root.Add(editor);
             var menuBar = new VisualElement { name = "menu-bar" }; menuBar.AddToClassList("menu-bar"); editor.Add(menuBar);
             BuildCommandMenus(menuBar);
+            Button projectStart = Button(menuBar, "project-start-menu", "프로젝트", OpenProjectStartMenu);
+            projectStart.RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
+            projectStart.tooltip = "프로젝트 만들기·열기·ZIP 가져오기·최근 프로젝트를 한곳에서 봅니다.";
             var header = new VisualElement { name = "header" }; header.AddToClassList("tool-header"); editor.Add(header);
             var identity = new VisualElement(); identity.AddToClassList("workspace-identity"); header.Add(identity);
             levelTitle = new Label("레벨 제작 도구") { name = "level-title" }; levelTitle.AddToClassList("level-title"); identity.Add(levelTitle);
@@ -53,6 +56,9 @@ namespace LevelTool
             var levelActions = new VisualElement(); levelActions.AddToClassList("panel-tabs"); levelPanel.Add(levelActions);
             Button(levelActions, "new-level", "새 레벨", () => AddLevel(false));
             Button(levelActions, "duplicate", "복제", () => AddLevel(true));
+            Button deleteLevel = Button(levelActions, "delete-level", "삭제", ConfirmDeleteLevel);
+            deleteLevel.tooltip = "현재 편집 중인 레벨을 삭제합니다. 마지막 레벨은 삭제할 수 없습니다.";
+            deleteLevel.RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
             BuildLevelBrowser();
             materialPanel = new VisualElement(); materialPanel.AddToClassList("panel-content"); leftPanel.Add(materialPanel);
             var layers = new DropdownField("편집 층", new List<string> { "Block", "Obstacle", "Cover", "Dust" }, 0) { name = "edit-layer" };

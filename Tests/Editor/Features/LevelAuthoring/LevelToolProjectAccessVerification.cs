@@ -28,7 +28,7 @@ namespace LevelAuthoring.Editor
                     Reject(() => LevelToolProjectAccess.Resolve(root, name, true), "invalid project name " + name);
 
                 AuthoringToolWorkspace workspace = new AuthoringToolWorkspace();
-                Check(LevelToolProjectAccess.OpenDefault(workspace, root, LevelToolDocuments.NewProject()), "create first default project");
+                Check(LevelToolProjectAccess.OpenDefault(workspace, root, LevelToolTestProject.Create()), "create first default project");
                 string levelId = workspace.Session.SelectedLevelId;
                 string projectId = workspace.Session.CreateSnapshot().Project.Id;
                 Dictionary<string, JObject> definitions = LevelToolDocuments.Definitions(workspace.Session);
@@ -68,7 +68,7 @@ namespace LevelAuthoring.Editor
                     JToken.DeepEquals(copied.Session.Get(levelId).Data, edited), "saved copy reopens with matching data and references");
                 Check(LevelToolProjectAccess.List(root).SequenceEqual(new[] { "Copy", "Default" }), "internal project list contains direct names");
                 string second = LevelToolProjectAccess.Resolve(root, "Second", true);
-                Check(workspace.Create(second, LevelToolDocuments.NewProject(), "Discard"), "second project creation");
+                Check(workspace.Create(second, LevelToolTestProject.Create(), "Discard"), "second project creation");
                 Directory.CreateDirectory(Path.Combine(root, "Empty"));
                 Directory.CreateDirectory(Path.Combine(root, "Partial"));
                 File.WriteAllText(Path.Combine(root, "Partial", "unfinished.json"), "unfinished");
@@ -83,7 +83,7 @@ namespace LevelAuthoring.Editor
                 string state = reopened.ExportState();
                 Check(!LevelToolProjectAccess.OpenDefault(reopened, root, null) && reopened.ExportState() == state && current.CanUndo && current.CanRedo,
                     "default entry preserves current dirty session, selection and history");
-                Check(!reopened.Open(second, "Cancel") && !reopened.Create(Path.Combine(root, "Cancelled"), LevelToolDocuments.NewProject()) &&
+                Check(!reopened.Open(second, "Cancel") && !reopened.Create(Path.Combine(root, "Cancelled"), LevelToolTestProject.Create()) &&
                     !Directory.Exists(Path.Combine(root, "Cancelled")) && reopened.ExportState() == state, "cancel preserves session and avoids project creation");
 
                 string broken = Path.Combine(root, "Broken");
@@ -100,7 +100,7 @@ namespace LevelAuthoring.Editor
                 Directory.CreateDirectory(Path.Combine(partialRoot, "Default"));
                 string partialFile = Path.Combine(partialRoot, "Default", "unfinished.json");
                 File.WriteAllText(partialFile, "unfinished");
-                Reject(() => LevelToolProjectAccess.OpenDefault(new AuthoringToolWorkspace(), partialRoot, LevelToolDocuments.NewProject()), "partial default rejected");
+                Reject(() => LevelToolProjectAccess.OpenDefault(new AuthoringToolWorkspace(), partialRoot, LevelToolTestProject.Create()), "partial default rejected");
                 Check(File.ReadAllText(partialFile) == "unfinished" && !File.Exists(Path.Combine(partialRoot, "Default", "project.json")), "partial default never overwritten");
                 string corruptRoot = Path.Combine(temporary, "corrupt");
                 Directory.CreateDirectory(Path.Combine(corruptRoot, "Default"));
@@ -110,7 +110,7 @@ namespace LevelAuthoring.Editor
                 Check(File.ReadAllText(corruptFile) == "{broken", "corrupt default never overwritten");
                 string emptyRoot = Path.Combine(temporary, "empty");
                 Directory.CreateDirectory(Path.Combine(emptyRoot, "Default"));
-                Check(LevelToolProjectAccess.OpenDefault(new AuthoringToolWorkspace(), emptyRoot, LevelToolDocuments.NewProject()), "empty default folder initialized");
+                Check(LevelToolProjectAccess.OpenDefault(new AuthoringToolWorkspace(), emptyRoot, LevelToolTestProject.Create()), "empty default folder initialized");
             }
             catch (Exception error) { exit = 1; Debug.LogException(error); }
             finally { if (Directory.Exists(temporary)) Directory.Delete(temporary, true); }

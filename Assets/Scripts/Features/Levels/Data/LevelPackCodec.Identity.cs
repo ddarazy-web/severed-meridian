@@ -34,13 +34,13 @@ namespace Levels
             byte[] bytes = new byte[payload.Length + 8]; Array.Copy(TutorialMagic, bytes, 4); bytes[4] = 6;
             Array.Copy(payload, 0, bytes, 8, payload.Length); return bytes;
         }
-        private static PackedTutorialLevelPack DecodeIdentity(byte[] bytes)
+        private static PackedTutorialLevelPack DecodeIdentity(byte[] bytes, bool validate)
         {
             PackedTutorialIdentity data = MemoryPackSerializer.Deserialize<PackedTutorialIdentity>(bytes.AsSpan(8));
             if (data?.ExecutionPack == null || data.ExecutionPack.Length < 8 || !IsTutorialPack(data.ExecutionPack) ||
                 data.ExecutionPack[4] < 3 || data.ExecutionPack[4] > 5 || data.Entries == null)
                 throw new InvalidOperationException("튜토리얼 완료 정보 팩의 실행 데이터가 없습니다.");
-            PackedTutorialLevelPack pack = DecodeTutorial(data.ExecutionPack);
+            PackedTutorialLevelPack pack = DecodeTutorial(data.ExecutionPack, false);
             if (data.Entries.Length != pack.Tutorials.Length) throw new InvalidOperationException("튜토리얼 완료 정보 누락입니다.");
             HashSet<int> seen = new HashSet<int>();
             foreach (PackedTutorialIdentityEntry entry in data.Entries)
@@ -56,7 +56,8 @@ namespace Levels
                 level.Tutorial.completionId = entry.CompletionId;
                 level.Tutorial.previousLevelNumbers = entry.PreviousLevelNumbers.ToList();
             }
-            ValidateTutorialPack(pack); return pack;
+            if (validate) ValidateTutorialPack(pack);
+            return pack;
         }
     }
 }

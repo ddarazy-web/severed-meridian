@@ -169,7 +169,7 @@ namespace LevelAuthoring.Editor
             try
             {
                 // 사용자 원본은 읽기만 하고 각 표본의 저장·복구 파일은 별도 폴더에 둔다.
-                var source = small ? LevelTool.LevelToolDocuments.NewProject() : new ContentSnapshotStore(Path.GetFullPath("ContentData/Candidates/main")).Read().Snapshot;
+                var source = small ? LevelToolTestProject.Create() : new ContentSnapshotStore(Path.GetFullPath("ContentData/Candidates/main")).Read().Snapshot;
                 foreach (int count in small ? new[] { 10 } : new[] { 10, 30, 60 })
                 {
                     GC.Collect(); GC.WaitForPendingFinalizers(); GC.Collect();

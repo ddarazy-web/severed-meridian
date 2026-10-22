@@ -57,7 +57,7 @@ namespace LevelAuthoring.Editor
                     Finish(0); return;
                 }
                 LevelToolRecoveryIsolation.Verify(screen, Path.Combine(folder, "recovery"));
-                screen.Workspace.Create(Path.Combine(folder, "project"), LevelToolDocuments.NewProject());
+                screen.Workspace.Create(Path.Combine(folder, "project"), LevelToolTestProject.Create());
                 Call("Refresh");
                 VisualElement properties = ((ScrollView)Get("properties")).contentContainer;
                 VisualElement firstProperty = properties[0];
@@ -142,7 +142,7 @@ namespace LevelAuthoring.Editor
                 Check(properties.Q<IntegerField>("scrapTarget")?.value == previousTarget, "Undo recovers display after invalid reference");
                 string listing = Path.Combine(folder, "listing");
                 ContentDocument displayLevel = screen.Workspace.Session.Get(screen.Workspace.Session.SelectedLevelId);
-                ContentDocument project = LevelToolDocuments.NewProject().Project;
+                ContentDocument project = LevelToolTestProject.Create().Project;
                 var entries = new JArray();
                 for (int index = 0; index < 10000; index++)
                     entries.Add(new JObject { ["id"] = "ui-level-" + index, ["path"] = "levels/" + index + ".json" });
@@ -161,7 +161,7 @@ namespace LevelAuthoring.Editor
                 Check((int)Get("packComparisonCount") == priorComparisons, "opening selected level avoids automatic whole-project pack comparison");
                 Check(Get("validatedDocuments") == null, "old project validation not reused in new directory session");
                 string refreshFolder = Path.Combine(folder, "refresh");
-                screen.Workspace.Create(refreshFolder, LevelToolDocuments.NewProject());
+                screen.Workspace.Create(refreshFolder, LevelToolTestProject.Create());
                 string selectedId = screen.Workspace.Session.SelectedLevelId;
                 DocumentEditing.DuplicateLevel(screen.Workspace.Session, selectedId, 2, "목록 테스트"); screen.Workspace.Save();
                 foreach (string file in Directory.GetFiles(Path.Combine(refreshFolder, ".authoring", "listings"), "*.json")) File.Delete(file);

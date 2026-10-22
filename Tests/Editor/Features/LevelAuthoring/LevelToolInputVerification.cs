@@ -66,7 +66,7 @@ namespace LevelAuthoring.Editor
                     case 0:
                         LevelToolRecoveryIsolation.Verify(screen, recoveryFolder);
                         Call("CloseModal");
-                        screen.Workspace.Create(folder, LevelToolDocuments.NewProject(), "Discard");
+                        screen.Workspace.Create(folder, LevelToolTestProject.Create(), "Discard");
                         levelId = Session.SelectedLevelId;
                         Session.Apply("게임 시험 미션 준비", docs => MissionDocumentEditing.Set(docs[levelId].Data, 0, "Color", "Type1", 10));
                         screen.Workspace.Save();

@@ -185,7 +185,7 @@ namespace LevelTool
                 ApplyLevelSearch();
             }
             if (browserRevision != levelIndex.Revision) ApplyLevelSearch();
-            if (Session != null && lastOpenedLevelId != Session.SelectedLevelId) RecordOpenedLevel(Session.SelectedLevelId);
+            if (Session?.SelectedLevelId != null && lastOpenedLevelId != Session.SelectedLevelId) RecordOpenedLevel(Session.SelectedLevelId);
             foreach (VisualElement row in levelBrowser.Query<VisualElement>(className: "level-browser-row").ToList())
                 row.EnableInClassList("editing-level", (string)row.userData == Session?.SelectedLevelId);
             RefreshRecentLevelChoices();
@@ -225,7 +225,7 @@ namespace LevelTool
         {
             if (Session == null && Workspace.Directory == null || busy || modal != null || sharedTutorialDraft != null || tutorialPick != null ||
                 levelIndex.Get(id) == null) return;
-            if (Session == null) { OpenSelectedLevel(id, afterOpen); return; }
+            if (Session?.SelectedLevelId == null) { OpenSelectedLevel(id, afterOpen); return; }
             if (id == Session.SelectedLevelId) { afterOpen?.Invoke(); return; }
             if (!Session.HasLevelChanges(Session.SelectedLevelId) && !HasPendingAuthoringInput()) { OpenSelectedLevel(id, afterOpen); return; }
             VisualElement panel = OpenModal("레벨 " + levelIndex.Get(id).Number + "를 편집할까요?");
@@ -233,9 +233,9 @@ namespace LevelTool
                 { style = { whiteSpace = WhiteSpace.Normal } });
             panel.Add(new Label("저장 시 다른 레벨과 공유 데이터의 미저장 변경도 함께 저장됩니다. 변경 버리기는 현재 레벨에만 적용됩니다.")
                 { style = { whiteSpace = WhiteSpace.Normal } });
-            Button(panel, "save-and-open-level", "저장하고 다른 레벨 열기", () =>
+            Button(panel, "save-and-open-level", "저장하고 열기", () =>
             { CloseModal(); ContinueAfterManualInput(() => SaveAndOpenLevel(id, afterOpen).Forget()).Forget(); });
-            Button(panel, "discard-and-open-level", "변경 버리고 다른 레벨 열기", () =>
+            Button(panel, "discard-and-open-level", "현재 레벨 변경 버리고 열기", () =>
             {
                 try
                 {
@@ -245,7 +245,7 @@ namespace LevelTool
                 }
                 catch (Exception error) { Show("변경을 버리지 못했습니다: " + error.Message); }
             });
-            Button(panel, "cancel-open-level", "계속 편집하기", CloseModal);
+            Button(panel, "cancel-open-level", "계속 편집", CloseModal);
         }
 
         private void OpenSelectedLevel(string id, Action afterOpen = null)

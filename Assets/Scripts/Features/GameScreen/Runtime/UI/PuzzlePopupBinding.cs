@@ -81,8 +81,9 @@ namespace GameScreen
                 bool won = game.Outcome.Kind == BoardOutcomeKind.Won;
                 string body = "남은 이동 " + game.State.MovesRemaining + "\n" + game.Message;
                 if (won && !game.LevelAdvanceEnabled) body += "\n다음 레벨은 MemoryPack 모드에서 이어서 플레이할 수 있습니다";
+                if (won && game.CanReturnToLobby && !game.HasNextRegisteredLevel) body += "\n등록된 마지막 레벨입니다. 로비에서 다시 선택할 수 있습니다.";
                 PuzzleResultState state = new PuzzleResultState { Title = won ? "정리 완료!" : "다시 도전해요", Body = body,
-                    NextVisible = won && game.LevelAdvanceEnabled, NextEnabled = game.CanAdvanceLevel, Busy = game.IsChangingLevel || game.IsRestarting };
+                    NextVisible = won && game.LevelAdvanceEnabled && game.HasNextRegisteredLevel, NextEnabled = game.CanAdvanceLevel, Busy = game.IsChangingLevel || game.IsRestarting };
                 if (result != null) { result.ApplyState(state); shownOutcome = game.Outcome; }
                 else if (shownOutcome != game.Outcome)
                 {
@@ -111,8 +112,13 @@ namespace GameScreen
             input.CancelGesture(); input.CancelItemSelection();
             return Service.Open(DescriptionId, new PuzzleDescriptionState { Text = text + "\n\n눌러서 닫기" });
         }
-        internal void BindPause(PuzzlePauseView view) { view.Bind(() => { if (CanCommand()) view.Close(); }, Retry); }
-        internal void BindResult(PuzzleResultView view) { view.Bind(Retry, NextLevel); }
+        internal void BindPause(PuzzlePauseView view) { view.Bind(() => { if (CanCommand()) view.Close(); }, Retry, game.CanReturnToLobby ? ReturnToLobby : null); }
+        internal void BindResult(PuzzleResultView view) { view.Bind(Retry, NextLevel, game.CanReturnToLobby ? ReturnToLobby : null); }
+        private void ReturnToLobby()
+        {
+            if (!CanCommand() || game.IsRestarting || game.IsChangingLevel) return;
+            input.CancelGesture(); input.CancelItemSelection(); game.RequestLobby();
+        }
         /// <summary>복원 후보가 현재 게임과 표시 영역에 연결됐는지 확인한다.</summary>
         /// <param name="view">아직 활성화되지 않은 복원 후보.</param>
         /// <param name="restoredContext">보관 값의 문맥.</param>

@@ -71,20 +71,6 @@ namespace LevelTool
             Button(panel, "cancel", "취소", CloseModal);
         }
 
-        private void NewProject()
-        {
-            if (busy) return;
-            ChooseFolder(path =>
-            {
-                try
-                {
-                    var template = LevelToolDocuments.NewProject();
-                    WithDirtyFor("새 프로젝트 만들기", choice => Workspace.Create(path, template, choice));
-                }
-                catch (Exception error) { Show(error.Message); }
-            }, true);
-        }
-
         private VisualElement OpenModal(string title)
         {
             CancelBoardTouch();

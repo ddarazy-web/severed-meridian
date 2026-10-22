@@ -79,7 +79,7 @@ namespace LevelAuthoring.Editor
                     screen = UnityEngine.Object.FindFirstObjectByType<LevelToolScreen>();
                     if (screen == null || (bool)Get("busy")) return;
                     LevelToolRecoveryIsolation.Verify(screen, directory);
-                    Check(screen.Workspace.Create(Path.Combine(directory, "project"), LevelToolDocuments.NewProject()), "isolated project");
+                    Check(screen.Workspace.Create(Path.Combine(directory, "project"), LevelToolTestProject.Create()), "isolated project");
                     Set("levelSettingsVisible", true); Call("Refresh");
                     phase = 1; next = EditorApplication.timeSinceStartup + 1;
                 }
@@ -404,7 +404,7 @@ namespace LevelAuthoring.Editor
                     Set("recoveryDirectory", directory);
                     Set("draftStore", new ToolDraftStore(directory));
                     Set("recentProjects", null);
-                    Check(screen.Workspace.Create(Path.Combine(directory, "project"), LevelToolDocuments.NewProject(), "Discard"), "next isolated suite project");
+                    Check(screen.Workspace.Create(Path.Combine(directory, "project"), LevelToolTestProject.Create(), "Discard"), "next isolated suite project");
                     Set("levelSettingsVisible", true); Call("Refresh");
                     phase = 1; next = EditorApplication.timeSinceStartup + 1;
                     return;

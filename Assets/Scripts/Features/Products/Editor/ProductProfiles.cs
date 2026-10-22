@@ -16,22 +16,26 @@ namespace Products.Editor
     {
         public readonly string Name, Symbol, Scene, Output, ProductName, ApplicationId;
         public readonly BuildTarget Target;
+        public readonly IReadOnlyList<string> Scenes;
         public bool IsTool => Symbol == "PRODUCT_LEVEL_EDITOR";
         public string ContentKey => Symbol + "/" + Target;
         public string ProfilePath => "Assets/Settings/BuildProfiles/" + Name + ".asset";
-        public ProductDefinition(string name, string symbol, BuildTarget target, string scene, string output, string productName, string applicationId)
-        { Name = name; Symbol = symbol; Target = target; Scene = scene; Output = output; ProductName = productName; ApplicationId = applicationId; }
+        public ProductDefinition(string name, string symbol, BuildTarget target, string scene, string output, string productName, string applicationId, params string[] additionalScenes)
+        {
+            Name = name; Symbol = symbol; Target = target; Scene = scene; Output = output; ProductName = productName; ApplicationId = applicationId;
+            Scenes = Array.AsReadOnly(new[] { scene }.Concat(additionalScenes).ToArray());
+        }
     }
 
     public static partial class ProductProfiles
     {
         public static readonly ProductDefinition[] Definitions =
         {
-            new ProductDefinition("Android Game", "PRODUCT_ANDROID_GAME", BuildTarget.Android, "Assets/Scenes/PuzzleGame.unity", "Builds/Android/Game.apk", "Moon Rabbit Junk Shop", "com.twelvethwarriors.aos.moonrabbits"),
-            new ProductDefinition("iOS Game", "PRODUCT_IOS_GAME", BuildTarget.iOS, "Assets/Scenes/PuzzleGame.unity", "Builds/iOS", "Moon Rabbit Junk Shop", "com.twelvethwarriors.ios.moonrabbits"),
-            new ProductDefinition("Windows Steam Game", "PRODUCT_STEAM_GAME", BuildTarget.StandaloneWindows64, "Assets/Scenes/PuzzleGame.unity", "Builds/Steam/MoonRabbit.exe", "Moon Rabbit Junk Shop", "com.twelvethwarriors.windows.moonrabbits"),
+            new ProductDefinition("Android Game", "PRODUCT_ANDROID_GAME", BuildTarget.Android, "Assets/Scenes/Lobby.unity", "Builds/Android/Game.apk", "Moon Rabbit Junk Shop", "com.twelvethwarriors.aos.moonrabbits", "Assets/Scenes/PuzzleGame.unity"),
+            new ProductDefinition("iOS Game", "PRODUCT_IOS_GAME", BuildTarget.iOS, "Assets/Scenes/Lobby.unity", "Builds/iOS", "Moon Rabbit Junk Shop", "com.twelvethwarriors.ios.moonrabbits", "Assets/Scenes/PuzzleGame.unity"),
+            new ProductDefinition("Windows Steam Game", "PRODUCT_STEAM_GAME", BuildTarget.StandaloneWindows64, "Assets/Scenes/Lobby.unity", "Builds/Steam/MoonRabbit.exe", "Moon Rabbit Junk Shop", "com.twelvethwarriors.windows.moonrabbits", "Assets/Scenes/PuzzleGame.unity"),
             new ProductDefinition("Windows Level Editor", "PRODUCT_LEVEL_EDITOR", BuildTarget.StandaloneWindows64, "Assets/Scenes/LevelTool.unity", "Builds/LevelTool/MoonRabbitLevelTool.exe", "Moon Rabbit Level Editor", "com.twelvethwarriors.windows.moonrabbits.leveleditor"),
-            new ProductDefinition("Android Level Editor", "PRODUCT_LEVEL_EDITOR", BuildTarget.Android, "Assets/Scenes/LevelTool.unity", "Builds/Android/LevelTool.apk", "Moon Rabbit Level Tool", "com.twelvethwarriors.aos.moonrabbits.leveleditor")
+            new ProductDefinition("Android Level Editor", "PRODUCT_LEVEL_EDITOR", BuildTarget.Android, "Assets/Scenes/LevelTool.unity", "Builds/Android/LevelTool.apk", "Moon Rabbit Level Tool", "com.twelvethwarriors.aos.moonrabbits.leveleditor"),
         };
 
         public static ProductDefinition ValidateSelection(string[] symbols, BuildTarget target)
@@ -50,7 +54,7 @@ namespace Products.Editor
             BuildTarget target = (BuildTarget)data.FindProperty("m_BuildTarget").intValue;
             ProductDefinition definition = ValidateSelection(profile.scriptingDefines, target);
             string[] scenes = profile.scenes.Where(value => value.enabled).Select(value => value.path).ToArray();
-            if (!profile.overrideGlobalScenes || scenes.Length != 1 || scenes[0] != definition.Scene || AssetDatabase.LoadAssetAtPath<SceneAsset>(definition.Scene) == null)
+            if (!profile.overrideGlobalScenes || !scenes.SequenceEqual(definition.Scenes) || definition.Scenes.Any(path => AssetDatabase.LoadAssetAtPath<SceneAsset>(path) == null))
                 throw new BuildFailedException(definition.Name + " 시작 씬이 제품 계약과 다릅니다.");
             string[] globals = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(BuildPipeline.GetBuildTargetGroup(target))).Split(';');
             if (globals.Any(value => value.StartsWith("PRODUCT_", StringComparison.Ordinal)))
@@ -97,7 +101,9 @@ namespace Products.Editor
                 SerializedProperty identifiers = player.FindProperty("applicationIdentifier");
                 if (name == null || identifiers == null || !identifiers.isArray) throw new BuildFailedException("제품별 PlayerSettings 직렬화 형식을 확인해야 합니다.");
                 name.stringValue = definition.ProductName;
-                string platform = definition.Target == BuildTarget.Android ? "Android" : definition.Target == BuildTarget.iOS ? "iPhone" : "Standalone";
+                if (!BuildToolPlatforms.Default.TryGet(definition.Target, out IBuildToolPlatform handler, out string reason))
+                    throw new BuildFailedException(reason);
+                string platform = handler.PlayerSettingsKey;
                 bool found = false;
                 for (int index = 0; index < identifiers.arraySize; index++)
                 {
@@ -137,7 +143,7 @@ namespace Products.Editor
                 settings.profileSettings.SetValue(id, "Local.LoadPath", "{UnityEngine.AddressableAssets.Addressables.RuntimePath}/" + definition.ContentKey);
             }
             EditorUtility.SetDirty(settings); AssetDatabase.SaveAssetIfDirty(settings);
-            GameDiagnostics.GameLog.Debug("다섯 제품의 설정·콘텐츠 경로 구성을 저장했습니다. 빌드는 실행하지 않았습니다.");
+            GameDiagnostics.GameLog.Debug(Definitions.Length + "개 제품의 설정·콘텐츠 경로 구성을 저장했습니다. 빌드는 실행하지 않았습니다.");
         }
 
         public static void Select(string symbol)

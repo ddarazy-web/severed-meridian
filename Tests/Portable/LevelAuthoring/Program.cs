@@ -8,6 +8,18 @@ internal static partial class Program
     private static int passed;
     private static void Main(string[] args)
     {
+        if (args.Length == 1 && args[0] == "native-start")
+        {
+            NativeStartChecks();
+            Console.WriteLine("PASS " + passed + " native start checks");
+            return;
+        }
+        if (args.Length == 1 && args[0] == "level-deletion")
+        {
+            LevelDeletionChecks();
+            Console.WriteLine("PASS " + passed + " level deletion checks");
+            return;
+        }
         if (args.Length == 1 && (args[0] == "stage4-package" || args[0] == "stage4-recovery"))
         {
             if (args[0] == "stage4-package") ProjectPackageChecks();
@@ -47,6 +59,7 @@ internal static partial class Program
         ExportedChecks();
         SafetyChecks(document);
         EditingChecks();
+        LevelDeletionChecks();
         PlacementChecks();
         ElementSelectionChecks();
         CommonChecks();
