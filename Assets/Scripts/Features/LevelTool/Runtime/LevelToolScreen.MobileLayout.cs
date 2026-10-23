@@ -119,15 +119,16 @@ namespace LevelTool
             mobileWidth = width; mobileHeight = height;
             mobileWide = width >= MobileWideWidth;
             mobilePortrait = height >= width;
+            RefreshBoardToolStatus();
             root.EnableInClassList("mobile-wide", mobileWide);
             root.EnableInClassList("mobile-portrait", !mobileWide && mobilePortrait);
             root.EnableInClassList("mobile-landscape", !mobileWide && !mobilePortrait);
 
             // 창 변경 시 선택된 패널과 기존 요소를 유지하고 기하 정보만 갱신한다.
             float panelWidth = Mathf.Min(320, width * .48f);
-            float panelHeight = Mathf.Min(280, height * .40f);
+            float panelHeight = mobilePanel == "materials" ? Mathf.Min(520, height * .65f) : Mathf.Min(280, height * .40f);
             float bodyHeight = body.resolvedStyle.height;
-            if (!float.IsNaN(bodyHeight) && bodyHeight > 0) panelHeight = Mathf.Min(panelHeight, bodyHeight * .60f);
+            if (!float.IsNaN(bodyHeight) && bodyHeight > 0) panelHeight = Mathf.Min(panelHeight, bodyHeight * (mobilePanel == "materials" ? .80f : .60f));
             mobilePanelHeight = panelHeight;
             foreach (VisualElement panel in new VisualElement[] { leftPanel, rightPanel, mobileMorePanel })
             {
@@ -154,6 +155,7 @@ namespace LevelTool
             if (panel == "levels") materialsVisible = false;
             if (panel == "materials") materialsVisible = true;
             boardFocus = false;
+            ApplyMobileLayout(mobileWidth, mobileHeight);
             UpdatePanelVisibility();
             root.schedule.Execute(RestoreMobilePanelInputs);
         }

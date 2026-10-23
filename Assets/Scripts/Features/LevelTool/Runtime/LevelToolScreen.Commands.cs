@@ -99,11 +99,18 @@ namespace LevelTool
 
         private bool TryExecuteCommand(ToolCommandId id)
         {
+            if (tutorialWork != null && (id == ToolCommandId.Save || id == ToolCommandId.SaveCopy || id == ToolCommandId.Open ||
+                id == ToolCommandId.NewProject || id == ToolCommandId.ImportProject || id == ToolCommandId.ExportProject ||
+                id == ToolCommandId.Reload || id == ToolCommandId.RecentProjects || id == ToolCommandId.Backup ||
+                id == ToolCommandId.LegacyRecovery || id == ToolCommandId.Exit) && GuardTutorialWorkExit(() => TryExecuteCommand(id))) return false;
+            if (id == ToolCommandId.Undo && tutorialWork != null && sharedTutorialDraft == null && !Session.CanUndoLevelWork(tutorialWork))
+            { Show("튜토리얼 작성 시작 이전 변경은 전체 취소 후 되돌릴 수 있습니다."); return false; }
             if (!CanExecuteCommand(id, out string reason)) { Show(reason); return false; }
             if (id == ToolCommandId.Cancel)
             {
-                if (fileTransferCancellation != null) fileTransferCancellation.Cancel();
-                else if (modal != null) CloseModal();
+                if (trialLoadingModal != null) CancelTrialLoading();
+                else if (fileTransferCancellation != null) fileTransferCancellation.Cancel();
+                else if (modal != null) { purposeDraft = null; CloseModal(); }
                 else if (tutorialPick != null) CancelTutorialPick();
                 else { CancelPendingInput(); brush = null; Refresh(); Show("진행 중 조작을 취소했습니다."); }
                 return true;
@@ -189,7 +196,7 @@ namespace LevelTool
 
         private static bool IsNavigationCommand(ToolCommandId id) => id == ToolCommandId.Open ||
             id == ToolCommandId.NewProject || id == ToolCommandId.ImportProject || id == ToolCommandId.RecentProjects ||
-            id == ToolCommandId.Reload || id == ToolCommandId.Backup || id == ToolCommandId.LegacyRecovery || id == ToolCommandId.Exit;
+            id == ToolCommandId.Reload || id == ToolCommandId.Backup || id == ToolCommandId.LegacyRecovery || id == ToolCommandId.Exit || id == ToolCommandId.BoardFocus;
 
         private void RefreshCommandStates()
         {

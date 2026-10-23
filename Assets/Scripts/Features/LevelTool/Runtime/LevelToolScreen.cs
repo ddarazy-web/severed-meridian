@@ -41,6 +41,7 @@ namespace LevelTool
             root = GetComponent<UIDocument>().rootVisualElement;
             root.Clear();
             modal = null; commandMenuOpen = false;
+            tutorialWorkBar = null;
             if (styles != null && !root.styleSheets.Contains(styles)) root.styleSheets.Add(styles);
             if (font != null) root.style.unityFont = font;
             root.AddToClassList("level-tool");
@@ -62,12 +63,14 @@ namespace LevelTool
                     Zoom = value => ZoomBoard(value, boardScroll.contentViewport.worldBound.center),
                     Fit = () => { autoFitBoard = true; FitBoardToViewport(); },
                     BeginMove = id => { moveBody = id; brush = null; Show("장애물이 이동할 기준 칸을 클릭하세요."); },
-                    SetSeed = value => seed = value, SetTutorialMode = value => tutorialMode = value
+                    SetSeed = value => seed = value, SetTutorialMode = value => tutorialMode = value,
+                    LoadMissionImage = (image, kind, tint) => LoadMissionPreview(image, kind, tint).Forget()
                 });
             tutorialPanel = new Presentation.LevelToolTutorialPanel(new Presentation.LevelToolTutorialActions
             {
                 Session = () => Session, Draft = () => sharedTutorialDraft, Edit = Edit, Refresh = RefreshProperties,
                 Preview = () => tutorialPreview, SetPreview = value => tutorialPreview = value, Layer = () => layer,
+                WorkActive = () => tutorialWork != null,
                 Pick = BeginTutorialPick,
                 BeginSharedDraft = () => Edit(() => { sharedTutorialDraft = new LevelAuthoring.Runtime.SharedTutorialDraft(Session); tutorialStep = 0; CancelPendingInput(); brush = null; }),
                 ApplySharedDraft = ApplySharedTutorialDraft,
@@ -78,6 +81,8 @@ namespace LevelTool
             root.UnregisterCallback<InputEvent>(OnManualInput, TrickleDown.TrickleDown);
             root.RegisterCallback<InputEvent>(OnManualInput, TrickleDown.TrickleDown);
             Refresh();
+            if (tutorialWork != null && purposeDraft != null && tutorialPick == null) OpenPurposeSettings();
+            if (tutorialPick != null && directPickReady) OpenDirectPickSettings();
             EnableRecovery();
             if (suspendedInputs != null)
             {
@@ -114,6 +119,8 @@ namespace LevelTool
         {
             CancelBoardTouch();
             tutorialPick = null;
+            purposeDraft = null;
+            directPickStep = null; directPickReady = false;
             CancelFlowTool(); wireDrawing = false; wireRoute.Clear();
             connectionGenerator = null; connectionTarget = null; selectedConnection = 0;
             moveBody = null; anchor = -1;
@@ -122,6 +129,7 @@ namespace LevelTool
 
         private void ConfirmDeleteLevel()
         {
+            if (GuardTutorialWorkExit(ConfirmDeleteLevel)) return;
             if (Session == null || busy || modal != null || sharedTutorialDraft != null || tutorialPick != null) return;
             if (Session.DocumentIdsOfKind("level").Length <= 1)
             { Show("마지막 레벨은 삭제할 수 없습니다. 레벨을 하나 이상 남겨 주세요."); return; }
@@ -160,6 +168,7 @@ namespace LevelTool
                 root.Q<Button>(name)?.SetEnabled(Session != null && !busy);
             root.Q<Button>("new-project")?.SetEnabled(!busy);
             bool shared = sharedTutorialDraft != null;
+            root.Q("board-touch-erase")?.SetEnabled(Session != null && !busy && !shared);
             root.Q("delete-level")?.SetEnabled(Session != null && !busy && !shared && tutorialPick == null &&
                 Session.DocumentIdsOfKind("level").Length > 1);
             root.Q("select")?.SetEnabled(Session != null && !busy);
@@ -183,29 +192,13 @@ namespace LevelTool
                 Show(error.Message); return;
             }
             board.style.display = (inspectorPage == "자동 시험" || inspectorPage == "시험 기록") ? DisplayStyle.None : DisplayStyle.Flex;
-            RefreshNavigation(); RefreshCommandStates();
+            RefreshNavigation(); RefreshCommandStates(); RefreshCreationGuide(); RefreshTutorialWorkBar();
             RefreshStartScreen();
             if (Session?.SelectedLevelId == null) { RefreshLevelBrowser(); palette.Clear(); paletteKey = null; inspector.Clear(); boardView.Clear(); ApplyToolSkin(); return; }
             try
             {
                 RefreshLevelBrowser();
-                var materials = definitions.Where(pair => LevelToolDocuments.Layer(pair.Value) == layer).ToArray();
-                string nextPalette = layer + string.Join("|", materials.Select(pair => pair.Key + ":" + pair.Value["displayName"]));
-                if (nextPalette != paletteKey)
-                {
-                    paletteKey = nextPalette; palette.Clear();
-                    foreach (var pair in materials)
-                    {
-                        string id = pair.Key;
-                        Button item = Button(palette, id, (string)pair.Value["displayName"], () =>
-                        {
-                            CancelBoardTouch(); boardTouchTool = "tap"; brush = id; moveBody = null; UpdateBoardTouchHint(); Refresh();
-                            Show("빈 칸에 배치합니다. 터치 교체는 ‘교체’ 옵션, 마우스 교체는 더블클릭을 사용하세요.");
-                        });
-                        item.tooltip = id;
-                    }
-                }
-                foreach (var item in palette.Query<Button>().ToList()) item.EnableInClassList("selected", item.name == brush);
+                RefreshMaterialPalette();
                 string nextBoardState = Workspace.Folder + "|" + Session.SelectedLevelId + "|" + boardRevision +
                     "|" + string.Join(",", Session.SelectedCells) + "|" + layer + "|" + inspectorPage + "|" +
                     flowTool + "|" + flowFirst + "|" + string.Join(",", flowRoute) + "|" + wireDrawing + "|" + string.Join(",", wireRoute) + "|" + connectionGenerator + "|" + connectionTarget + "|" + selectedConnection +
@@ -219,8 +212,9 @@ namespace LevelTool
                 string nextProperties = nextBoardState + "|" + propertiesRevision + "|" + selectedShape + "|" + shared + "|" + (tutorialPick != null);
                 if (forceProperties || propertiesKey != nextProperties)
                 {
-                    bool retainedTutorial = inspectorPage == "튜토리얼" && tutorialPanel.Root.parent == inspector &&
+                    bool retainedTutorial = inspectorPage == "튜토리얼" && inspector.Contains(tutorialPanel.Root) &&
                         tutorialPick == null && tutorialPanel.TryRefreshInstructions();
+                    if (retainedTutorial) RefreshTutorialSummaryInstructions();
                     if (!retainedTutorial)
                     {
                         inspector.Clear();

@@ -1,0 +1,47 @@
+PASS unchanged refresh preserves property controls
+PASS name edit preserves material controls
+PASS name edit preserves board controls
+PASS name edit retains dirty state
+PASS Undo returns to saved state
+PASS Redo restores name
+PASS version lookup preserves public copy isolation
+PASS selection reuses definitions
+PASS selection preserves existing board cells
+PASS brush reuses definitions
+PASS selection and brush do not edit documents
+PASS unchanged refresh reuses pack comparison
+PASS unchanged refresh performs zero display document reads and definition builds
+PASS validation initially current
+PASS cell edit updates board
+PASS single level edit reads one display document without rebuilding definitions
+PASS changed document invalidates validation
+PASS changed document recomputes pack comparison
+PASS Undo restores board appearance
+PASS Undo restores validation currency
+PASS zoom preserves existing board cells
+PASS zoom preserves property inputs
+PASS zoom does not edit document
+PASS same ID reload replaces derived definitions
+PASS same ID reload shows saved name
+PASS cancel tutorial cell picker restores property input
+PASS performance fixture tutorial cancellation restores saved state
+PASS supply edit updates visible field
+PASS supply Undo updates visible field
+PASS failed leave restores enabled screen with error
+PASS successful clean leave does not rebuild properties
+PASS failed display preparation does not leave stale editable controls
+PASS Undo recovers display after invalid reference
+PASS actual scene displays 10000 entries without selecting a body
+PASS listing-only search enabled
+PASS explicit edit shows selected board without other bodies
+PASS opening selected level avoids automatic whole-project pack comparison
+PASS old project validation not reused in new directory session
+PASS explicit listing refresh button available
+PASS listing rebuild explains full scan before execution
+PASS dismissing listing rebuild preserves draft
+PASS listing progress and cancel controls visible
+PASS explicit listing refresh completed
+PASS listing UI preserved unsaved draft
+PASS listing UI refreshed unknown number
+PASS listing UI preserved Undo
+PASS listing progress closed and editor restored

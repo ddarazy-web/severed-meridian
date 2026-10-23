@@ -98,6 +98,8 @@ namespace LevelAuthoring.Editor
             string previousPage = (string)typeof(LevelToolScreen).GetField("inspectorPage", flags).GetValue(screen);
             TutorialDraftEditing.AddSampleBoard(parent, "two");
             string flowId = TutorialDraftEditing.CreateFlow(parent, "두 행동 공유 게임 검사");
+            typeof(LevelToolScreen).GetField("inspectorPage", flags).SetValue(screen, "튜토리얼");
+            typeof(LevelToolScreen).GetMethod("BeginTutorialWork", flags).Invoke(screen, null);
             var draft = new SharedTutorialDraft(parent);
             TutorialDraftEditing.EditFlow(draft.Session, flowId, "draft instructions", flow => flow.steps[0].instructions = "시험 사본의 두 번 교환");
             TutorialDraftEditing.EditFlow(draft.Session, flowId, "draft redo", flow => flow.steps[0].instructions = "다시 실행 안내");
@@ -105,6 +107,10 @@ namespace LevelAuthoring.Editor
             typeof(LevelToolScreen).GetField("sharedTutorialDraft", flags).SetValue(screen, draft);
             typeof(LevelToolScreen).GetField("inspectorPage", flags).SetValue(screen, "튜토리얼");
             Refresh(screen);
+            var composition = screen.GetComponent<UIDocument>().rootVisualElement.Q<Foldout>("tutorial-composition-details");
+            Check(composition != null, "shared trial starts inside explicit tutorial work");
+            composition.value = true;
+            Check(screen.GetComponent<UIDocument>().rootVisualElement.Q<TextField>("tutorial-instructions")?.value == "시험 사본의 두 번 교환", "shared editor shows draft instructions before game");
             string parentBefore = parent.ExportState(), draftBefore = draft.ExportState();
             string key = "MoonRabbit.Tutorial.Completed." + parent.Get(parent.SelectedLevelId).Data["levelNumber"];
             string identity = "MoonRabbit.Tutorial.Identity." + parent.Get(parent.SelectedLevelId).Data["tutorial"]["completionId"];
@@ -130,6 +136,7 @@ namespace LevelAuthoring.Editor
             draft.Session.Undo();
             Check(parent.ExportState() == parentBefore, "draft undo/redo never applies shared source implicitly");
             typeof(LevelToolScreen).GetField("sharedTutorialDraft", flags).SetValue(screen, null);
+            typeof(LevelToolScreen).GetMethod("CompleteTutorialWork", flags).Invoke(screen, null);
             typeof(LevelToolScreen).GetField("inspectorPage", flags).SetValue(screen, previousPage); Refresh(screen);
         }
         private static async UniTask Stable(PuzzleGameSession game)

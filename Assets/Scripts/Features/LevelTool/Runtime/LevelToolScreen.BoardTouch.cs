@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LevelAuthoring.Editing;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -48,7 +49,7 @@ namespace LevelTool
             boardInput = new LevelToolBoardInput(root, boardScroll, board,
                 () => new LevelToolBoardInput.Context
                 {
-                    HasSession = Session != null, Blocked = modal != null, Busy = busy,
+                    HasSession = Session?.SelectedLevelId != null, Blocked = modal != null, Busy = busy,
                     Picking = tutorialPick != null || flowTool != null, WireDrawing = wireDrawing,
                     Mobile = mobileViewportActive, Replace = boardTouchReplace, Tool = boardTouchTool, CellSize = cellSize
                 },
@@ -69,6 +70,13 @@ namespace LevelTool
             tools.contentContainer.style.flexDirection = FlexDirection.Row;
             editor.Insert(editor.IndexOf(body), tools);
             Button(tools, "board-touch-select", "선택", () => SetBoardTouchTool("tap"));
+            Button(tools, "board-touch-materials", "배치", () =>
+            {
+                materialsVisible = true; leftPanelHidden = false; boardFocus = false;
+                if (mobileNavigation != null) { if (mobilePanel != "materials") SelectMobilePanel("materials"); }
+                else UpdatePanelVisibility();
+            });
+            Button(tools, "board-touch-erase", "지우기", () => SetBoardTouchTool("erase"));
             Button(tools, "board-touch-area", "영역", () => SetBoardTouchTool("area"));
             Button(tools, "board-touch-pan", "이동", () => SetBoardTouchTool("pan"));
             Toggle add = new Toggle("추가 선택") { name = "board-touch-add", value = boardTouchAdd };
@@ -80,6 +88,10 @@ namespace LevelTool
             Button(tools, "board-zoom-in", "+", () => ZoomBoard(cellSize * 1.2f, boardScroll.contentViewport.worldBound.center));
             Button(tools, "board-fit", "화면 맞춤", () => { autoFitBoard = true; FitBoardToViewport(); });
             Button(tools, "board-focus-toggle", "보드 넓게", ToggleBoardFocus).tooltip = "상단과 좌우 편집 패널을 접어 보드 공간을 넓힙니다. Shift+Space로도 전환할 수 있습니다.";
+            Button(tools, "toggle-left-panel", "목록·소재", () => ToggleEditorPanel(true));
+            Button(tools, "toggle-right-panel", "속성", () => ToggleEditorPanel(false));
+            foreach (string navigation in new[] { "tool-menu", "board-focus-toggle", "toggle-left-panel", "toggle-right-panel", "board-touch-materials", "sidebar-levels", "sidebar-materials", "inspector-selection", "inspector-level" })
+                root.Q<Button>(navigation).RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
             Button(tools, "board-actions", "작업", OpenBoardActions);
             Button(tools, "board-touch-cancel", "취소", () => { CancelBoardTouch(); Show("진행 중 터치와 영역 지정을 취소했습니다."); });
             foreach (VisualElement control in tools.contentContainer.Children())
@@ -98,6 +110,7 @@ namespace LevelTool
 
         private void UpdateBoardTouchHint()
         {
+            RefreshBoardToolStatus();
             if (boardTouchHint == null) return;
             boardTouchHint.text = boardTouchTool == "pan" ? "끌어서 보드 이동" : boardTouchTool == "area" ?
                 (boardInput == null || boardInput.AreaStart < 0) ? "영역 시작 칸을 선택" : "끝 칸을 선택 · 취소 가능" : "탭: 손을 떼면 확정 · 길게: 작업";
@@ -122,6 +135,7 @@ namespace LevelTool
 
         private void HandleAndroidBack()
         {
+            if (trialLoadingModal != null) { CancelTrialLoading(); return; }
             if (fileTransferCancellation != null) { fileTransferCancellation.Cancel(); return; }
             if (modal != null) { CloseModal(); return; }
             if (playRoot != null) { HandleTrialBack(); return; }
@@ -152,19 +166,55 @@ namespace LevelTool
 
         private void OpenBoardActions()
         {
-            if (busy || Session == null || modal != null || tutorialPick != null || sharedTutorialDraft != null) return;
+            if (busy || Session?.SelectedLevelId == null || modal != null || tutorialPick != null || sharedTutorialDraft != null) return;
             if (!CommitCommandInput()) return;
             CancelBoardTouch();
-            VisualElement panel = OpenModal("선택 작업 · " + layer); panel.name = "board-actions-menu"; commandMenuOpen = true;
+            VisualElement panel = OpenModal("선택 작업 · " + LayerLabel(layer)); panel.name = "board-actions-menu"; commandMenuOpen = true;
             panel.Add(new Label("현재 층의 선택만 편집합니다. 붙여넣기는 첫 선택 칸을 기준으로 배치합니다."));
+            JObject data = Session.Get(Session.SelectedLevelId).Data;
+            foreach (string targetLayer in new[] { "Block", "Obstacle", "Cover", "Dust" })
+            {
+                string[] ids = ElementClipboard.SelectedInstanceIds(targetLayer);
+                string names = string.Join(", ", data["elements"].OfType<JObject>()
+                    .Where(item => ids.Contains((string)item["instanceId"]))
+                    .Select(item => definitions.TryGetValue((string)item["definitionId"], out JObject definition) ?
+                        (string)definition["displayName"] : (string)item["definitionId"]).Distinct().Take(3));
+                Button clear = Button(panel, "board-clear-layer-" + targetLayer,
+                    LayerLabel(targetLayer) + " · " + (ids.Length == 0 ? "비어 있음" : names + " (" + ids.Length + ") · 지우기"),
+                    () => { CloseModal(); Edit(() => ElementClipboard.Delete(targetLayer)); });
+                clear.SetEnabled(ids.Length > 0);
+                clear.tooltip = "선택 범위의 " + LayerLabel(targetLayer) + "만 지웁니다. 다른 층은 유지하며 Ctrl+Z로 복원합니다.";
+            }
             Button(panel, "board-place", "현재 도구 배치", () => { CloseModal(); PlaceBoardSelection(false); });
             Button(panel, "board-replace", "현재 도구로 교체", () => { CloseModal(); PlaceBoardSelection(true); });
             foreach (ToolCommandId id in new[] { ToolCommandId.Copy, ToolCommandId.Cut, ToolCommandId.Paste, ToolCommandId.Delete })
                 CommandButton(panel, id, "board-command-" + id);
             Button(panel, "board-properties", "선택 속성 수정", () =>
-            { CloseModal(); levelSettingsVisible = false; if (mobileNavigation != null && mobilePanel != "properties") SelectMobilePanel("properties"); else UpdatePanelVisibility(); });
+            { CloseModal(); levelSettingsVisible = false; rightPanelHidden = false; boardFocus = false; if (mobileNavigation != null && mobilePanel != "properties") SelectMobilePanel("properties"); else UpdatePanelVisibility(); });
+            Button(panel, "board-clear-all-layers", "선택 칸의 모든 층 비우기…", () => { CloseModal(); ConfirmClearBoardCells(); });
             Button(panel, "board-close-actions", "닫기", CloseModal);
             RefreshCommandStates();
+        }
+
+        private void ConfirmClearBoardCells()
+        {
+            if (Session?.SelectedLevelId == null || Session.SelectedCells.Length == 0) return;
+            int[] cells = Session.SelectedCells.ToArray();
+            AuthoringEditSession owner = Session;
+            VisualElement panel = OpenModal("선택 칸의 모든 층 비우기");
+            panel.Add(new Label(cells.Length + "칸의 블록·장애물·덮개·바닥을 지웁니다. 칸에 걸친 2×2 본체도 전체 제거됩니다. 실행 취소로 복원할 수 있습니다."));
+            Button(panel, "confirm-clear-all-layers", "모든 층 비우기", () =>
+            {
+                CloseModal();
+                if (!ReferenceEquals(owner, Session)) return;
+                Change("선택 칸 모든 층 비우기", data =>
+                {
+                    foreach (int cell in cells)
+                        foreach (string targetLayer in new[] { "Block", "Obstacle", "Cover", "Dust" })
+                            LevelDocumentEditing.Erase(data, definitions, targetLayer, cell / 9, cell % 9);
+                });
+            });
+            Button(panel, "cancel", "취소", CloseModal);
         }
 
         private void PlaceBoardSelection(bool replace)

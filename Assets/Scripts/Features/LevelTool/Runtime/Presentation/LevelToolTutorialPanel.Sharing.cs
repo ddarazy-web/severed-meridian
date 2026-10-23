@@ -27,8 +27,22 @@ namespace LevelTool.Presentation
             }
             sharing.Add(new Label("현재: " + level.Tutorial.flow.name + "\n흐름과 안내는 공유하며, 아래 레벨별 설정은 이 레벨에만 적용합니다.") { style = { whiteSpace = WhiteSpace.Normal } });
             var usage = new Foldout { text = "이 구성을 사용하는 레벨", name = "tutorial-flow-usage", value = false }; sharing.Add(usage);
-            foreach (var doc in Session.DocumentIdsOfKind("level").Select(Session.Get).Where(doc => (string)doc.Data["tutorial"]?["flowId"] == current))
-                usage.Add(new Label(doc.Data["levelNumber"] + ". " + doc.Data["displayName"]));
+            usage.tooltip = "이 목록을 펼칠 때만 레벨의 공통 구성 연결을 확인합니다. 레벨이 많으면 시간이 걸릴 수 있습니다.";
+            bool usageLoaded = false;
+            usage.RegisterValueChangedCallback(evt =>
+            {
+                if (!evt.newValue || usageLoaded || !Root.Contains(usage)) return;
+                usageLoaded = true;
+                try
+                {
+                    foreach (var doc in Session.DocumentIdsOfKind("level").Select(Session.Get).Where(doc => (string)doc.Data["tutorial"]?["flowId"] == current))
+                        usage.Add(new Label(doc.Data["levelNumber"] + ". " + doc.Data["displayName"]));
+                }
+                catch (Exception error)
+                {
+                    usage.Add(new Label("사용 레벨 확인 실패: " + error.Message) { style = { whiteSpace = WhiteSpace.Normal } });
+                }
+            });
             Button(sharing, "tutorial-edit-flow", "공유 원본 사본 편집", actions.BeginSharedDraft);
             Button(sharing, "tutorial-detach", "현재 값으로 독립 복사", () => Edit(() => TutorialDraftEditing.Detach(Session)));
             Button(sharing, "tutorial-sync", "레벨 설정 목록 동기화", () => Edit(() => TutorialDraftEditing.Synchronize(Session)))

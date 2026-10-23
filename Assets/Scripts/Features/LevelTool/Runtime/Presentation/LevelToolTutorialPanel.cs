@@ -27,6 +27,7 @@ namespace LevelTool.Presentation
         public Action<Action> Edit;
         public Action Refresh, BeginSharedDraft, ApplySharedDraft, DiscardSharedDraft;
         public Func<bool> Preview;
+        public Func<bool> WorkActive;
         public Action<bool> SetPreview;
         public Func<string> Layer;
         public Action<string, string, string, string> Pick;

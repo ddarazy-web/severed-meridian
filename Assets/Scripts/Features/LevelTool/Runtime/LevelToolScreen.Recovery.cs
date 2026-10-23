@@ -209,6 +209,7 @@ namespace LevelTool
 
         private void RequestLeaveFor(Action continuation, string operation)
         {
+            if (GuardTutorialWorkExit(() => RequestLeaveFor(continuation, operation))) return;
             if (RecordsBusy) { Show("기록 정리를 끝내거나 취소한 뒤 " + operation + "해 주세요."); return; }
             if (busy) { Show("파일 처리 완료 후 " + operation + "해 주세요."); return; }
             if (sharedTutorialDraft != null) { AskSharedDraftBeforeLeave(continuation, operation); return; }

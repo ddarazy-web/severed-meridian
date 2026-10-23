@@ -189,3 +189,31 @@ Button:focus { border-color: rgb(169, 245, 228); }
 .mobile-portrait #recent-levels, .mobile-landscape #recent-levels { flex-grow: 1; flex-shrink: 1; min-width: 0; }
 .mobile-portrait #find-current-level, .mobile-landscape #find-current-level { width: 120px; min-width: 0; flex-shrink: 0; }
 .level-tool #recent-levels { margin-bottom: 3px; }
+
+/* 보드 작업을 우선하고 부가 설정은 펼쳐서 사용한다. */
+#tool-options { flex-shrink: 0; max-height: 240px; margin-bottom: 4px; background-color: rgb(23, 33, 45); border-radius: 6px; }
+#tool-menu { flex-shrink: 0; min-width: 58px; margin-right: 8px; }
+#save-status-details { min-width: 28px; width: 28px; padding: 0; }
+#board-stage { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; min-height: 0; }
+#board-header { flex-direction: row; align-items: center; flex-shrink: 0; min-height: 28px; padding: 3px 7px; }
+#current-board-tool { flex-grow: 1; flex-shrink: 1; min-width: 0; font-size: 12px; color: rgb(166, 223, 212); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#board-zoom-label { flex-shrink: 0; margin-left: 8px; color: rgb(168, 191, 206); font-size: 12px; }
+.board-focus .tool-header { display: flex; }
+#palette .material-item { flex-direction: row; align-items: center; min-height: 56px; padding: 4px 6px; }
+.material-item Image { width: 44px; height: 44px; flex-shrink: 0; margin-right: 8px; }
+.material-item Label { flex-grow: 1; flex-shrink: 1; min-width: 0; white-space: normal; -unity-text-align: middle-left; }
+#material-search > .unity-base-field__label, #material-category > .unity-base-field__label { min-width: 34px; width: 34px; }
+.mobile-level-tool .tool-header { flex-direction: row; flex-wrap: wrap; }
+.mobile-level-tool .workspace-identity { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 100px; }
+.mobile-level-tool .toolbar { flex-basis: 100%; }
+.mobile-level-tool #save-status-details { min-width: 44px; width: 44px; }
+.mobile-level-tool #toggle-left-panel, .mobile-level-tool #toggle-right-panel { display: none; }
+.mobile-level-tool .mobile-tool-status { min-height: 0; max-height: 0; overflow: hidden; }
+.mobile-level-tool #board-header { min-height: 24px; }
+.mobile-landscape .tool-header { flex-wrap: nowrap; }
+.mobile-landscape .toolbar { flex-basis: auto; flex-grow: 1; }
+.mobile-landscape #board-header { min-height: 16px; padding-top: 0; padding-bottom: 0; }
+.mobile-landscape #board-touch-tools { height: 52px; margin-bottom: 0; }
+.mobile-landscape .mobile-navigation > Button { margin-top: 0; margin-bottom: 0; }
+.mobile-landscape .toolbar { margin-top: 0; margin-bottom: 0; }
+.mobile-level-tool #board-touch-hint { display: none; }

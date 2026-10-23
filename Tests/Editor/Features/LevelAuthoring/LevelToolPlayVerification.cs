@@ -30,9 +30,16 @@ namespace LevelAuthoring.Editor
         private static string recoveryFolder;
         private static bool gameOnly;
         private static bool nativeStart;
-        public static void RunNativeStartUx() { nativeStart = true; Run(false); }
-        public static void Run() { nativeStart = false; Run(false); }
-        public static void RunGameEntryRegression() { nativeStart = false; Run(true); }
+        private static bool nativeBoard, nativeBoardBaseline;
+        private static bool nativeComposition;
+        private static bool nativeDelivery;
+        public static void RunNativeDeliveryUx() { nativeDelivery = true; nativeComposition = nativeBoard = nativeStart = false; Run(false); }
+        public static void RunNativeCompositionUx() { nativeComposition = true; nativeBoard = nativeStart = false; Run(false); }
+        public static void RunNativeBoardBaseline() { nativeBoard = nativeBoardBaseline = true; nativeStart = false; Run(false); }
+        public static void RunNativeBoardUx() { nativeBoard = true; nativeBoardBaseline = nativeStart = false; Run(false); }
+        public static void RunNativeStartUx() { nativeBoard = false; nativeStart = true; Run(false); }
+        public static void Run() { nativeBoard = nativeStart = false; Run(false); }
+        public static void RunGameEntryRegression() { nativeBoard = nativeStart = false; Run(true); }
         private static void Run(bool onlyGameEntry)
         {
             gameOnly = onlyGameEntry;
@@ -56,7 +63,7 @@ namespace LevelAuthoring.Editor
             EditorSettings.enterPlayModeOptionsEnabled = priorEnabled;
             EditorSettings.enterPlayModeOptions = priorOptions;
             EditorApplication.update -= Tick; EditorApplication.playModeStateChanged -= State;
-            if (nativeStart && Directory.Exists(recoveryFolder))
+            if ((nativeStart || nativeBoard || nativeComposition || nativeDelivery) && Directory.Exists(recoveryFolder))
             {
                 // 이 실행에서 만든 격리 저장소만 제거한다. 캡처와 결과 로그는 별도 경로에 남는다.
                 try { Directory.Delete(recoveryFolder, true); }
@@ -80,13 +87,19 @@ namespace LevelAuthoring.Editor
                     panel = screen.GetComponent<UIDocument>().panelSettings;
                     oldTarget = panel.targetTexture;
                     oldScaleMode = panel.scaleMode; oldScale = panel.scale;
-                    if (nativeStart) { panel.scaleMode = PanelScaleMode.ConstantPixelSize; panel.scale = 1; }
+                    if (nativeStart || nativeBoard || nativeComposition || nativeDelivery) { panel.scaleMode = PanelScaleMode.ConstantPixelSize; panel.scale = 1; }
                     // UI Toolkit의 마스크 렌더링에는 스텐실 버퍼가 필요하다.
                     texture = new RenderTexture(1280, 800, 24); texture.Create(); panel.targetTexture = texture;
-                    if (nativeStart)
+                    if (nativeStart || nativeBoard || nativeComposition || nativeDelivery)
                     {
                         phase = 98;
-                        RunNativeStartCases().Forget(error => { exit = 1; Debug.LogException(error); casesDone = true; });
+                        if (nativeDelivery)
+                            RunNativeDeliveryCases().Forget(error => { exit = 1; Debug.LogException(error); casesDone = true; });
+                        else if (nativeComposition)
+                            RunNativeCompositionCases().Forget(error => { exit = 1; Debug.LogException(error); casesDone = true; });
+                        else if (nativeBoard)
+                            RunNativeBoardCases().Forget(error => { exit = 1; Debug.LogException(error); casesDone = true; });
+                        else RunNativeStartCases().Forget(error => { exit = 1; Debug.LogException(error); casesDone = true; });
                         return;
                     }
                     screen.Workspace.Open(File.ReadAllText("Logs/GameAuthoringStage02/latest-fixtures.txt"), "Cancel");
@@ -120,6 +133,7 @@ namespace LevelAuthoring.Editor
                 }
                 else if (phase == 2)
                 {
+                    if (screen.TestSession == null && (bool)typeof(LevelToolScreen).GetField("busy", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(screen)) return;
                     if (screen.TestSession == null) throw new Exception("시험 시작 실패: " + screen.GetComponent<UIDocument>().rootVisualElement.Q<Label>("status").text);
                     if (!screen.TestSession.IsReady) return;
                     if (!screen.TestSession.PlayContext.IsTest || screen.TestSession.PlayContext.AllowLevelAdvance) throw new Exception("정식 게임 문맥 사용");
@@ -171,6 +185,21 @@ namespace LevelAuthoring.Editor
                 await LevelToolStorageUIExercise.Run(screen);
                 await LevelToolRecoveryExercise.Run(screen);
             }
+            casesDone = true;
+        }
+        private static async UniTask RunNativeBoardCases()
+        {
+            await LevelToolNativeBoardExercise.Run(screen, texture, panel, recoveryFolder, nativeBoardBaseline);
+            casesDone = true;
+        }
+        private static async UniTask RunNativeCompositionCases()
+        {
+            await LevelToolNativeCompositionExercise.Run(screen, texture, panel, recoveryFolder);
+            casesDone = true;
+        }
+        private static async UniTask RunNativeDeliveryCases()
+        {
+            await LevelToolNativeDeliveryExercise.Run(screen, texture, panel, recoveryFolder);
             casesDone = true;
         }
         private static async UniTask RunNativeStartCases()

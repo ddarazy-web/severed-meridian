@@ -1,5 +1,18 @@
 # 진행·검증 기록
 
+## 네이티브 레벨툴 UX
+
+- [4단계 — 시험·저장·ZIP 전달·통합 흐름 검증 및 전체 단계 감사 완료](MoonRabbitJunkyard/2026-10-23-native-level-tool-ux-stage04.md)
+- [3단계 — 미션·튜토리얼 조립·작업 취소·필수 설정 검증 완료](MoonRabbitJunkyard/2026-10-23-native-level-tool-ux-stage03.md)
+- [2단계 — 보드 중심 편집·반응형 패널·소재·입력 검증 완료](MoonRabbitJunkyard/2026-10-22-native-level-tool-ux-stage02.md)
+
+## 경량 로비 최종 보고서·대표 측정
+
+- [2단계 최종 보고서 — 게임 진입·복귀 및 아틀라스 준비 개선 전후](MoonRabbitJunkyard/2026-10-21-lobby-stage02.md)
+- [3단계 최종 보고서 — 대량 목록·스크롤·게임 왕복 측정](MoonRabbitJunkyard/2026-10-21-lobby-stage03.md)
+
+각 보고서에서 보존한 원본 측정으로 이동할 수 있다. 중복·중간 검사 출력은 정리했으며, 최종 판정과 미검증 항목은 보고서에 남겼다. 이 기록 정리는 재검사를 의미하지 않는다.
+
 - [게임·제작 도구 분리 2단계 — JSON 검증 기록](project-wide/game-authoring-stage-02-progress.md)
 - [2단계 제작 필드·JSON 계약 대응표](project-wide/game-authoring-stage-02-field-map.md)
 

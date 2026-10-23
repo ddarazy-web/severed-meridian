@@ -70,9 +70,11 @@ namespace LevelAuthoring.Editor
                 JObject element = (JObject)session.Get(session.SelectedLevelId).Data["elements"][0];
                 Check((string)element["color"] == "Type3" && (string)element["rocketDirection"] == "Vertical", "appearance uses current shared placement settings without a redraw");
                 session.Undo(); Check(session.Get(session.SelectedLevelId).Data.ToString() == afterDurability, "appearance is one Undo");
-                Draw(); Click("add-mission"); Draw();
+                Draw(); Click("add-mission"); Click("apply-mission"); Draw();
                 string beforeMission = session.Get(session.SelectedLevelId).Data.ToString();
-                root.Query<IntegerField>().ToList().Last(field => field.label == "목표 수량").value = 37;
+                Click("edit-mission-" + (((JArray)session.Get(session.SelectedLevelId).Data["missions"]).Count - 1));
+                root.Q<IntegerField>("mission-count").value = 37;
+                Click("apply-mission");
                 string afterMission = session.Get(session.SelectedLevelId).Data.ToString();
                 Check((int)((JArray)session.Get(session.SelectedLevelId).Data["missions"]).Last["count"] == 37, "mission count remains editable through the panel");
                 session.Undo(); Check(session.Get(session.SelectedLevelId).Data.ToString() == beforeMission, "mission count has one Undo");

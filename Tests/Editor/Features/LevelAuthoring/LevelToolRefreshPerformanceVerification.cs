@@ -120,9 +120,16 @@ namespace LevelAuthoring.Editor
                 Call("Refresh");
                 Check(!ReferenceEquals(definitions, Get("definitions")), "same ID reload replaces derived definitions");
                 Check(((Label)Get("levelTitle")).text.Contains("갱신 검사"), "same ID reload shows saved name");
+                Call("BeginTutorialWork");
+                LevelAuthoring.Runtime.TutorialDraftEditing.EditLevel(screen.Workspace.Session, "직접 선택 검사 단계", level =>
+                    level.Tutorial.steps.Add(new Tutorial.TutorialStepDefinition { kind = Tutorial.TutorialStepKind.Swap, instructions = "두 칸 선택" }));
                 Call("BeginTutorialPick", "action", null, null, null);
                 Call("CancelTutorialPick");
                 Check(properties[0].enabledInHierarchy, "cancel tutorial cell picker restores property input");
+                Call("GuardTutorialWorkExit", new object[] { null });
+                Button discard = screen.GetComponent<UIDocument>().rootVisualElement.Q<Button>("tutorial-discard-work");
+                typeof(Clickable).GetMethod("Invoke", Flags).Invoke(discard.clickable, new object[] { null });
+                Check(!screen.Workspace.Session.IsDirty, "performance fixture tutorial cancellation restores saved state");
                 typeof(LevelToolScreen).GetField("inspectorPage", Flags).SetValue(screen, "공급");
                 Call("Refresh");
                 int previousTarget = properties.Q<IntegerField>("scrapTarget").value;

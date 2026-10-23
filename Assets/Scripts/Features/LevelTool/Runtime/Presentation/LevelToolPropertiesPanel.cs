@@ -23,9 +23,10 @@ namespace LevelTool.Presentation
         public Action Fit;
         public Action<int> SetSeed;
         public Action<Tutorial.TutorialRunMode> SetTutorialMode;
+        public Action<Image, string, string> LoadMissionImage;
     }
 
-    public sealed class LevelToolPropertiesPanel : IDisposable
+    public sealed partial class LevelToolPropertiesPanel : IDisposable
     {
         private readonly Func<AuthoringEditSession> currentSession;
         private readonly Action<string, Action<JObject>> Change;
@@ -138,27 +139,6 @@ namespace LevelTool.Presentation
             inspector = container;
         }
 
-        private void DrawMissions(JObject level)
-        {
-            string[] kinds = { "Color", "Crate", "Web", "Scrap", "Dust", "Safe", "ColorLock", "Appliance", "Mold", "Recovery" };
-            JArray missions = (JArray)level["missions"];
-            inspector.Add(new Label("미션 (최대 4개)"));
-            for (int i = 0; i < missions.Count; i++)
-            {
-                int index = i;
-                string kind = (string)missions[i]["kind"], missionColor = (string)missions[i]["color"];
-                int count = (int)missions[i]["count"];
-                DropdownField target = new DropdownField("대상", kinds.ToList(), Math.Max(0, Array.IndexOf(kinds, kind)));
-                Bind(target, e => Change("미션 대상", data => MissionDocumentEditing.Set(data, index, e.newValue, missionColor, Math.Max(1, count)))); inspector.Add(target);
-                DropdownField colors = new DropdownField("색", Enumerable.Range(1, 5).Select(n => "Type" + n).ToList(), Math.Max(0, int.Parse(missionColor.Substring(4)) - 1));
-                Bind(colors, e => Change("미션 색", data => MissionDocumentEditing.Set(data, index, kind, e.newValue, count))); inspector.Add(colors);
-                IntegerField amount = new IntegerField("목표 수량") { value = count, isDelayed = true };
-                Bind(amount, e => Change("미션 수량", data => MissionDocumentEditing.Set(data, index, kind, missionColor, e.newValue))); inspector.Add(amount);
-                Button(inspector, "remove-mission-" + i, "미션 삭제", () => Change("미션 삭제", data => MissionDocumentEditing.Remove(data, index)));
-            }
-            Button(inspector, "add-mission", "미션 추가", () => Change("미션 추가", data =>
-                MissionDocumentEditing.Set(data, ((JArray)data["missions"]).Count, "Color", color, 10)));
-        }
     }
 }
 #endif

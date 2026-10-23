@@ -107,6 +107,10 @@ namespace LevelAuthoring.Editor
                         Check(!exported.CanWrite, "export closes caller-owned output before completion");
                         Check(System.Text.RegularExpressions.Regex.IsMatch(fakeTransfer.SuggestedName, @"^project_\d{8}-\d{6}-\d{3}\.zip$"), "dated ZIP filename");
                         Check(Root.Q<Label>("status").text.Contains("클라우드 동기화는 해당 서비스"), "local success does not claim cloud sync");
+                        string outcome = Root.Q<Label>("status").text;
+                        Click("save-status-details");
+                        Check(Root.Q<Label>("save-details-outcome")?.text == outcome, "ZIP outcome stays accessible in save details");
+                        Click("close-save-details");
                         using (var archive = new ZipArchive(new MemoryStream(exported.ToArray()), ZipArchiveMode.Read))
                             Check(archive.GetEntry("project.json") != null && archive.Entries.Count > 1, "actual UI exports project archive");
                         Check(!screen.Workspace.Session.IsDirty && Root.Q<Label>("status").text.Contains("ZIP 내보내기 완료"),
@@ -325,7 +329,14 @@ namespace LevelAuthoring.Editor
                     }
                     Finish(0); return;
                 }
-                Check(!ReferenceEquals(screen.Workspace.Session, originalSession) && !screen.Workspace.Session.IsDirty,
+                if (phase == 4)
+                {
+                    Check(screen.Workspace.Session == null && screen.Workspace.Directory != null,
+                        "import opens metadata listing without eagerly editing all levels");
+                    Call("RequestOpenLevel", levelId, null);
+                    phase = 5; next = EditorApplication.timeSinceStartup + 1; return;
+                }
+                Check(screen.Workspace.Session != null && !ReferenceEquals(screen.Workspace.Session, originalSession) && !screen.Workspace.Session.IsDirty,
                     "successful dirty discard opens imported saved session");
                 Check(Path.GetFileName(screen.Workspace.Folder) == "검증 가져오기" &&
                     (string)screen.Workspace.Session.Get(levelId).Data["displayName"] != "이전 편집 초안",

@@ -1,0 +1,110 @@
+RUN 20261023-021914-016 (Editor harness exit 0 observed)
+PASS official tutorial records unchanged
+PASS official tutorial records unchanged
+PASS official tutorial records unchanged
+PASS official tutorial records unchanged
+PASS shared trial starts inside explicit tutorial work
+PASS shared editor shows draft instructions before game
+PASS shared draft real game starts
+PASS shared two-action guidance accepted
+PASS shared two-action guidance accepted
+PASS shared draft fixed supply supports two real actions and damage condition
+PASS shared real game return preserves parent and isolated draft undo/redo
+PASS shared editor resumes unchanged after game
+PASS shared draft game leaves official tutorial progress unchanged
+PASS shared draft redo survives actual game
+PASS runtime tool MemoryPack selector uses published moves and preserves unsaved JSON on return
+RUN 20261023-022625-748 (Editor harness exit 0 observed)
+PASS transfer/recovery UI case Export
+PASS transfer/recovery UI case ImportSuccess
+PASS transfer/recovery UI case ImportCancel
+PASS transfer/recovery UI case ImportTransitionCancel
+PASS transfer/recovery UI case ImportReadFailure
+PASS transfer/recovery UI case ImportCloseFailure
+PASS transfer/recovery UI case ExportWriteFailure
+PASS transfer/recovery UI case ExportFlushFailure
+PASS transfer/recovery UI case ExportCloseFailure
+PASS transfer/recovery UI case ExportCancel
+PASS transfer/recovery UI case ExportSaveFailure
+PASS transfer/recovery UI case ExportOpenFailure
+PASS transfer/recovery UI case ExportSourceChanged
+PASS transfer/recovery UI case Back
+PASS transfer/recovery UI case LeaveSaveFailure
+PASS transfer/recovery UI case Pause
+PASS transfer/recovery UI case ReloadRecovery
+PASS LevelToolTransferRecoveryVerification.RunAll: actual UI transfer cases, stream failure boundaries, live resume and fresh-screen recovery
+RUN 20261023-023205-003 (Editor harness exit 0 observed)
+RUN 20261023-023535-974 (Editor harness exit 0 observed)
+RUN 20261023-023832-731 (Editor harness exit 0 observed)
+PASS native-delivery trial failure has an actionable visible dialog
+PASS native-delivery failure dialog retains actual cause
+PASS native-delivery failure identifies actual trial input
+PASS native-delivery failure preserves unsaved authoring and history
+PASS native-delivery enabled trial-failure-edit
+PASS native-delivery edit recovery closes failure without changing work
+PASS native-delivery enabled trial-failure-retry
+PASS native-delivery retry after resource repair enters isolated test context
+PASS native-delivery running game keeps actual input source visible
+PASS native-delivery retry and return preserve dirty document selection and history
+PASS native-delivery trial return preserves board zoom and panel visibility
+PASS native-delivery loading has a visible cancellation action before preparation
+PASS native-delivery enabled trial-loading-cancel
+PASS native-delivery loading cancellation restores editor without modifying data or showing failure
+PASS native-delivery Android back cancels loading instead of hiding its dialog
+PASS native-delivery Escape command cancels loading and preserves work
+PASS native-delivery enabled save
+PASS native-delivery explicit save writes current JSON and clears dirty state
+PASS native-delivery save outcome names JSON and its actual project location
+PASS native-delivery enabled save-status-details
+PASS native-delivery saved project is not described as memory-only
+PASS native-delivery last file outcome remains accessible in save details
+PASS native-delivery enabled close-save-details
+PASS native-delivery failure retry accessible (1280, 800)
+PASS native-delivery enabled trial-failure-edit
+PASS native-delivery enabled save-status-details
+PASS native-delivery save details close accessible (1280, 800)
+PASS native-delivery keyboard Escape closes save details
+PASS native-delivery failure retry accessible (1440, 900)
+PASS native-delivery enabled trial-failure-edit
+PASS native-delivery enabled save-status-details
+PASS native-delivery save details close accessible (1440, 900)
+PASS native-delivery enabled close-save-details
+PASS native-delivery failure retry accessible (390, 844)
+PASS native-delivery enabled trial-failure-edit
+PASS native-delivery enabled save-status-details
+PASS native-delivery save details close accessible (390, 844)
+PASS native-delivery keyboard safe area keeps save dialog close accessible
+PASS native-delivery rotation keeps open dialog result and close action
+PASS native-delivery enabled close-save-details
+PASS native-delivery failure retry accessible (844, 390)
+PASS native-delivery enabled trial-failure-edit
+PASS native-delivery enabled save-status-details
+PASS native-delivery save details close accessible (844, 390)
+PASS native-delivery enabled close-save-details
+PASS native-delivery failure retry accessible (820, 1180)
+PASS native-delivery enabled trial-failure-edit
+PASS native-delivery enabled save-status-details
+PASS native-delivery save details close accessible (820, 1180)
+PASS native-delivery enabled close-save-details
+PASS native-delivery enabled create-project
+PASS native-delivery enabled choose-folder
+PASS native-delivery enabled first-level
+PASS native-delivery enabled create-level
+PASS native-delivery journey creates project and first level through UI
+PASS native-delivery enabled tutorial-sample-board-menu
+PASS native-delivery enabled tutorial-create-sample-board
+PASS native-delivery enabled tutorial-begin-work
+PASS native-delivery journey tests edited tutorial instructions
+PASS native-delivery journey performs instructed matching action
+PASS native-delivery journey actual matching preserves draft on return
+PASS native-delivery enabled tutorial-work-complete
+PASS native-delivery journey completion remains unsaved until explicit save
+PASS native-delivery enabled save
+PASS native-delivery journey saves completed tutorial explicitly
+PASS native-delivery enabled export-project-confirm
+PASS native-delivery journey exports saved project ZIP
+PASS native-delivery enabled import-project-confirm
+PASS native-delivery journey import opens listing without eager level loading
+PASS native-delivery journey imported selected level retains edited tutorial and saved state
+PASS native-delivery journey transfer leaves original saved project intact
+PASS actual 1000/10000 files; all-body locks during listing/search; only selected levels unlocked; incremental save; four samples each

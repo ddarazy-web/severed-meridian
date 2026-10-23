@@ -1,0 +1,19 @@
+Editor Play Mode UI Toolkit touch event replay. Physical Android touch, OS back and device rotation remain unverified.
+PASS isolated touch project created
+PASS enabled control board-touch-select
+PASS visible tap cell 40
+PASS tap center is inside viewport 40 cell=(x:182.00, y:395.00, width:36.00, height:36.00) viewport=(x:13.00, y:235.00, width:374.00, height:560.00)
+PASS enabled control board-actions
+PASS enabled control board-command-Copy
+PASS actual menu Copy keeps Block source document
+PASS enabled control board-actions
+PASS Block clipboard Paste is disabled in Dust action menu
+PASS clipboard layer mismatch preserves document
+PASS enabled control board-close-actions
+PASS visible tap cell 41
+PASS tap center is inside viewport 41 cell=(x:218.00, y:395.00, width:36.00, height:36.00) viewport=(x:13.00, y:235.00, width:374.00, height:560.00)
+PASS enabled control board-actions
+PASS enabled control board-command-Paste
+PASS returning to Block restores actual menu Paste into selected target
+PASS same-layer paste is one shared Undo
+PASS requested touch replay checks completed; physical Android interaction remains unverified.

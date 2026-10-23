@@ -1,0 +1,11 @@
+Editor Play Mode UI Toolkit touch event replay. Physical Android touch, OS back and device rotation remain unverified.
+PASS isolated touch project created
+PASS enabled control board-touch-select
+PASS visible tap cell 30
+PASS tap center is inside viewport 30 cell=(x:146.00, y:359.00, width:36.00, height:36.00) viewport=(x:13.00, y:235.00, width:374.00, height:560.00)
+PASS body replacement fixture selects complete 2×2 body
+PASS enabled control board-actions
+PASS enabled control board-replace
+PASS actual menu replaces one 2×2 body with one 1×1 element at original anchor
+PASS body replacement has one Undo restoring original body identity
+PASS requested touch replay checks completed; physical Android interaction remains unverified.

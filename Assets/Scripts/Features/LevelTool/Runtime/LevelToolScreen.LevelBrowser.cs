@@ -227,6 +227,7 @@ namespace LevelTool
                 levelIndex.Get(id) == null) return;
             if (Session?.SelectedLevelId == null) { OpenSelectedLevel(id, afterOpen); return; }
             if (id == Session.SelectedLevelId) { afterOpen?.Invoke(); return; }
+            if (GuardTutorialWorkExit(() => RequestOpenLevel(id, afterOpen))) return;
             if (!Session.HasLevelChanges(Session.SelectedLevelId) && !HasPendingAuthoringInput()) { OpenSelectedLevel(id, afterOpen); return; }
             VisualElement panel = OpenModal("레벨 " + levelIndex.Get(id).Number + "를 편집할까요?");
             panel.Add(new Label("현재 편집 중인 레벨 " + levelIndex.Get(Session.SelectedLevelId)?.Number + "에 저장하지 않은 변경 사항이 있습니다.")

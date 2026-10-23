@@ -1,0 +1,79 @@
+Editor Play Mode UI Toolkit touch event replay. Physical Android touch, OS back and device rotation remain unverified.
+PASS isolated touch project created
+PASS actual board cell is attached and laid out
+PASS initial touch target center lies inside actual viewport; cell=(x:182.00, y:395.00, width:36.00, height:36.00) viewport=(x:13.00, y:235.00, width:374.00, height:560.00) body=
+TOUCH DIAGNOSTIC before Down cellBounds=(x:182.00, y:395.00, width:36.00, height:36.00) viewport=(x:13.00, y:235.00, width:374.00, height:560.00) boardBounds=(x:38.00, y:251.00, width:324.00, height:324.00) scroll=(0.00, 0.00) primary=-1 candidate=-1 cancelled=False pointerCount=0 brush=supply.normal.random time=3.096398 status=왼쪽 목록의 ‘편집’ 버튼으로 레벨을 열고, 소재 탭에서 배치할 블록을 고르세요. placements=[]
+TOUCH DIAGNOSTIC after Down cellBounds=(x:182.00, y:395.00, width:36.00, height:36.00) viewport=(x:13.00, y:235.00, width:374.00, height:560.00) boardBounds=(x:38.00, y:251.00, width:324.00, height:324.00) scroll=(0.00, 0.00) primary=1 candidate=40 cancelled=False pointerCount=1 brush=supply.normal.random time=3.096398 status=왼쪽 목록의 ‘편집’ 버튼으로 레벨을 열고, 소재 탭에서 배치할 블록을 고르세요. placements=[]
+PASS actual touch PointerDown with brush leaves document, dirty and Undo unchanged
+TOUCH DIAGNOSTIC after Up cellBounds=(x:182.00, y:395.00, width:36.00, height:36.00) viewport=(x:13.00, y:235.00, width:374.00, height:560.00) boardBounds=(x:38.00, y:251.00, width:324.00, height:324.00) scroll=(0.00, 0.00) primary=-1 candidate=40 cancelled=False pointerCount=0 brush=supply.normal.random time=3.096398 status=왼쪽 목록의 ‘편집’ 버튼으로 레벨을 열고, 소재 탭에서 배치할 블록을 고르세요. placements=[{"definitionId":"supply.normal.random","instanceId":"3c2e7e24743041c5b04054abcf10f39e","layer":"Block","coordinate":{"row":4,"column":4},"durability":0,"requiredCharge":0,"hasColor":false,"color":"Type1","rocketDirection":"Horizontal"}]
+PASS actual touch PointerUp commits exactly one placement at visible cell
+PASS one Undo restores entire pre-tap document
+PASS Redo restores placement identity
+PASS movement beyond tap tolerance cancels placement
+PASS pointer cancel suppresses later Up
+PASS pointer capture loss suppresses later Up
+PASS application pause cancels pending touch
+PASS enabled control menu-file
+PASS popup opening cancels pending touch
+PASS before 0.6 seconds long touch has no menu
+PASS before long touch threshold
+PASS after 0.6 seconds long touch opens actual action menu
+PASS long touch menu opening does not edit
+PASS long touch release does not place
+PASS two fingers cancel first pending tap and remaining finger release
+PASS two finger outward movement actually increases board scale
+PASS pinch preserves header/menu size after layout
+PASS two finger reversed release order also never taps
+PASS enabled control board-zoom-in
+PASS zoom plus changes actual board scale
+PASS enabled control board-zoom-out
+PASS zoom buttons preserve document and Undo
+PASS enabled control board-touch-select
+PASS visible tap cell 41
+PASS tap center is inside viewport 41 cell=(x:227.00, y:467.00, width:54.00, height:54.00) viewport=(x:13.00, y:235.00, width:374.00, height:546.00)
+PASS tap after pinch/zoom selects the visible board coordinate
+PASS enabled control board-touch-pan
+PASS explicit one finger pan tool does not place
+PASS enabled control board-touch-select
+PASS enabled control board-touch-area
+PASS visible tap cell 30
+PASS tap center is inside viewport 30 cell=(x:69.00, y:413.00, width:54.00, height:54.00) viewport=(x:13.00, y:235.00, width:374.00, height:546.00)
+PASS visible tap cell 40
+PASS tap center is inside viewport 40 cell=(x:123.00, y:467.00, width:54.00, height:54.00) viewport=(x:13.00, y:235.00, width:374.00, height:546.00)
+PASS actual area tool selects rectangle without Shift
+PASS area selection preserves document and Undo
+PASS visible tap cell 50
+PASS tap center is inside viewport 50 cell=(x:177.00, y:521.00, width:54.00, height:54.00) viewport=(x:13.00, y:235.00, width:374.00, height:546.00)
+PASS visible tap cell 60
+PASS tap center is inside viewport 60 cell=(x:231.00, y:575.00, width:54.00, height:54.00) viewport=(x:13.00, y:235.00, width:374.00, height:546.00)
+PASS additional area selection accumulates both rectangles
+PASS enabled control board-touch-cancel
+PASS enabled control board-actions
+PASS selected action button opens actual menu
+PASS enabled control board-touch-select
+PASS rotation fixture starts an actual pending touch preview
+PASS actual viewport rotation cancels pending touch
+PASS rotation retains layer and brush
+PASS mouse regression uses visible scrolled cell
+PASS Windows mouse still commits on PointerDown
+PASS mouse placement is one shared Undo
+PASS mouse Redo restores placement and references
+PASS visible tap cell 40
+PASS tap center is inside viewport 40 cell=(x:418.00, y:256.00, width:54.00, height:54.00) viewport=(x:13.00, y:147.00, width:863.00, height:163.00)
+PASS ordinary occupied tap preserves original placement
+PASS visible tap cell 40
+PASS tap center is inside viewport 40 cell=(x:418.00, y:256.00, width:54.00, height:54.00) viewport=(x:13.00, y:147.00, width:863.00, height:163.00)
+PASS explicit replacement toggle permits occupied current-layer touch edit
+PASS replacement takes one Undo and restores original document
+PASS enabled control board-actions
+PASS enabled control board-command-Copy
+PASS actual action menu Copy preserves document
+PASS enabled control board-actions
+PASS enabled control board-command-Delete
+PASS actual action menu Delete erases selected current layer
+PASS enabled control undo
+PASS action menu Delete is one common Undo
+PASS touch workspace saves through common storage
+PASS touch workspace reopens through common storage
+PASS save/reopen preserves touch and mouse document semantics
+PASS requested touch replay checks completed; physical Android interaction remains unverified.

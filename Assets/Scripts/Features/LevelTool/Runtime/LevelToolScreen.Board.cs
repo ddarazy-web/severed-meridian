@@ -25,6 +25,7 @@ namespace LevelTool
         {
             // 소수점 반올림으로 아홉 번째 셀이 다음 줄에 넘어가지 않도록 격자 크기를 맞춘다.
             cellSize = Mathf.Clamp(Mathf.Round(cellSize), 32, 144);
+            RefreshBoardToolStatus();
             float viewportWidth = boardScroll.contentViewport.resolvedStyle.width;
             boardScroll.contentContainer.style.minWidth = Mathf.Max(float.IsNaN(viewportWidth) ? 0 : viewportWidth, cellSize * 9 + 32);
             boardView.Refresh(Session, Workspace.Folder, definitions, layer, cellSize, new Presentation.LevelToolBoardOverlayState
@@ -42,6 +43,7 @@ namespace LevelTool
         }
         private void ExecuteBoardCell(int cell, bool shift, bool replace, bool touch)
         {
+            if (boardTouchTool == "erase" && sharedTutorialDraft != null) return;
             board.Focus();
             if (UseTutorialPicker(cell) || UseFlowTool(cell)) return;
             Edit(() =>
@@ -50,6 +52,7 @@ namespace LevelTool
                     Session.SelectCells(Enumerable.Range(0, 81).Where(i => i / 9 >= Math.Min(cell / 9, anchor / 9) && i / 9 <= Math.Max(cell / 9, anchor / 9) &&
                         i % 9 >= Math.Min(cell % 9, anchor % 9) && i % 9 <= Math.Max(cell % 9, anchor % 9)));
                 else { anchor = cell; if (touch) SelectBoardCells(new[] { cell }); else Session.SelectCells(new[] { cell }); }
+                if (boardTouchTool == "erase" && !shift) { ElementClipboard.Delete(layer); return; }
                 if (moveBody != null)
                 {
                     Session.EditLevel("장애물 이동", data => LevelDocumentEditing.Move(data, definitions, moveBody, cell / 9, cell % 9));

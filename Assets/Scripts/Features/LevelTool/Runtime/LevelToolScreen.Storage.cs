@@ -11,6 +11,13 @@ namespace LevelTool
     {
         private FocusedInputState modalInputFocus;
         private VisualElement modalPreviousFocus;
+        private string lastFileOutcome;
+
+        private void ShowFileOutcome(string message)
+        {
+            lastFileOutcome = message;
+            Show(message);
+        }
 
         private async UniTask Storage(Action action, bool saving = false)
         {
@@ -32,13 +39,15 @@ namespace LevelTool
                 manualFileFailure = null;
                 if (saving) CompleteManualSave();
                 if (!ReferenceEquals(previousSession, Session)) CancelPendingInput();
-                Show("파일 처리가 완료되었습니다.");
+                ShowFileOutcome((saving ? "JSON 저장 완료 · " : "프로젝트 준비 완료 · ") + Workspace.Folder +
+                    (saving ? " · 다른 기기로 옮기려면 파일 메뉴의 ZIP 내보내기를 사용하세요." : " · 편집할 레벨을 선택하세요."));
             }
             catch (Exception error)
             {
                 if (saving) CompleteManualSave(error);
                 else { manualSaveOwner = Session; manualFileFailure = error.Message; }
-                Show(error.Message);
+                ShowFileOutcome((saving ? "JSON 저장 실패: " : "파일 작업 실패: ") + error.Message +
+                    " · 현재 작업은 유지했습니다. 저장 상태 안내에서 위치·원인을 확인하고 경로/권한/충돌을 해결한 뒤 다시 시도하세요.");
             }
             finally
             {
@@ -62,6 +71,7 @@ namespace LevelTool
 
         private void WithDirtyFor(string operation, Func<string, bool> action)
         {
+            if (GuardTutorialWorkExit(() => WithDirtyFor(operation, action))) return;
             if (!HasUnsavedWork) { Storage(() => action("Cancel")).Forget(); return; }
             VisualElement panel = OpenModal(operation + " 전 현재 작업 확인");
             panel.Add(new Label("현재 작업에 저장하지 않은 변경이 있습니다. 저장하거나 버린 뒤 선택한 작업을 진행합니다. 취소하면 입력 중인 내용까지 유지합니다.")

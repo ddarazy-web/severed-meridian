@@ -31,6 +31,8 @@ namespace LevelAuthoring.Editor
                 typeof(Clickable).GetMethod("Invoke", flags).Invoke(button.clickable, new object[] { null });
             }
             root.Q<DropdownField>("inspector-page").value = "튜토리얼";
+            Click("tutorial-begin-work");
+            root.Q<Foldout>("tutorial-composition-details").value = true;
             Check(root.Q<TextField>("tutorial-shared-name") != null, "shared authoring controls exist");
             root.Q<TextField>("tutorial-shared-name").value = "shared test"; Click("tutorial-create-flow");
             string flowId = (string)parent.Get(levelId).Data["tutorial"]["flowId"];
@@ -49,10 +51,10 @@ namespace LevelAuthoring.Editor
             Check((int)parent.Get(levelId).Data["tutorial"]["bindings"][0]["number"] == 3 &&
                 (int)parent.Get(flowId).Data["steps"][0]["conditions"][0]["requiredCount"] == 2, "level parameter does not change shared default");
             Click("tutorial-edit-flow"); root.Q<TextField>("tutorial-instructions").value = "discard me";
-            int left = 0; screen.RequestLeave(() => left++); Click("cancel");
+            int left = 0; screen.RequestLeave(() => left++); Click("tutorial-continue-work");
             Check(left == 0 && root.Q<TextField>("tutorial-instructions").value == "discard me", "cancel exit keeps shared draft");
-            screen.RequestLeave(() => left++); Click("discard-flow-and-leave"); Click("cancel");
-            Check(left == 0 && root.Q<Button>("tutorial-edit-flow") != null && root.Q<Button>("tutorial-apply-flow") == null, "cancel parent exit after discarding draft restores parent UI");
+            screen.RequestLeave(() => left++); Click("tutorial-continue-work"); Click("tutorial-cancel-flow");
+            Check(left == 0 && root.Q<Button>("tutorial-edit-flow") != null && root.Q<Button>("tutorial-apply-flow") == null, "whole-work guard keeps editor open and explicit draft discard restores parent UI");
             Check((string)parent.Get(flowId).Data["steps"][0]["instructions"] == "draft text", "discarding shared draft preserves source");
             Click("tutorial-detach");
             Check((int)parent.Get(levelId).Data["tutorial"]["steps"][0]["conditions"][0]["requiredCount"] == 3,
@@ -104,7 +106,8 @@ namespace LevelAuthoring.Editor
             {
                 Click("tutorial-binding-pick-" + key);
                 typeof(LevelToolScreen).GetMethod("UseTutorialPicker", flags).Invoke(screen, new object[] { 30 });
-                Click("tutorial-pick-confirm");
+                if (root.Q("direct-pick-apply") == null) Click("tutorial-pick-confirm");
+                Click("direct-pick-apply");
                 var value = Value(key);
                 Check(key == "First" || key == "Second" ? (int)value["coordinate"]["row"] == 3 :
                     key == "Target" ? value["target"]["cells"].Count() == 1 : value["cells"].Count() == 1, "confirmed binding board selection " + key);

@@ -1,0 +1,23 @@
+{
+  "RemovedFiles": 87,
+  "RemovedRuns": [
+    "Logs\\AndroidLevelToolStage02\\run-425e2be1cbf24cef802fa2eb773e3279",
+    "Logs\\AndroidLevelToolStage02\\run-6280f587c32c4190847a4cef0a79c3a2",
+    "Logs\\AndroidLevelToolStage02\\run-79b1e71717a442c7bf0f837514a43413",
+    "Logs\\AndroidLevelToolStage02\\run-907b7e4998ff45b79f576049cd3cfd19",
+    "Logs\\AndroidLevelToolStage02\\run-b5ffda561a354453a5889c9db8c24908",
+    "Logs\\AndroidLevelToolStage02\\run-e15a0df884414bca82197c6a98686e51",
+    "Logs\\AndroidLevelToolStage02\\run-f1218ffa920246cfa9a3df0a729322ce",
+    "Logs\\AndroidLevelToolStage03\\touch-4a6fe6e55df2456da6a2dd6ef6401e82",
+    "Logs\\AndroidLevelToolStage03\\touch-54cce3fd090c4b8588a7a67b1995fd53",
+    "Logs\\AndroidLevelToolStage03\\touch-6da219d9262643b5ba4dd8cb4894c194",
+    "Logs\\AndroidLevelToolStage03\\touch-75132b1e1a7a4772b271fb811977ddf3",
+    "Logs\\AndroidLevelToolStage03\\touch-9988a5f81cbd48f0b98a57e1a4dd138e",
+    "Logs\\AndroidLevelToolStage03\\touch-ca2b5099bef24766a8b94e475093272f",
+    "Logs\\AndroidLevelToolStage03\\touch-e740bd1163ac489488e6dbc76449eeff",
+    "Logs\\AndroidLevelToolStage03\\touch-f0a5c5acb21348c2963f24ee6adc1d3d",
+    "Logs\\AndroidLevelToolStage03\\touch-95b08088fc8d4bb29e569692f21cc2a8"
+  ],
+  "PreservedAuthoringSource": "C:\\Projects\\Git\\ServeredMeridian\\ContentData\\Candidates\\import-20261019-135243-ea6bf11848fe458bb1e022e770861470",
+  "Scope": "Owned GUID Project/Recovery only; evidence outside runs preserved"
+}

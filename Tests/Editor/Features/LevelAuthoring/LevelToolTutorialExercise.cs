@@ -22,6 +22,8 @@ namespace LevelAuthoring.Editor
             string id = session.SelectedLevelId, original = session.Get(id).Data.ToString();
             var page = root.Q<DropdownField>("inspector-page");
             Check(page.choices.Contains("튜토리얼"), "tutorial inspector exists"); page.value = "튜토리얼";
+            Click("tutorial-begin-work");
+            root.Q<Foldout>("tutorial-composition-details").value = true;
             int previous = session.Get(id).Data["tutorial"]["steps"].Count();
             Click("tutorial-add-step");
             Check(session.Get(id).Data["tutorial"]["steps"].Count() == previous + 1, "step added through runtime UI");
@@ -94,7 +96,7 @@ namespace LevelAuthoring.Editor
             var pick = typeof(LevelToolScreen).GetMethod("UseTutorialPicker", flags);
             pick.Invoke(screen, new object[] { 30 }); pick.Invoke(screen, new object[] { 31 });
             Check(session.ExportState() == beforePicking, "pending picks do not change document or undo history");
-            Click("tutorial-pick-cancel");
+            Click("direct-pick-cancel");
             Check(session.ExportState() == beforePicking && root.Q("tutorial-pick-panel") == null, "cancel preserves original selection and content");
             yield return null;
             Click("tutorial-pick-action");
@@ -102,10 +104,9 @@ namespace LevelAuthoring.Editor
             var pendingPick = (Newtonsoft.Json.Linq.JObject)typeof(LevelToolScreen).GetField("tutorialPick", flags).GetValue(screen);
             Check(pendingPick["cells"].Count() == 2, "pending selection retained in memory");
             pick.Invoke(screen, new object[] { 32 });
-            Click("tutorial-pick-confirm");
-            Check(root.Q("tutorial-pick-panel") != null && session.ExportState() == beforePicking, "invalid three-cell action remains pending without edits");
-            pick.Invoke(screen, new object[] { 32 });
-            Click("tutorial-pick-confirm");
+            Check(root.Q("direct-pick-apply") != null && pendingPick["cells"].Count() == 2 && session.ExportState() == beforePicking,
+                "fixed action opens required modal and blocks extra cells without edits");
+            Click("direct-pick-apply");
             var picked = session.Get(id).Data["tutorial"]["steps"].Last;
             Check((int)picked["first"]["row"] == 3 && (int)picked["first"]["column"] == 3 && (int)picked["second"]["column"] == 4,
                 "confirmed action preserves click order: " + root.Q<Label>("status").text + " / " + picked["first"] + " / " + picked["second"]);

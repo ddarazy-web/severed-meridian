@@ -37,30 +37,36 @@ namespace LevelTool
             return sharedTutorialDraft?.PreviewLevels(Session, ids) ?? Session.CreateTrialSnapshot(ids);
         }
 
-        public async UniTask BeginPlay()
+        public UniTask BeginPlay() => BeginPlayCore(-1);
+
+        private async UniTask BeginPlayCore(int tutorialLastStep)
         {
             if (busy || RecordsBusy || Session == null || playRoot != null) return;
             if (BatchActive || MultiActive) { Show("진행 중인 시험을 중지하고 저장이 끝난 뒤 게임 시험을 시작하세요."); return; }
             DisposeToolBot();
+            CaptureTrialChecklist(!packedTrial || tutorialLastStep >= 0);
             playReturnFocus = commandInputFocus ?? CaptureFocusedInput(); commandInputFocus = null;
             int revision = ++playRevision;
             busy = true; editor.SetEnabled(false);
             try
             {
+                playLifetime = CancellationTokenSource.CreateLinkedTokenSource(this.GetCancellationTokenOnDestroy());
+                ShowTrialLoading(tutorialLastStep);
+                await UniTask.NextFrame(playLifetime.Token);
                 var snapshot = CreateTrialSnapshot();
                 if (boardPrefab == null || sessionPrefab == null || screenPrefab == null)
                     throw new InvalidOperationException("게임 시험 프리팹 연결이 없습니다.");
-                playLifetime = CancellationTokenSource.CreateLinkedTokenSource(this.GetCancellationTokenOnDestroy());
                 playRoot = new GameObject("LevelTool Test Game");
                 PuzzlePlayRequest request;
-                if (packedTrial)
+                if (packedTrial && tutorialLastStep < 0)
                 {
                     int number = (int)snapshot.Get(Session.SelectedLevelId).Data["levelNumber"];
                     var trial = await PackedPuzzlePlayAdapter.CreateRequestAsync(number, seed, playLifetime.Token);
                     if (revision != playRevision) return;
                     checkedPackHash = trial.SourceHash; UpdatePackStatus(); request = trial.Request;
                 }
-                else request = JsonPuzzlePlayAdapter.CreateRequest(snapshot, Session.SelectedLevelId, seed);
+                else request = tutorialLastStep >= 0 ? JsonPuzzlePlayAdapter.CreateTutorialRequest(snapshot, Session.SelectedLevelId, seed, tutorialLastStep) :
+                    JsonPuzzlePlayAdapter.CreateRequest(snapshot, Session.SelectedLevelId, seed);
                 playLifetime.Token.ThrowIfCancellationRequested();
                 Camera camera = new GameObject("Test Camera").AddComponent<Camera>();
                 camera.transform.SetParent(playRoot.transform, false); camera.transform.position = new Vector3(0, 0, -10);
@@ -77,21 +83,32 @@ namespace LevelTool
                 if (backgroundCamera != null) backgroundCamera.enabled = false;
                 editor.style.display = DisplayStyle.None;
                 root.style.backgroundColor = Color.clear; root.pickingMode = PickingMode.Ignore;
-                returnButton = Button(root, "return-to-editor", "← 편집으로 돌아가기", ReturnToEditor);
+                returnButton = Button(root, "return-to-editor", (packedTrial && tutorialLastStep < 0 ? "MemoryPack" : "JSON") + " 시험 · 편집 복귀", ReturnToEditor);
+                returnButton.tooltip = TrialSourceLabel(tutorialLastStep) + " · 정식 진행 기록에는 저장하지 않습니다.";
                 returnButton.style.position = Position.Absolute; returnButton.style.right = 80; returnButton.style.top = 12;
                 ApplyTrialReturnLayout();
                 if (mobileViewportActive) ApplyToolSkin();
                 // Start가 정식 입력을 선택하기 전에 명시적 시험 문맥을 전달한다.
-                await playSession.InitializeAsync(request, PuzzlePlayContext.CreateTest(tutorialMode), playLifetime.Token);
+                await playSession.InitializeAsync(request, PuzzlePlayContext.CreateTest(tutorialLastStep >= 0 ? TutorialRunMode.Always : tutorialMode), playLifetime.Token);
                 if (playSession != null && playSession.HasFailed) throw new InvalidOperationException(playSession.Message);
+                CloseTrialLoading();
             }
             catch (OperationCanceledException) { if (revision == playRevision) ReturnToEditor(); }
-            catch (Exception error) { if (revision == playRevision) { ReturnToEditor(); Show("시험 시작 실패: " + error.Message); } }
+            catch (Exception error)
+            {
+                if (revision == playRevision)
+                {
+                    ReturnToEditor();
+                    ShowTrialFailure(error.Message, tutorialLastStep);
+                }
+            }
             finally { if (revision == playRevision) { busy = false; if (editor != null) editor.SetEnabled(true); } }
         }
 
         public void ReturnToEditor()
         {
+            CloseTrialLoading();
+            RecordTrialChecklist();
             if (backgroundCamera != null) backgroundCamera.enabled = true;
             playRevision++; busy = false;
             playLifetime?.Cancel(); playLifetime?.Dispose(); playLifetime = null;
@@ -123,7 +140,6 @@ namespace LevelTool
         private void ApplyTrialReturnLayout()
         {
             if (returnButton == null || !mobileViewportActive) return;
-            returnButton.text = "← 편집 복귀";
             returnButton.style.right = StyleKeyword.Auto;
             returnButton.style.left = mobileVisibleArea.xMin + 8;
             returnButton.style.top = mobileVisibleArea.yMin + 8;

@@ -464,7 +464,7 @@ namespace LevelAuthoring.Editor
         private static void SetViewport(Vector2Int size, Rect keyboard = default)
         {
             if (texture != null) { panel.targetTexture = null; texture.Release(); UnityEngine.Object.DestroyImmediate(texture); }
-            texture = new RenderTexture(size.x, size.y, 0); texture.Create(); panel.targetTexture = texture;
+            texture = new RenderTexture(size.x, size.y, 24); texture.Create(); panel.targetTexture = texture;
             // 비대칭 노치와 하단 시스템 영역을 매번 같은 물리 좌표 계약으로 넣는다.
             Rect safe = new Rect(12, 18, size.x - 36, size.y - 42);
             float bottom = Mathf.Max(safe.yMin, keyboard.height > 0 ? keyboard.yMax : safe.yMin);

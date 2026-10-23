@@ -91,7 +91,12 @@ namespace LevelTool
                 save.tooltip = folderLabel.tooltip + (allowed ? "" : "\n사용 불가: " + reason);
             }
             var details = root.Q<Button>("save-status-details");
-            if (details != null) details.text = manualSaveFailure != null || manualFileFailure != null ? "실패 원인" : "저장 안내";
+            if (details != null)
+            {
+                bool failed = manualSaveFailure != null || manualFileFailure != null;
+                details.text = failed ? "!" : "ⓘ";
+                details.tooltip = failed ? "저장 실패 원인 보기" : "저장 상태와 저장 위치 안내";
+            }
         }
 
         private void OpenSaveDetails()
@@ -109,8 +114,9 @@ namespace LevelTool
             string instruction = Workspace.IsRecovery ? "파일 메뉴의 사본 저장을 사용하세요." :
                 sharedTutorialDraft != null ? "공유 사본을 원본에 적용한 뒤 프로젝트를 저장하세요." :
                 mobileViewportActive ? "저장 버튼으로 저장하세요." : "저장 버튼 또는 Ctrl+S로 저장하세요.";
-            content.Add(new Label("변경 내용은 메모리에만 있습니다. " + instruction +
+            content.Add(new Label((HasUnsavedWork ? "저장하지 않은 변경은 메모리에만 있습니다. " : "현재 내용은 JSON에 저장되어 있습니다. ") + instruction +
                 " 강제 종료하면 마지막 저장 이후의 변경은 사라질 수 있습니다.") { name = "save-details-policy" });
+            if (lastFileOutcome != null) content.Add(new Label(lastFileOutcome) { name = "save-details-outcome" });
             if (pendingInputDirty) content.Add(new Label("입력 중인 내용이 있습니다. 글자 조합을 마치고 올바른 숫자를 입력한 뒤 저장하세요."));
             if (sharedTutorialDraft != null) content.Add(new Label("공유 사본을 원본에 적용한 뒤 프로젝트를 저장하세요. 원본 적용만으로는 파일에 저장되지 않습니다."));
             if (Workspace.IsRecovery) content.Add(new Label("과거 복구본은 파일 메뉴의 사본 저장으로 새 폴더에 저장하세요. 기존 원본과 복구 기록은 유지됩니다."));

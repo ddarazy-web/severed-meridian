@@ -244,6 +244,12 @@ namespace LevelAuthoring.Editor
                 }
                 var index = new LevelBrowserIndex();
                 for (int i = 1; i <= 10000; i++) index.Upsert(i == 1 ? aId : i == 2 ? "level-b" : "level-" + i, i, "아주 긴 레벨 이름 · 로켓과 폭탄 조합 튜토리얼 " + i);
+                // 실제 열린 문서의 메타데이터는 유지해야 Refresh의 정상 보정과 가상 목록 재생성을 혼동하지 않는다.
+                foreach (string id in new[] { aId, "level-b" })
+                {
+                    var info = screen.Workspace.Session.GetDocumentInfo(id);
+                    index.Upsert(id, info.LevelNumber, info.DisplayName);
+                }
                 typeof(LevelToolScreen).GetField("levelIndex", Flags).SetValue(screen, index);
                 typeof(LevelToolScreen).GetMethod("ApplyLevelSearch", Flags).Invoke(screen, null);
                 list.ScrollToItem(0);

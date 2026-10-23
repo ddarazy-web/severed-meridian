@@ -80,6 +80,7 @@ namespace LevelTool
 
         private void NewProject()
         {
+            if (GuardTutorialWorkExit(NewProject)) return;
             if (busy) return;
             VisualElement panel = OpenModal("새 프로젝트 만들기");
             panel.Add(new Label("프로젝트 이름을 정해 주세요. 레벨은 다음 화면에서 만들어요.")
@@ -112,6 +113,7 @@ namespace LevelTool
 
         private void AddLevel(bool duplicate)
         {
+            if (GuardTutorialWorkExit(() => AddLevel(duplicate))) return;
             if (busy || Workspace.Folder == null || sharedTutorialDraft != null || modal != null) return;
             ContinueAfterManualInput(() => OpenNewLevelDialog(duplicate)).Forget();
         }

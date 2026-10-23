@@ -33,7 +33,7 @@ namespace LevelTool
                 { CloseModal(); RunProjectTransfer(false).Forget(); });
                 Button(panel, "cancel", "취소", CloseModal);
             }
-            catch (Exception failure) { Show("내보내기 준비 실패: " + failure.Message); }
+            catch (Exception failure) { ShowFileOutcome("내보내기 준비 실패: " + failure.Message + " · 현재 작업을 유지했습니다. 레벨 검사로 데이터 연결을 확인한 뒤 다시 내보내세요."); }
         }
 
         private void ImportProject()
@@ -83,7 +83,7 @@ namespace LevelTool
                 else Show("가져올 프로젝트 ZIP을 선택하세요.");
                 Stream stream = import ? await fileTransfer.OpenProject(cancellation.Token) :
                     await fileTransfer.CreateProject(Path.GetFileName(Workspace.Folder) + "_" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff", CultureInfo.InvariantCulture) + ".zip", cancellation.Token);
-                if (stream == null) { Show(saved ? "ZIP 전송 취소 · JSON 저장 완료 · 내부 저장본 유지" : "전송 취소"); return; }
+                if (stream == null) { ShowFileOutcome(saved ? "ZIP 전송 취소 · JSON 저장 완료 · 내부 저장본 유지 · " + Workspace.Folder + " · 필요할 때 ZIP 내보내기를 다시 선택하세요." : "전송 취소 · 현재 작업을 유지했습니다. 필요할 때 ZIP 가져오기를 다시 선택하세요."); return; }
                 // Windows 파일 스트림은 실제 경로를 제공한다. SAF 등은 경로를 추정하지 않는다.
                 destination = stream is FileStream file ? file.Name : "시스템 파일 선택기에서 지정한 문서";
                 string savedFolder = Workspace.Folder, projectsRoot = InternalProjectsRoot;
@@ -98,15 +98,16 @@ namespace LevelTool
                 });
                 cancellation.Token.ThrowIfCancellationRequested();
                 transferred = true;
-                Show(import ? "ZIP 검사·내부 프로젝트 등록 완료" : "ZIP 내보내기 완료 · " + destination + " · 클라우드 동기화는 해당 서비스에서 확인하세요.");
+                ShowFileOutcome(import ? "ZIP 검사·내부 프로젝트 등록 완료 · " + imported + " · 지금 열기를 취소해도 프로젝트 열기에서 다시 열 수 있습니다." : "ZIP 내보내기 완료 · " + destination + " · 클라우드 동기화는 해당 서비스에서 확인하세요.");
             }
-            catch (OperationCanceledException) { Show((saved ? "ZIP 전송 취소 · JSON 저장 완료 · 내부 저장본 유지" : "전송 취소") +
-                (!import && saved ? " · 생성된 외부 파일이 있다면 불완전할 수 있습니다." : "")); }
+            catch (OperationCanceledException) { ShowFileOutcome((saved ? "ZIP 전송 취소 · JSON 저장 완료 · 내부 저장본 유지" : "전송 취소") +
+                (!import && saved ? " · 생성된 외부 파일이 있다면 불완전할 수 있습니다." : "") + " · 편집을 계속하거나 파일 메뉴에서 다시 시도하세요."); }
             catch (Exception failure)
             {
                 if (manualSaveInProgress) CompleteManualSave(failure);
-                Show((import ? "가져오기 실패: " : saved ? "내보내기 실패 · 내부 저장본 유지: " : "내부 저장 실패 · ZIP 내보내기 실패: ") + failure.Message +
-                    (!import && saved ? " · 생성된 외부 파일이 있다면 불완전할 수 있습니다." : ""));
+                ShowFileOutcome((import ? "가져오기 실패: " : saved ? "내보내기 실패 · 내부 저장본 유지: " : "내부 저장 실패 · ZIP 내보내기 실패: ") + failure.Message +
+                    (!import && saved ? " · 생성된 외부 파일이 있다면 불완전할 수 있습니다." : "") +
+                    (import ? " · ZIP 파일과 새 프로젝트 이름을 확인한 뒤 다시 가져오세요. 기존 프로젝트는 유지했습니다." : " · 저장 위치·권한·외부 변경을 확인한 뒤 다시 내보내세요."));
             }
             finally
             {

@@ -1,0 +1,4 @@
+100 selection/Refresh calls: 7864.049 ms
+100 list/material panel changes: 61.264 ms
+Additional display document reads: 0
+Allocation counter unsupported/unverified; zero is not an allocation claim.

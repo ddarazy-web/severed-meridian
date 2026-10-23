@@ -20,6 +20,40 @@ namespace LevelTool.Presentation
         private string artworkKey;
         private int artworkRevision;
 
+        internal async UniTask<Sprite> PrepareMissionPreview(string kind, string color)
+        {
+            PuzzleArtwork owner = artwork;
+            if (disposed || owner == null || !Enum.TryParse(kind, out MissionKind missionKind) || !Enum.TryParse(color, out RabbitColor tint)) return null;
+            string path = PuzzleArtworkPaths.Mission(new LevelMissionDefinition(missionKind, tint, 1));
+            if (path == null) return null;
+            await owner.PrepareEffectsAsync(new[] { path }, lifetime.Token);
+            return disposed || artwork != owner ? null : owner.Get(path);
+        }
+
+        internal async UniTask<Dictionary<string, Sprite>> PrepareMaterialPreviews(IReadOnlyDictionary<string, JObject> definitions, string color)
+        {
+            var result = new Dictionary<string, Sprite>();
+            PuzzleArtwork owner = artwork;
+            if (disposed || owner == null) return result;
+            var frames = new Dictionary<string, ElementVisualFrame>();
+            foreach (var pair in definitions)
+            {
+                try
+                {
+                    frames[pair.Key] = owner.Visuals.Resolver.Resolve(new ElementId(pair.Key), new ElementVisualState(
+                        (int)Enum.Parse(typeof(RabbitColor), color), (int?)pair.Value["placement"]?["maxDurability"] ?? 1,
+                        0, (bool?)pair.Value["charge"]?["enabled"] == true ? (int)pair.Value["charge"]["minRequired"] : 0,
+                        0, 0, LevelToolDocuments.Size(pair.Value)));
+                }
+                catch (ArgumentException) { }
+                catch (KeyNotFoundException) { }
+            }
+            await owner.PrepareEffectsAsync(frames.Values.Select(frame => frame.Path), lifetime.Token);
+            if (disposed || artwork != owner) return result;
+            foreach (var pair in frames) result[pair.Key] = owner.GetVisual(pair.Value);
+            return result;
+        }
+
         private async UniTask DrawArtwork(JObject level, AuthoringEditSession session, string folder, IReadOnlyDictionary<string, JObject> definitions, float cellSize)
         {
             int revision = ++artworkRevision;

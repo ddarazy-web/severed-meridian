@@ -55,12 +55,14 @@ namespace LevelAuthoring.Editor
             Click("undo"); Check(Data["elements"].Count() == 1, "UI area one undo");
             Click("sources"); Check(Data["elementSupply"]["sources"].Count() == 13, "UI basic source placement");
             Click("undo"); Check(Data["elementSupply"]["sources"].Count() == 9, "UI source one undo");
-            Click("add-mission"); Check(Data["missions"].Count() == 1, "UI basic mission creation");
-            IntegerField amount = Root.Query<IntegerField>().ToList().First(field => field.label == "목표 수량");
+            Click("add-mission"); Click("apply-mission"); Check(Data["missions"].Count() == 1, "UI basic mission creation");
+            Click("edit-mission-0");
+            IntegerField amount = Root.Q<IntegerField>("mission-count");
             int oldAmount = amount.value;
             amount.value = 0;
-            Check(Root.Query<IntegerField>().ToList().First(field => field.label == "목표 수량").value == oldAmount,
-                "rejected mission amount restores displayed value");
+            Check(!Root.Q<Button>("apply-mission").enabledSelf && (int)Data["missions"][0]["count"] == oldAmount,
+                "invalid mission draft blocks Apply and preserves document");
+            Click("cancel-mission");
             Click("remove-mission-0"); Check(Data["missions"].Count() == 0, "UI basic mission removal");
             Click("duplicate"); Click("create-level"); Check(Session.SelectedLevelId != created, "UI duplicate level");
             while (Session.CanUndo) Session.Undo();

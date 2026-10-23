@@ -96,7 +96,10 @@ namespace LevelTool
         {
             VisualElement target = evt.target as VisualElement;
             bool onBoard = target != null && boardScroll.Contains(target);
-            if (evt.pointerType != UnityEngine.UIElements.PointerType.touch)
+            // 마우스의 이동 도구도 같은 캡처·취소 경로를 사용하고 셀 편집을 실행하지 않는다.
+            bool mousePan = evt.pointerType != UnityEngine.UIElements.PointerType.touch && onBoard && evt.button == 0 &&
+                context().Tool == "pan" && !context().Blocked && !context().Busy && context().HasSession;
+            if (evt.pointerType != UnityEngine.UIElements.PointerType.touch && !mousePan)
             {
                 if (onBoard && evt.button == 1 && !context().Blocked && !context().Busy && context().HasSession)
                 {
@@ -110,7 +113,7 @@ namespace LevelTool
                     for (VisualElement current = target; current != null && current != board; current = current.parent)
                         if (current.name?.StartsWith("cell-", StringComparison.Ordinal) == true &&
                             int.TryParse(current.name.Substring(5), out int cell))
-                        { executeCell(cell, evt.shiftKey, evt.clickCount >= 2, false); break; }
+                        { executeCell(cell, evt.shiftKey, context().Replace || evt.clickCount >= 2, false); break; }
                 }
                 return;
             }
@@ -150,7 +153,7 @@ namespace LevelTool
 
         private void OnBoardTouchMove(PointerMoveEvent evt)
         {
-            if (evt.pointerType != UnityEngine.UIElements.PointerType.touch || !boardTouchPoints.TryGetValue(evt.pointerId, out Vector2 previous)) return;
+            if (!boardTouchPoints.TryGetValue(evt.pointerId, out Vector2 previous)) return;
             if (boardViewGestureActive && boardTouchPoints.Count == 2 && !context().Blocked)
             {
                 Vector2 other = boardTouchPoints.First(pair => pair.Key != evt.pointerId).Value;
@@ -174,7 +177,7 @@ namespace LevelTool
 
         private void OnBoardTouchUp(PointerUpEvent evt)
         {
-            if (evt.pointerType != UnityEngine.UIElements.PointerType.touch || !boardTouchPoints.ContainsKey(evt.pointerId)) return;
+            if (!boardTouchPoints.ContainsKey(evt.pointerId)) return;
             bool commit = !boardTouchCancelled && boardTouchPoints.Count == 1 && evt.pointerId == boardTouchPrimary &&
                 !context().Blocked && !context().Busy && context().Tool != "pan" && Vector2.Distance(evt.position, boardTouchOrigin) <= 10;
             int cell = boardTouchCell, vertex = boardTouchVertex;

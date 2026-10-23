@@ -16,6 +16,7 @@ namespace LevelTool
         private void SelectWorkspacePage(string page)
         {
             if (busy || modal != null || playRoot != null) return;
+            if (!tutorialInternalNavigation && page != "튜토리얼" && GuardTutorialWorkExit(() => SelectWorkspacePage(page))) return;
             if (sharedTutorialDraft != null && page != "튜토리얼") { Show("공유 원본 사본을 적용하거나 버린 뒤 다른 작업으로 이동하세요."); return; }
             root.focusController?.focusedElement?.Blur();
             CancelPendingInput(); brush = null;

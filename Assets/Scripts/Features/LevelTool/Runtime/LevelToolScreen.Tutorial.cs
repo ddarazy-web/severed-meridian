@@ -2,6 +2,7 @@
 using System;
 using Levels;
 using Tutorial;
+using UnityEngine.UIElements;
 
 namespace LevelTool
 {
@@ -14,7 +15,13 @@ namespace LevelTool
         private void TutorialEdit(string label, Action<LevelDefinition> edit) => tutorialPanel.EditTutorial(label, edit);
         private void DrawTutorial()
         {
-            tutorialPanel.RefreshView(); inspector.Add(tutorialPanel.Root);
+            if (tutorialWork == null) { DrawTutorialOverview(); return; }
+            DrawTutorialPurposes();
+            DrawTutorialSummaries();
+            var details = new UnityEngine.UIElements.Foldout { name = "tutorial-composition-details", text = "직접 조립 · 단계 / 조건 / 공통 구성", value = tutorialAdvanced };
+            details.RegisterValueChangedCallback(evt => tutorialAdvanced = evt.newValue);
+            inspector.Add(details);
+            tutorialPanel.RefreshView(); details.Add(tutorialPanel.Root);
         }
     }
 }

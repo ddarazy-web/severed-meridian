@@ -26,9 +26,12 @@ namespace LevelAuthoring.Editor
                     Click("menu-test"); name = name == "validate-level" ? "command-Validate" : "command-ReplayTutorial";
                 }
                 var button = root.Q<Button>(name) ?? throw new Exception("Missing sample button " + name);
+                if (!button.enabledInHierarchy) throw new Exception("Disabled sample button " + name);
                 typeof(Clickable).GetMethod("Invoke", flags).Invoke(button.clickable, new object[] { null });
             }
             root.Q<DropdownField>("inspector-page").value = "튜토리얼";
+            Click("tutorial-begin-work");
+            root.Q<Foldout>("tutorial-composition-details").value = true;
             Click("tutorial-quick-match");
             var first = session.Get(id).Data["tutorial"]["steps"][0];
             Check((string)first["conditions"][0]["kind"] == "Match" && (int)first["first"]["row"] == 2, "selected cells create reusable three-match step");
@@ -51,8 +54,10 @@ namespace LevelAuthoring.Editor
             Click("tutorial-add-condition-sample");
             var condition = session.Get(id).Data["tutorial"]["steps"].Last["conditions"].Last;
             Check((string)condition["kind"] == "DurabilityDecrease" && (string)condition["target"]["kind"] == "Entity" && (int)condition["target"]["coordinate"]["row"] == 4, "condition sample uses selected entity");
+            Check(!root.Q<Button>("tutorial-add-sample-board").enabledInHierarchy, "active tutorial work cannot create another level");
+            Click("tutorial-work-cancel"); Click("tutorial-discard-work");
             int levelCount = session.Documents.Count(doc => doc.Kind == "level"); string beforeBoard = session.Get(id).Data.ToString();
-            Click("tutorial-add-sample-board");
+            Click("tutorial-sample-board-menu"); Click("tutorial-create-sample-board");
             Check(session.Documents.Count(doc => doc.Kind == "level") == levelCount + 1 && session.SelectedLevelId != id && session.Get(id).Data.ToString() == beforeBoard, "test board creates a separate editable level");
             string checkBefore = session.ExportState();
             Click("validate-level");

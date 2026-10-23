@@ -34,6 +34,8 @@ namespace LevelAuthoring.Editor
         private static string recoveryFolder, projectFolder, levelId, definitionId, baseline;
         private static int phase, exit;
         private static double deadline, next;
+        private static bool viewportPending;
+        private static Vector2 pinchHeaderSize;
         private static VisualElement Root => screen.GetComponent<UIDocument>().rootVisualElement;
 
         public static void RunTap() => Begin(true);
@@ -63,7 +65,7 @@ namespace LevelAuthoring.Editor
             string run = Path.GetFullPath(Output + "/touch-" + Guid.NewGuid().ToString("N"));
             recoveryFolder = Path.Combine(run, "Recovery"); projectFolder = Path.Combine(run, "Project");
             LevelToolRecoveryIsolation.Configure(recoveryFolder);
-            phase = exit = 0; done = false; next = 0;
+            phase = exit = 0; done = viewportPending = false; next = 0;
             deadline = EditorApplication.timeSinceStartup + 180;
             EditorApplication.update += Tick; EditorApplication.playModeStateChanged += State;
             EditorApplication.EnterPlaymode();
@@ -96,6 +98,15 @@ namespace LevelAuthoring.Editor
                 if (done) return;
                 if (EditorApplication.timeSinceStartup > deadline) throw new Exception("Touch verification timed out at " + phase);
                 if (!EditorApplication.isPlaying || EditorApplication.timeSinceStartup < next) return;
+                if (viewportPending)
+                {
+                    if (Mathf.Abs(Root.layout.width - texture.width) > 1 || Mathf.Abs(Root.layout.height - texture.height) > 1) return;
+                    Call("ApplyMobileViewport", new Vector2(texture.width, texture.height),
+                        new Rect(12, 18, texture.width - 36, texture.height - 42), new Rect());
+                    viewportPending = false;
+                    next = EditorApplication.timeSinceStartup + .3;
+                    return;
+                }
                 switch (phase)
                 {
                     case 0:
@@ -278,6 +289,8 @@ namespace LevelAuthoring.Editor
                         session.Apply("2×2 교체 검사 준비", docs => LevelDocumentEditing.Place(docs[levelId].Data, bodyReplaceDefinitions, originalBody, 3, 3, false));
                         savedDocument = session.Get(levelId).Data; Call("Refresh"); Advance(91); break;
                     case 91:
+                        Root.Q<ScrollView>("board-scroll").ScrollTo(Root.Q("cell-30")); Advance(93); break;
+                    case 93:
                         Tap(30); Check(session.SelectedCells.Length == 4, "body replacement fixture selects complete 2×2 body");
                         Set("brush", definitionId); Call("Refresh"); Advance(92); break;
                     case 92:
@@ -296,6 +309,8 @@ namespace LevelAuthoring.Editor
                         session.Apply("클립보드 층 검사 준비", docs => LevelDocumentEditing.Place(docs[levelId].Data, clipboardDefinitions, definitionId, 4, 4, false));
                         savedDocument = session.Get(levelId).Data; Call("Refresh"); Advance(111); break;
                     case 111:
+                        Root.Q<ScrollView>("board-scroll").ScrollTo(Root.Q("cell-40")); Advance(114); break;
+                    case 114:
                         Tap(40); Click("board-actions"); Click("board-command-Copy");
                         Check(JToken.DeepEquals(savedDocument, session.Get(levelId).Data), "actual menu Copy keeps Block source document");
                         Set("layer", "Dust"); Call("Refresh"); Advance(112); break;
@@ -379,7 +394,7 @@ namespace LevelAuthoring.Editor
         {
             VisualElement cell = Root.Q("cell-40");
             Check(cell != null && cell.worldBound.width > 0, "actual board cell is attached and laid out");
-            Check(Root.Q<ScrollView>("board-scroll").contentViewport.worldBound.Contains(cell.worldBound.center), "initial touch target center lies inside actual viewport");
+            Check(Root.Q<ScrollView>("board-scroll").contentViewport.worldBound.Contains(cell.worldBound.center), "initial touch target center lies inside actual viewport; cell=" + cell.worldBound + " viewport=" + Root.Q<ScrollView>("board-scroll").contentViewport.worldBound + " body=" + Root.Q("body")?.worldBound);
             DiagnoseTouch("before Down", cell);
             Touch(cell, EventType.MouseDown, 1, cell.worldBound.center);
             DiagnoseTouch("after Down", cell);
@@ -438,6 +453,7 @@ namespace LevelAuthoring.Editor
 
         private static void VerifyTwoFingers()
         {
+            pinchHeaderSize = Root.Q("header").worldBound.size;
             VisualElement cell = Root.Q("cell-40"); Vector2 point = cell.worldBound.center;
             float before = (float)Get("cellSize");
             Touch(cell, EventType.MouseDown, 1, point);
@@ -451,6 +467,7 @@ namespace LevelAuthoring.Editor
 
         private static void VerifyReverseRelease()
         {
+            Check(Vector2.Distance(pinchHeaderSize, Root.Q("header").worldBound.size) < .1f, "pinch preserves header/menu size after layout");
             VisualElement cell = Root.Q("cell-40"); Vector2 point = cell.worldBound.center;
             Touch(cell, EventType.MouseDown, 1, point);
             Touch(Root.Q("cell-41"), EventType.MouseDown, 2, point + new Vector2(60, 0));
@@ -542,7 +559,7 @@ namespace LevelAuthoring.Editor
             VisualElement cell = Root.Q("cell-" + index);
             Check(cell != null && cell.worldBound.width > 0, "visible tap cell " + index);
             Vector2 point = cell.worldBound.center;
-            Check(Root.Q<ScrollView>("board-scroll").contentViewport.worldBound.Contains(point), "tap center is inside viewport " + index);
+            Check(Root.Q<ScrollView>("board-scroll").contentViewport.worldBound.Contains(point), "tap center is inside viewport " + index + " cell=" + cell.worldBound + " viewport=" + Root.Q<ScrollView>("board-scroll").contentViewport.worldBound);
             Touch(cell, EventType.MouseDown, 1, point); Touch(cell, EventType.MouseUp, 1, point);
         }
 
@@ -726,8 +743,8 @@ namespace LevelAuthoring.Editor
         private static void SetViewport(Vector2Int size)
         {
             if (texture != null) { panel.targetTexture = null; texture.Release(); UnityEngine.Object.DestroyImmediate(texture); }
-            texture = new RenderTexture(size.x, size.y, 0); texture.Create(); panel.targetTexture = texture;
-            Root.schedule.Execute(() => Call("ApplyMobileViewport", new Vector2(size.x, size.y), new Rect(12, 18, size.x - 36, size.y - 42), new Rect())).StartingIn(200);
+            texture = new RenderTexture(size.x, size.y, 24); texture.Create(); panel.targetTexture = texture;
+            viewportPending = true;
         }
 
         private static void Touch(VisualElement target, EventType type, int pointerId, Vector2 position)

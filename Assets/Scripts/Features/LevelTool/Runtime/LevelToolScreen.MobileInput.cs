@@ -82,6 +82,10 @@ namespace LevelTool
                 VisualElement input = pair.Key;
                 if (!root.Contains(input)) { mobilePendingInputs.Remove(input); continue; }
                 focus = pair.Value.Focus;
+                boardFocus = false;
+                if (rightPanel.Contains(input)) rightPanelHidden = false;
+                if (leftPanel.Contains(input)) leftPanelHidden = false;
+                if (toolOptions.Contains(input)) toolOptions.style.display = DisplayStyle.Flex;
                 mobilePanel = rightPanel.Contains(input) ? "properties" : leftPanel.Contains(input) ?
                     materialsVisible ? "materials" : "levels" : "more";
                 UpdatePanelVisibility();

@@ -12,6 +12,9 @@ namespace LevelTool
         private Label levelTitle;
         private bool materialsVisible, levelSettingsVisible, boardFocus;
         private bool autoFitBoard = true;
+        private ScrollView toolOptions;
+        private bool leftPanelHidden, rightPanelHidden;
+        private Label currentToolLabel, boardZoomLabel;
 
 
         private void BuildEditorLayout()
@@ -23,13 +26,25 @@ namespace LevelTool
             projectStart.RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
             projectStart.tooltip = "프로젝트 만들기·열기·ZIP 가져오기·최근 프로젝트를 한곳에서 봅니다.";
             var header = new VisualElement { name = "header" }; header.AddToClassList("tool-header"); editor.Add(header);
+            Button(header, "tool-menu", "메뉴", ToggleToolOptions).tooltip = "프로젝트·파일·편집·작업 탭·시험 설정을 펼칩니다.";
             var identity = new VisualElement(); identity.AddToClassList("workspace-identity"); header.Add(identity);
             levelTitle = new Label("레벨 제작 도구") { name = "level-title" }; levelTitle.AddToClassList("level-title"); identity.Add(levelTitle);
+            levelTitle.focusable = true;
+            levelTitle.tooltip = "눌러서 레벨 목록 열기 · Enter / Space";
+            levelTitle.RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
+            levelTitle.RegisterCallback<ClickEvent>(evt => { if (evt.button == 0) OpenLevelList(); });
+            levelTitle.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode != KeyCode.Return && evt.keyCode != KeyCode.Space) return;
+                OpenLevelList(); evt.StopPropagation(); evt.PreventDefault();
+            });
             var saveStatusRow = new VisualElement(); saveStatusRow.AddToClassList("save-status-row"); identity.Add(saveStatusRow);
             folderLabel = new Label { name = "workspace-status" }; saveStatusRow.Add(folderLabel);
-            var saveDetails = Button(saveStatusRow, "save-status-details", "저장 안내", OpenSaveDetails);
+            var saveDetails = Button(saveStatusRow, "save-status-details", "ⓘ", OpenSaveDetails);
             saveDetails.RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
             saveDetails.tooltip = "저장 상태와 오류 원인, 전체 저장 위치를 확인합니다.";
+            creationGuide = Button(saveStatusRow, "creation-guide", "제작 안내", OpenCreationGuide);
+            creationGuide.RegisterCallback<PointerDownEvent>(PrepareCommandPointer, TrickleDown.TrickleDown);
             toolbar = new VisualElement { name = "toolbar" }; toolbar.AddToClassList("toolbar"); header.Add(toolbar);
             CommandButton(toolbar, ToolCommandId.Save, "save");
             CommandButton(toolbar, ToolCommandId.Undo, "undo");
@@ -47,6 +62,9 @@ namespace LevelTool
             VisualElement contextBar = new VisualElement { name = "workspace-context" };
             contextBar.AddToClassList("workspace-context"); editor.Add(contextBar);
             contextBar.Add(pageTools); contextBar.Add(editor.Q("trial-input-bar"));
+            toolOptions = new ScrollView { name = "tool-options" };
+            toolOptions.style.display = DisplayStyle.None;
+            editor.Add(toolOptions); toolOptions.Add(menuBar); toolOptions.Add(workspaceTabs); toolOptions.Add(contextBar);
             body = new VisualElement { name = "workspace-body" }; body.AddToClassList("body"); editor.Add(body);
             leftPanel = new VisualElement { name = "left-panel" }; leftPanel.AddToClassList("sidebar"); body.Add(leftPanel);
             var leftTabs = new VisualElement(); leftTabs.AddToClassList("panel-tabs"); leftPanel.Add(leftTabs);
@@ -66,8 +84,13 @@ namespace LevelTool
             layers.tooltip = "Block: 일반·파워 블록 / Obstacle: 장애물 / Cover: 덮개 / Dust: 바닥";
             layers.RegisterValueChangedCallback(e => { CancelBoardTouch(); layer = e.newValue; brush = null; moveBody = null; Refresh(); }); materialPanel.Add(layers);
             Button(materialPanel, "select", "선택 도구", () => SetBoardTouchTool("tap"));
+            BuildMaterialFilters();
             palette = new ScrollView(ScrollViewMode.Vertical) { name = "palette", horizontalScrollerVisibility = ScrollerVisibility.Hidden }; palette.style.flexGrow = 1; materialPanel.Add(palette);
-            boardScroll = new ScrollView(ScrollViewMode.VerticalAndHorizontal) { name = "board-scroll" }; boardScroll.AddToClassList("board-viewport"); body.Add(boardScroll);
+            var boardStage = new VisualElement { name = "board-stage" }; body.Add(boardStage);
+            var boardHeader = new VisualElement { name = "board-header" }; boardStage.Add(boardHeader);
+            currentToolLabel = new Label { name = "current-board-tool" }; boardHeader.Add(currentToolLabel);
+            boardZoomLabel = new Label { name = "board-zoom-label" }; boardHeader.Add(boardZoomLabel);
+            boardScroll = new ScrollView(ScrollViewMode.VerticalAndHorizontal) { name = "board-scroll" }; boardScroll.AddToClassList("board-viewport"); boardStage.Add(boardScroll);
             board = new VisualElement { name = "board", focusable = true }; board.AddToClassList("board"); boardScroll.Add(board);
             boardScroll.contentContainer.style.alignItems = Align.Center;
             boardScroll.RegisterCallback<GeometryChangedEvent>(_ =>
@@ -93,7 +116,8 @@ namespace LevelTool
             root.EnableInClassList("board-focus", boardFocus);
             Button focusButton = root.Q<Button>("board-focus-toggle");
             if (focusButton != null) focusButton.text = boardFocus ? "편집 패널 복원" : "보드 넓게";
-            leftPanel.style.display = rightPanel.style.display = boardFocus ? DisplayStyle.None : DisplayStyle.Flex;
+            leftPanel.style.display = boardFocus || leftPanelHidden ? DisplayStyle.None : DisplayStyle.Flex;
+            rightPanel.style.display = boardFocus || rightPanelHidden ? DisplayStyle.None : DisplayStyle.Flex;
             levelPanel.style.display = materialsVisible ? DisplayStyle.None : DisplayStyle.Flex;
             materialPanel.style.display = materialsVisible ? DisplayStyle.Flex : DisplayStyle.None;
             root.Q("sidebar-levels").EnableInClassList("selected", !materialsVisible);
@@ -105,12 +129,46 @@ namespace LevelTool
             if (settings != null) settings.style.display = levelSettingsVisible ? DisplayStyle.Flex : DisplayStyle.None;
             if (selection != null) selection.style.display = levelSettingsVisible ? DisplayStyle.None : DisplayStyle.Flex;
             if (mobileNavigation != null) UpdateMobilePanelVisibility();
+            if (materialsVisible) EnsureMaterialPreviews();
         }
 
         private void ToggleBoardFocus()
         {
+            SuspendMobilePanelInput();
             boardFocus = !boardFocus; UpdatePanelVisibility();
+            if (boardFocus) toolOptions.style.display = DisplayStyle.None;
+            root.schedule.Execute(RestoreMobilePanelInputs);
             Show(boardFocus ? "보드 영역을 넓혔습니다. Shift+Space 또는 보기 메뉴로 패널을 복원하세요." : "좌우 편집 패널을 복원했습니다.");
+        }
+
+        private void ToggleToolOptions()
+        {
+            if (mobileNavigation != null) { SelectMobilePanel("more"); return; }
+            SuspendMobilePanelInput();
+            toolOptions.style.display = toolOptions.resolvedStyle.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
+            root.schedule.Execute(RestoreMobilePanelInputs);
+        }
+
+        private void ToggleEditorPanel(bool left)
+        {
+            SuspendMobilePanelInput();
+            if (boardFocus)
+            {
+                boardFocus = false;
+                if (left) leftPanelHidden = false; else rightPanelHidden = false;
+            }
+            else if (left) leftPanelHidden = !leftPanelHidden; else rightPanelHidden = !rightPanelHidden;
+            UpdatePanelVisibility(); root.schedule.Execute(RestoreMobilePanelInputs);
+        }
+
+        private void OpenLevelList()
+        {
+            if (busy || modal != null || sharedTutorialDraft != null) return;
+            CancelBoardTouch(); SuspendMobilePanelInput();
+            materialsVisible = false; leftPanelHidden = false; boardFocus = false;
+            if (mobileNavigation != null && mobilePanel != "levels") SelectMobilePanel("levels");
+            else UpdatePanelVisibility();
+            root.schedule.Execute(RestoreMobilePanelInputs);
         }
 
         private void FitBoardToViewport()

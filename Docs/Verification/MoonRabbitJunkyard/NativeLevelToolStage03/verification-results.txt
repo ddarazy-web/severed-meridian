@@ -1,0 +1,287 @@
+Unity 6000.3.10f1 / Editor verification only. No product build or device test.
+Final runtime run 20261023-001801-990: exit 0; harness detached.
+PASS native-composition hammer summary describes one target without a missing second cell
+PASS native-composition shuffle summary does not require board coordinates
+PASS native-composition damage summary exposes aggregation and target layer
+PASS native-composition match summary exposes required color
+PASS native-composition power summary exposes required direction
+PASS native-composition enabled creation-guide
+PASS native-composition configuration does not claim actual play
+PASS native-composition enabled checklist-settings
+PASS native-composition checklist opens level settings
+PASS native-composition checklist navigation preserves documents and history
+PASS native-composition checklist refresh does not read level bodies
+PASS native-composition enabled add-mission
+PASS native-composition mission draft uses actual project sprite
+PASS native-composition enabled apply-mission
+PASS native-composition mission summary uses actual project sprite
+PASS native-composition enabled creation-guide
+PASS native-composition guide distinguishes unsaved edit
+PASS native-composition enabled checklist-close
+PASS native-composition enabled tutorial-begin-work
+PASS native-composition enabled creation-guide
+PASS native-composition enabled checklist-board
+PASS native-composition creation guide does not change panels before tutorial exit decision
+PASS native-composition enabled tutorial-continue-work
+PASS native-composition leaving tutorial offers continue or whole-work cancel
+PASS native-composition enabled tutorial-continue-work
+PASS native-composition continue retains tutorial work
+PASS native-composition enabled tutorial-discard-work
+PASS native-composition whole-work cancellation restores selected level exactly
+PASS native-composition enabled tutorial-begin-work
+PASS native-composition enabled save
+PASS native-composition save requires completing or cancelling tutorial work first
+PASS native-composition enabled tutorial-continue-work
+PASS native-composition enabled tutorial-work-complete
+PASS native-composition invalid required values block completion
+PASS native-composition enabled tutorial-work-complete
+PASS native-composition valid completion stays in memory without saving
+PASS native-composition unplayed completed tutorial remains explicitly unverified
+PASS native-composition enabled tutorial-begin-work
+PASS native-composition enabled tutorial-purpose-match
+PASS native-composition first action rejects random/empty initial cells with explanation
+PASS native-composition enabled tutorial-work-complete
+PASS native-composition unfinished purpose selection blocks work completion
+PASS native-composition cancelled board selection discards the unadded purpose draft
+PASS native-composition enabled tutorial-purpose-match
+PASS native-composition picker outlines only valid first action cells
+PASS native-composition two selected cells automatically open required settings
+PASS native-composition purpose wizard is a draft until Apply
+PASS native-composition invalid purpose count blocks Apply
+PASS native-composition enabled purpose-apply
+PASS native-composition match purpose composes existing action and condition data
+PASS native-composition enabled tutorial-edit-step-1
+PASS native-composition retained instruction edit refreshes the visible summary
+PASS native-composition direct picker highlights valid action cells
+PASS native-composition direct swap rejects nonadjacent second cell
+PASS native-composition direct fixed selection opens required settings without editing
+PASS native-composition direct required modal survives screen reactivation without committing
+PASS native-composition direct settings require an instruction before apply
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition direct modal cancellation preserves document and undo
+PASS native-composition enabled tutorial-purpose-generate
+PASS native-composition enabled purpose-apply
+PASS native-composition enabled tutorial-purpose-use
+PASS native-composition enabled purpose-use-generated
+PASS native-composition generated-result action needs only the remaining second cell
+PASS native-composition enabled purpose-apply
+PASS native-composition previous result is linked only after explicit choice
+PASS native-composition direct linked action selects only the remaining fixed cell
+PASS native-composition enabled direct-pick-apply
+PASS native-composition direct action edit preserves generated binding and changes only the fixed cell
+PASS native-composition enabled undo
+PASS native-composition direct settings and selection undo together
+PASS native-composition free highlight area requires explicit selection completion
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition free selection cancellation preserves data
+PASS native-composition direct hammer opens settings after one cell
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition shuffle does not request an irrelevant board cell
+PASS native-composition first power action highlights the specified power only
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition through-step trial has an isolated request builder
+PASS native-composition through-step trial keeps the first step rather than jumping to the selected step
+PASS native-composition through-step request does not mutate authoring data
+PASS native-composition step summaries expose values and through-step trial action
+PASS native-composition enabled tutorial-purpose-combine
+PASS native-composition combination wizard supports at most two explicit combinations
+PASS native-composition enabled purpose-apply
+PASS native-composition only the two selected combinations are accepted
+PASS native-composition enabled tutorial-purpose-damage
+PASS native-composition enabled purpose-target-board
+PASS native-composition board target change preserves entered count and instructions
+PASS native-composition reactivation restores unfinished required settings and entered values
+PASS native-composition enabled purpose-pick-target
+PASS native-composition normal block cannot be selected as a durability entity
+PASS native-composition durability picker outlines damageable entities only
+PASS native-composition enabled purpose-apply
+PASS native-composition damage wizard preserves exact N, entity target and specified cause
+PASS native-composition direct initial entity filters incompatible normal blocks
+PASS native-composition direct entity opens required settings after one cell
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition broken generated link is visible without silent repair
+PASS native-composition enabled tutorial-work-complete
+PASS native-composition broken link blocks completion
+PASS native-composition broken consumer binding is not automatically rewritten
+PASS native-composition enabled tutorial-work-cancel
+PASS native-composition enabled tutorial-discard-work
+PASS native-composition whole cancellation replaces obsolete validation error with restoration result
+PASS native-composition enabled tutorial-begin-work
+PASS native-composition enabled tutorial-purpose-match
+PASS native-composition required Apply accessible (1280, 800)
+PASS native-composition enabled purpose-cancel
+PASS native-composition direct required Apply accessible (1280, 800)
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition enabled tutorial-purpose-match
+PASS native-composition required Apply accessible (1440, 900)
+PASS native-composition enabled purpose-cancel
+PASS native-composition direct required Apply accessible (1440, 900)
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition enabled tutorial-purpose-match
+PASS native-composition required Apply accessible (390, 844)
+PASS native-composition rotation while modal open preserves draft and cancellation
+PASS native-composition keyboard keeps required controls accessible and draft values
+PASS native-composition Escape cancels only current purpose draft and keeps tutorial work
+PASS native-composition direct required Apply accessible (390, 844)
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition enabled tutorial-purpose-match
+PASS native-composition required Apply accessible (844, 390)
+PASS native-composition enabled purpose-cancel
+PASS native-composition direct required Apply accessible (844, 390)
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition enabled tutorial-purpose-match
+PASS native-composition required Apply accessible (820, 1180)
+PASS native-composition enabled purpose-cancel
+PASS native-composition direct required Apply accessible (820, 1180)
+PASS native-composition enabled direct-pick-cancel
+PASS native-composition shared usage does not enumerate level bodies while collapsed
+PASS native-composition shared usage loads on explicit expansion
+PASS native-composition enabled tutorial-work-cancel
+PASS native-composition enabled tutorial-discard-work
+PASS native-composition enabled tutorial-begin-work
+PASS native-composition through-step actual game starts
+PASS native-composition through-step game starts at the first description
+PASS native-composition enabled creation-guide
+PASS native-composition launch without an action does not mark play checked
+PASS native-composition enabled checklist-close
+PASS native-composition first description advances explicitly
+PASS native-composition selected tutorial swap executes in actual game
+PASS native-composition through-step ends after selected step and excludes later description
+PASS native-composition actual trial preserves authoring documents and history
+PASS native-composition enabled creation-guide
+PASS native-composition completed real swap marks play checked
+PASS native-composition enabled checklist-close
+PASS native-composition temporary screen disable preserves tutorial checkpoint and authoring history
+PASS native-composition resumed screen still guards leaving tutorial work
+PASS native-composition enabled tutorial-continue-work
+
+Regression 20261022-214329-615 (exit 0 observed at execution)
+PASS enabled action add-mission
+PASS opening mission draft does not mutate the level
+PASS purpose-first mission editor is available
+PASS invalid count blocks Apply
+PASS enabled action apply-mission
+PASS apply creates one dirty mission
+PASS one Undo restores mission baseline
+PASS mission summary includes target count
+PASS enabled action edit-mission-0
+PASS enabled action cancel-mission
+PASS cancel keeps the existing mission
+PASS enabled action remove-mission-0
+PASS remove mission remains supported
+PASS enabled action add-mission
+PASS enabled action apply-mission
+PASS obstacle purpose creates the selected removal target
+PASS enabled action edit-mission-0
+PASS enabled action apply-mission
+PASS existing mission edit applies count
+PASS enabled action add-mission
+PASS duplicate obstacle target is blocked
+PASS enabled action cancel-mission
+PASS cancelled draft callbacks cannot apply later
+
+Regression 20261022-232807-313 (exit 0 observed at execution)
+PASS level-scoped work checkpoint exists
+PASS cancel restores tutorial and board but preserves unrelated level settings
+PASS cancel preserves shared changes and pre-existing dirty level
+PASS cancel preserves another level created during work
+PASS Undo does not revive cancelled tutorial
+PASS Redo retains work-start level without cancelled changes
+PASS completing tutorial work does not save files
+PASS explicit save and reopen retain completed tutorial and unrelated settings
+
+Regression 20261023-000154-636 (exit 0 observed at execution)
+PASS tutorial inspector exists
+PASS step added through runtime UI
+PASS step instructions editable
+PASS selected board cells become action coordinates
+PASS registered matching condition added
+PASS condition count editable
+PASS step copied independently
+PASS condition UI supports SuccessfulSwap
+PASS condition UI supports DurabilityDecrease
+PASS condition UI supports RemainingDurability
+PASS remaining durability only exposes exact value
+PASS condition UI supports Removed
+PASS condition UI supports Generated
+PASS generated binding and selected target region edited
+PASS condition UI supports Activated
+PASS condition UI supports Combined
+PASS condition UI supports ItemUsed
+PASS condition UI supports MissionProgress
+PASS unset mission does not display a false selection
+PASS mission selection stores index and identity
+PASS tutorial spotlight preview control exists
+PASS tutorial preview dims outside action cells
+PASS highlighted action remains transparent and board input stays available
+PASS preview setting retained in memory
+PASS tutorial preview does not edit source
+PASS tutorial preview can be hidden
+PASS picking locks other edits until confirm or cancel
+PASS pending picks do not change document or undo history
+PASS cancel preserves original selection and content
+PASS pending selection retained in memory
+PASS fixed action opens required modal and blocks extra cells without edits
+PASS confirmed action preserves click order: 선택한 칸을 적용했습니다. 실행 취소로 되돌릴 수 있습니다. / {
+PASS picking applies one undo transaction
+PASS tutorial UI undo restores original document
+PASS advanced UI verification returned to edit mode, exit 0
+
+Regression 20261023-000348-052 (exit 0 observed at execution)
+PASS shared authoring controls exist
+PASS shared creation connects and shows usage
+PASS shared UI changes stay in draft
+PASS all twelve shared parameter fields selectable
+PASS explicit UI apply updates shared source
+PASS level parameter does not change shared default
+PASS cancel exit keeps shared draft
+PASS whole-work guard keeps editor open and explicit draft discard restores parent UI
+PASS discarding shared draft preserves source
+PASS UI detach expands level-specific value
+PASS coordinate binding First
+PASS coordinate binding Second
+PASS area binding ActionArea
+PASS area binding Highlights
+PASS number binding FreeItemCount
+PASS number binding RequiredCount
+PASS number binding MatchSize
+PASS condition target binding
+PASS power binding PowerDefinitionId
+PASS color binding
+PASS mission binding
+PASS power binding ActionDefinitionId
+PASS all twelve binding edits preserve shared source
+PASS confirmed binding board selection First
+PASS confirmed binding board selection Second
+PASS confirmed binding board selection ActionArea
+PASS confirmed binding board selection Highlights
+PASS confirmed binding board selection Target
+PASS confirmed level picks preserve shared source
+PASS advanced UI verification returned to edit mode, exit 0
+
+Regression 20261022-232557-788 (exit 0 observed at execution)
+PASS selected cells create reusable three-match step
+PASS current step saved as JSON sample
+PASS sample selector stores chosen step rather than last step
+PASS sample preview describes selected sample
+PASS sample button appends independent steps
+PASS editing applied sample does not mutate library
+PASS condition sample uses selected entity
+PASS active tutorial work cannot create another level
+PASS test board creates a separate editable level
+PASS sample board structural validation passes
+PASS sample tutorial logical replay passes
+PASS validation and replay preserve complete edit state
+PASS edited results marked stale
+PASS invalid tutorial reports exact step path
+PASS issue button selects tutorial step
+PASS logical replay through UI match
+PASS replay preserves source and history match
+PASS logical replay through UI two
+PASS replay preserves source and history two
+PASS logical replay through UI follow
+PASS replay preserves source and history follow
+PASS issue location selects exact board cell
+PASS sample and board operations undo without changing source
+PASS advanced UI verification returned to edit mode, exit 0
+

@@ -50,8 +50,9 @@ namespace LevelTool.Presentation
                 state.SampleBoard, value => { state.SampleBoard = value; Refresh(); });
             var board = TutorialSampleBoards.All.First(value => value.Id == state.SampleBoard);
             samples.Add(new Label(board.ExpectedResult) { name = "tutorial-sample-board-preview", style = { whiteSpace = WhiteSpace.Normal } });
-            Button(samples, "tutorial-add-sample-board", "시험 보드 사본을 새 레벨로 추가", () => Edit(() => TutorialDraftEditing.AddSampleBoard(Session, state.SampleBoard)))
-                .tooltip = "현재 레벨을 바꾸지 않고 새 레벨을 추가합니다. 상단 게임 시험에서 실행하고, 필요 없으면 Undo로 제거하세요. 저장하면 작업 폴더에 포함됩니다.";
+            Button sampleBoard = Button(samples, "tutorial-add-sample-board", "시험 보드 사본을 새 레벨로 추가", () => Edit(() => TutorialDraftEditing.AddSampleBoard(Session, state.SampleBoard)));
+            sampleBoard.SetEnabled(actions.WorkActive?.Invoke() != true);
+            sampleBoard.tooltip = "튜토리얼 작성 중에는 다른 레벨을 만들 수 없습니다. 작성 완료 또는 전체 취소 후 시험 보드를 추가하세요.";
         }
         private void AddQuickTutorial(bool match) => TutorialEdit("선택 칸으로 새 안내", level =>
         {
